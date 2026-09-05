@@ -1,0 +1,15 @@
+# Raw source data (large, redistributed from NISRA)
+data/*.geojson
+
+# Build-time toolchain (node + mapshaper), disposable: rm -rf .tools
+.tools/
+
+# Generated artifacts
+build/
+web/data/
+web/vendor/
+
+# Editor / OS noise
+.DS_Store
+*.swp
+__pycache__/

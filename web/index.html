@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NI Data Zones</title>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="panel">
+    <h1>Northern Ireland</h1>
+    <p class="sub">Census 2021 Data Zones</p>
+    <dl id="stats">
+      <div><dt>Zones</dt><dd id="stat-zones">&mdash;</dd></div>
+      <div><dt>Population</dt><dd id="stat-pop">&mdash;</dd></div>
+    </dl>
+    <p class="hint">Hover a zone for its population.</p>
+  </div>
+
+  <div id="status" role="status">Loading zones&hellip;</div>
+
+  <div id="tooltip" hidden>
+    <div class="tt-name"></div>
+    <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
+    <div class="tt-lgd"></div>
+  </div>
+
+  <script src="vendor/maplibre-gl.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
