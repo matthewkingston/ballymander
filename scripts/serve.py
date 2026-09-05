@@ -82,6 +82,9 @@ def main() -> None:
 
     if not (WEB_ROOT / "data" / "dz.geojson").exists():
         print("warning: web/data/dz.geojson missing -- run scripts/build_map_data.sh\n")
+    if not (WEB_ROOT / "data" / "dz_adjacency.json").exists():
+        print("warning: web/data/dz_adjacency.json missing -- "
+              "run scripts/build_adjacency.py\n")
 
     handler = partial(Handler, directory=str(WEB_ROOT))
     with ThreadingHTTPServer((args.host, args.port), handler) as httpd:

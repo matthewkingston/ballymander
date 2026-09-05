@@ -10,6 +10,7 @@
 
 const CONFIG = {
   dataUrl: 'data/dz.geojson',
+  graphUrl: 'data/dz_adjacency.json',
   // Measured extent of DZ2021.geojson.
   bounds: [[-8.1775, 54.0227], [-5.4328, 55.3130]],
   colors: {
@@ -188,9 +189,16 @@ async function main() {
     addZoneLayers(map, geojson);
     wireHover(map);
 
-    // Debug handle: lets you poke at the map from the console, e.g.
+    // Debug handles: poke at either from the console, e.g.
     //   __map.setPaintProperty('dz-fill', 'fill-color', '#c00')
+    //   __graph.neighbours(__graph.zones[0])
     window.__map = map;
+
+    // Adjacency is data, not a layer -- nothing on screen depends on it, so it
+    // loads off the critical path and a failure must not take the map with it.
+    DZGraph.load(CONFIG.graphUrl)
+      .then((graph) => { window.__graph = graph; })
+      .catch((err) => console.warn('adjacency graph unavailable:', err.message));
 
     const { zones, pop } = summarise(geojson);
     els.statZones.textContent = nf.format(zones);

@@ -52,6 +52,22 @@ const stats = await page.evaluate(() => ({
   pop: document.getElementById('stat-pop').textContent,
 }));
 
+// the adjacency graph loads off the critical path, so wait for it separately
+await page.waitForFunction(() => window.__graph, { timeout: 30000 }).catch(() => {});
+
+const graph = await page.evaluate(() => {
+  const g = window.__graph;
+  if (!g) return null;
+  return {
+    zones: g.zones.length,
+    edges: g.edges.length,
+    components: g.meta.components,
+    rathlin: g.neighbours('N20001651'),                  // ferry to The_Glens_B3 only
+    narrows: g.areNeighbours('N20003391', 'N20003778'),  // Strangford, must be true
+    corner: g.areNeighbours('N20000007', 'N20000022'),   // point touch, must be false
+  };
+});
+
 await page.screenshot({ path: `${OUT}/map-full.png` });
 
 // --- hover a zone -------------------------------------------------------
@@ -87,5 +103,5 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-console.log(JSON.stringify({ stats, tip, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ stats, graph, tip, painted, errors, failed, external }, null, 2));
 await browser.close();

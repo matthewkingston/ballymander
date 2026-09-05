@@ -37,6 +37,14 @@ if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz.geojson ]; then
   python3 scripts/verify_build.py
 fi
 
-# 4. serve
+# 4. adjacency graph (guarded on its own artifact: an existing dz.geojson
+#    skips step 3, and this must still be built)
+if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_adjacency.json ]; then
+  echo "==> adjacency"
+  python3 scripts/build_adjacency.py
+  python3 scripts/verify_adjacency.py
+fi
+
+# 5. serve
 echo
 exec python3 scripts/serve.py "${SERVE_ARGS[@]}"

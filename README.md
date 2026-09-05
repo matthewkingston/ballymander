@@ -11,8 +11,8 @@ population on hover.
 ./run.sh
 ```
 
-First run fetches the toolchain (~28MB) and builds the map data (~30s); after
-that it just serves. Then, **from your laptop**:
+First run fetches the toolchain (~28MB) and builds the map data and the adjacency
+graph (a minute or two); after that it just serves. Then, **from your laptop**:
 
 ```bash
 ssh -L 8765:localhost:8765 <user>@<this-box>
@@ -23,7 +23,7 @@ and open <http://localhost:8765>.
 
 The server binds `127.0.0.1` only — this box has a public IP, so the app is
 deliberately not exposed. Rendering happens in your laptop's browser, so only
-the one-time ~0.7MB data fetch crosses the tunnel; pan, zoom and hover are local.
+the one-time ~0.8MB data fetch crosses the tunnel; pan, zoom and hover are local.
 
 > Don't run a browser on the box through X11 forwarding — WebGL over X11 is
 > painful-to-broken and would round-trip every frame.
@@ -34,16 +34,25 @@ Other flags: `./run.sh --rebuild` (force a data rebuild), `./run.sh --port 9000`
 
 ```
 data/*.json      ──prepare_attributes.py──>  build/dz_attributes.csv
-data/DZ2021.geojson ──build_map_data.sh────>  web/data/dz.geojson  ──> web/ app
+data/DZ2021.geojson ──build_map_data.sh────>  web/data/dz.geojson       ──> web/ app
                         (mapshaper)
+data/DZ2021.geojson ──build_adjacency.py───>  web/data/dz_adjacency.json ──> web/ app
 ```
+
+The two outputs come from the same source but not from each other: the graph is
+built from the **full-resolution** boundaries, never the simplified ones.
 
 | Script | Does |
 |---|---|
 | `scripts/setup_tools.sh` | node + mapshaper into `.tools/`, MapLibre into `web/vendor/`. No sudo. |
 | `scripts/prepare_attributes.py` | NISRA flexible-table JSON → CSV |
 | `scripts/build_map_data.sh` | mapshaper: simplify + join + trim fields |
-| `scripts/verify_build.py` | asserts the output is correct |
+| `scripts/verify_build.py` | asserts the map data is correct |
+| `scripts/dz_topology.py` | exact boundary-segment topology, shared by the three below |
+| `scripts/build_adjacency.py` | builds the adjacency graph; holds `WATER_CROSSINGS` |
+| `scripts/dz_graph.py` | importable Python accessor for the graph |
+| `scripts/verify_adjacency.py` | asserts the graph is correct |
+| `scripts/audit_gaps.py` | review tool: finds close-but-not-adjacent pairs |
 | `scripts/serve.py` | static server, gzip, localhost-only |
 | `scripts/smoke_test.sh` | headless browser check + screenshots |
 
@@ -86,6 +95,72 @@ The religion table is already in `data/` and commented out ready to enable.
 > reconcile exactly with published higher-level totals. The people table sums to
 > 1,903,168 against the published 1,903,175.
 
+## Adjacency
+
+`web/data/dz_adjacency.json` answers *who borders whom* — 3,780 zones, 10,743
+edges, one connected component.
+
+```python
+import sys; sys.path.insert(0, "scripts")     # when importing from the repo root
+from dz_graph import load
+g = load()
+g.neighbours("N20001651")                      # ['N20001659']
+g.are_neighbours("N20003391", "N20003778")     # True
+```
+
+```js
+__graph.neighbours('N20001651')                // same answers in the browser
+__graph.areNeighbours('N20003391', 'N20003778')
+```
+
+**Two zones are neighbours when they share a length of boundary**, plus three
+declared water crossings. Three decisions are worth knowing about, because none
+of them is forced by the data:
+
+*Shared vertices are float-identical* in the source — 60.4% of boundary segments
+are claimed by two zones — so adjacency is an exact computation. No tolerance, no
+snapping, no spatial index.
+
+*Zones meeting at a single point are not neighbours.* 342 pairs do: the two
+diagonals where four zones meet at a crossroads. A contiguous region cannot pass
+through a dimensionless point, so they are excluded — but they are recorded under
+`point_touches`, readable via `g.point_touches(code)`, so the decision is visible
+in the data rather than hidden in a script. One pair sharing 0.32 mm (a digitising
+artifact where three zones meet; the next smallest real border is 0.61 m) is
+counted here too — see `MIN_SHARED_M`.
+
+*The mosaic excludes water.* Lough Neagh, Strangford, Belfast Lough, Lough Foyle
+and Carlingford are uncovered holes and the coast is a hard edge, so places that
+are genuinely connected share no boundary — and Rathlin Island falls out of the
+graph entirely. `WATER_CROSSINGS` in `build_adjacency.py` bridges exactly three,
+declared by zone name so the list can be checked by eye:
+
+| Crossing | Gap | Why |
+|---|---|---|
+| `Erne_West_F3` ↔ `Erne_East_F1` | 104 m | River Erne at Enniskillen |
+| `Downpatrick_B1` ↔ `Ards_Peninsula_N4` | 623 m | Strangford Narrows ferry |
+| `The_Glens_B3` ↔ `The_Glens_B1` | 6.3 km | Rathlin Island ferry |
+
+**The test is whether there is a real-world way across — a bridge or a ferry — not
+how narrow the water is.** Somewhere you cannot cross is far away in the only
+sense that matters, however close it looks on a map. So the two sides of Belfast
+Lough, Lough Neagh and Lough Foyle are not neighbours, and neither is the mouth of
+Larne Lough: 319 m of water, but nothing crosses it, so those zones stay 6 hops
+apart by land. Without the three that *are* declared, the graph has two components
+and Rathlin has degree 0.
+
+To check the list against the geometry:
+
+```bash
+python3 scripts/audit_gaps.py     # ~30s, prints a table, changes nothing
+```
+
+It ranks every non-adjacent pair within 800 m by how many hops apart they are in
+the land-only graph — proximity alone is a bad signal, since two zones on the same
+stretch of coast are often metres apart across a harbour mouth and a short walk
+apart by land. It cannot prove the list complete: it would not have found the
+6.3 km Rathlin ferry, which is what the low-degree report at the end is for.
+
 ## The app
 
 `web/app.js` is split into data / map / layers / interaction so the planned
@@ -101,17 +176,28 @@ __map.getSource('dz').setData(next)
 
 Hover uses MapLibre `feature-state` keyed off the DZ code (via the source's
 `promoteId`), so nothing re-renders per mouse move and there is no per-feature
-DOM. `window.__map` is exposed as a console handle.
+DOM. `window.__map` is exposed as a console handle, with `window.__graph` beside
+it. The graph loads off the critical path — nothing on screen depends on it, so a
+failure to fetch it warns to the console and leaves the map working.
 
 ## Verification
 
 ```bash
-python3 scripts/verify_build.py    # data assertions
-./scripts/smoke_test.sh            # headless render + hover, needs run.sh serving
+python3 scripts/verify_build.py      # map data assertions
+python3 scripts/verify_adjacency.py  # graph assertions
+./scripts/smoke_test.sh              # headless render + hover, needs run.sh serving
 ```
 
 `verify_build.py` checks 3,780 features, unique codes matching the source, all
 rings closed and ≥4 points, and that populations sum to 1,903,168.
+
+`verify_adjacency.py` checks the graph is symmetric and loop-free, has one
+connected component and no isolated zone, that the three crossings resolve to the
+declared names, and — the check that ties the two artifacts together — that
+**simplification lost no shared border**. It gains three: writing at
+`precision=0.00001` (~0.65 m) snaps vertices together and promotes three
+full-resolution point touches into shared segments. Each is verified to be
+exactly that, so the number is a bound on a known artifact rather than a fudge.
 
 `smoke_test.sh` loads the page in headless Chromium, asserts no console errors,
 no failed requests and no external requests, hovers a Belfast zone to confirm
