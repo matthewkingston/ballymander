@@ -3,7 +3,7 @@ Current Design Outline and Goals
 The webapp exists to iteratively build regions from census Data Zones (DZs), similar to eg parliamentary constituencies. I want to make it interactive and visually interesting too.
 The next intermediate goal for the project is to simply make N regions (N configurable) of approximately equal population, to build out the functionality.
 The main driver of the building is the score function, a weighted sum of terms that have each been normalised to be dimensionless - see 4d, where the normalisation is set out. Two terms so far:
-    - population equality: SUM(pop_current - pop_target)^2 over all regions, where pop_target is pop_NI_total/N. This is the reference term and carries weight 1.
+    - population equality: SUM(pop_current - pop_target)^2 over all regions, where pop_target is pop_NI_total/N. User-weighted, default 1, with a floor of 0.1 - it can be turned down but never off, since nothing else anchors the regions to equal population.
     - shape sanity (land): a compactness penalty, described in shape_sanity.txt and summarised in 4d. User-weighted, default 1, and 0 turns it off.
     - shape sanity (people): the same measure with people as the mass rather than land. Needed because the two disagree - DZ areas span a factor of 15,000 against 15 for population, so an area-weighted centroid sits where the ground is, up to 8 km from where the people are, and the land measure is close to blind to the shape of the population. Separately weighted, default 1.
 Of course ideally the score is minimised. Normalising each term is what lets another (eg equal average age per region) be added later without re-tuning everything around it.
@@ -27,7 +27,8 @@ I will now lay out how I imagine the app's function, alongside what the user see
         d. The assignment of the DZ is random, but weighted by exp(-Delta_score/T), where Delta_score is the score change and T is a temperature setting how stochastic the choice is, so that the score-minimising outcome is favoured, but not certain. This is a weighted choice among the candidate regions, not an accept/reject step: the DZ's own region is always a candidate, with Delta_score = 0 and so weight 1, which is the reference the others are judged against.
            T is derived from first principles, not tuned or sampled, so that it is stable, repeatable, and survives new terms being added to the score later.
            For that to work the score has to be a weighted sum of *dimensionless* terms:
-               score = SUM over terms t of  w_t * S_t
+               score = (SUM over terms t of  w_t * S_t) / (SUM over terms t of w_t)
+           Dividing by the total weight means only the ratios matter, so 0.1/1/1 and 1/10/10 are the same objective and the weights read as relative priorities rather than absolute gains. In the app they are set on log sliders running from 0.1 to 10 with 1 in the middle, the optional terms having one further detent that reads as off.
            Terms come in two shapes. Most are deviations from a target:
                S_t = SUM over regions r of ((x_r_t - x_target_t) / sigma_t)^2
            Others are plain penalties with no target at all - compactness has a direction, not an ideal value a region should sit at:

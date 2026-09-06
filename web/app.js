@@ -48,6 +48,8 @@ const els = {
   buildValue: document.getElementById('ctl-build-value'),
   opt: document.getElementById('ctl-opt'),
   optValue: document.getElementById('ctl-opt-value'),
+  popw: document.getElementById('ctl-popw'),
+  popwValue: document.getElementById('ctl-popw-value'),
   shape: document.getElementById('ctl-shape'),
   shapeValue: document.getElementById('ctl-shape-value'),
   pshape: document.getElementById('ctl-pshape'),
@@ -160,6 +162,26 @@ function addZoneLayers(map, geojson) {
       ],
     },
   });
+}
+
+/* --- score weights ------------------------------------------------------- */
+
+/* Weight sliders carry log10 of the weight, so 1 sits exactly in the middle
+ * of the range and each end is a factor of ten away. Only the ratios between
+ * weights matter -- the model divides the score by their sum -- so 0.1/1/1 and
+ * 1/10/10 are the same objective.
+ *
+ * Terms marked `data-off` get one detent below the range, which reads as off.
+ * Population has no such detent: it is the reference term and switching it off
+ * entirely would leave nothing anchoring the regions to equal population. */
+function weightOf(el) {
+  const v = Number(el.value);
+  if (el.dataset.off !== undefined && v <= Number(el.min) + 1e-9) return 0;
+  return 10 ** v;
+}
+
+function formatWeight(w) {
+  return w === 0 ? 'off' : String(Number(w.toPrecision(3)));
 }
 
 /* --- region colour ------------------------------------------------------- */
@@ -319,8 +341,8 @@ function tick(map) {
       // best-so-far on the current state rather than leaving a stale one.
       const t = Number(els.temp.value);
       run.model.temperature = t > 0 ? t : 1;
-      run.model.setShapeWeight(Number(els.shape.value));
-      run.model.setPopShapeWeight(Number(els.pshape.value));
+      run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
+        weightOf(els.pshape));
       // Changes the move set, not the score, so best-so-far stays comparable
       // and this needs no re-base.
       run.model.allowBranchMoves = els.branch.checked;
@@ -348,7 +370,7 @@ function start(map) {
   clearRegions(map);
 
   run.model.start(n, Number(els.seed.value) || 0, Number(els.temp.value) || 1,
-    Number(els.shape.value), Number(els.pshape.value));
+    weightOf(els.shape), weightOf(els.pshape), weightOf(els.popw));
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
 
@@ -425,10 +447,14 @@ async function main() {
   const map = createMap();
 
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
-                             [els.opt, els.optValue], [els.shape, els.shapeValue],
-                             [els.pshape, els.pshapeValue]]) {
-    input.addEventListener('input', () => { out.textContent = input.value; });
-    out.textContent = input.value;
+                             [els.opt, els.optValue], [els.popw, els.popwValue],
+                             [els.shape, els.shapeValue], [els.pshape, els.pshapeValue]]) {
+    const show = () => {
+      out.textContent = input.dataset.weight !== undefined
+        ? formatWeight(weightOf(input)) : input.value;
+    };
+    input.addEventListener('input', show);
+    show();
   }
 
   try {

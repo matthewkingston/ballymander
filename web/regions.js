@@ -184,8 +184,10 @@ class RegionModel {
     this.rawScore = 0;
     this.shapeRaw = 0;        // SUM_r (land penalty_r - 1)
     this.popShapeRaw = 0;     // SUM_r (people penalty_r - 1)
+    this.wPop = 1;
     this.wShape = 0;
     this.wPopShape = 0;
+    this.weightSum = 1;
     this.sigmaShape = 1;
     this.sigmaPopShape = 1;
     this.rArea = new Float64Array(0);
@@ -205,13 +207,15 @@ class RegionModel {
   }
 
   /* Seed N regions and prepare the build phase. */
-  start(N, seed, temperature = 1, wShape = 0, wPopShape = 0) {
+  start(N, seed, temperature = 1, wShape = 0, wPopShape = 0, wPop = 1) {
     this.reset();
     this.N = N;
     this.target = this.totalPop / N;
     this.temperature = temperature;
-    this.wShape = this.hasGeometry ? wShape : 0;
-    this.wPopShape = this.hasGeometry ? wPopShape : 0;
+    this.wPop = Math.max(0, wPop);
+    this.wShape = this.hasGeometry ? Math.max(0, wShape) : 0;
+    this.wPopShape = this.hasGeometry ? Math.max(0, wPopShape) : 0;
+    this.weightSum = this.wPop + this.wShape + this.wPopShape || 1;
     // One move shifts a region's land penalty by about (zone area / region
     // area) and its people penalty by about (zone pop / region pop); see the
     // derivations in major_checkpoint_1.txt. Both reduce to N/n here, but they
@@ -452,7 +456,7 @@ class RegionModel {
     for (const z of this.openNbrs[region]) {
       const d = this.pop[z];
       // Both terms are normalised now, because they are being added together.
-      let delta = (d * (d + 2 * deviation)) / this.eD2;
+      let delta = (this.wPop * d * (d + 2 * deviation)) / this.eD2;
       if (shaped) {
         delta += (this.wShape * (this._penaltyWith(region, z, 1) - penNow))
           / this.sigmaShape;
@@ -461,6 +465,7 @@ class RegionModel {
         delta += (this.wPopShape * (this._penaltyPopWith(region, z, 1) - penPopNow))
           / this.sigmaPopShape;
       }
+      delta /= this.weightSum;
       if (delta < pickDelta || (delta === pickDelta && z < pick)) {
         pickDelta = delta;
         pick = z;
@@ -533,7 +538,8 @@ class RegionModel {
       if (r < 0 || seen.has(r)) continue;
       seen.add(r);
       candidates.push(r);
-      let delta = 2 * dP * (dP + this.regionPop[r] - this.regionPop[from]) / this.eD2;
+      let delta = this.wPop * 2 * dP
+        * (dP + this.regionPop[r] - this.regionPop[from]) / this.eD2;
       if (shaped) {
         const joining = this._penaltyWithAgg(r, g, 1) - this._penalty(r);
         delta += (this.wShape * (leaving + joining)) / this.sigmaShape;
@@ -542,7 +548,7 @@ class RegionModel {
         const joining = this._penaltyPopWithAgg(r, g, 1) - this._penaltyPop(r);
         delta += (this.wPopShape * (leavingPop + joining)) / this.sigmaPopShape;
       }
-      deltas.push(delta);
+      deltas.push(delta / this.weightSum);
     }
     if (candidates.length === 1) return false;
 
@@ -780,10 +786,12 @@ class RegionModel {
 
   get scorePopShape() { return this.popShapeRaw / this.sigmaPopShape; }
 
+  /* Divided by the total weight, so only the ratios matter: (0.1, 1, 1) and
+   * (1, 10, 10) are the same objective. */
   get score() {
-    return this.scorePop
+    return (this.wPop * this.scorePop
       + this.wShape * this.scoreShape
-      + this.wPopShape * this.scorePopShape;
+      + this.wPopShape * this.scorePopShape) / this.weightSum;
   }
 
   /* The legible versions: 1 is a circle for land, and for people it is a region
@@ -814,10 +822,20 @@ class RegionModel {
    * different weight is a different objective -- anything recorded under the
    * old one is not comparable and best-so-far restarts from where we are.
    * Returns whether anything changed. */
-  setShapeWeight(w) {
-    const next = this.hasGeometry ? w : 0;
-    if (next === this.wShape) return false;
-    this.wShape = next;
+  setShapeWeight(w) { return this.setWeights(this.wPop, w, this.wPopShape); }
+
+  /* Any weight is part of the score, so changing one is a change of
+   * objective: anything recorded under the old weights is not comparable and
+   * best-so-far restarts from the current state. Returns whether it changed. */
+  setWeights(wPop, wShape, wPopShape) {
+    const p = Math.max(0, wPop);
+    const l = this.hasGeometry ? Math.max(0, wShape) : 0;
+    const q = this.hasGeometry ? Math.max(0, wPopShape) : 0;
+    if (p === this.wPop && l === this.wShape && q === this.wPopShape) return false;
+    this.wPop = p;
+    this.wShape = l;
+    this.wPopShape = q;
+    this.weightSum = p + l + q || 1;
     this.bestScore = Infinity;
     // A partial map cannot be compared against a complete one; the build phase
     // records the first comparable state when it finishes.
@@ -825,14 +843,9 @@ class RegionModel {
     return true;
   }
 
-  setPopShapeWeight(w) {
-    const next = this.hasGeometry ? w : 0;
-    if (next === this.wPopShape) return false;
-    this.wPopShape = next;
-    this.bestScore = Infinity;
-    if (this.assigned >= this.n) this._recordBest();
-    return true;
-  }
+  setPopWeight(w) { return this.setWeights(w, this.wShape, this.wPopShape); }
+
+  setPopShapeWeight(w) { return this.setWeights(this.wPop, this.wShape, w); }
 
   /* Put the map back to the best state seen -- with a stochastic rule the
    * state when the user stops is not the best one visited. */

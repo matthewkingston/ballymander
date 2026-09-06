@@ -389,6 +389,39 @@ check(near(liveP.bestScore, liveP.score, 1e-9),
   'changing the people weight re-bases best-so-far');
 check(liveP.setPopShapeWeight(2) === false, 'the same people weight is a no-op');
 
+/* Only the ratios between weights matter: the score is divided by their sum,
+ * so scaling all three must be invisible. Checked through the whole dynamics,
+ * not just the score getter -- a weight left out of a delta would show here. */
+const small = new RegionModel(graph, pops, geom);
+small.start(18, 5, 1, 1, 1, 0.1);          // land 1, people 1, population 0.1
+while (small.buildStep());
+for (let i = 0; i < 30000; i++) small.optimiseStep();
+const big = new RegionModel(graph, pops, geom);
+big.start(18, 5, 1, 10, 10, 1);            // the same thing, times ten
+while (big.buildStep());
+for (let i = 0; i < 30000; i++) big.optimiseStep();
+check(small.assign.every((v, i) => v === big.assign[i]),
+  'scaling every weight by ten gives an identical map');
+check(near(small.score, big.score, 1e-9 * Math.max(1, Math.abs(small.score))),
+  `and an identical score (${small.score.toFixed(6)} vs ${big.score.toFixed(6)})`);
+
+const even = new RegionModel(graph, pops, geom);
+even.start(18, 5, 1, 1, 1, 1);
+while (even.buildStep());
+check(near(even.score,
+  (even.scorePop + even.scoreShape + even.scorePopShape) / 3, 1e-9 * Math.abs(even.score)),
+  'equal weights make the score the mean of the three terms');
+check(even.weightSum === 3, `weightSum tracks the weights (${even.weightSum})`);
+
+const popw = new RegionModel(graph, pops, geom);
+popw.start(18, 5, 1, 1, 1, 1);
+while (popw.buildStep());
+for (let i = 0; i < 20000; i++) popw.optimiseStep();
+check(popw.setPopWeight(0.3) === true, 'the population weight is settable');
+check(near(popw.bestScore, popw.score, 1e-9),
+  'changing the population weight re-bases best-so-far too');
+check(popw.setPopWeight(0.3) === false, 'the same population weight is a no-op');
+
 /* Changing the weight mid-run changes the objective, so the old best is not
  * comparable and must not survive. */
 const live = new RegionModel(graph, pops, geom);

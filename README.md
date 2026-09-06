@@ -172,8 +172,8 @@ continues exactly where it left off; **STOP** is what restores the best state
 and shows the results table.
 
 Controls: number of regions, random seed (same seed gives the same map),
-temperature, shape weight, frames per second, and how many model steps run per
-frame. The two
+temperature, the three score weights, whether branch moves are allowed, frames
+per second, and how many model steps run per frame. The two
 phases get separate step controls because they want very different rates -- a
 build step claims a whole zone and is worth watching, while an optimisation step
 moves one zone in 3,780 and is invisible on its own.
@@ -182,8 +182,10 @@ The algorithm is in `web/regions.js`, deliberately free of DOM and MapLibre so i
 can be driven headlessly — `web/app.js` only animates it and paints the result,
 via `setFeatureState`, so no geometry is re-uploaded as regions change.
 
-**The score** is a weighted sum of normalised terms. Population equality is the
-reference term, carrying weight 1:
+**The score** is a weighted sum of normalised terms, **divided by the total
+weight** — so only the ratios matter, and 0.1/1/1 is the same objective as
+1/10/10. The weights are relative priorities, not gains. Population equality is
+the anchor term:
 
 ```
 S_pop       = SUM_r (pop_r - target)^2 / E[d^2]        target = total / N
@@ -246,9 +248,13 @@ large thinly-populated zones — that was the deliberate trade against a fixed
 scale, which has no such incentive but would steer rural regions hard and urban
 ones barely at all.
 
-Both sliders default to 1 and 0 turns a term off. The penalties are still
-*measured* at weight 0 — about twenty flops per move — so the readout shows what
-the shapes are even when they aren't being steered. At N=18 over 50,000 moves:
+All three weight sliders are logarithmic, running 0.1 to 10 with **1 in the
+middle** — the slider carries log₁₀ of the weight. The two shape terms have one
+extra detent at the left that reads *off*; population does not, since with every
+weight at zero there would be nothing anchoring the regions to equal population.
+The penalties are still *measured* at weight 0 — about twenty flops per move —
+so the readout shows what the shapes are even when they aren't being steered.
+At N=18 over 50,000 moves:
 
 | weights | land | people |
 |---|---|---|

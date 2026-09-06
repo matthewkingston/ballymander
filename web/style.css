@@ -86,7 +86,7 @@ html, body {
   color: var(--ink-muted);
 }
 #ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value,
-#ctl-pshape-value {
+#ctl-pshape-value, #ctl-popw-value {
   font-variant-numeric: tabular-nums;
 }
 
