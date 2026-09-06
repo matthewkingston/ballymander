@@ -26,8 +26,12 @@
         <input id="ctl-seed" type="number" min="0" step="1" value="1">
         <label for="ctl-temp">Temperature</label>
         <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
-        <label for="ctl-fps">Redraws/s <span id="ctl-fps-value">60</span></label>
+        <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
         <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">
+        <label for="ctl-build">Build/frame <span id="ctl-build-value">10</span></label>
+        <input id="ctl-build" type="range" min="1" max="200" step="1" value="10">
+        <label for="ctl-opt">Optimise/frame <span id="ctl-opt-value">200</span></label>
+        <input id="ctl-opt" type="range" min="1" max="2000" step="1" value="200">
       </div>
       <div class="ctl-buttons">
         <button id="ctl-go" type="button" disabled>GO</button>

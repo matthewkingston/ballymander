@@ -69,10 +69,12 @@ const graph = await page.evaluate(() => {
 });
 
 // --- drive a region run -------------------------------------------------
-// The build phase is one zone per redraw by design, which is ~60s. Raise the
-// steps-per-redraw knob so the smoke test exercises the same code path fast.
+// Wind the build rate up to its maximum so the smoke test exercises the same
+// code path without waiting out an animation meant for a human.
 await page.evaluate(() => {
-  CONFIG.buildStepsPerRedraw = 400;
+  const build = document.getElementById('ctl-build');
+  build.value = build.max;
+  build.dispatchEvent(new Event('input'));
   document.getElementById('ctl-n').value = '12';
   document.getElementById('ctl-seed').value = '3';
 });

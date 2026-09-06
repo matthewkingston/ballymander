@@ -169,7 +169,10 @@ seed zones until every Data Zone is claimed, then keeps nudging zones between
 regions to even the populations up, until you press **STOP**.
 
 Controls: number of regions, random seed (same seed gives the same map),
-temperature, and redraws per second.
+temperature, frames per second, and how many model steps run per frame. The two
+phases get separate step controls because they want very different rates -- a
+build step claims a whole zone and is worth watching, while an optimisation step
+moves one zone in 3,780 and is invisible on its own.
 
 The algorithm is in `web/regions.js`, deliberately free of DOM and MapLibre so it
 can be driven headlessly — `web/app.js` only animates it and paints the result,

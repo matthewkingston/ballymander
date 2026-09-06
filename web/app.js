@@ -24,11 +24,6 @@ const CONFIG = {
     fillHover: '#d9622b',
     line: '#a9b6c2',
   },
-  // Model steps run between redraws. One per redraw suits the build phase,
-  // where each step is a visible new zone; the optimisation phase moves one
-  // zone among 3,780 per step, so at one per redraw nothing appears to happen.
-  buildStepsPerRedraw: 1,
-  optimiseStepsPerRedraw: 200,
 };
 
 const SRC = 'dz';
@@ -49,6 +44,10 @@ const els = {
   temp: document.getElementById('ctl-temp'),
   fps: document.getElementById('ctl-fps'),
   fpsValue: document.getElementById('ctl-fps-value'),
+  build: document.getElementById('ctl-build'),
+  buildValue: document.getElementById('ctl-build-value'),
+  opt: document.getElementById('ctl-opt'),
+  optValue: document.getElementById('ctl-opt-value'),
   go: document.getElementById('ctl-go'),
   stop: document.getElementById('ctl-stop'),
   run: document.getElementById('run'),
@@ -285,12 +284,17 @@ function tick(map) {
     const interval = 1000 / Number(els.fps.value);
     if (now - run.lastDraw >= interval) {
       run.lastDraw = now;
+      // The two phases want very different rates: a build step claims a whole
+      // zone and is worth seeing, while an optimisation step moves one zone in
+      // 3,780 and is invisible on its own.
       if (run.phase === 'build') {
-        for (let i = 0; i < CONFIG.buildStepsPerRedraw; i++) {
+        const steps = Number(els.build.value);
+        for (let i = 0; i < steps; i++) {
           if (!run.model.buildStep()) { run.phase = 'optimise'; break; }
         }
       } else {
-        for (let i = 0; i < CONFIG.optimiseStepsPerRedraw; i++) run.model.optimiseStep();
+        const steps = Number(els.opt.value);
+        for (let i = 0; i < steps; i++) run.model.optimiseStep();
       }
       paintRegions(map);
       readout();
@@ -364,8 +368,11 @@ function showResults() {
 async function main() {
   const map = createMap();
 
-  els.fps.addEventListener('input', () => { els.fpsValue.textContent = els.fps.value; });
-  els.fpsValue.textContent = els.fps.value;
+  for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
+                             [els.opt, els.optValue]]) {
+    input.addEventListener('input', () => { out.textContent = input.value; });
+    out.textContent = input.value;
+  }
 
   try {
     const [geojson] = await Promise.all([
