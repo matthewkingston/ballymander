@@ -48,11 +48,14 @@ const els = {
   buildValue: document.getElementById('ctl-build-value'),
   opt: document.getElementById('ctl-opt'),
   optValue: document.getElementById('ctl-opt-value'),
+  shape: document.getElementById('ctl-shape'),
+  shapeValue: document.getElementById('ctl-shape-value'),
   go: document.getElementById('ctl-go'),
   stop: document.getElementById('ctl-stop'),
   run: document.getElementById('run'),
   runPhase: document.getElementById('run-phase'),
   runDev: document.getElementById('run-dev'),
+  runShape: document.getElementById('run-shape'),
   runScore: document.getElementById('run-score'),
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
@@ -274,6 +277,9 @@ function readout() {
     done: 'stopped — best shown',
   }[run.phase] || '—';
   els.runDev.textContent = pct.format(m.maxDeviation);
+  // 1 is a circle. The normalised shape term is measured per move, so its own
+  // value is large and says little; this is the legible number.
+  els.runShape.textContent = m.meanPenalty.toFixed(2);
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
 }
@@ -287,6 +293,15 @@ function tick(map) {
       // The two phases want very different rates: a build step claims a whole
       // zone and is worth seeing, while an optimisation step moves one zone in
       // 3,780 and is invisible on its own.
+      // Both knobs are read every frame rather than captured at GO.
+      // Temperature only affects the acceptance rule, so it is free to move.
+      // The shape weight is part of the score, so changing it makes anything
+      // recorded under the old weight incomparable -- setShapeWeight re-bases
+      // best-so-far on the current state rather than leaving a stale one.
+      const t = Number(els.temp.value);
+      run.model.temperature = t > 0 ? t : 1;
+      run.model.setShapeWeight(Number(els.shape.value));
+
       if (run.phase === 'build') {
         const steps = Number(els.build.value);
         for (let i = 0; i < steps; i++) {
@@ -309,7 +324,8 @@ function start(map) {
   stop(map, { silent: true });
   clearRegions(map);
 
-  run.model.start(n, Number(els.seed.value) || 0, Number(els.temp.value) || 1);
+  run.model.start(n, Number(els.seed.value) || 0, Number(els.temp.value) || 1,
+    Number(els.shape.value));
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
 
@@ -369,7 +385,7 @@ async function main() {
   const map = createMap();
 
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
-                             [els.opt, els.optValue]]) {
+                             [els.opt, els.optValue], [els.shape, els.shapeValue]]) {
     input.addEventListener('input', () => { out.textContent = input.value; });
     out.textContent = input.value;
   }
@@ -401,7 +417,7 @@ async function main() {
         window.__graph = graph;
         const pops = Object.fromEntries(
           geojson.features.map((f) => [f.properties.code, f.properties.pop]));
-        run.model = new RegionModel(graph, pops);
+        run.model = new RegionModel(graph, pops, zoneGeometry(geojson.features));
         run.shadow = new Int32Array(run.model.n).fill(-1);
         window.__model = run.model;
         els.go.disabled = false;

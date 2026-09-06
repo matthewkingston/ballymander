@@ -85,7 +85,9 @@ html, body {
   letter-spacing: 0.06em;
   color: var(--ink-muted);
 }
-#ctl-fps-value { font-variant-numeric: tabular-nums; }
+#ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Form controls do not inherit the body font. */
 .ctl-grid input {
@@ -129,6 +131,7 @@ html, body {
   margin: 0 0 12px;
 }
 #run[hidden] { display: none; }
+#run .run-wide { grid-column: 1 / -1; }
 #run div { margin: 0; }
 #run dt {
   font-size: 10px;

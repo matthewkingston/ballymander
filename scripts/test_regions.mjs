@@ -12,13 +12,15 @@ const load = (file, name) =>
   new Function(`${fs.readFileSync(path.join(ROOT, file), 'utf8')}; return ${name};`)();
 
 const DZGraph = load('web/graph.js', 'DZGraph');
-const RegionModel = load('web/regions.js', 'RegionModel');
+const { RegionModel, zoneGeometry } = load('web/regions.js',
+  '{ RegionModel, zoneGeometry }');
 
 const graph = new DZGraph(JSON.parse(
   fs.readFileSync(path.join(ROOT, 'web/data/dz_adjacency.json'), 'utf8')));
 const feats = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'web/data/dz.geojson'), 'utf8')).features;
 const pops = Object.fromEntries(feats.map((f) => [f.properties.code, f.properties.pop]));
+const geom = zoneGeometry(feats);
 
 const failures = [];
 function check(ok, msg) {
@@ -61,7 +63,7 @@ function frontierFromScratch(model) {
   return set;
 }
 
-const model = new RegionModel(graph, pops);
+const model = new RegionModel(graph, pops, geom);
 console.log(`\nregion model over ${model.n.toLocaleString()} zones, `
   + `total pop ${model.totalPop.toLocaleString()}, E[d^2] = `
   + `${Math.round(model.eD2).toLocaleString()}\n`);
@@ -84,17 +86,17 @@ check(scratch.size === model.frontier.length
   && model.frontier.every((z) => scratch.has(z)),
   `frontier matches a from-scratch recompute (${model.frontier.length} vs ${scratch.size})`);
 
-const built = model.score;
+const built = model.scorePop;
 const rescored = model._rescore() / model.eD2;
 check(Math.abs(built - rescored) < 1e-6 * Math.max(1, built),
   `incremental score matches a full rescore (${built.toFixed(3)} vs ${rescored.toFixed(3)})`);
 
 /* --- determinism --------------------------------------------------------- */
-const a = new RegionModel(graph, pops);
+const a = new RegionModel(graph, pops, geom);
 a.start(18, 42); while (a.buildStep());
-const b = new RegionModel(graph, pops);
+const b = new RegionModel(graph, pops, geom);
 b.start(18, 42); while (b.buildStep());
-const c = new RegionModel(graph, pops);
+const c = new RegionModel(graph, pops, geom);
 c.start(18, 43); while (c.buildStep());
 check(a.assign.every((v, i) => v === b.assign[i]), 'same seed gives an identical map');
 check(!a.assign.every((v, i) => v === c.assign[i]), 'a different seed gives a different map');
@@ -128,12 +130,86 @@ check(Math.abs(model.score - model.bestScore) < 1e-6 * Math.max(1, model.bestSco
   'restoreBest reproduces the best score exactly');
 check(regionsContiguous(model) === null, 'restored best state is contiguous');
 
+/* --- shape term ---------------------------------------------------------- */
+console.log('\nshape (moment of inertia)');
+
+/* Against analytic values, independent of any NI data: a disc is 1, a square is
+ * pi/3, a 4:1 rectangle 2.22. This is what catches a wrong constant or a
+ * dropped self-moment. */
+function gridPenalty(w, h) {
+  let A = 0; let Sx = 0; let Sy = 0; let Sxx = 0; let own = 0;
+  for (let i = 0; i < w; i++) {
+    for (let j = 0; j < h; j++) {
+      const x = i + 0.5; const y = j + 0.5;
+      A += 1; Sx += x; Sy += y; Sxx += x * x + y * y; own += 1 / (2 * Math.PI);
+    }
+  }
+  return RegionModel.prototype._penaltyFrom.call(null, A, Sx, Sy, Sxx, own);
+}
+const near = (a, b, tol) => Math.abs(a - b) <= tol;
+check(gridPenalty(1, 1) === 1, `a single cell scores exactly 1 (${gridPenalty(1, 1)})`);
+check(near(gridPenalty(40, 40), Math.PI / 3, 0.002),
+  `a square scores pi/3 (${gridPenalty(40, 40).toFixed(4)} vs ${(Math.PI / 3).toFixed(4)})`);
+check(near(gridPenalty(80, 20), 2.225, 0.01),
+  `a 4:1 rectangle scores 2.22 (${gridPenalty(80, 20).toFixed(4)})`);
+check(gridPenalty(160, 10) > gridPenalty(80, 20),
+  'a 16:1 rectangle scores worse than a 4:1');
+
+/* Weight 0 must be exactly the old behaviour, geometry present or not. */
+const off = new RegionModel(graph, pops, geom);
+off.start(18, 5, 1, 0);
+while (off.buildStep());
+for (let i = 0; i < 50000; i++) off.optimiseStep();
+const noGeom = new RegionModel(graph, pops);          // shape term unavailable
+noGeom.start(18, 5, 1, 1);                            // weight ignored
+while (noGeom.buildStep());
+for (let i = 0; i < 50000; i++) noGeom.optimiseStep();
+check(off.assign.every((v, i) => v === noGeom.assign[i]),
+  'weight 0 is exactly the behaviour without the shape term at all');
+
+/* Sums are maintained incrementally through tens of thousands of moves and are
+ * a small difference of large numbers, so drift is the thing to watch. */
+const on = new RegionModel(graph, pops, geom);
+on.start(18, 5, 1, 1);
+while (on.buildStep());
+for (let i = 0; i < 50000; i++) on.optimiseStep();
+const beforeResum = on.shapeRaw;
+on._resum();
+check(near(beforeResum, on.shapeRaw, 1e-6 * Math.max(1, Math.abs(on.shapeRaw))),
+  `no drift in the shape sums over 50,000 moves `
+  + `(${beforeResum.toFixed(9)} vs ${on.shapeRaw.toFixed(9)})`);
+
+/* The trade-off is real and the test should say so rather than hide it. */
+console.log(`  weight 0: mean penalty ${off.meanPenalty.toFixed(3)}, `
+  + `max dev ${(off.maxDeviation * 100).toFixed(2)}%`);
+console.log(`  weight 1: mean penalty ${on.meanPenalty.toFixed(3)}, `
+  + `max dev ${(on.maxDeviation * 100).toFixed(2)}%`);
+check(on.meanPenalty < off.meanPenalty,
+  `weight 1 makes regions rounder (${on.meanPenalty.toFixed(3)} vs `
+  + `${off.meanPenalty.toFixed(3)})`);
+check(regionsContiguous(on) === null, 'shaped regions are still contiguous');
+check(on.assigned === on.n, 'shaped run still assigns every zone');
+
+/* Changing the weight mid-run changes the objective, so the old best is not
+ * comparable and must not survive. */
+const live = new RegionModel(graph, pops, geom);
+live.start(18, 5, 1, 0);
+while (live.buildStep());
+for (let i = 0; i < 20000; i++) live.optimiseStep();
+live.setShapeWeight(2);
+check(near(live.bestScore, live.score, 1e-9),
+  'changing the shape weight re-bases best-so-far on the current state');
+const rebased = live.bestScore;
+check(live.setShapeWeight(2) === false && live.bestScore === rebased,
+  'setting the same weight again changes nothing');
+check(live.setShapeWeight(0.5) === true, 'a real change is reported as one');
+
 /* --- does it actually converge? ------------------------------------------ */
 const STEPS = 200000;
 console.log(`\nconvergence after ${STEPS.toLocaleString()} steps`);
 console.log('  N   seed     build dev    optimised dev      build score   optimised score');
 for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) {
-  const m = new RegionModel(graph, pops);
+  const m = new RegionModel(graph, pops, geom);
   m.start(N, seed);
   while (m.buildStep());
   const devBuild = m.maxDeviation;
@@ -162,7 +238,7 @@ for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) 
  * of why single-zone moves alone are limited. Swap moves are the standard fix
  * and are already deferred in major_checkpoint_1.txt. */
 console.log('\nthe known slow case: N=18 seed 7, sealed pocket');
-const slow = new RegionModel(graph, pops);
+const slow = new RegionModel(graph, pops, geom);
 slow.start(18, 7);
 while (slow.buildStep());
 for (const upTo of [200000, 600000, 1600000]) {

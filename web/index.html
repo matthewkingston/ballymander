@@ -26,6 +26,8 @@
         <input id="ctl-seed" type="number" min="0" step="1" value="1">
         <label for="ctl-temp">Temperature</label>
         <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
+        <label for="ctl-shape">Shape <span id="ctl-shape-value">1</span></label>
+        <input id="ctl-shape" type="range" min="0" max="5" step="0.1" value="1">
         <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
         <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">
         <label for="ctl-build">Build/frame <span id="ctl-build-value">10</span></label>
@@ -40,8 +42,9 @@
     </div>
 
     <dl id="run" hidden>
-      <div><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
+      <div class="run-wide"><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
       <div><dt>Max dev</dt><dd id="run-dev">&mdash;</dd></div>
+      <div><dt>Shape</dt><dd id="run-shape">&mdash;</dd></div>
       <div><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
       <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
     </dl>

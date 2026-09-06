@@ -104,6 +104,8 @@ const regions = await page.evaluate(() => {
     resultsShown: !document.getElementById('results').hidden,
     phase: document.getElementById('run-phase').textContent,
     maxDev: document.getElementById('run-dev').textContent,
+    shapeShown: document.getElementById('run-shape').textContent,
+    meanPenalty: Number(m.meanPenalty.toFixed(3)),
     popsSumToTotal: pops.reduce((a, b) => a + b, 0),
   };
 });
@@ -159,6 +161,9 @@ if (!regions || !regions.assignedAll || regions.painted !== regions.zones) {
   problems.push('region run did not paint every zone');
 }
 if (!regions || regions.rows !== regions.regionCount) problems.push('results table incomplete');
+// A disc scores 1 and nothing can beat it, so anything below means the moment
+// sums never got real geometry.
+if (!regions || !(regions.meanPenalty > 0.99)) problems.push('shape penalty not measured');
 if (problems.length) {
   console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);
   process.exit(1);

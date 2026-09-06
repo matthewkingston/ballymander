@@ -169,7 +169,8 @@ seed zones until every Data Zone is claimed, then keeps nudging zones between
 regions to even the populations up, until you press **STOP**.
 
 Controls: number of regions, random seed (same seed gives the same map),
-temperature, frames per second, and how many model steps run per frame. The two
+temperature, shape weight, frames per second, and how many model steps run per
+frame. The two
 phases get separate step controls because they want very different rates -- a
 build step claims a whole zone and is worth watching, while an optimisation step
 moves one zone in 3,780 and is invisible on its own.
@@ -178,20 +179,60 @@ The algorithm is in `web/regions.js`, deliberately free of DOM and MapLibre so i
 can be driven headlessly — `web/app.js` only animates it and paints the result,
 via `setFeatureState`, so no geometry is re-uploaded as regions change.
 
-**The score** is a sum of squared population deviations, normalised by `E[d^2]`,
-the mean squared DZ population:
+**The score** is a weighted sum of normalised terms. Population equality is the
+reference term, carrying weight 1:
 
 ```
-score       = SUM_r (pop_r - target)^2 / E[d^2]        target = total / N
+S_pop       = SUM_r (pop_r - target)^2 / E[d^2]        target = total / N
 build delta = d * (d + 2*(pop_r - target)) / E[d^2]    assign unassigned d to r
 move delta  = 2d * (d + pop_B - pop_A)    / E[d^2]     move d out of A into B
 ```
 
-Normalising matters for what comes next, not for now: it puts the score in units
-of *one typical move*, so the temperature is a plain number near 1 at any N, and
-a second term (equal mean age, say) can be added as a weighted sum without
-re-tuning everything around it. Note the two deltas are different formulas —
-assigning an unclaimed zone is not a move from nowhere.
+`E[d^2]` is the mean squared DZ population. Normalising puts every term in units
+of *one typical move*, so the temperature is a plain number near 1 at any N and
+weights are pure priorities rather than exchange rates between incompatible
+units. Note the two deltas are different formulas — assigning an unclaimed zone
+is not a move from nowhere.
+
+**Shape** is the second term, a compactness penalty measured as a moment of
+inertia about each region's own centroid:
+
+```
+A    = SUM a_z          Sx = SUM a_z x_z      Sxx  = SUM a_z (x_z^2 + y_z^2)
+Sown = SUM a_z^2/(2pi)  Sy = SUM a_z y_z
+
+I       = Sxx - (Sx^2 + Sy^2)/A + Sown
+penalty = 2*pi*I / A^2                       1 for a disc, higher for anything else
+S_shape = SUM_r (penalty_r - 1) / sigma_shape
+```
+
+Treating each zone as a point mass at its centroid means that identity never
+needs the centroid, so a zone joining or leaving is four additions — the same
+O(1) as the population delta, with no sampling, no bounding box and no
+rotational bias. A square scores 1.047 (π/3), a 4:1 rectangle 2.22.
+
+`Sown` — each zone's own moment, taken as a disc of equal area — stops a
+one-zone region scoring 0 and so looking better than a circle, which would bias
+the build towards keeping regions small. It decays as `1/k`.
+
+`sigma_shape = mean_zone_area * N / total_area`, derived rather than measured,
+and unlike the population term it **depends on N**. The origin is shifted to the
+centre of the data before measuring, because `Sxx - (Sx^2+Sy^2)/A` is a small
+difference of large numbers and raw projected metres throw away most of the
+mantissa.
+
+The **Shape** slider is the weight, default 1, and 0 turns the term off. The
+penalty is still measured at weight 0 — it costs about twenty flops per move —
+so the readout shows what the shapes *are* even when they aren't being steered.
+At N=18 over 50,000 moves, weight 1 takes the mean penalty from 2.13 to 1.22.
+
+**Temperature and shape weight are both live**, read every frame rather than
+captured at GO, so you can steer a run while watching it. They differ in one
+way that matters: temperature only affects the acceptance rule, so the score and
+best-so-far keep meaning what they meant. The shape weight is part of the score,
+so changing it is a change of objective — the model discards the old best and
+re-bases it on the current state, otherwise STOP would restore a "best" scored
+under a weight you are no longer using.
 
 **Build phase.** Seeds are chosen by farthest-point sampling, because purely
 random seeds clump and a region boxed in early can never recover — nothing is
