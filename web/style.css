@@ -85,7 +85,8 @@ html, body {
   letter-spacing: 0.06em;
   color: var(--ink-muted);
 }
-#ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value {
+#ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value,
+#ctl-pshape-value {
   font-variant-numeric: tabular-nums;
 }
 

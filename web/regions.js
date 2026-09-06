@@ -123,6 +123,7 @@ class RegionModel {
     this.pop = new Float64Array(this.n);
     for (let i = 0; i < this.n; i++) this.pop[i] = popByCode[this.codes[i]] || 0;
     this.totalPop = this.pop.reduce((a, b) => a + b, 0);
+    this.meanPop = this.totalPop / this.n;
     // sigma^2 for the population term: the scale of one typical move.
     this.eD2 = this.pop.reduce((a, b) => a + b * b, 0) / this.n;
 
@@ -150,6 +151,12 @@ class RegionModel {
     this._seen = new Int32Array(this.n);   // BFS marks, stamped rather than cleared
     this._stamp = 0;
 
+    // Build steps between pocket sweeps. A sweep is one pass over the
+    // unassigned zones, so this is about taste rather than cost. Set to
+    // Infinity to turn sealing off. Deliberately not in reset(): it is a
+    // tuning knob, not run state, and must survive start().
+    this.sweepInterval = 25;
+
     this.reset();
   }
 
@@ -165,30 +172,42 @@ class RegionModel {
     this.frontier = [];        // zones with a neighbour in another region
     this.frontierPos = new Int32Array(this.n).fill(-1);
     this.rawScore = 0;
-    this.shapeRaw = 0;        // SUM_r (penalty_r - 1)
+    this.shapeRaw = 0;        // SUM_r (land penalty_r - 1)
+    this.popShapeRaw = 0;     // SUM_r (people penalty_r - 1)
     this.wShape = 0;
+    this.wPopShape = 0;
     this.sigmaShape = 1;
+    this.sigmaPopShape = 1;
     this.rArea = new Float64Array(0);
     this.rSx = new Float64Array(0);
     this.rSy = new Float64Array(0);
     this.rSxx = new Float64Array(0);
     this.rOwn = new Float64Array(0);
+    this.rPx = new Float64Array(0);
+    this.rPy = new Float64Array(0);
+    this.rPxx = new Float64Array(0);
     this.bestScore = Infinity;
     this.steps = 0;
     this.moves = 0;
+    this.sweepCounter = 0;
+    this.sealed = 0;
   }
 
   /* Seed N regions and prepare the build phase. */
-  start(N, seed, temperature = 1, wShape = 0) {
+  start(N, seed, temperature = 1, wShape = 0, wPopShape = 0) {
     this.reset();
     this.N = N;
     this.target = this.totalPop / N;
     this.temperature = temperature;
     this.wShape = this.hasGeometry ? wShape : 0;
-    // One move shifts a region's penalty by about (zone area / region area);
-    // see the derivation in major_checkpoint_1.txt. Unlike the population
-    // term this depends on N, so it is derived here rather than fixed.
+    this.wPopShape = this.hasGeometry ? wPopShape : 0;
+    // One move shifts a region's land penalty by about (zone area / region
+    // area) and its people penalty by about (zone pop / region pop); see the
+    // derivations in major_checkpoint_1.txt. Both reduce to N/n here, but they
+    // are written out so they stay right if the data changes. Unlike the
+    // population-equality term these depend on N.
     this.sigmaShape = (this.meanArea * N) / (this.totalArea || 1);
+    this.sigmaPopShape = (this.meanPop * N) / (this.totalPop || 1);
     this.rng = mulberry32(seed);
     this.regionPop = new Float64Array(N);
     this.regionSize = new Int32Array(N);
@@ -197,6 +216,9 @@ class RegionModel {
     this.rSy = new Float64Array(N);
     this.rSxx = new Float64Array(N);
     this.rOwn = new Float64Array(N);
+    this.rPx = new Float64Array(N);
+    this.rPy = new Float64Array(N);
+    this.rPxx = new Float64Array(N);
     this.openNbrs = Array.from({ length: N }, () => new Set());
 
     const seeds = this._farthestPointSeeds(N);
@@ -276,24 +298,129 @@ class RegionModel {
       this.rOwn[r] + sign * this.zOwn[z]);
   }
 
-  /* Fold zone z into region r's sums, keeping SUM_r (penalty_r - 1) current. */
+  /* The same moment with people as the mass instead of land.
+   *
+   * Needed because the two disagree badly: DZ areas span a factor of 15,000
+   * while populations span 15, so an area-weighted centroid sits wherever the
+   * ground is -- measured across a run, up to 8 km from where the people are.
+   * The land penalty is close to blind to the shape of the population.
+   *
+   * Normalised by the region's own area, so 1 means the people are spread like
+   * a uniform disc covering the region: above 1 they are strung out, below 1
+   * they are clustered. There is no floor at 1, unlike the land penalty --
+   * concentration earns credit, and the land term is what stops that being
+   * bought with sprawl. */
+  _penaltyPopFrom(P, Px, Py, Pxx, A) {
+    if (P <= 0 || A <= 0) return 1;
+    const I = Pxx - (Px * Px + Py * Py) / P;
+    return (2 * Math.PI * I) / (P * A);
+  }
+
+  _penaltyPop(r) {
+    return this._penaltyPopFrom(this.regionPop[r], this.rPx[r], this.rPy[r],
+      this.rPxx[r], this.rArea[r]);
+  }
+
+  _penaltyPopWith(r, z, sign) {
+    const p = sign * this.pop[z];
+    return this._penaltyPopFrom(
+      this.regionPop[r] + p,
+      this.rPx[r] + p * this.zx[z],
+      this.rPy[r] + p * this.zy[z],
+      this.rPxx[r] + p * (this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z]),
+      this.rArea[r] + sign * this.za[z]);
+  }
+
+  /* Fold zone z into region r's sums, keeping both penalty totals current.
+   * This owns regionPop too, because the people penalty depends on it and the
+   * two must not be updated out of step. */
   _accumulate(r, z, sign) {
-    if (!this.hasGeometry) return;
-    this.shapeRaw -= this._penalty(r) - 1;
+    const geom = this.hasGeometry;
+    if (geom) {
+      this.shapeRaw -= this._penalty(r) - 1;
+      this.popShapeRaw -= this._penaltyPop(r) - 1;
+    }
     const a = sign * this.za[z];
     this.rArea[r] += a;
     this.rSx[r] += a * this.zx[z];
     this.rSy[r] += a * this.zy[z];
     this.rSxx[r] += a * (this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z]);
     this.rOwn[r] += sign * this.zOwn[z];
-    this.shapeRaw += this._penalty(r) - 1;
+
+    const p = sign * this.pop[z];
+    this.regionPop[r] += p;
+    this.rPx[r] += p * this.zx[z];
+    this.rPy[r] += p * this.zy[z];
+    this.rPxx[r] += p * (this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z]);
+
+    if (geom) {
+      this.shapeRaw += this._penalty(r) - 1;
+      this.popShapeRaw += this._penaltyPop(r) - 1;
+    }
   }
 
   /* --- build phase ------------------------------------------------------- */
 
+  /* Assign every unassigned pocket that only one region can ever reach.
+   *
+   * A zone can only be claimed by a region already bordering it, so if a
+   * connected pocket of unassigned zones touches exactly one region, every
+   * zone in it is going to that region whatever happens elsewhere -- no other
+   * region can get adjacent without going through the first one, and nothing
+   * is ever stolen during the build. Handing them over now is not a guess.
+   *
+   * It matters because until then the region looks smaller than it really is,
+   * so the build keeps feeding it while it is already committed to the pocket,
+   * and it over-claims on its far side. Returns how many zones were sealed. */
+  sealPockets() {
+    if (this.assigned >= this.n) return 0;
+    const stamp = ++this._stamp;
+    let sealed = 0;
+
+    for (let start = 0; start < this.n; start++) {
+      if (this.assign[start] >= 0 || this._seen[start] === stamp) continue;
+      const pocket = [start];
+      this._seen[start] = stamp;
+      let owner = -1;
+      let contested = false;
+      // No early exit on `contested`: the whole pocket still has to be marked,
+      // or its far side gets rescanned as a separate pocket.
+      for (let i = 0; i < pocket.length; i++) {
+        for (const w of this.nbr[pocket[i]]) {
+          const r = this.assign[w];
+          if (r < 0) {
+            if (this._seen[w] !== stamp) { this._seen[w] = stamp; pocket.push(w); }
+          } else if (owner < 0) {
+            owner = r;
+          } else if (owner !== r) {
+            contested = true;
+          }
+        }
+      }
+      if (contested || owner < 0) continue;
+      for (const z of pocket) this._claim(z, owner);
+      sealed += pocket.length;
+    }
+    this.sealed += sealed;
+    return sealed;
+  }
+
+  _claim(z, region) {
+    this._place(z, region);
+    for (const w of this.nbr[z]) {
+      if (this.assign[w] < 0) this.openNbrs[region].add(w);
+    }
+  }
+
   /* One assignment. Returns false when every zone is assigned. */
   buildStep() {
     if (this.assigned >= this.n) return false;
+
+    if (++this.sweepCounter >= this.sweepInterval) {
+      this.sweepCounter = 0;
+      this.sealPockets();
+      if (this.assigned >= this.n) { this._recordBest(); return false; }
+    }
 
     let region = -1;
     for (let r = 0; r < this.N; r++) {
@@ -306,7 +433,9 @@ class RegionModel {
 
     const deviation = this.regionPop[region] - this.target;
     const shaped = this.wShape > 0;
+    const peopled = this.wPopShape > 0;
     const penNow = shaped ? this._penalty(region) : 0;
+    const penPopNow = peopled ? this._penaltyPop(region) : 0;
     let pick = -1;
     let pickDelta = Infinity;
     for (const z of this.openNbrs[region]) {
@@ -317,16 +446,17 @@ class RegionModel {
         delta += (this.wShape * (this._penaltyWith(region, z, 1) - penNow))
           / this.sigmaShape;
       }
+      if (peopled) {
+        delta += (this.wPopShape * (this._penaltyPopWith(region, z, 1) - penPopNow))
+          / this.sigmaPopShape;
+      }
       if (delta < pickDelta || (delta === pickDelta && z < pick)) {
         pickDelta = delta;
         pick = z;
       }
     }
 
-    this._place(pick, region);
-    for (const w of this.nbr[pick]) {
-      if (this.assign[w] < 0) this.openNbrs[region].add(w);
-    }
+    this._claim(pick, region);
     this.steps++;
     // A partial map cannot be compared against a complete one, so the first
     // state worth recording is the one where every zone has a region.
@@ -337,8 +467,7 @@ class RegionModel {
   _place(z, region) {
     const before = this.regionPop[region] - this.target;
     this.assign[z] = region;
-    this._accumulate(region, z, 1);
-    this.regionPop[region] += this.pop[z];
+    this._accumulate(region, z, 1);   // also updates regionPop
     this.regionSize[region]++;
     this.assigned++;
     const after = this.regionPop[region] - this.target;
@@ -372,7 +501,10 @@ class RegionModel {
     const seen = new Set([from]);
     // Constant across candidates: what leaving `from` costs.
     const shaped = this.wShape > 0;
+    const peopled = this.wPopShape > 0;
     const leaving = shaped ? this._penaltyWith(from, z, -1) - this._penalty(from) : 0;
+    const leavingPop = peopled
+      ? this._penaltyPopWith(from, z, -1) - this._penaltyPop(from) : 0;
     for (const w of this.nbr[z]) {
       const r = this.assign[w];
       if (r < 0 || seen.has(r)) continue;
@@ -382,6 +514,10 @@ class RegionModel {
       if (shaped) {
         const joining = this._penaltyWith(r, z, 1) - this._penalty(r);
         delta += (this.wShape * (leaving + joining)) / this.sigmaShape;
+      }
+      if (peopled) {
+        const joining = this._penaltyPopWith(r, z, 1) - this._penaltyPop(r);
+        delta += (this.wPopShape * (leavingPop + joining)) / this.sigmaPopShape;
       }
       deltas.push(delta);
     }
@@ -414,10 +550,8 @@ class RegionModel {
     const d = this.pop[z];
     const a0 = this.regionPop[from] - this.target;
     const b0 = this.regionPop[to] - this.target;
-    this._accumulate(from, z, -1);
+    this._accumulate(from, z, -1);    // both also update regionPop
     this._accumulate(to, z, 1);
-    this.regionPop[from] -= d;
-    this.regionPop[to] += d;
     this.regionSize[from]--;
     this.regionSize[to]++;
     this.assign[z] = to;
@@ -486,13 +620,16 @@ class RegionModel {
   _rescore() {
     let total = 0;
     let shape = 0;
+    let popShape = 0;
     for (let r = 0; r < this.N; r++) {
       const dev = this.regionPop[r] - this.target;
       total += dev * dev;
       shape += this._penalty(r) - 1;
+      popShape += this._penaltyPop(r) - 1;
     }
     this.rawScore = total;
     this.shapeRaw = shape;
+    this.popShapeRaw = popShape;
     return total;
   }
 
@@ -505,16 +642,23 @@ class RegionModel {
     this.rSy.fill(0);
     this.rSxx.fill(0);
     this.rOwn.fill(0);
+    this.rPx.fill(0);
+    this.rPy.fill(0);
+    this.rPxx.fill(0);
     for (let z = 0; z < this.n; z++) {
       const r = this.assign[z];
       if (r < 0) continue;
+      const rr = this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z];
       this.regionPop[r] += this.pop[z];
       this.regionSize[r]++;
       this.rArea[r] += this.za[z];
       this.rSx[r] += this.za[z] * this.zx[z];
       this.rSy[r] += this.za[z] * this.zy[z];
-      this.rSxx[r] += this.za[z] * (this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z]);
+      this.rSxx[r] += this.za[z] * rr;
       this.rOwn[r] += this.zOwn[z];
+      this.rPx[r] += this.pop[z] * this.zx[z];
+      this.rPy[r] += this.pop[z] * this.zy[z];
+      this.rPxx[r] += this.pop[z] * rr;
     }
     this._rescore();
   }
@@ -525,11 +669,20 @@ class RegionModel {
 
   get scoreShape() { return this.shapeRaw / this.sigmaShape; }
 
-  get score() { return this.scorePop + this.wShape * this.scoreShape; }
+  get scorePopShape() { return this.popShapeRaw / this.sigmaPopShape; }
 
-  /* The legible version: 1 is a circle. The normalised term above is measured
-   * per move, so its absolute value is large and means little on its own. */
+  get score() {
+    return this.scorePop
+      + this.wShape * this.scoreShape
+      + this.wPopShape * this.scorePopShape;
+  }
+
+  /* The legible versions: 1 is a circle for land, and for people it is a region
+   * whose population is spread evenly across it. The normalised terms above are
+   * measured per move, so their absolute values are large and say little. */
   get meanPenalty() { return this.N ? this.shapeRaw / this.N + 1 : 1; }
+
+  get meanPopPenalty() { return this.N ? this.popShapeRaw / this.N + 1 : 1; }
 
   /* Max deviation from target as a fraction -- the legible number to show. */
   get maxDeviation() {
@@ -563,6 +716,15 @@ class RegionModel {
     return true;
   }
 
+  setPopShapeWeight(w) {
+    const next = this.hasGeometry ? w : 0;
+    if (next === this.wPopShape) return false;
+    this.wPopShape = next;
+    this.bestScore = Infinity;
+    if (this.assigned >= this.n) this._recordBest();
+    return true;
+  }
+
   /* Put the map back to the best state seen -- with a stochastic rule the
    * state when the user stops is not the best one visited. */
   restoreBest() {
@@ -586,6 +748,7 @@ class RegionModel {
       zones: this.regionSize[r],
       deviation: this.target ? (this.regionPop[r] - this.target) / this.target : 0,
       penalty: this._penalty(r),
+      penaltyPop: this._penaltyPop(r),
     }));
   }
 }

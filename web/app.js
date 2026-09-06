@@ -50,12 +50,16 @@ const els = {
   optValue: document.getElementById('ctl-opt-value'),
   shape: document.getElementById('ctl-shape'),
   shapeValue: document.getElementById('ctl-shape-value'),
+  pshape: document.getElementById('ctl-pshape'),
+  pshapeValue: document.getElementById('ctl-pshape-value'),
   go: document.getElementById('ctl-go'),
   stop: document.getElementById('ctl-stop'),
   run: document.getElementById('run'),
   runPhase: document.getElementById('run-phase'),
   runDev: document.getElementById('run-dev'),
   runShape: document.getElementById('run-shape'),
+  runPShape: document.getElementById('run-pshape'),
+  runMoves: document.getElementById('run-moves'),
   runScore: document.getElementById('run-score'),
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
@@ -273,13 +277,16 @@ function readout() {
   const m = run.model;
   els.runPhase.textContent = {
     build: `building ${nf.format(m.assigned)}/${nf.format(m.n)}`,
-    optimise: `optimising ${nf.format(m.moves)} moves`,
+    optimise: 'optimising',
     done: 'stopped — best shown',
   }[run.phase] || '—';
   els.runDev.textContent = pct.format(m.maxDeviation);
-  // 1 is a circle. The normalised shape term is measured per move, so its own
-  // value is large and says little; this is the legible number.
+  els.runMoves.textContent = nf.format(m.moves);
+  // The legible numbers: 1 is a circle for land, and evenly-spread population
+  // for people. The normalised terms are measured per move, so their own
+  // values are large and say little.
   els.runShape.textContent = m.meanPenalty.toFixed(2);
+  els.runPShape.textContent = m.meanPopPenalty.toFixed(2);
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
 }
@@ -301,6 +308,7 @@ function tick(map) {
       const t = Number(els.temp.value);
       run.model.temperature = t > 0 ? t : 1;
       run.model.setShapeWeight(Number(els.shape.value));
+      run.model.setPopShapeWeight(Number(els.pshape.value));
 
       if (run.phase === 'build') {
         const steps = Number(els.build.value);
@@ -325,7 +333,7 @@ function start(map) {
   clearRegions(map);
 
   run.model.start(n, Number(els.seed.value) || 0, Number(els.temp.value) || 1,
-    Number(els.shape.value));
+    Number(els.shape.value), Number(els.pshape.value));
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
 
@@ -385,7 +393,8 @@ async function main() {
   const map = createMap();
 
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
-                             [els.opt, els.optValue], [els.shape, els.shapeValue]]) {
+                             [els.opt, els.optValue], [els.shape, els.shapeValue],
+                             [els.pshape, els.pshapeValue]]) {
     input.addEventListener('input', () => { out.textContent = input.value; });
     out.textContent = input.value;
   }

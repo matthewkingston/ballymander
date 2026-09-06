@@ -221,10 +221,41 @@ centre of the data before measuring, because `Sxx - (Sx^2+Sy^2)/A` is a small
 difference of large numbers and raw projected metres throw away most of the
 mantissa.
 
-The **Shape** slider is the weight, default 1, and 0 turns the term off. The
-penalty is still measured at weight 0 — it costs about twenty flops per move —
-so the readout shows what the shapes *are* even when they aren't being steered.
-At N=18 over 50,000 moves, weight 1 takes the mean penalty from 2.13 to 1.22.
+**People shape** is a third term, the same moment with *people* as the mass
+instead of land:
+
+```
+I_pop       = Ppp - (Px^2 + Py^2)/P
+penalty_pop = 2*pi*I_pop / (P * A)     1 = people spread evenly across the region
+```
+
+It exists because the two measures disagree — correlation 0.438 over a run.
+DZ areas span a factor of 15,000 while populations span 15, so an area-weighted
+centroid sits wherever the *ground* is: measured across one run it lands 0.3 to
+8.4 km from where the people are. One region scored 1.20 on land (a tidy patch)
+and 2.45 on people (strung out along a line); another scored 1.03 on land (very
+nearly a disc) and 0.45 on people (everyone balled into one corner).
+
+Note it has **no floor at 1**, unlike the land penalty. Concentrated population
+scores below 1 and earns credit; the land term is what stops that being bought
+with sprawl. Normalising by the region's own area does mildly reward absorbing
+large thinly-populated zones — that was the deliberate trade against a fixed
+scale, which has no such incentive but would steer rural regions hard and urban
+ones barely at all.
+
+Both sliders default to 1 and 0 turns a term off. The penalties are still
+*measured* at weight 0 — about twenty flops per move — so the readout shows what
+the shapes are even when they aren't being steered. At N=18 over 50,000 moves:
+
+| weights | land | people |
+|---|---|---|
+| neither | 2.073 | 1.918 |
+| land only | 1.245 | 1.311 |
+| people only | 1.587 | 1.114 |
+| **both** | **1.204** | **0.995** |
+
+The last row is the point: together they beat either alone *on both measures*,
+which is not something you would get from two terms pulling against each other.
 
 **Temperature and shape weight are both live**, read every frame rather than
 captured at GO, so you can steer a run while watching it. They differ in one
@@ -240,6 +271,17 @@ ever stolen during the build. Then repeatedly: take the lowest-population region
 that still borders an unassigned zone, and give it the neighbour that most
 improves the score. Because the DZ graph is one connected component, some region
 always borders an unassigned zone, so this always finishes.
+
+Every 25 steps it also **seals pockets**: any connected group of unassigned zones
+bordered by exactly one region is handed to that region whole. This is forced
+rather than clever — a zone can only be claimed by a region already bordering it,
+and nothing is stolen during the build, so no second region can ever reach such a
+group. Until it is handed over the region looks smaller than it really is, so the
+build keeps feeding it while it is already committed to the pocket and it
+over-claims on its far side. It fires a lot — around 1,400 of 3,780 zones at
+N=18 — improving the build score in 10 of 12 (N, seed) combinations tried,
+sometimes by 2–3×, and finishing the build in ~2,350 steps instead of ~3,760.
+`__model.sweepInterval = Infinity` turns it off.
 
 **Optimisation phase.** Sample a zone on a region boundary, reject it if removing
 it would split its region in two, then reassign it among its neighbouring regions

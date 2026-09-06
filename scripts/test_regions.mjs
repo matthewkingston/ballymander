@@ -91,6 +91,65 @@ const rescored = model._rescore() / model.eD2;
 check(Math.abs(built - rescored) < 1e-6 * Math.max(1, built),
   `incremental score matches a full rescore (${built.toFixed(3)} vs ${rescored.toFixed(3)})`);
 
+/* --- sealing pockets ----------------------------------------------------- */
+console.log('\npocket sealing');
+
+/* The invariant the sweep must leave behind: no unassigned pocket bordered by
+ * exactly one region, because such a pocket can only ever go to that region. */
+function lonePocketExists(m) {
+  const seen = new Set();
+  for (let start = 0; start < m.n; start++) {
+    if (m.assign[start] >= 0 || seen.has(start)) continue;
+    const pocket = [start];
+    seen.add(start);
+    const owners = new Set();
+    for (let i = 0; i < pocket.length; i++) {
+      for (const w of m.nbr[pocket[i]]) {
+        if (m.assign[w] < 0) {
+          if (!seen.has(w)) { seen.add(w); pocket.push(w); }
+        } else {
+          owners.add(m.assign[w]);
+        }
+      }
+    }
+    if (owners.size === 1) return true;
+  }
+  return false;
+}
+
+const sealer = new RegionModel(graph, pops, geom);
+sealer.start(18, 5);
+check(sealer.sweepInterval === 25,
+  `sweepInterval survives start() (${sealer.sweepInterval})`);
+let sweeps = 0;
+while (sealer.buildStep()) {
+  if (sealer.steps % 25 === 0) { sealer.sealPockets(); sweeps++; }
+}
+check(!lonePocketExists(sealer), 'no single-owner pocket is left unassigned');
+check(sealer.sealed > 0, `pockets actually get sealed (${sealer.sealed} zones)`);
+check(sealer.assigned === sealer.n, 'sealing still assigns every zone');
+check(regionsContiguous(sealer) === null,
+  'sealing keeps every region contiguous -- a pocket touching one region joins it whole');
+
+const bare = new RegionModel(graph, pops, geom);
+bare.sweepInterval = Infinity;
+bare.start(18, 5);
+while (bare.buildStep());
+check(bare.sealed === 0, 'sweepInterval = Infinity turns sealing off');
+check(bare.assigned === bare.n, 'the build still completes without sealing');
+console.log(`  build score ${bare.scorePop.toFixed(0)} without sealing, `
+  + `${sealer.scorePop.toFixed(0)} with (${sealer.steps.toLocaleString()} steps `
+  + `vs ${bare.steps.toLocaleString()})`);
+
+const seal2 = new RegionModel(graph, pops, geom);
+seal2.start(18, 5);
+while (seal2.buildStep());
+const seal3 = new RegionModel(graph, pops, geom);
+seal3.start(18, 5);
+while (seal3.buildStep());
+check(seal2.assign.every((v, i) => v === seal3.assign[i]),
+  'sealing stays deterministic for a given seed');
+
 /* --- determinism --------------------------------------------------------- */
 const a = new RegionModel(graph, pops, geom);
 a.start(18, 42); while (a.buildStep());
@@ -155,6 +214,35 @@ check(near(gridPenalty(80, 20), 2.225, 0.01),
 check(gridPenalty(160, 10) > gridPenalty(80, 20),
   'a 16:1 rectangle scores worse than a 4:1');
 
+/* People-weighted moment. With uniform density it must agree with the land
+ * moment -- that is the whole design: they only diverge where density does. */
+function gridPopPenalty(w, h, popAt) {
+  let A = 0; let P = 0; let Px = 0; let Py = 0; let Pxx = 0;
+  for (let i = 0; i < w; i++) {
+    for (let j = 0; j < h; j++) {
+      const x = i + 0.5; const y = j + 0.5; const p = popAt(i, j);
+      A += 1; P += p; Px += p * x; Py += p * y; Pxx += p * (x * x + y * y);
+    }
+  }
+  return RegionModel.prototype._penaltyPopFrom.call(null, P, Px, Py, Pxx, A);
+}
+const uniform = () => 1;
+check(near(gridPopPenalty(40, 40, uniform), Math.PI / 3, 0.005),
+  `uniform density over a square gives pi/3, same as land `
+  + `(${gridPopPenalty(40, 40, uniform).toFixed(4)})`);
+check(near(gridPopPenalty(80, 20, uniform), 2.225, 0.01),
+  `uniform density over a 4:1 rectangle gives 2.22 `
+  + `(${gridPopPenalty(80, 20, uniform).toFixed(4)})`);
+const corner = (i, j) => (i === 0 && j === 0 ? 1 : 0);
+check(gridPopPenalty(40, 40, corner) === 0,
+  'population in a single cell scores 0 -- concentration earns credit');
+const ribbon = (i, j) => (j === 20 ? 1 : 0);
+check(gridPopPenalty(40, 40, ribbon) < 1,
+  `people along a ribbon inside a square are still tighter than the square `
+  + `(${gridPopPenalty(40, 40, ribbon).toFixed(3)})`);
+check(gridPopPenalty(160, 10, uniform) > gridPopPenalty(80, 20, uniform),
+  'a more elongated region strings its people out further');
+
 /* Weight 0 must be exactly the old behaviour, geometry present or not. */
 const off = new RegionModel(graph, pops, geom);
 off.start(18, 5, 1, 0);
@@ -189,6 +277,46 @@ check(on.meanPenalty < off.meanPenalty,
   + `${off.meanPenalty.toFixed(3)})`);
 check(regionsContiguous(on) === null, 'shaped regions are still contiguous');
 check(on.assigned === on.n, 'shaped run still assigns every zone');
+
+/* The people term, on its own and against the land term. */
+const people = new RegionModel(graph, pops, geom);
+people.start(18, 5, 1, 0, 1);
+while (people.buildStep());
+for (let i = 0; i < 50000; i++) people.optimiseStep();
+const popDrift = people.popShapeRaw;
+people._resum();
+check(near(popDrift, people.popShapeRaw, 1e-6 * Math.max(1, Math.abs(popDrift))),
+  `no drift in the people sums over 50,000 moves `
+  + `(${popDrift.toFixed(9)} vs ${people.popShapeRaw.toFixed(9)})`);
+console.log(`  neither weight    : land ${off.meanPenalty.toFixed(3)}, `
+  + `people ${off.meanPopPenalty.toFixed(3)}`);
+console.log(`  land weight only  : land ${on.meanPenalty.toFixed(3)}, `
+  + `people ${on.meanPopPenalty.toFixed(3)}`);
+console.log(`  people weight only: land ${people.meanPenalty.toFixed(3)}, `
+  + `people ${people.meanPopPenalty.toFixed(3)}`);
+check(people.meanPopPenalty < on.meanPopPenalty,
+  `weighting people beats weighting land at the people measure `
+  + `(${people.meanPopPenalty.toFixed(3)} vs ${on.meanPopPenalty.toFixed(3)})`);
+check(regionsContiguous(people) === null, 'people-shaped regions are contiguous');
+
+const both = new RegionModel(graph, pops, geom);
+both.start(18, 5, 1, 1, 1);
+while (both.buildStep());
+for (let i = 0; i < 50000; i++) both.optimiseStep();
+console.log(`  both              : land ${both.meanPenalty.toFixed(3)}, `
+  + `people ${both.meanPopPenalty.toFixed(3)}`);
+check(both.meanPenalty < off.meanPenalty && both.meanPopPenalty < off.meanPopPenalty,
+  'both weights together improve both measures over no shape term at all');
+
+/* Weight changes re-base best for the people term too. */
+const liveP = new RegionModel(graph, pops, geom);
+liveP.start(18, 5, 1, 0, 0);
+while (liveP.buildStep());
+for (let i = 0; i < 20000; i++) liveP.optimiseStep();
+liveP.setPopShapeWeight(2);
+check(near(liveP.bestScore, liveP.score, 1e-9),
+  'changing the people weight re-bases best-so-far');
+check(liveP.setPopShapeWeight(2) === false, 'the same people weight is a no-op');
 
 /* Changing the weight mid-run changes the objective, so the old best is not
  * comparable and must not survive. */
