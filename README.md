@@ -53,6 +53,7 @@ built from the **full-resolution** boundaries, never the simplified ones.
 | `scripts/dz_graph.py` | importable Python accessor for the graph |
 | `scripts/verify_adjacency.py` | asserts the graph is correct |
 | `scripts/audit_gaps.py` | review tool: finds close-but-not-adjacent pairs |
+| `scripts/test_regions.mjs` | headless test of the region algorithm |
 | `scripts/serve.py` | static server, gzip, localhost-only |
 | `scripts/smoke_test.sh` | headless browser check + screenshots |
 
@@ -161,6 +162,64 @@ stretch of coast are often metres apart across a harbour mouth and a short walk
 apart by land. It cannot prove the list complete: it would not have found the
 6.3 km Rathlin ferry, which is what the low-degree report at the end is for.
 
+## Building regions
+
+Set a number of regions and press **GO**. The app grows that many regions out of
+seed zones until every Data Zone is claimed, then keeps nudging zones between
+regions to even the populations up, until you press **STOP**.
+
+Controls: number of regions, random seed (same seed gives the same map),
+temperature, and redraws per second.
+
+The algorithm is in `web/regions.js`, deliberately free of DOM and MapLibre so it
+can be driven headlessly — `web/app.js` only animates it and paints the result,
+via `setFeatureState`, so no geometry is re-uploaded as regions change.
+
+**The score** is a sum of squared population deviations, normalised by `E[d^2]`,
+the mean squared DZ population:
+
+```
+score       = SUM_r (pop_r - target)^2 / E[d^2]        target = total / N
+build delta = d * (d + 2*(pop_r - target)) / E[d^2]    assign unassigned d to r
+move delta  = 2d * (d + pop_B - pop_A)    / E[d^2]     move d out of A into B
+```
+
+Normalising matters for what comes next, not for now: it puts the score in units
+of *one typical move*, so the temperature is a plain number near 1 at any N, and
+a second term (equal mean age, say) can be added as a weighted sum without
+re-tuning everything around it. Note the two deltas are different formulas —
+assigning an unclaimed zone is not a move from nowhere.
+
+**Build phase.** Seeds are chosen by farthest-point sampling, because purely
+random seeds clump and a region boxed in early can never recover — nothing is
+ever stolen during the build. Then repeatedly: take the lowest-population region
+that still borders an unassigned zone, and give it the neighbour that most
+improves the score. Because the DZ graph is one connected component, some region
+always borders an unassigned zone, so this always finishes.
+
+**Optimisation phase.** Sample a zone on a region boundary, reject it if removing
+it would split its region in two, then reassign it among its neighbouring regions
+weighted by `exp(-delta / T)`. Straight after the build, regions differ by tens of
+thousands of people, so normalised deltas reach several hundred — the softmax
+subtracts the minimum before exponentiating, or it overflows immediately. A
+pleasant side effect is that the phase starts nearly greedy and becomes genuinely
+stochastic as it converges. `T` is held fixed rather than annealed, so the current
+score plateaus and jitters while the best-so-far keeps improving; **STOP** restores
+the best state visited, which is not the state it happened to stop in.
+
+> **Two things worth knowing before reading the numbers.** The build phase on its
+> own leaves a wide spread — around 60% max deviation at N=18 — because boxed-in
+> regions stop growing. Closing that is the optimisation phase's job, and it
+> typically gets under 1% within a couple of hundred thousand steps.
+>
+> Occasionally two regions come out of the build as a **sealed pocket**: they
+> border only each other and one other region, every one of whose adjacent zones
+> is an articulation point, so nothing can legally cross without splitting
+> something. `N=18 seed 7` is such a case and is kept in the test suite. It is a
+> narrow channel rather than a dead end — it escapes around 1.4M steps and lands
+> near 0.5% — but it is the clearest illustration of why single-zone moves alone
+> are limited. Swap moves are the standard fix, and are deferred.
+
 ## The app
 
 `web/app.js` is split into data / map / layers / interaction so the planned
@@ -176,8 +235,8 @@ __map.getSource('dz').setData(next)
 
 Hover uses MapLibre `feature-state` keyed off the DZ code (via the source's
 `promoteId`), so nothing re-renders per mouse move and there is no per-feature
-DOM. `window.__map` is exposed as a console handle, with `window.__graph` beside
-it. The graph loads off the critical path — nothing on screen depends on it, so a
+DOM. `window.__map` is exposed as a console handle, with `window.__graph` and
+`window.__model` beside it. The graph loads off the critical path — nothing on screen depends on it, so a
 failure to fetch it warns to the console and leaves the map working.
 
 ## Verification
@@ -185,8 +244,16 @@ failure to fetch it warns to the console and leaves the map working.
 ```bash
 python3 scripts/verify_build.py      # map data assertions
 python3 scripts/verify_adjacency.py  # graph assertions
+node scripts/test_regions.mjs        # region algorithm, headless, ~12s
 ./scripts/smoke_test.sh              # headless render + hover, needs run.sh serving
 ```
+
+`test_regions.mjs` drives `web/regions.js` against the real data and asserts that
+every zone ends assigned, that **every region is contiguous** after the build and
+after 50,000 moves, that the incrementally-maintained frontier set matches a
+from-scratch recompute, that the incremental score matches a full rescore, that a
+seed reproduces its map exactly, and that optimisation cuts the score by more
+than 5x at N = 4, 18, 50 and 100.
 
 `verify_build.py` checks 3,780 features, unique codes matching the source, all
 rings closed and ≥4 points, and that populations sum to 1,903,168.

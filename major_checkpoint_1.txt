@@ -1,0 +1,40 @@
+Current Design Outline and Goals
+
+The webapp exists to iteratively build regions from census Data Zones (DZs), similar to eg parliamentary constituencies. I want to make it interactive and visually interesting too.
+The next intermediate goal for the project is to simply make N regions (N configurable) of approximately equal population, to build out the functionality.
+The main driver of the building is the score function: for now - just SUM(pop_current - pop_target)^2 summed over all regions, where pop_target is pop_NI_total/N. Of course ideally the score is minimised. Later other elements will be added to the score for different effects and features, so from the start the score is written as a weighted sum of terms that have each been normalised to be dimensionless - see 4d, where the normalisation is set out. That costs one division now and is what lets a second term (eg equal average age per region) be added later without re-tuning everything around it.
+I will now lay out how I imagine the app's function, alongside what the user sees:
+1. N regions is set by the user in the app, and they click 'GO'
+2. N DZs are selected as region starting points by farthest-point sampling: pick one at random, then repeatedly take the DZ whose graph distance to the nearest existing seed is greatest. That is N breadth-first searches over the adjacency graph, so it is essentially free. Purely random seeds clump, and clumping is costly here because the build phase never steals - a region boxed in early is stuck at its size until the optimisation phase, which then has to fix it one DZ at a time. The pathological case is a seed on a degree-1 zone such as Rathlin, which can only grow through its single neighbour and ends the build at 141 people if that neighbour is taken first. The random seed is settable by the user for repeatbility. On the map each region has a different colour assigned, and unassigned DZs are light grey.
+3. Then the initial 'build phase' begins. In this, I imagine the loop as:
+        a. Pick the region with the smallest population, which currently has an unassigned neighbour
+        b. Of its neighbouring DZs *which are not currently assigned to another region*, take the one which, once taken, most improves the score. In practice up until the build phase is almost over this will just be the one with the largest population
+        c. Finish when all DZs are assigned to a region
+    This process should be displayed to the user, allowing them to see the regions growing and spreading across the map. There should be a user-configurable 'redraws per second' number to control how fast the updates occurr
+4. The next phase is the 'optimisation phase'. Now that all regions are built, contiguous and with approximately similar populations, the app will spend some time trying to improve the solution. Currently, both for simplicity and visual interest, I want to keep it fairly stochastic - in the future significant changes and upgrades may be made to this phase.
+        a. Choose a DZ, from the set of those which border at least one region other than their own.
+        b. If removing it from its region would mean a loss of contiguousness for its region, or it is the only DZ in its region, restart
+        c. Else, for each of its neighbouring regions (including its own), score the map where the DZ belongs to that region. For this, only the score change is needed, calculated for the affected refions only.
+        d. The assignment of the DZ is random, but weighted by exp(-Delta_score/T), where Delta_score is the score change and T is a temperature setting how stochastic the choice is, so that the score-minimising outcome is favoured, but not certain. This is a weighted choice among the candidate regions, not an accept/reject step: the DZ's own region is always a candidate, with Delta_score = 0 and so weight 1, which is the reference the others are judged against.
+           T is derived from first principles, not tuned or sampled, so that it is stable, repeatable, and survives new terms being added to the score later.
+           For that to work the score has to be a weighted sum of *dimensionless* terms:
+               score = SUM over terms t of  w_t * SUM over regions r of ((x_r_t - x_target_t) / sigma_t)^2
+           where sigma_t is that term's characteristic scale - the size of the change one typical DZ move makes to it. Normalised this way, every term is measured in 'one move's worth', the weights w_t are pure priorities carrying no hidden units, and T is a dimensionless number near 1 whatever the score is made of. Without this, terms in different units cannot be added at all: population deviations are in people (squared, ~1e6) and age deviations are in years (squared, ~1), so an unnormalised age term would be invisible next to population.
+           For the population term sigma is exactly derivable. Taking a DZ of population d out of region A and putting it into region B changes the raw population score by
+               Delta_raw = 2d * (d + pop_B - pop_A)
+           where pop_A and pop_B are the two regions' populations before the move. (Check: moving out of an over-full A into an under-full B makes the bracket negative, so the score falls.) Near convergence regions settle to within roughly one DZ of each other, so both terms in the bracket are the same order and |Delta_raw| is about 2*E[d^2]. So
+               sigma_pop^2 = E[d^2] = mean squared DZ population = 275,345 for this dataset
+           and the normalised population term moves by about 2 per step, giving
+               T = c, with c defaulting to 1
+           c = 1 is not claimed to be 'correct', only to be the right order of magnitude.
+           The population term's scale is independent of N, but that is a property of population specifically, not a general rule, and it must not be assumed for future terms. Population is extensive - it sums over DZs, and a DZ's contribution does not change as regions get smaller. An intensive quantity such as mean age is a ratio: moving a DZ shifts a region's mean age by about (d / pop_region) * (age_region - age_DZ), and pop_region is P/N, so that term's Delta grows linearly with N. At N=18 a typical move shifts a region's mean age by ~0.5% of the DZ-to-region age difference; at N=200 it is ~5%. Each new term therefore needs its own sigma_t derived at the current N, or the weights will silently change meaning as N changes.
+           Note also that the total score scales with N (roughly N * w_t summed, once normalised), which is why the score itself can never set the temperature: one move is 100% of the raw score at N=2 and 0.4% of it at N=500.
+           T is held fixed rather than decayed. This is a sampler, not an annealing schedule: the current score will plateau and jitter indefinitely while 'current best' keeps improving with diminishing returns. That suits running until the user presses STOP, and keeps the map visually alive rather than settling into stillness. c may still need adjustment once the behaviour is visible.
+        e. Repeat until the user presses a 'STOP' button
+    As with the build phase, the assignments should be visible to the user throughout. Additionally the current total score, and 'current best' score should be shown. Throughout this the 'current best' state should be saved.
+5. After the process is stopped, the map reverts to the 'current best' state.  A simple table listing the populations of each region should be displayed at the side. The final map of assignments should remain, and when scrolling over the regions their name (just eg 'Region 1') and final population should be shown. 
+
+Deferred for now:
+1. Improved optimisation algorithm
+2. Seeding refinements beyond farthest-point sampling (eg accounting for population density rather than graph distance alone)
+3. Region boudaries are a medium-thick black line, while DZ boundaries (both inside and outside regions) are thinner and grey.

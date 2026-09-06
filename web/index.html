@@ -17,6 +17,35 @@
       <div><dt>Zones</dt><dd id="stat-zones">&mdash;</dd></div>
       <div><dt>Population</dt><dd id="stat-pop">&mdash;</dd></div>
     </dl>
+
+    <div id="controls">
+      <div class="ctl-grid">
+        <label for="ctl-n">Regions</label>
+        <input id="ctl-n" type="number" min="2" max="500" step="1" value="18">
+        <label for="ctl-seed">Seed</label>
+        <input id="ctl-seed" type="number" min="0" step="1" value="1">
+        <label for="ctl-temp">Temperature</label>
+        <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
+        <label for="ctl-fps">Redraws/s <span id="ctl-fps-value">60</span></label>
+        <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">
+      </div>
+      <div class="ctl-buttons">
+        <button id="ctl-go" type="button" disabled>GO</button>
+        <button id="ctl-stop" type="button" disabled>STOP</button>
+      </div>
+    </div>
+
+    <dl id="run" hidden>
+      <div><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
+      <div><dt>Max dev</dt><dd id="run-dev">&mdash;</dd></div>
+      <div><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
+      <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
+    </dl>
+
+    <div id="results" hidden>
+      <table id="results-table"><tbody></tbody></table>
+    </div>
+
     <p class="hint">Hover a zone for its population.</p>
   </div>
 
@@ -26,10 +55,12 @@
     <div class="tt-name"></div>
     <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
     <div class="tt-lgd"></div>
+    <div class="tt-region" hidden></div>
   </div>
 
   <script src="vendor/maplibre-gl.js"></script>
   <script src="graph.js"></script>
+  <script src="regions.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -68,6 +68,44 @@ const graph = await page.evaluate(() => {
   };
 });
 
+// --- drive a region run -------------------------------------------------
+// The build phase is one zone per redraw by design, which is ~60s. Raise the
+// steps-per-redraw knob so the smoke test exercises the same code path fast.
+await page.evaluate(() => {
+  CONFIG.buildStepsPerRedraw = 400;
+  document.getElementById('ctl-n').value = '12';
+  document.getElementById('ctl-seed').value = '3';
+});
+await page.click('#ctl-go');
+await page.waitForFunction(
+  () => document.getElementById('run-phase').textContent.startsWith('optimising'),
+  { timeout: 60000 }
+);
+await page.evaluate(() => new Promise(r => setTimeout(r, 1500)));
+await page.screenshot({ path: `${OUT}/map-regions.png` });
+await page.click('#ctl-stop');
+
+const regions = await page.evaluate(() => {
+  const m = window.__model;
+  let painted = 0;
+  for (const code of m.codes) {
+    const st = window.__map.getFeatureState({ source: 'dz', id: code });
+    if (st && typeof st.region === 'number') painted++;
+  }
+  const pops = m.summary().map(r => Math.round(r.pop));
+  return {
+    painted,
+    zones: m.n,
+    assignedAll: m.assigned === m.n,
+    regionCount: m.N,
+    rows: document.querySelectorAll('#results-table tbody tr').length,
+    resultsShown: !document.getElementById('results').hidden,
+    phase: document.getElementById('run-phase').textContent,
+    maxDev: document.getElementById('run-dev').textContent,
+    popsSumToTotal: pops.reduce((a, b) => a + b, 0),
+  };
+});
+
 await page.screenshot({ path: `${OUT}/map-full.png` });
 
 // --- hover a zone -------------------------------------------------------
@@ -103,5 +141,24 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-console.log(JSON.stringify({ stats, graph, tip, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ stats, graph, regions, tip, painted, errors, failed, external }, null, 2));
 await browser.close();
+
+// Report *and* fail: a console error that only shows up in the JSON is easy to
+// skim past, and a broken paint expression makes MapLibre drop the layer
+// without throwing.
+const problems = [];
+if (errors.length) problems.push(`${errors.length} console error(s)`);
+if (failed.length) problems.push(`${failed.length} failed request(s)`);
+if (external.length) problems.push(`${external.length} external request(s)`);
+if (!tip) problems.push('hover produced no tooltip (is the dz-fill layer there?)');
+if (!graph || graph.components !== 1) problems.push('adjacency graph did not load');
+if (!regions || !regions.assignedAll || regions.painted !== regions.zones) {
+  problems.push('region run did not paint every zone');
+}
+if (!regions || regions.rows !== regions.regionCount) problems.push('results table incomplete');
+if (problems.length) {
+  console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);
+  process.exit(1);
+}
+console.error('\nsmoke test passed');
