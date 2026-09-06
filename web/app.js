@@ -53,6 +53,7 @@ const els = {
   pshape: document.getElementById('ctl-pshape'),
   pshapeValue: document.getElementById('ctl-pshape-value'),
   go: document.getElementById('ctl-go'),
+  pause: document.getElementById('ctl-pause'),
   stop: document.getElementById('ctl-stop'),
   run: document.getElementById('run'),
   runPhase: document.getElementById('run-phase'),
@@ -72,6 +73,7 @@ const run = {
   model: null,
   phase: 'idle',          // idle | build | optimise | done
   raf: 0,
+  paused: false,
   lastDraw: 0,
   shadow: null,
   colors: [],
@@ -273,13 +275,21 @@ function wireHover(map) {
 
 /* --- the run ------------------------------------------------------------- */
 
+function setButtons(state) {   // idle | running | paused
+  els.go.disabled = state !== 'idle';
+  els.pause.disabled = state === 'idle';
+  els.stop.disabled = state === 'idle';
+  els.pause.textContent = state === 'paused' ? 'RESUME' : 'PAUSE';
+}
+
 function readout() {
   const m = run.model;
-  els.runPhase.textContent = {
+  const phase = {
     build: `building ${nf.format(m.assigned)}/${nf.format(m.n)}`,
     optimise: 'optimising',
     done: 'stopped — best shown',
   }[run.phase] || '—';
+  els.runPhase.textContent = run.paused ? `${phase} — paused` : phase;
   els.runDev.textContent = pct.format(m.maxDeviation);
   els.runMoves.textContent = nf.format(m.moves);
   // The legible numbers: 1 is a circle for land, and evenly-spread population
@@ -293,6 +303,7 @@ function readout() {
 
 function tick(map) {
   return function frame(now) {
+    if (run.paused) return;
     if (run.phase !== 'build' && run.phase !== 'optimise') return;
     const interval = 1000 / Number(els.fps.value);
     if (now - run.lastDraw >= interval) {
@@ -338,20 +349,37 @@ function start(map) {
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
 
   run.phase = 'build';
+  run.paused = false;
   run.lastDraw = 0;
-  els.go.disabled = true;
-  els.stop.disabled = false;
+  setButtons('running');
   els.run.hidden = false;
   els.results.hidden = true;
   readout();
   run.raf = requestAnimationFrame(tick(map));
 }
 
+/* Halt without ending the run: phase and model state are untouched, so
+ * resuming picks up exactly where it left off. */
+function togglePause(map) {
+  if (run.phase !== 'build' && run.phase !== 'optimise') return;
+  run.paused = !run.paused;
+  if (run.paused) {
+    if (run.raf) cancelAnimationFrame(run.raf);
+    run.raf = 0;
+    setButtons('paused');
+  } else {
+    setButtons('running');
+    run.lastDraw = 0;
+    run.raf = requestAnimationFrame(tick(map));
+  }
+  readout();   // the loop is not running to do it
+}
+
 function stop(map, { silent = false } = {}) {
   if (run.raf) cancelAnimationFrame(run.raf);
   run.raf = 0;
-  els.go.disabled = false;
-  els.stop.disabled = true;
+  run.paused = false;
+  setButtons('idle');
   if (silent || run.phase === 'idle') { run.phase = 'idle'; return; }
 
   // A stochastic rule leaves the map in whatever state it happened to be in,
@@ -431,6 +459,7 @@ async function main() {
         window.__model = run.model;
         els.go.disabled = false;
         els.go.addEventListener('click', () => start(map));
+        els.pause.addEventListener('click', () => togglePause(map));
         els.stop.addEventListener('click', () => stop(map));
       })
       .catch((err) => console.warn('adjacency graph unavailable:', err.message));

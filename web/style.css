@@ -121,8 +121,12 @@ html, body {
 }
 .ctl-buttons button:hover:not(:disabled) { filter: brightness(1.08); }
 .ctl-buttons button:disabled { color: var(--ink-muted); background: #e7ebef; cursor: default; }
-#ctl-stop { color: var(--ink); background: #fff; border-color: var(--rule); }
-#ctl-stop:disabled { color: var(--ink-muted); background: #e7ebef; border-color: transparent; }
+#ctl-pause, #ctl-stop { color: var(--ink); background: #fff; border-color: var(--rule); }
+#ctl-pause:disabled, #ctl-stop:disabled {
+  color: var(--ink-muted);
+  background: #e7ebef;
+  border-color: transparent;
+}
 
 /* --- live readout ------------------------------------------------------- */
 #run {

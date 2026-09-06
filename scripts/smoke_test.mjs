@@ -85,6 +85,33 @@ await page.waitForFunction(
 );
 await page.evaluate(() => new Promise(r => setTimeout(r, 1500)));
 await page.screenshot({ path: `${OUT}/map-regions.png` });
+
+// pause holds the run without ending it, and resume picks it back up
+await page.click('#ctl-pause');
+await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+const paused = await page.evaluate(() => ({
+  label: document.getElementById('ctl-pause').textContent,
+  phase: document.getElementById('run-phase').textContent,
+  moves: window.__model.moves,
+  goDisabled: document.getElementById('ctl-go').disabled,
+}));
+await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+const stillPaused = await page.evaluate(() => window.__model.moves);
+await page.click('#ctl-pause');
+await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
+const resumed = await page.evaluate(() => ({
+  label: document.getElementById('ctl-pause').textContent,
+  moves: window.__model.moves,
+}));
+const pause = {
+  label: paused.label,
+  phase: paused.phase,
+  held: stillPaused === paused.moves,
+  resumedLabel: resumed.label,
+  advanced: resumed.moves > paused.moves,
+  goDisabledWhilePaused: paused.goDisabled,
+};
+
 await page.click('#ctl-stop');
 
 const regions = await page.evaluate(() => {
@@ -147,7 +174,7 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-console.log(JSON.stringify({ stats, graph, regions, tip, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ stats, graph, regions, pause, tip, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to
@@ -167,6 +194,8 @@ if (!regions || regions.rows !== regions.regionCount) problems.push('results tab
 // sums never got real geometry.
 if (!regions || !(regions.meanPenalty > 0.99)) problems.push('land penalty not measured');
 if (!regions || !(regions.meanPopPenalty > 0)) problems.push('people penalty not measured');
+if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
+if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
 if (problems.length) {
   console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);
   process.exit(1);

@@ -166,7 +166,10 @@ apart by land. It cannot prove the list complete: it would not have found the
 
 Set a number of regions and press **GO**. The app grows that many regions out of
 seed zones until every Data Zone is claimed, then keeps nudging zones between
-regions to even the populations up, until you press **STOP**.
+regions to even the populations up, until you press **STOP**. **PAUSE** holds a
+run without ending it — the phase and all model state survive, so resuming
+continues exactly where it left off; **STOP** is what restores the best state
+and shows the results table.
 
 Controls: number of regions, random seed (same seed gives the same map),
 temperature, shape weight, frames per second, and how many model steps run per
