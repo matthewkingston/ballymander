@@ -28,6 +28,8 @@ function check(ok, msg) {
   if (!ok) failures.push(msg);
 }
 
+const near = (a, b, tol) => Math.abs(a - b) <= tol;
+
 /* Independent contiguity check -- deliberately not the model's own. */
 function regionsContiguous(model) {
   const members = Array.from({ length: model.N }, () => []);
@@ -189,6 +191,76 @@ check(Math.abs(model.score - model.bestScore) < 1e-6 * Math.max(1, model.bestSco
   'restoreBest reproduces the best score exactly');
 check(regionsContiguous(model) === null, 'restored best state is contiguous');
 
+/* --- branch moves -------------------------------------------------------- */
+console.log('\nbranch moves');
+
+const branchOn = new RegionModel(graph, pops, geom);
+branchOn.start(18, 5, 1, 1, 1);
+while (branchOn.buildStep());
+for (let i = 0; i < 50000; i++) branchOn.optimiseStep();
+
+const branchOff = new RegionModel(graph, pops, geom);
+branchOff.allowBranchMoves = false;
+branchOff.start(18, 5, 1, 1, 1);
+while (branchOff.buildStep());
+for (let i = 0; i < 50000; i++) branchOff.optimiseStep();
+
+check(branchOn.allowBranchMoves === true, 'allowBranchMoves survives start()');
+check(branchOff.branched === 0, 'off means no branch moves happen at all');
+check(branchOn.branched > 0,
+  `on means they actually fire (${branchOn.branched.toLocaleString()} of `
+  + `${branchOn.moves.toLocaleString()} moves)`);
+
+/* The whole point: moving a cut vertex plus its smaller side must leave both
+ * regions in one piece. This is the check that would catch a wrong component
+ * choice, and it is done independently of the model's own routine. */
+check(regionsContiguous(branchOn) === null,
+  `every region contiguous after branch moves (${regionsContiguous(branchOn) || 'ok'})`);
+check([...branchOn.regionSize].every((s) => s > 0), 'no region emptied by a branch move');
+check(branchOn.assigned === branchOn.n, 'every zone still assigned');
+
+/* _moveSet updates the frontier only after the whole set has moved; getting
+ * that wrong would leave it out of step with reality. */
+const bScratch = frontierFromScratch(branchOn);
+check(bScratch.size === branchOn.frontier.length
+  && branchOn.frontier.every((z) => bScratch.has(z)),
+  `frontier survives multi-zone moves (${branchOn.frontier.length} vs ${bScratch.size})`);
+
+const bRaw = branchOn.shapeRaw;
+const bPopRaw = branchOn.popShapeRaw;
+const bScore = branchOn.scorePop;
+branchOn._resum();
+check(near(bRaw, branchOn.shapeRaw, 1e-6 * Math.max(1, Math.abs(bRaw)))
+  && near(bPopRaw, branchOn.popShapeRaw, 1e-6 * Math.max(1, Math.abs(bPopRaw)))
+  && near(bScore, branchOn.scorePop, 1e-6 * Math.max(1, bScore)),
+  'no drift in any incremental total across branch moves');
+
+/* _branchOf directly: find a real cut vertex and check what it hands back. */
+let probed = 0;
+for (const z of branchOn.frontier) {
+  const r = branchOn.assign[z];
+  if (branchOn.regionSize[r] <= 1 || branchOn._connectedWithout(r, z)) continue;
+  const moving = branchOn._branchOf(r, z);
+  check(moving !== null && moving[0] === z, 'the branch leads with the zone itself');
+  const comps = branchOn._componentsWithout(r, z);
+  const total = comps.reduce((a, c) => a + c.length, 0);
+  check(total === branchOn.regionSize[r] - 1,
+    `the pieces account for the whole region minus the zone (${total} vs `
+    + `${branchOn.regionSize[r] - 1})`);
+  check(moving.length - 1 <= total / 2,
+    `the branch is the smaller side (${moving.length - 1} of ${total})`);
+  check(moving.length < branchOn.regionSize[r], 'something is always left behind');
+  probed = comps.length;
+  break;
+}
+check(probed >= 2, `found a real cut vertex to probe (${probed} pieces)`);
+
+console.log(`  branch moves off: score ${branchOff.scorePop.toFixed(1)}, `
+  + `land ${branchOff.meanPenalty.toFixed(3)}`);
+console.log(`  branch moves on : score ${branchOn.scorePop.toFixed(1)}, `
+  + `land ${branchOn.meanPenalty.toFixed(3)}, `
+  + `${(100 * branchOn.branched / branchOn.moves).toFixed(1)}% of moves were branches`);
+
 /* --- shape term ---------------------------------------------------------- */
 console.log('\nshape (moment of inertia)');
 
@@ -205,7 +277,6 @@ function gridPenalty(w, h) {
   }
   return RegionModel.prototype._penaltyFrom.call(null, A, Sx, Sy, Sxx, own);
 }
-const near = (a, b, tol) => Math.abs(a - b) <= tol;
 check(gridPenalty(1, 1) === 1, `a single cell scores exactly 1 (${gridPenalty(1, 1)})`);
 check(near(gridPenalty(40, 40), Math.PI / 3, 0.002),
   `a square scores pi/3 (${gridPenalty(40, 40).toFixed(4)} vs ${(Math.PI / 3).toFixed(4)})`);

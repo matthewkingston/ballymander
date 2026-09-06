@@ -103,6 +103,12 @@ html, body {
   border-radius: 5px;
 }
 .ctl-grid input[type="range"] { padding: 0; border: 0; background: none; accent-color: var(--accent); }
+.ctl-grid input[type="checkbox"] {
+  width: auto;
+  justify-self: start;
+  margin: 0;
+  accent-color: var(--accent);
+}
 .ctl-grid input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .ctl-buttons { display: flex; gap: 8px; margin-top: 11px; }

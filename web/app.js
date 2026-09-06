@@ -52,6 +52,7 @@ const els = {
   shapeValue: document.getElementById('ctl-shape-value'),
   pshape: document.getElementById('ctl-pshape'),
   pshapeValue: document.getElementById('ctl-pshape-value'),
+  branch: document.getElementById('ctl-branch'),
   go: document.getElementById('ctl-go'),
   pause: document.getElementById('ctl-pause'),
   stop: document.getElementById('ctl-stop'),
@@ -320,6 +321,9 @@ function tick(map) {
       run.model.temperature = t > 0 ? t : 1;
       run.model.setShapeWeight(Number(els.shape.value));
       run.model.setPopShapeWeight(Number(els.pshape.value));
+      // Changes the move set, not the score, so best-so-far stays comparable
+      // and this needs no re-base.
+      run.model.allowBranchMoves = els.branch.checked;
 
       if (run.phase === 'build') {
         const steps = Number(els.build.value);

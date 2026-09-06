@@ -286,9 +286,19 @@ N=18 — improving the build score in 10 of 12 (N, seed) combinations tried,
 sometimes by 2–3×, and finishing the build in ~2,350 steps instead of ~3,760.
 `__model.sweepInterval = Infinity` turns it off.
 
-**Optimisation phase.** Sample a zone on a region boundary, reject it if removing
-it would split its region in two, then reassign it among its neighbouring regions
-weighted by `exp(-delta / T)`. Straight after the build, regions differ by tens of
+**Optimisation phase.** Sample a zone on a region boundary, then reassign it
+among its neighbouring regions weighted by `exp(-delta / T)`.
+
+If removing the zone would split its region in two, **branch moves** (a checkbox,
+on by default) let it go anyway, taking the smaller piece with it. That set is
+the unique smallest one whose departure leaves the region whole: every piece cut
+off by removing the zone must touch that zone, and the zone touches the
+destination, so both regions stay contiguous for free. Three-way splits keep the
+largest piece. There is no size cap — a big branch wrecks population equality, so
+its delta is large and the temperature suppresses it without a blunt threshold.
+The set's totals are computed once and shared across candidate destinations, so
+each candidate's delta stays O(1) however big the branch. Turning it off restores
+the plain single-zone rule. Straight after the build, regions differ by tens of
 thousands of people, so normalised deltas reach several hundred — the softmax
 subtracts the minimum before exponentiating, or it overflows immediately. A
 pleasant side effect is that the phase starts nearly greedy and becomes genuinely

@@ -151,6 +151,16 @@ class RegionModel {
     this._seen = new Int32Array(this.n);   // BFS marks, stamped rather than cleared
     this._stamp = 0;
 
+    // When a zone is an articulation point of its region, taking it alone
+    // would split the region in two. With this on, the smaller piece goes with
+    // it instead of the move being rejected. Like sweepInterval, a knob rather
+    // than run state, so it survives start().
+    this.allowBranchMoves = true;
+    this._single = [0];   // scratch, so a plain move allocates nothing
+    this._agg = {
+      area: 0, ax: 0, ay: 0, axx: 0, own: 0, pop: 0, px: 0, py: 0, pxx: 0,
+    };
+
     // Build steps between pocket sweeps. A sweep is one pass over the
     // unassigned zones, so this is about taste rather than cost. Set to
     // Infinity to turn sealing off. Deliberately not in reset(): it is a
@@ -191,6 +201,7 @@ class RegionModel {
     this.moves = 0;
     this.sweepCounter = 0;
     this.sealed = 0;
+    this.branched = 0;
   }
 
   /* Seed N regions and prepare the build phase. */
@@ -493,30 +504,42 @@ class RegionModel {
     const z = this.frontier[(this.rng() * this.frontier.length) | 0];
     const from = this.assign[z];
     if (this.regionSize[from] <= 1) return false;
-    if (!this._connectedWithout(from, z)) return false;
 
-    const d = this.pop[z];
+    // What has to move with z for `from` to stay in one piece. Usually just z.
+    let moving;
+    if (this._connectedWithout(from, z)) {
+      moving = this._single;
+      moving[0] = z;
+    } else if (this.allowBranchMoves) {
+      moving = this._branchOf(from, z);
+      if (moving === null || moving.length >= this.regionSize[from]) return false;
+    } else {
+      return false;
+    }
+
+    const g = this._aggregateInto(this._agg, moving);
+    const dP = g.pop;
     const candidates = [from];
     const deltas = [0];
     const seen = new Set([from]);
     // Constant across candidates: what leaving `from` costs.
     const shaped = this.wShape > 0;
     const peopled = this.wPopShape > 0;
-    const leaving = shaped ? this._penaltyWith(from, z, -1) - this._penalty(from) : 0;
+    const leaving = shaped ? this._penaltyWithAgg(from, g, -1) - this._penalty(from) : 0;
     const leavingPop = peopled
-      ? this._penaltyPopWith(from, z, -1) - this._penaltyPop(from) : 0;
+      ? this._penaltyPopWithAgg(from, g, -1) - this._penaltyPop(from) : 0;
     for (const w of this.nbr[z]) {
       const r = this.assign[w];
       if (r < 0 || seen.has(r)) continue;
       seen.add(r);
       candidates.push(r);
-      let delta = 2 * d * (d + this.regionPop[r] - this.regionPop[from]) / this.eD2;
+      let delta = 2 * dP * (dP + this.regionPop[r] - this.regionPop[from]) / this.eD2;
       if (shaped) {
-        const joining = this._penaltyWith(r, z, 1) - this._penalty(r);
+        const joining = this._penaltyWithAgg(r, g, 1) - this._penalty(r);
         delta += (this.wShape * (leaving + joining)) / this.sigmaShape;
       }
       if (peopled) {
-        const joining = this._penaltyPopWith(r, z, 1) - this._penaltyPop(r);
+        const joining = this._penaltyPopWithAgg(r, g, 1) - this._penaltyPop(r);
         delta += (this.wPopShape * (leavingPop + joining)) / this.sigmaPopShape;
       }
       deltas.push(delta);
@@ -540,27 +563,33 @@ class RegionModel {
 
     const to = candidates[chosen];
     if (to === from) return false;
-    this._move(z, from, to);
+    if (moving.length > 1) this.branched++;
+    this._moveSet(moving, from, to);
     this.moves++;
     this._recordBest();
     return true;
   }
 
-  _move(z, from, to) {
-    const d = this.pop[z];
+  _moveSet(zones, from, to) {
     const a0 = this.regionPop[from] - this.target;
     const b0 = this.regionPop[to] - this.target;
-    this._accumulate(from, z, -1);    // both also update regionPop
-    this._accumulate(to, z, 1);
-    this.regionSize[from]--;
-    this.regionSize[to]++;
-    this.assign[z] = to;
+    for (const z of zones) {
+      this._accumulate(from, z, -1);  // both also update regionPop
+      this._accumulate(to, z, 1);
+      this.regionSize[from]--;
+      this.regionSize[to]++;
+      this.assign[z] = to;
+    }
     const a1 = this.regionPop[from] - this.target;
     const b1 = this.regionPop[to] - this.target;
     this.rawScore += a1 * a1 - a0 * a0 + b1 * b1 - b0 * b0;
 
-    this._touchFrontier(z);
-    for (const w of this.nbr[z]) this._touchFrontier(w);
+    // Only once every zone has moved: mid-way through the set the frontier
+    // would be tested against a state that never actually exists.
+    for (const z of zones) {
+      this._touchFrontier(z);
+      for (const w of this.nbr[z]) this._touchFrontier(w);
+    }
   }
 
   /* Would `region` still be one piece with z taken out of it? */
@@ -588,6 +617,86 @@ class RegionModel {
       }
     }
     return count === size - 1;
+  }
+
+  /* The connected pieces `region` would fall into without z.
+   *
+   * Every piece must contain a neighbour of z -- otherwise it was already cut
+   * off with z present, and the region was never connected -- so starting a
+   * flood from each of z's neighbours in the region finds all of them, in
+   * O(region size) rather than a scan of every zone. */
+  _componentsWithout(region, z) {
+    const stamp = ++this._stamp;
+    const comps = [];
+    for (const start of this.nbr[z]) {
+      if (this.assign[start] !== region || this._seen[start] === stamp) continue;
+      const comp = [start];
+      this._seen[start] = stamp;
+      for (let i = 0; i < comp.length; i++) {
+        for (const w of this.nbr[comp[i]]) {
+          if (w !== z && this.assign[w] === region && this._seen[w] !== stamp) {
+            this._seen[w] = stamp;
+            comp.push(w);
+          }
+        }
+      }
+      comps.push(comp);
+    }
+    return comps;
+  }
+
+  /* z plus everything that has to travel with it: keep the largest piece,
+   * move the rest. The result is the unique smallest set whose departure
+   * leaves `region` in one piece -- the graph picks it, not a heuristic.
+   * Returns null if z is not actually a cut vertex here. */
+  _branchOf(region, z) {
+    const comps = this._componentsWithout(region, z);
+    if (comps.length < 2) return null;
+    let biggest = 0;
+    for (let i = 1; i < comps.length; i++) {
+      if (comps[i].length > comps[biggest].length) biggest = i;
+    }
+    const moving = [z];
+    for (let i = 0; i < comps.length; i++) {
+      if (i !== biggest) for (const w of comps[i]) moving.push(w);
+    }
+    return moving;
+  }
+
+  /* Totals for a moving set, computed once and shared by every candidate
+   * destination, so each candidate's delta stays O(1) however big the set. */
+  _aggregateInto(g, zones) {
+    g.area = 0; g.ax = 0; g.ay = 0; g.axx = 0; g.own = 0;
+    g.pop = 0; g.px = 0; g.py = 0; g.pxx = 0;
+    for (const z of zones) {
+      const a = this.za[z];
+      const pop = this.pop[z];
+      const x = this.zx[z];
+      const y = this.zy[z];
+      const rr = x * x + y * y;
+      g.area += a; g.ax += a * x; g.ay += a * y; g.axx += a * rr;
+      g.own += this.zOwn[z];
+      g.pop += pop; g.px += pop * x; g.py += pop * y; g.pxx += pop * rr;
+    }
+    return g;
+  }
+
+  _penaltyWithAgg(r, g, sign) {
+    return this._penaltyFrom(
+      this.rArea[r] + sign * g.area,
+      this.rSx[r] + sign * g.ax,
+      this.rSy[r] + sign * g.ay,
+      this.rSxx[r] + sign * g.axx,
+      this.rOwn[r] + sign * g.own);
+  }
+
+  _penaltyPopWithAgg(r, g, sign) {
+    return this._penaltyPopFrom(
+      this.regionPop[r] + sign * g.pop,
+      this.rPx[r] + sign * g.px,
+      this.rPy[r] + sign * g.py,
+      this.rPxx[r] + sign * g.pxx,
+      this.rArea[r] + sign * g.area);
   }
 
   /* --- frontier ---------------------------------------------------------- */
