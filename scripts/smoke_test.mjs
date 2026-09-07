@@ -172,7 +172,10 @@ const tip = await page.evaluate(() => {
   return {
     name: t.querySelector('.tt-name')?.textContent,
     pop: t.querySelector('.tt-pop-value')?.textContent,
-    lgd: t.querySelector('.tt-lgd')?.textContent,
+    rel: t.querySelector('.tt-rel')?.textContent,
+    region: t.querySelector('.tt-region-name')?.textContent,
+    regionPop: t.querySelector('.tt-region-pop-value')?.textContent,
+    regionRel: t.querySelector('.tt-region-rel')?.textContent,
   };
 });
 

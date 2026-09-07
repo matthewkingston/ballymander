@@ -35,8 +35,11 @@ const els = {
   tooltip: document.getElementById('tooltip'),
   ttName: document.querySelector('.tt-name'),
   ttPop: document.querySelector('.tt-pop-value'),
-  ttLgd: document.querySelector('.tt-lgd'),
+  ttRel: document.querySelector('.tt-rel'),
   ttRegion: document.querySelector('.tt-region'),
+  ttRegionName: document.querySelector('.tt-region-name'),
+  ttRegionPop: document.querySelector('.tt-region-pop-value'),
+  ttRegionRel: document.querySelector('.tt-region-rel'),
   statZones: document.getElementById('stat-zones'),
   statPop: document.getElementById('stat-pop'),
   n: document.getElementById('ctl-n'),
@@ -248,14 +251,18 @@ function clearRegions(map) {
 function showTooltip(point, props) {
   els.ttName.textContent = props.name || props.code;
   els.ttPop.textContent = props.pop == null ? '—' : nf.format(props.pop);
-  els.ttLgd.textContent = props.lgd || '';
+  els.ttRel.textContent = props.rel == null ? '' : `religion ${props.rel.toFixed(2)}`;
+  els.ttRel.hidden = props.rel == null;
 
   const region = run.model && run.model.regionOf(props.code);
   if (region == null) {
     els.ttRegion.hidden = true;
   } else {
-    els.ttRegion.textContent =
-      `Region ${region + 1} — ${nf.format(Math.round(run.model.regionPop[region]))}`;
+    els.ttRegionName.textContent = `Region ${region + 1}`;
+    els.ttRegionPop.textContent = nf.format(Math.round(run.model.regionPop[region]));
+    const value = run.model.regionReligion(region);
+    els.ttRegionRel.textContent = `religion ${value.toFixed(2)}`;
+    els.ttRegionRel.hidden = !run.model.hasReligion;
     els.ttRegion.hidden = false;
   }
   els.tooltip.hidden = false;

@@ -1073,6 +1073,9 @@ class RegionModel {
     for (let z = 0; z < this.n; z++) this._touchFrontier(z);
   }
 
+  /* A region's religion value, for display. */
+  regionReligion(r) { return this._relValue(r); }
+
   regionOf(code) {
     const r = this.assign[this.index.get(code)];
     return r === undefined || r < 0 ? null : r;

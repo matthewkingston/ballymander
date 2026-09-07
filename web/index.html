@@ -83,7 +83,7 @@
       <table id="results-table"><tbody></tbody></table>
     </div>
 
-    <p class="hint">Hover a zone for its population.</p>
+    <p class="hint">Hover a zone for its figures, and its region's.</p>
   </div>
 
   <div id="status" role="status">Loading zones&hellip;</div>
@@ -91,8 +91,14 @@
   <div id="tooltip" hidden>
     <div class="tt-name"></div>
     <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
-    <div class="tt-lgd"></div>
-    <div class="tt-region" hidden></div>
+    <div class="tt-rel" hidden></div>
+    <div class="tt-region" hidden>
+      <div class="tt-region-name"></div>
+      <div class="tt-region-pop">
+        <span class="tt-region-pop-value"></span> <span class="tt-unit">people</span>
+      </div>
+      <div class="tt-region-rel" hidden></div>
+    </div>
   </div>
 
   <script src="vendor/maplibre-gl.js"></script>
