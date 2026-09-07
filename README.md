@@ -76,7 +76,7 @@ Tune with `SIMPLIFY=9% ./scripts/build_map_data.sh` — higher keeps more detail
 
 ## Adding another DZ-level dataset
 
-Drop the NISRA JSON in `data/`, then add **one line** to `TABLES` in
+Drop the NISRA JSON in `data/`, then add an entry to `TABLES` in
 `scripts/prepare_attributes.py`:
 
 ```python
@@ -86,10 +86,20 @@ TABLES = [
 ]
 ```
 
-Then `./run.sh --rebuild`. The loader handles 1-D (zone → number) and 2-D
-(zone × category) tables; 2-D becomes one column per category, e.g. `rel_catholic`.
+A 2-D table can instead be collapsed to a single weighted index with `weights`,
+which is how religion is handled:
 
-The religion table is already in `data/` and commented out ready to enable.
+```python
+{"column": "rel", "file": "...religion...json", "weights": {"Catholic": 1.0, ...}},
+```
+
+That emits `rel` (the weighted mean) and `rel_n` (the table's own row total).
+Every category must carry a weight, both ways — a renamed or added category is a
+hard failure rather than a silently wrong index.
+
+Then `./run.sh --rebuild`. **It is not quite one line**: the joined fields also
+have to be listed in `field-types` and `-filter-fields` in
+`scripts/build_map_data.sh`, or mapshaper drops them.
 
 > **Note on the numbers:** DZ-level census counts carry NISRA's statistical
 > disclosure control, so they're approximate by a person or two and won't
@@ -248,7 +258,63 @@ large thinly-populated zones — that was the deliberate trade against a fixed
 scale, which has no such incentive but would steer rural regions hard and urban
 ones barely at all.
 
-All three weight sliders are logarithmic, running 0.1 to 10 with **1 in the
+**Religion** is the fourth term, and the first demographic one. Each zone carries
+an index from the census religion table — Protestant 0, Catholic 1, and the
+unaligned at 0.5 on the assumption that in a two-way contest they split evenly.
+A region's value is the population-weighted mean, and the national figure is
+**0.511**. A mode selector picks what to do with it:
+
+| mode | term per region | effect |
+|---|---|---|
+| average | `(x − μ)²` | every region near the national mix |
+| extreme | `−(x − μ)²` | the same negated: segregate as far as geography allows |
+| gerrymander | `1 / (1 + exp((x − t)/s))` | maximise how many regions clear a threshold |
+
+A selector rather than a signed weight, because the score divides by the sum of
+the weights and a negative one would collapse then invert that denominator,
+taking every other term with it.
+
+The gerrymander logistic is 1 well below the threshold, 0.5 at it, 0 well above,
+and steepest exactly at `t` — so **packing and cracking emerge from the shape**
+rather than being built in. Regions far below have almost no gradient and get
+written off; regions just below have the strongest pull; regions above are
+indifferent to losing supporters, so the population term drains them. Measured at
+N=18, gerrymandering at 0.6 empties the marginal band completely — three regions
+sit within 0.05 of the threshold with the term off, none with it on, and the
+values split into a clean gap: `0.21 … 0.39 │ 0.66 … 0.75`.
+
+**Steepness has a sweet spot in both directions.** Too sharp and the term is a
+step function with no gradient to climb; too soft and it degenerates into average
+mode. At N=18, `s = 0.05` wins 9 seats where `s = 0.15` wins 6.
+
+Its sigma is closed form rather than measured. The value is *intensive* — a ratio,
+not a sum — so one move shifts it by about `(zone n / region n) × (zone value −
+region value)`, which **scales with N** where the population term's does not:
+
+```
+delta(N) = 0.2 * N / 3780
+average, extreme:  sigma = 2 * 0.15 * delta
+gerrymander:       sigma = delta / (4s)
+```
+
+The 0.2 is how far a boundary zone typically sits from its own region's value,
+bracketed by two measured figures: 0.176 rms between adjacent zones, 0.301 SD
+across NI. The 0.15 is a different thing — how far *regions* sit from the
+national value, measured at 0.153 with the term off.
+
+> The obvious guess for the first line, `sigma = delta^2`, is wrong by a factor
+> of over a hundred, and it is an instructive mistake. It carries over the
+> reasoning that works for population, where the deviation really does settle at
+> one move's worth because the optimiser can drive it there. Religion cannot be
+> driven that close — segregation is coarse enough that regions stay ~0.15 apart
+> however the lines are drawn — so it is that spread, not `delta`, that sets the
+> scale. The wrong version made the term 123× stronger than population at equal
+> weights and swamped everything: max deviation went from 1.4% to 33%.
+> `test_regions.mjs` now measures every term's per-move delta at a common state
+> and asserts they stay within 25× of each other. It aggregates by `rel_n`, the religion table's own row total, not by
+`pop` — disclosure control leaves the two differing in 1,261 of 3,780 zones.
+
+All four weight sliders are logarithmic, running 0.1 to 10 with **1 in the
 middle** — the slider carries log₁₀ of the weight. The two shape terms have one
 extra detent at the left that reads *off*; population does not, since with every
 weight at zero there would be nothing anchoring the regions to equal population.

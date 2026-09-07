@@ -86,7 +86,8 @@ html, body {
   color: var(--ink-muted);
 }
 #ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value,
-#ctl-pshape-value, #ctl-popw-value {
+#ctl-pshape-value, #ctl-popw-value, #ctl-relw-value, #ctl-relt-value,
+#ctl-rels-value {
   font-variant-numeric: tabular-nums;
 }
 
@@ -103,6 +104,25 @@ html, body {
   border-radius: 5px;
 }
 .ctl-grid input[type="range"] { padding: 0; border: 0; background: none; accent-color: var(--accent); }
+.ctl-sub {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px dashed var(--rule);
+}
+.ctl-sub[hidden] { display: none; }
+
+.ctl-grid select {
+  font: inherit;
+  font-size: 13px;
+  width: 100%;
+  padding: 3px 4px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+}
+.ctl-grid select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 .ctl-grid input[type="checkbox"] {
   width: auto;
   justify-self: start;

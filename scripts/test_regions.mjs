@@ -12,8 +12,8 @@ const load = (file, name) =>
   new Function(`${fs.readFileSync(path.join(ROOT, file), 'utf8')}; return ${name};`)();
 
 const DZGraph = load('web/graph.js', 'DZGraph');
-const { RegionModel, zoneGeometry } = load('web/regions.js',
-  '{ RegionModel, zoneGeometry }');
+const { RegionModel, zoneGeometry, zoneReligion } = load('web/regions.js',
+  '{ RegionModel, zoneGeometry, zoneReligion }');
 
 const graph = new DZGraph(JSON.parse(
   fs.readFileSync(path.join(ROOT, 'web/data/dz_adjacency.json'), 'utf8')));
@@ -21,6 +21,7 @@ const feats = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'web/data/dz.geojson'), 'utf8')).features;
 const pops = Object.fromEntries(feats.map((f) => [f.properties.code, f.properties.pop]));
 const geom = zoneGeometry(feats);
+const rel = zoneReligion(feats);
 
 const failures = [];
 function check(ok, msg) {
@@ -65,7 +66,7 @@ function frontierFromScratch(model) {
   return set;
 }
 
-const model = new RegionModel(graph, pops, geom);
+const model = new RegionModel(graph, pops, geom, rel);
 console.log(`\nregion model over ${model.n.toLocaleString()} zones, `
   + `total pop ${model.totalPop.toLocaleString()}, E[d^2] = `
   + `${Math.round(model.eD2).toLocaleString()}\n`);
@@ -119,7 +120,7 @@ function lonePocketExists(m) {
   return false;
 }
 
-const sealer = new RegionModel(graph, pops, geom);
+const sealer = new RegionModel(graph, pops, geom, rel);
 sealer.start(18, 5);
 check(sealer.sweepInterval === 25,
   `sweepInterval survives start() (${sealer.sweepInterval})`);
@@ -133,7 +134,7 @@ check(sealer.assigned === sealer.n, 'sealing still assigns every zone');
 check(regionsContiguous(sealer) === null,
   'sealing keeps every region contiguous -- a pocket touching one region joins it whole');
 
-const bare = new RegionModel(graph, pops, geom);
+const bare = new RegionModel(graph, pops, geom, rel);
 bare.sweepInterval = Infinity;
 bare.start(18, 5);
 while (bare.buildStep());
@@ -143,21 +144,21 @@ console.log(`  build score ${bare.scorePop.toFixed(0)} without sealing, `
   + `${sealer.scorePop.toFixed(0)} with (${sealer.steps.toLocaleString()} steps `
   + `vs ${bare.steps.toLocaleString()})`);
 
-const seal2 = new RegionModel(graph, pops, geom);
+const seal2 = new RegionModel(graph, pops, geom, rel);
 seal2.start(18, 5);
 while (seal2.buildStep());
-const seal3 = new RegionModel(graph, pops, geom);
+const seal3 = new RegionModel(graph, pops, geom, rel);
 seal3.start(18, 5);
 while (seal3.buildStep());
 check(seal2.assign.every((v, i) => v === seal3.assign[i]),
   'sealing stays deterministic for a given seed');
 
 /* --- determinism --------------------------------------------------------- */
-const a = new RegionModel(graph, pops, geom);
+const a = new RegionModel(graph, pops, geom, rel);
 a.start(18, 42); while (a.buildStep());
-const b = new RegionModel(graph, pops, geom);
+const b = new RegionModel(graph, pops, geom, rel);
 b.start(18, 42); while (b.buildStep());
-const c = new RegionModel(graph, pops, geom);
+const c = new RegionModel(graph, pops, geom, rel);
 c.start(18, 43); while (c.buildStep());
 check(a.assign.every((v, i) => v === b.assign[i]), 'same seed gives an identical map');
 check(!a.assign.every((v, i) => v === c.assign[i]), 'a different seed gives a different map');
@@ -194,14 +195,14 @@ check(regionsContiguous(model) === null, 'restored best state is contiguous');
 /* --- branch moves -------------------------------------------------------- */
 console.log('\nbranch moves');
 
-const branchOn = new RegionModel(graph, pops, geom);
-branchOn.start(18, 5, 1, 1, 1);
+const branchOn = new RegionModel(graph, pops, geom, rel);
+branchOn.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (branchOn.buildStep());
 for (let i = 0; i < 50000; i++) branchOn.optimiseStep();
 
-const branchOff = new RegionModel(graph, pops, geom);
+const branchOff = new RegionModel(graph, pops, geom, rel);
 branchOff.allowBranchMoves = false;
-branchOff.start(18, 5, 1, 1, 1);
+branchOff.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (branchOff.buildStep());
 for (let i = 0; i < 50000; i++) branchOff.optimiseStep();
 
@@ -315,12 +316,12 @@ check(gridPopPenalty(160, 10, uniform) > gridPopPenalty(80, 20, uniform),
   'a more elongated region strings its people out further');
 
 /* Weight 0 must be exactly the old behaviour, geometry present or not. */
-const off = new RegionModel(graph, pops, geom);
-off.start(18, 5, 1, 0);
+const off = new RegionModel(graph, pops, geom, rel);
+off.start(18, 5, { wShape: 0 });
 while (off.buildStep());
 for (let i = 0; i < 50000; i++) off.optimiseStep();
 const noGeom = new RegionModel(graph, pops);          // shape term unavailable
-noGeom.start(18, 5, 1, 1);                            // weight ignored
+noGeom.start(18, 5, { wShape: 1 });                            // weight ignored
 while (noGeom.buildStep());
 for (let i = 0; i < 50000; i++) noGeom.optimiseStep();
 check(off.assign.every((v, i) => v === noGeom.assign[i]),
@@ -328,8 +329,8 @@ check(off.assign.every((v, i) => v === noGeom.assign[i]),
 
 /* Sums are maintained incrementally through tens of thousands of moves and are
  * a small difference of large numbers, so drift is the thing to watch. */
-const on = new RegionModel(graph, pops, geom);
-on.start(18, 5, 1, 1);
+const on = new RegionModel(graph, pops, geom, rel);
+on.start(18, 5, { wShape: 1 });
 while (on.buildStep());
 for (let i = 0; i < 50000; i++) on.optimiseStep();
 const beforeResum = on.shapeRaw;
@@ -350,8 +351,8 @@ check(regionsContiguous(on) === null, 'shaped regions are still contiguous');
 check(on.assigned === on.n, 'shaped run still assigns every zone');
 
 /* The people term, on its own and against the land term. */
-const people = new RegionModel(graph, pops, geom);
-people.start(18, 5, 1, 0, 1);
+const people = new RegionModel(graph, pops, geom, rel);
+people.start(18, 5, { wShape: 0, wPopShape: 1 });
 while (people.buildStep());
 for (let i = 0; i < 50000; i++) people.optimiseStep();
 const popDrift = people.popShapeRaw;
@@ -370,8 +371,8 @@ check(people.meanPopPenalty < on.meanPopPenalty,
   + `(${people.meanPopPenalty.toFixed(3)} vs ${on.meanPopPenalty.toFixed(3)})`);
 check(regionsContiguous(people) === null, 'people-shaped regions are contiguous');
 
-const both = new RegionModel(graph, pops, geom);
-both.start(18, 5, 1, 1, 1);
+const both = new RegionModel(graph, pops, geom, rel);
+both.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (both.buildStep());
 for (let i = 0; i < 50000; i++) both.optimiseStep();
 console.log(`  both              : land ${both.meanPenalty.toFixed(3)}, `
@@ -380,8 +381,8 @@ check(both.meanPenalty < off.meanPenalty && both.meanPopPenalty < off.meanPopPen
   'both weights together improve both measures over no shape term at all');
 
 /* Weight changes re-base best for the people term too. */
-const liveP = new RegionModel(graph, pops, geom);
-liveP.start(18, 5, 1, 0, 0);
+const liveP = new RegionModel(graph, pops, geom, rel);
+liveP.start(18, 5, {});
 while (liveP.buildStep());
 for (let i = 0; i < 20000; i++) liveP.optimiseStep();
 liveP.setPopShapeWeight(2);
@@ -392,12 +393,12 @@ check(liveP.setPopShapeWeight(2) === false, 'the same people weight is a no-op')
 /* Only the ratios between weights matter: the score is divided by their sum,
  * so scaling all three must be invisible. Checked through the whole dynamics,
  * not just the score getter -- a weight left out of a delta would show here. */
-const small = new RegionModel(graph, pops, geom);
-small.start(18, 5, 1, 1, 1, 0.1);          // land 1, people 1, population 0.1
+const small = new RegionModel(graph, pops, geom, rel);
+small.start(18, 5, { wShape: 1, wPopShape: 1, wPop: 0.1 });          // land 1, people 1, population 0.1
 while (small.buildStep());
 for (let i = 0; i < 30000; i++) small.optimiseStep();
-const big = new RegionModel(graph, pops, geom);
-big.start(18, 5, 1, 10, 10, 1);            // the same thing, times ten
+const big = new RegionModel(graph, pops, geom, rel);
+big.start(18, 5, { wShape: 10, wPopShape: 10, wPop: 1 });            // the same thing, times ten
 while (big.buildStep());
 for (let i = 0; i < 30000; i++) big.optimiseStep();
 check(small.assign.every((v, i) => v === big.assign[i]),
@@ -405,16 +406,16 @@ check(small.assign.every((v, i) => v === big.assign[i]),
 check(near(small.score, big.score, 1e-9 * Math.max(1, Math.abs(small.score))),
   `and an identical score (${small.score.toFixed(6)} vs ${big.score.toFixed(6)})`);
 
-const even = new RegionModel(graph, pops, geom);
-even.start(18, 5, 1, 1, 1, 1);
+const even = new RegionModel(graph, pops, geom, rel);
+even.start(18, 5, { wShape: 1, wPopShape: 1, wPop: 1 });
 while (even.buildStep());
 check(near(even.score,
   (even.scorePop + even.scoreShape + even.scorePopShape) / 3, 1e-9 * Math.abs(even.score)),
   'equal weights make the score the mean of the three terms');
 check(even.weightSum === 3, `weightSum tracks the weights (${even.weightSum})`);
 
-const popw = new RegionModel(graph, pops, geom);
-popw.start(18, 5, 1, 1, 1, 1);
+const popw = new RegionModel(graph, pops, geom, rel);
+popw.start(18, 5, { wShape: 1, wPopShape: 1, wPop: 1 });
 while (popw.buildStep());
 for (let i = 0; i < 20000; i++) popw.optimiseStep();
 check(popw.setPopWeight(0.3) === true, 'the population weight is settable');
@@ -424,8 +425,8 @@ check(popw.setPopWeight(0.3) === false, 'the same population weight is a no-op')
 
 /* Changing the weight mid-run changes the objective, so the old best is not
  * comparable and must not survive. */
-const live = new RegionModel(graph, pops, geom);
-live.start(18, 5, 1, 0);
+const live = new RegionModel(graph, pops, geom, rel);
+live.start(18, 5, {});
 while (live.buildStep());
 for (let i = 0; i < 20000; i++) live.optimiseStep();
 live.setShapeWeight(2);
@@ -436,12 +437,191 @@ check(live.setShapeWeight(2) === false && live.bestScore === rebased,
   'setting the same weight again changes nothing');
 check(live.setShapeWeight(0.5) === true, 'a real change is reported as one');
 
+/* --- religion ------------------------------------------------------------ */
+console.log('\nreligion');
+
+check(near(model.relMean, 0.5111, 5e-4),
+  `national value is 0.511 (${model.relMean.toFixed(4)})`);
+
+/* The index in the geojson against the raw NISRA table. This is what proves the
+ * collapse in prepare_attributes.py did what it claims, end to end. */
+const rawTable = JSON.parse(fs.readFileSync(path.join(ROOT,
+  'data/ni-census21-people-dz21+religion_belong_to_or_brought_up_in_dvo-f4902c4c.json'),
+  'utf8')).table;
+const WEIGHTS = {
+  Catholic: 1,
+  'Protestant and Other Christian (including Christian related)': 0,
+  'Other religions': 0.5,
+  None: 0.5,
+};
+const catWeights = rawTable.dimensions[1].categories.map((c) => WEIGHTS[c.label]);
+const width = catWeights.length;
+let worstZone = 0;
+rawTable.dimensions[0].categories.forEach((zc, i) => {
+  const row = rawTable.values.slice(i * width, (i + 1) * width);
+  const n = row.reduce((x, y) => x + y, 0);
+  const want = row.reduce((acc, v, j) => acc + v * catWeights[j], 0) / n;
+  const got = rel[zc.code];
+  worstZone = Math.max(worstZone, Math.abs(want - got.value), Math.abs(n - got.n));
+});
+check(worstZone < 1e-5,
+  `every zone index matches the raw table (worst error ${worstZone.toExponential(1)})`);
+
+function relRun(opts, steps = 50000) {
+  const m = new RegionModel(graph, pops, geom, rel);
+  m.start(18, 5, opts);
+  while (m.buildStep());
+  for (let i = 0; i < steps; i++) m.optimiseStep();
+  m.restoreBest();
+  return m;
+}
+const seatsAt = (m, t, above) =>
+  m.summary().filter((r) => (above ? r.religion >= t : r.religion <= t)).length;
+
+const relOff = relRun({});
+const relAvg = relRun({ wRel: 1, relMode: 'average' });
+const relExt = relRun({ wRel: 1, relMode: 'extreme' });
+console.log(`  off      spread ${relOff.relSpread.toFixed(3)}   `
+  + `range ${Math.min(...relOff.summary().map((r) => r.religion)).toFixed(2)}`
+  + `-${Math.max(...relOff.summary().map((r) => r.religion)).toFixed(2)}`);
+console.log(`  average  spread ${relAvg.relSpread.toFixed(3)}   `
+  + `range ${Math.min(...relAvg.summary().map((r) => r.religion)).toFixed(2)}`
+  + `-${Math.max(...relAvg.summary().map((r) => r.religion)).toFixed(2)}`);
+console.log(`  extreme  spread ${relExt.relSpread.toFixed(3)}   `
+  + `range ${Math.min(...relExt.summary().map((r) => r.religion)).toFixed(2)}`
+  + `-${Math.max(...relExt.summary().map((r) => r.religion)).toFixed(2)}`);
+check(relAvg.relSpread < relOff.relSpread,
+  `average mode narrows the spread (${relAvg.relSpread.toFixed(3)} vs `
+  + `${relOff.relSpread.toFixed(3)})`);
+check(relExt.relSpread > relOff.relSpread,
+  `extreme mode widens it (${relExt.relSpread.toFixed(3)} vs `
+  + `${relOff.relSpread.toFixed(3)})`);
+
+/* Seats are a coarse integer that moves slowly, so these get more steps than
+ * the modes above; 50,000 is not enough to flip one at N=18. */
+const GERRY_STEPS = 300000;
+const gAbove = relRun({ wRel: 1, relMode: 'gerrymander', relThreshold: 0.6, relAbove: true },
+  GERRY_STEPS);
+const gBelow = relRun({ wRel: 1, relMode: 'gerrymander', relThreshold: 0.4, relAbove: false },
+  GERRY_STEPS);
+const marginals = (m, t) => m.summary().filter((r) => Math.abs(r.religion - t) <= 0.05).length;
+console.log(`  gerrymander above 0.6: ${seatsAt(gAbove, 0.6, true)}/18 seats `
+  + `(${seatsAt(relOff, 0.6, true)}/18 with the term off)`);
+console.log(`  gerrymander below 0.4: ${seatsAt(gBelow, 0.4, false)}/18 seats `
+  + `(${seatsAt(relOff, 0.4, false)}/18 with the term off)`);
+console.log(`  values: ${gAbove.summary().map((r) => r.religion.toFixed(2)).sort().join(' ')}`);
+check(seatsAt(gAbove, 0.6, true) > seatsAt(relOff, 0.6, true),
+  'gerrymander above wins more regions over the threshold');
+check(seatsAt(gBelow, 0.4, false) > seatsAt(relOff, 0.4, false),
+  'and the direction toggle wins more the other way');
+check(gAbove.relSeats === seatsAt(gAbove, 0.6, true),
+  "the model's own seat count agrees with an independent one");
+
+/* The sharper test of the mechanism: packing and cracking means abandoning the
+ * middle, so regions should vacate the neighbourhood of the threshold. This is
+ * far less noisy than the seat count and is what the logistic is really for. */
+console.log(`  regions within 0.05 of the threshold: `
+  + `${marginals(relOff, 0.6)} with the term off, ${marginals(gAbove, 0.6)} gerrymandering`);
+check(marginals(gAbove, 0.6) < marginals(relOff, 0.6),
+  `gerrymandering empties the marginal band (${marginals(gAbove, 0.6)} vs `
+  + `${marginals(relOff, 0.6)})`);
+
+/* Two more running sums maintained through 50,000 moves, branch moves included. */
+const relRawBefore = relExt.relRaw;
+let worstValue = 0;
+for (let r = 0; r < relExt.N; r++) {
+  let sum = 0;
+  let n = 0;
+  for (let z = 0; z < relExt.n; z++) {
+    if (relExt.assign[z] === r) { sum += relExt.zRel[z] * relExt.zRelN[z]; n += relExt.zRelN[z]; }
+  }
+  worstValue = Math.max(worstValue, Math.abs(sum / n - relExt._relValue(r)));
+}
+check(worstValue < 1e-9,
+  `region values match a from-scratch weighted mean (worst ${worstValue.toExponential(1)})`);
+relExt._resum();
+check(near(relRawBefore, relExt.relRaw, 1e-6 * Math.max(1, Math.abs(relRawBefore))),
+  `no drift in the religion total (${relRawBefore.toFixed(9)} vs ${relExt.relRaw.toFixed(9)})`);
+check(regionsContiguous(relExt) === null, 'religion-steered regions stay contiguous');
+
+/* Without the data the term is inert, whatever is asked for. */
+const noRel = new RegionModel(graph, pops, geom);
+noRel.start(18, 5, { wRel: 1, relMode: 'average' });
+while (noRel.buildStep());
+for (let i = 0; i < 50000; i++) noRel.optimiseStep();
+noRel.restoreBest();
+check(noRel.assign.every((v, i) => v === relOff.assign[i]),
+  'with no religion data the term is inert whatever the mode');
+
+const relLive = relRun({ wRel: 1, relMode: 'average' }, 20000);
+check(relLive.setReligion('gerrymander', 0.6, 0.05, true) === true,
+  'changing the religion mode is reported as a change');
+check(near(relLive.bestScore, relLive.score, 1e-9),
+  'changing the religion mode re-bases best-so-far');
+check(relLive.setReligion('gerrymander', 0.6, 0.05, true) === false,
+  'the same religion settings are a no-op');
+check(relLive.setReligion('gerrymander', 0.55, 0.05, true) === true,
+  'a threshold change alone counts as a change');
+
+/* --- sigma calibration --------------------------------------------------- */
+/* Every term is normalised to "one typical move's worth", so at a common state
+ * their per-move deltas should be the same order. This is the check that would
+ * have caught the religion sigma being 123x too strong: it was derived assuming
+ * the regional deviation settles at one move's scale, as the population term's
+ * does, when geography actually holds religion values ~0.15 apart however the
+ * lines are drawn. At equal weights that swamped everything else. */
+console.log('\nsigma calibration');
+
+const calib = new RegionModel(graph, pops, geom, rel);
+calib.start(18, 5, { wPop: 1 });
+while (calib.buildStep());
+for (let i = 0; i < 50000; i++) calib.optimiseStep();
+
+function perMoveDeltas(m) {
+  const acc = { population: [], land: [], people: [], religion: [] };
+  for (let k = 0; k < 4000; k++) {
+    const z = m.frontier[(m.rng() * m.frontier.length) | 0];
+    const from = m.assign[z];
+    if (m.regionSize[from] <= 1 || !m._connectedWithout(from, z)) continue;
+    const g = m._aggregateInto(m._agg, [z]);
+    for (const w of m.nbr[z]) {
+      const r = m.assign[w];
+      if (r < 0 || r === from) continue;
+      acc.population.push(Math.abs(2 * g.pop
+        * (g.pop + m.regionPop[r] - m.regionPop[from]) / m.eD2));
+      acc.land.push(Math.abs((m._penaltyWithAgg(from, g, -1) - m._penalty(from)
+        + m._penaltyWithAgg(r, g, 1) - m._penalty(r)) / m.sigmaShape));
+      acc.people.push(Math.abs((m._penaltyPopWithAgg(from, g, -1) - m._penaltyPop(from)
+        + m._penaltyPopWithAgg(r, g, 1) - m._penaltyPop(r)) / m.sigmaPopShape));
+      acc.religion.push(Math.abs((m._relTermWithAgg(from, g, -1) - m._relTerm(from)
+        + m._relTermWithAgg(r, g, 1) - m._relTerm(r)) / m.sigmaRel));
+      break;
+    }
+  }
+  const rms = (a) => Math.sqrt(a.reduce((x, y) => x + y * y, 0) / a.length);
+  return Object.fromEntries(Object.entries(acc).map(([k, v]) => [k, rms(v)]));
+}
+
+const SPREAD_LIMIT = 25;
+for (const mode of ['average', 'extreme', 'gerrymander']) {
+  calib.setReligion(mode, 0.6, 0.05, true);
+  const d = perMoveDeltas(calib);
+  const vals = Object.values(d);
+  const ratio = Math.max(...vals) / Math.min(...vals);
+  console.log(`  ${mode.padEnd(12)}`
+    + Object.entries(d).map(([k, v]) => `${k} ${v.toFixed(2)}`).join('  ')
+    + `   spread ${ratio.toFixed(1)}x`);
+  check(ratio < SPREAD_LIMIT,
+    `${mode}: every term's per-move delta is within ${SPREAD_LIMIT}x of the others `
+    + `(${ratio.toFixed(1)}x)`);
+}
+
 /* --- does it actually converge? ------------------------------------------ */
 const STEPS = 200000;
 console.log(`\nconvergence after ${STEPS.toLocaleString()} steps`);
 console.log('  N   seed     build dev    optimised dev      build score   optimised score');
 for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) {
-  const m = new RegionModel(graph, pops, geom);
+  const m = new RegionModel(graph, pops, geom, rel);
   m.start(N, seed);
   while (m.buildStep());
   const devBuild = m.maxDeviation;
@@ -470,7 +650,7 @@ for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) 
  * of why single-zone moves alone are limited. Swap moves are the standard fix
  * and are already deferred in major_checkpoint_1.txt. */
 console.log('\nthe known slow case: N=18 seed 7, sealed pocket');
-const slow = new RegionModel(graph, pops, geom);
+const slow = new RegionModel(graph, pops, geom, rel);
 slow.start(18, 7);
 while (slow.buildStep());
 for (const upTo of [200000, 600000, 1600000]) {

@@ -36,6 +36,18 @@ function mulberry32(seed) {
 
 /* --- geometry ------------------------------------------------------------ */
 
+/* How far a boundary zone's religion value typically sits from its own
+ * region's. The rms difference between adjacent zones is 0.176 and the
+ * pop-weighted SD across NI is 0.301, so 0.2 is a fair round figure. It only
+ * sets the scale of a slider whose default is arbitrary. */
+const V_SPREAD = 0.2;
+
+/* How far regional religion values typically sit from the national one. Not the
+ * same thing as V_SPREAD, and not something the optimiser can shrink to nothing:
+ * NI's segregation is coarse enough that regions stay this far apart whatever
+ * the boundaries. Measured at 0.153 across N=18 with the term switched off. */
+const R_SPREAD = 0.15;
+
 const M_PER_DEG_LAT = 111320;
 const M_PER_DEG_LON = M_PER_DEG_LAT * Math.cos((54.65 * Math.PI) / 180);
 
@@ -107,13 +119,33 @@ function zoneGeometry(features) {
   return out;
 }
 
+/* { code: {value, n} } for every zone: the religion index and the count it was
+ * averaged over.
+ *
+ * `rel` runs 0 (all Protestant) to 1 (all Catholic), with the unaligned at 0.5
+ * on the assumption that in a two-way contest they split evenly. The weighting
+ * is applied in scripts/prepare_attributes.py, so changing it means a rebuild.
+ *
+ * `rel_n` rather than `pop` is the denominator to aggregate by: NISRA's
+ * disclosure control perturbs the two tables independently, leaving them
+ * differing in about a third of zones by a handful of people each. */
+function zoneReligion(features) {
+  const out = {};
+  for (const f of features) {
+    const p = f.properties;
+    if (typeof p.rel !== 'number' || typeof p.rel_n !== 'number') return null;
+    out[p.code] = { value: p.rel, n: p.rel_n };
+  }
+  return out;
+}
+
 /* --- model --------------------------------------------------------------- */
 
 class RegionModel {
   /* graph: a DZGraph. popByCode / geomByCode: keyed by zone code, the latter
    * from zoneGeometry(). Geometry is optional -- without it the shape term is
    * unavailable and its weight is forced to zero. */
-  constructor(graph, popByCode, geomByCode = null) {
+  constructor(graph, popByCode, geomByCode = null, relByCode = null) {
     this.codes = [...graph.zones].sort();
     this.n = this.codes.length;
     this.index = new Map(this.codes.map((code, i) => [code, i]));
@@ -146,6 +178,25 @@ class RegionModel {
     this.totalArea = this.za.reduce((a, b) => a + b, 0);
     this.meanArea = this.totalArea / this.n;
 
+    // Religion: the index per zone and the count it was averaged over.
+    this.hasReligion = Boolean(relByCode);
+    this.zRel = new Float64Array(this.n);
+    this.zRelN = new Float64Array(this.n);
+    if (this.hasReligion) {
+      for (let i = 0; i < this.n; i++) {
+        const r = relByCode[this.codes[i]] || { value: 0, n: 0 };
+        this.zRel[i] = r.value;
+        this.zRelN[i] = r.n;
+      }
+    }
+    let relSum = 0;
+    let relN = 0;
+    for (let i = 0; i < this.n; i++) {
+      relSum += this.zRel[i] * this.zRelN[i];
+      relN += this.zRelN[i];
+    }
+    this.relMean = relN ? relSum / relN : 0;   // the national value, 0.5111
+
     this.assign = new Int32Array(this.n);
     this.bestAssign = new Int32Array(this.n);
     this._seen = new Int32Array(this.n);   // BFS marks, stamped rather than cleared
@@ -159,6 +210,7 @@ class RegionModel {
     this._single = [0];   // scratch, so a plain move allocates nothing
     this._agg = {
       area: 0, ax: 0, ay: 0, axx: 0, own: 0, pop: 0, px: 0, py: 0, pxx: 0,
+      relSum: 0, relN: 0,
     };
 
     // Build steps between pocket sweeps. A sweep is one pass over the
@@ -184,10 +236,17 @@ class RegionModel {
     this.rawScore = 0;
     this.shapeRaw = 0;        // SUM_r (land penalty_r - 1)
     this.popShapeRaw = 0;     // SUM_r (people penalty_r - 1)
+    this.relRaw = 0;          // SUM_r of the religion term, already signed
     this.wPop = 1;
     this.wShape = 0;
     this.wPopShape = 0;
+    this.wRel = 0;
     this.weightSum = 1;
+    this.relMode = 'off';     // off | average | extreme | gerrymander
+    this.relThreshold = 0.6;
+    this.relSteepness = 0.05;
+    this.relAbove = true;
+    this.sigmaRel = 1;
     this.sigmaShape = 1;
     this.sigmaPopShape = 1;
     this.rArea = new Float64Array(0);
@@ -198,6 +257,8 @@ class RegionModel {
     this.rPx = new Float64Array(0);
     this.rPy = new Float64Array(0);
     this.rPxx = new Float64Array(0);
+    this.rRelSum = new Float64Array(0);
+    this.rRelN = new Float64Array(0);
     this.bestScore = Infinity;
     this.steps = 0;
     this.moves = 0;
@@ -207,15 +268,25 @@ class RegionModel {
   }
 
   /* Seed N regions and prepare the build phase. */
-  start(N, seed, temperature = 1, wShape = 0, wPopShape = 0, wPop = 1) {
+  start(N, seed, opts = {}) {
+    const {
+      temperature = 1, wPop = 1, wShape = 0, wPopShape = 0, wRel = 0,
+      relMode = 'off', relThreshold = 0.6, relSteepness = 0.05, relAbove = true,
+    } = opts;
     this.reset();
     this.N = N;
     this.target = this.totalPop / N;
     this.temperature = temperature;
+    this.relMode = this.hasReligion ? relMode : 'off';
+    this.relThreshold = relThreshold;
+    this.relSteepness = relSteepness;
+    this.relAbove = relAbove;
     this.wPop = Math.max(0, wPop);
     this.wShape = this.hasGeometry ? Math.max(0, wShape) : 0;
     this.wPopShape = this.hasGeometry ? Math.max(0, wPopShape) : 0;
-    this.weightSum = this.wPop + this.wShape + this.wPopShape || 1;
+    this.wRel = this.relMode === 'off' ? 0 : Math.max(0, wRel);
+    this.weightSum = this.wPop + this.wShape + this.wPopShape + this.wRel || 1;
+    this.sigmaRel = this._sigmaRel(N);
     // One move shifts a region's land penalty by about (zone area / region
     // area) and its people penalty by about (zone pop / region pop); see the
     // derivations in major_checkpoint_1.txt. Both reduce to N/n here, but they
@@ -234,6 +305,8 @@ class RegionModel {
     this.rPx = new Float64Array(N);
     this.rPy = new Float64Array(N);
     this.rPxx = new Float64Array(N);
+    this.rRelSum = new Float64Array(N);
+    this.rRelN = new Float64Array(N);
     this.openNbrs = Array.from({ length: N }, () => new Set());
 
     const seeds = this._farthestPointSeeds(N);
@@ -279,6 +352,68 @@ class RegionModel {
       frontier = next;
       d++;
     }
+  }
+
+  /* --- religion ---------------------------------------------------------- */
+
+  /* One move shifts a region's religion value by about
+   *   (zone n / region n) * (zone value - region value)  =  V_SPREAD * N / n
+   * The value is intensive -- a ratio, not a sum -- so unlike the population
+   * term this scales with N. Closed form, nothing measured at runtime. */
+  _sigmaRel(N) {
+    const delta = (V_SPREAD * N) / this.n;
+    if (this.relMode === 'gerrymander') {
+      // The logistic's steepest slope, at the threshold, is 1/(4s).
+      return delta / (4 * Math.max(1e-6, this.relSteepness));
+    }
+    // (x - mu)^2 changes by 2|x - mu| * delta, so the scale is set by how far
+    // regions actually sit from the mean -- NOT by delta itself.
+    //
+    // Getting this wrong is worth a comment. The population term's deviation
+    // does settle at one move's worth, because the optimiser can drive it
+    // there. Religion cannot be driven that close: geography holds regional
+    // values ~0.15 apart however the lines are drawn. Using delta^2 here made
+    // the term 123x too strong, which at equal weights swamped everything else
+    // -- max population deviation went from 1.4% to 33%.
+    return 2 * R_SPREAD * delta;
+  }
+
+  /* The term for one region value, already signed so lower is better in every
+   * mode. Extreme is average negated: one minimises the variance of regional
+   * values, the other maximises it. */
+  _relTermFrom(x) {
+    if (this.relMode === 'gerrymander') {
+      const s = Math.max(1e-6, this.relSteepness);
+      // Saturates above the threshold, still pulls below it, steepest at it.
+      // exp() overflowing to Infinity gives 0 here, which is the right limit.
+      const u = this.relAbove
+        ? (x - this.relThreshold) / s
+        : (this.relThreshold - x) / s;
+      return 1 / (1 + Math.exp(u));
+    }
+    const d = x - this.relMean;
+    if (this.relMode === 'average') return d * d;
+    if (this.relMode === 'extreme') return -d * d;
+    return 0;
+  }
+
+  _relValue(r) {
+    return this.rRelN[r] ? this.rRelSum[r] / this.rRelN[r] : this.relMean;
+  }
+
+  _relTerm(r) { return this._relTermFrom(this._relValue(r)); }
+
+  _relTermWith(r, z, sign) {
+    const n = this.rRelN[r] + sign * this.zRelN[z];
+    if (n <= 0) return this._relTermFrom(this.relMean);
+    return this._relTermFrom(
+      (this.rRelSum[r] + sign * this.zRel[z] * this.zRelN[z]) / n);
+  }
+
+  _relTermWithAgg(r, g, sign) {
+    const n = this.rRelN[r] + sign * g.relN;
+    if (n <= 0) return this._relTermFrom(this.relMean);
+    return this._relTermFrom((this.rRelSum[r] + sign * g.relSum) / n);
   }
 
   /* --- shape ------------------------------------------------------------- */
@@ -351,10 +486,12 @@ class RegionModel {
    * two must not be updated out of step. */
   _accumulate(r, z, sign) {
     const geom = this.hasGeometry;
+    const rel = this.relMode !== 'off';
     if (geom) {
       this.shapeRaw -= this._penalty(r) - 1;
       this.popShapeRaw -= this._penaltyPop(r) - 1;
     }
+    if (rel) this.relRaw -= this._relTerm(r);
     const a = sign * this.za[z];
     this.rArea[r] += a;
     this.rSx[r] += a * this.zx[z];
@@ -368,10 +505,14 @@ class RegionModel {
     this.rPy[r] += p * this.zy[z];
     this.rPxx[r] += p * (this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z]);
 
+    this.rRelSum[r] += sign * this.zRel[z] * this.zRelN[z];
+    this.rRelN[r] += sign * this.zRelN[z];
+
     if (geom) {
       this.shapeRaw += this._penalty(r) - 1;
       this.popShapeRaw += this._penaltyPop(r) - 1;
     }
+    if (rel) this.relRaw += this._relTerm(r);
   }
 
   /* --- build phase ------------------------------------------------------- */
@@ -449,8 +590,10 @@ class RegionModel {
     const deviation = this.regionPop[region] - this.target;
     const shaped = this.wShape > 0;
     const peopled = this.wPopShape > 0;
+    const religious = this.wRel > 0;
     const penNow = shaped ? this._penalty(region) : 0;
     const penPopNow = peopled ? this._penaltyPop(region) : 0;
+    const relNow = religious ? this._relTerm(region) : 0;
     let pick = -1;
     let pickDelta = Infinity;
     for (const z of this.openNbrs[region]) {
@@ -464,6 +607,10 @@ class RegionModel {
       if (peopled) {
         delta += (this.wPopShape * (this._penaltyPopWith(region, z, 1) - penPopNow))
           / this.sigmaPopShape;
+      }
+      if (religious) {
+        delta += (this.wRel * (this._relTermWith(region, z, 1) - relNow))
+          / this.sigmaRel;
       }
       delta /= this.weightSum;
       if (delta < pickDelta || (delta === pickDelta && z < pick)) {
@@ -530,9 +677,12 @@ class RegionModel {
     // Constant across candidates: what leaving `from` costs.
     const shaped = this.wShape > 0;
     const peopled = this.wPopShape > 0;
+    const religious = this.wRel > 0;
     const leaving = shaped ? this._penaltyWithAgg(from, g, -1) - this._penalty(from) : 0;
     const leavingPop = peopled
       ? this._penaltyPopWithAgg(from, g, -1) - this._penaltyPop(from) : 0;
+    const leavingRel = religious
+      ? this._relTermWithAgg(from, g, -1) - this._relTerm(from) : 0;
     for (const w of this.nbr[z]) {
       const r = this.assign[w];
       if (r < 0 || seen.has(r)) continue;
@@ -547,6 +697,10 @@ class RegionModel {
       if (peopled) {
         const joining = this._penaltyPopWithAgg(r, g, 1) - this._penaltyPop(r);
         delta += (this.wPopShape * (leavingPop + joining)) / this.sigmaPopShape;
+      }
+      if (religious) {
+        const joining = this._relTermWithAgg(r, g, 1) - this._relTerm(r);
+        delta += (this.wRel * (leavingRel + joining)) / this.sigmaRel;
       }
       deltas.push(delta / this.weightSum);
     }
@@ -674,6 +828,7 @@ class RegionModel {
   _aggregateInto(g, zones) {
     g.area = 0; g.ax = 0; g.ay = 0; g.axx = 0; g.own = 0;
     g.pop = 0; g.px = 0; g.py = 0; g.pxx = 0;
+    g.relSum = 0; g.relN = 0;
     for (const z of zones) {
       const a = this.za[z];
       const pop = this.pop[z];
@@ -683,6 +838,7 @@ class RegionModel {
       g.area += a; g.ax += a * x; g.ay += a * y; g.axx += a * rr;
       g.own += this.zOwn[z];
       g.pop += pop; g.px += pop * x; g.py += pop * y; g.pxx += pop * rr;
+      g.relSum += this.zRel[z] * this.zRelN[z]; g.relN += this.zRelN[z];
     }
     return g;
   }
@@ -736,15 +892,18 @@ class RegionModel {
     let total = 0;
     let shape = 0;
     let popShape = 0;
+    let rel = 0;
     for (let r = 0; r < this.N; r++) {
       const dev = this.regionPop[r] - this.target;
       total += dev * dev;
       shape += this._penalty(r) - 1;
       popShape += this._penaltyPop(r) - 1;
+      rel += this._relTerm(r);
     }
     this.rawScore = total;
     this.shapeRaw = shape;
     this.popShapeRaw = popShape;
+    this.relRaw = rel;
     return total;
   }
 
@@ -760,6 +919,8 @@ class RegionModel {
     this.rPx.fill(0);
     this.rPy.fill(0);
     this.rPxx.fill(0);
+    this.rRelSum.fill(0);
+    this.rRelN.fill(0);
     for (let z = 0; z < this.n; z++) {
       const r = this.assign[z];
       if (r < 0) continue;
@@ -774,6 +935,8 @@ class RegionModel {
       this.rPx[r] += this.pop[z] * this.zx[z];
       this.rPy[r] += this.pop[z] * this.zy[z];
       this.rPxx[r] += this.pop[z] * rr;
+      this.rRelSum[r] += this.zRel[z] * this.zRelN[z];
+      this.rRelN[r] += this.zRelN[z];
     }
     this._rescore();
   }
@@ -786,12 +949,15 @@ class RegionModel {
 
   get scorePopShape() { return this.popShapeRaw / this.sigmaPopShape; }
 
+  get scoreReligion() { return this.relRaw / this.sigmaRel; }
+
   /* Divided by the total weight, so only the ratios matter: (0.1, 1, 1) and
    * (1, 10, 10) are the same objective. */
   get score() {
     return (this.wPop * this.scorePop
       + this.wShape * this.scoreShape
-      + this.wPopShape * this.scorePopShape) / this.weightSum;
+      + this.wPopShape * this.scorePopShape
+      + this.wRel * this.scoreReligion) / this.weightSum;
   }
 
   /* The legible versions: 1 is a circle for land, and for people it is a region
@@ -800,6 +966,31 @@ class RegionModel {
   get meanPenalty() { return this.N ? this.shapeRaw / this.N + 1 : 1; }
 
   get meanPopPenalty() { return this.N ? this.popShapeRaw / this.N + 1 : 1; }
+
+  /* Spread of the regional religion values: falling means the regions are
+   * converging on the national mix, rising means they are separating. */
+  get relSpread() {
+    if (!this.N) return 0;
+    let mean = 0;
+    for (let r = 0; r < this.N; r++) mean += this._relValue(r);
+    mean /= this.N;
+    let v = 0;
+    for (let r = 0; r < this.N; r++) {
+      const d = this._relValue(r) - mean;
+      v += d * d;
+    }
+    return Math.sqrt(v / this.N);
+  }
+
+  /* Regions on the wanted side of the threshold. */
+  get relSeats() {
+    let seats = 0;
+    for (let r = 0; r < this.N; r++) {
+      const x = this._relValue(r);
+      if (this.relAbove ? x >= this.relThreshold : x <= this.relThreshold) seats++;
+    }
+    return seats;
+  }
 
   /* Max deviation from target as a fraction -- the legible number to show. */
   get maxDeviation() {
@@ -827,15 +1018,18 @@ class RegionModel {
   /* Any weight is part of the score, so changing one is a change of
    * objective: anything recorded under the old weights is not comparable and
    * best-so-far restarts from the current state. Returns whether it changed. */
-  setWeights(wPop, wShape, wPopShape) {
+  setWeights(wPop, wShape, wPopShape, wRel = this.wRel) {
     const p = Math.max(0, wPop);
     const l = this.hasGeometry ? Math.max(0, wShape) : 0;
     const q = this.hasGeometry ? Math.max(0, wPopShape) : 0;
-    if (p === this.wPop && l === this.wShape && q === this.wPopShape) return false;
+    const x = this.relMode === 'off' ? 0 : Math.max(0, wRel);
+    if (p === this.wPop && l === this.wShape && q === this.wPopShape
+        && x === this.wRel) return false;
     this.wPop = p;
     this.wShape = l;
     this.wPopShape = q;
-    this.weightSum = p + l + q || 1;
+    this.wRel = x;
+    this.weightSum = p + l + q + x || 1;
     this.bestScore = Infinity;
     // A partial map cannot be compared against a complete one; the build phase
     // records the first comparable state when it finishes.
@@ -844,6 +1038,27 @@ class RegionModel {
   }
 
   setPopWeight(w) { return this.setWeights(w, this.wShape, this.wPopShape); }
+
+  /* Mode, threshold, steepness and direction all change what the term measures,
+   * so the running total has to be rebuilt from scratch and best-so-far goes
+   * with it -- anything recorded under the old settings is not comparable. */
+  setReligion(mode, threshold, steepness, above) {
+    const m = this.hasReligion ? mode : 'off';
+    if (m === this.relMode && threshold === this.relThreshold
+        && steepness === this.relSteepness && above === this.relAbove) return false;
+    this.relMode = m;
+    this.relThreshold = threshold;
+    this.relSteepness = steepness;
+    this.relAbove = above;
+    if (m === 'off') this.wRel = 0;
+    this.weightSum = this.wPop + this.wShape + this.wPopShape + this.wRel || 1;
+    this.sigmaRel = this._sigmaRel(this.N);
+    this.relRaw = 0;
+    for (let r = 0; r < this.N; r++) this.relRaw += this._relTerm(r);
+    this.bestScore = Infinity;
+    if (this.assigned >= this.n) this._recordBest();
+    return true;
+  }
 
   setPopShapeWeight(w) { return this.setWeights(this.wPop, this.wShape, w); }
 
@@ -871,6 +1086,7 @@ class RegionModel {
       deviation: this.target ? (this.regionPop[r] - this.target) / this.target : 0,
       penalty: this._penalty(r),
       penaltyPop: this._penaltyPop(r),
+      religion: this._relValue(r),
     }));
   }
 }

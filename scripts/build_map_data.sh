@@ -25,8 +25,9 @@ echo "==> simplifying at ${SIMPLIFY} (Visvalingam weighted, keep-shapes)"
 
 "$MS" 6gb "$IN" \
   -simplify "$SIMPLIFY" keep-shapes \
-  -join "$ATTRS" keys=DZ2021_cd,code field-types=code:str,pop:num \
-  -filter-fields DZ2021_cd,DZ2021_nm,SDZ2021_cd,LGD2014_nm,Area_ha,pop \
+  -join "$ATTRS" keys=DZ2021_cd,code \
+    field-types=code:str,pop:num,rel:num,rel_n:num \
+  -filter-fields DZ2021_cd,DZ2021_nm,SDZ2021_cd,LGD2014_nm,Area_ha,pop,rel,rel_n \
   -rename-fields code=DZ2021_cd,name=DZ2021_nm,sdz=SDZ2021_cd,lgd=LGD2014_nm,area_ha=Area_ha \
   -o "$OUT" precision=0.00001
 

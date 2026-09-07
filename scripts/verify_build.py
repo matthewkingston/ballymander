@@ -12,6 +12,10 @@ OUT = ROOT / "web" / "data" / "dz.geojson"
 
 EXPECTED_FEATURES = 3780
 EXPECTED_POP = 1_903_168
+# The religion table is ten people short of the people table: NISRA's disclosure
+# control perturbs them independently. Checking it against EXPECTED_POP would
+# fail, and rel_n is the right denominator for the religion index anyway.
+EXPECTED_REL_TOTAL = 1_903_158
 
 failures: list[str] = []
 
@@ -49,7 +53,15 @@ def main() -> int:
     check(total == EXPECTED_POP,
           f"populations sum to {EXPECTED_POP:,} (got {total:,})")
 
-    for field in ("code", "name", "sdz", "lgd", "area_ha"):
+    rel_total = sum(p["rel_n"] for p in props if p.get("rel_n") is not None)
+    check(rel_total == EXPECTED_REL_TOTAL,
+          f"religion counts sum to {EXPECTED_REL_TOTAL:,} (got {rel_total:,})")
+
+    bad_rel = [p.get("code") for p in props
+               if not isinstance(p.get("rel"), (int, float)) or not 0 <= p["rel"] <= 1]
+    check(not bad_rel, f"every 'rel' is a number in 0..1 (bad: {len(bad_rel)})")
+
+    for field in ("code", "name", "sdz", "lgd", "area_ha", "rel", "rel_n"):
         n = sum(1 for p in props if p.get(field) in (None, ""))
         check(n == 0, f"every feature has '{field}' (missing: {n})")
 

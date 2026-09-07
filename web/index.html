@@ -34,6 +34,16 @@
         <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
         <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
                data-weight data-off>
+        <label for="ctl-relmode">Religion</label>
+        <select id="ctl-relmode">
+          <option value="off" selected>off</option>
+          <option value="average">average</option>
+          <option value="extreme">extreme</option>
+          <option value="gerrymander">gerrymander</option>
+        </select>
+        <label for="ctl-relw">Religion wt <span id="ctl-relw-value">1</span></label>
+        <input id="ctl-relw" type="range" min="-1.02" max="1" step="0.02" value="0"
+               data-weight data-off>
         <label for="ctl-branch">Branch moves</label>
         <input id="ctl-branch" type="checkbox" checked>
         <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
@@ -42,6 +52,14 @@
         <input id="ctl-build" type="range" min="1" max="200" step="1" value="10">
         <label for="ctl-opt">Optimise/frame <span id="ctl-opt-value">200</span></label>
         <input id="ctl-opt" type="range" min="1" max="4000" step="1" value="200">
+      </div>
+      <div class="ctl-grid ctl-sub" id="ctl-gerry" hidden>
+        <label for="ctl-relt">Threshold <span id="ctl-relt-value">0.6</span></label>
+        <input id="ctl-relt" type="range" min="0.05" max="0.95" step="0.01" value="0.6">
+        <label for="ctl-rels">Steepness <span id="ctl-rels-value">0.05</span></label>
+        <input id="ctl-rels" type="range" min="0.01" max="0.3" step="0.01" value="0.05">
+        <label for="ctl-rela">Above threshold</label>
+        <input id="ctl-rela" type="checkbox" checked>
       </div>
       <div class="ctl-buttons">
         <button id="ctl-go" type="button" disabled>GO</button>
@@ -56,6 +74,7 @@
       <div><dt>Moves</dt><dd id="run-moves">&mdash;</dd></div>
       <div><dt>Land</dt><dd id="run-shape">&mdash;</dd></div>
       <div><dt>People</dt><dd id="run-pshape">&mdash;</dd></div>
+      <div><dt>Religion</dt><dd id="run-rel">&mdash;</dd></div>
       <div><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
       <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
     </dl>

@@ -1,0 +1,30 @@
+I feel that the app is at a good stage in terms of its basic ability to make sensible regions.
+Next I want to start introducing other demographic factors to play with, and I'll prototype this with the relgion data that's already in place.
+For simplicity, and given it's NI, we'll assign the data as Protestant=0, Other/None=0.5 and Catholic=1. The data has four categories - Catholic 45.7%, Protestant and Other Christian 43.5%, Other religions 1.5%, None 9.3% - so the last two are pooled into the 10.8% sitting at 0.5, on the assumption that in the gerrymandering analogy they vote equally likely each way. A region's value is the population-weighted mean over its DZs, and the national average is 0.511.
+
+There are 3 functional modes, chosen by a mode selector rather than by the sign of a weight. Modes 1 and 2 are 2 sides of the same coin and could in principle be one term with a negative weight, but the score divides by the sum of the weights so that only ratios matter, and a negative weight makes that denominator shrink to zero and then flip, inverting every other term with it. Putting the sign inside the term instead keeps the weight slider positive and normal, and gives mode 3 somewhere to live.
+
+1. Target Average: as much as possible each region has the national average religion value, so the score term per region is simply proportional to (region_religion-average_religion)^2
+2. Target Extreme: Try and group similar religious populations together. Same term negated, which is to say mode 1 minimises the variance of the regional values and mode 2 maximises it.
+3. Gerrymander mode: The app tries to maximise the number of regions which meet a user-defined threshold (eg average score 0.6), with no benefit beyond that threshold. This is simulating gerrymandering, where a party wants a majority in districts. There must be a large penalty exactly at the threshold, and no additional benefit to going beyond it, but also a score which incentivises movement towards the threshold where it is possible. That shape is a logistic:
+       term per region = 1 / (1 + exp((x - t) / s))
+   summed over regions, which is a smooth relaxation of counting the regions that fall short. It is 1 well below the threshold, 0.5 at it, 0 well above, and steepest exactly at t.
+   Packing and cracking should then emerge from the shape rather than needing to be built in. Regions far below the threshold have almost no gradient, so the optimiser writes them off - cracking. Regions just below have the strongest pull, so effort concentrates where a seat can actually flip. Regions above the threshold are indifferent to losing supporters, so the population term drains them freely - packing.
+
+Controls for mode 3:
+    - Threshold t, the value a region has to reach.
+    - Steepness, controlling s. This is a real knob with a sweet spot at both ends: too sharp and the term becomes a step function with no gradient to climb, too soft and it degenerates into mode 1. For scale, one DZ move shifts a region's value by very roughly 0.001 at N=18, so s wants to be a few dozen times that - a region within reach of the threshold should feel it, one fifty moves away should not.
+    - Above/below toggle. A threshold of 0.6 gerrymanders for one side only, so the toggle picks whether regions are being pushed above t or below it.
+
+Practical notes:
+    - A region's religion value is intensive - a ratio, not a sum - so a move shifts it by roughly (zone pop / region pop) * (zone value - region value), which scales with N where the population term's does not. This is the case major_checkpoint_1.txt warns about, but nothing needs measuring at runtime: the relation is closed form and can be hard-coded. zone pop / region pop is just N/3780, and the value spread a move actually feels is about 0.2 - the rms difference between adjacent zones' values is 0.176, and the SD of zone values across NI is 0.30, so 0.2 is a fair round figure for how far a boundary zone sits from its own region. So
+          delta(N) = 0.2 * N / 3780
+      is what one move shifts a region's value by. From that:
+          modes 1 and 2:  sigma = 2 * R_SPREAD * delta,  R_SPREAD ~ 0.15
+          mode 3:         sigma = delta / (4s)    (the logistic's steepest slope is 1/(4s), at the threshold)
+      For modes 1 and 2 the term is (x - mu)^2, which changes by 2|x - mu| * delta, so the scale is set by how far regions actually sit from the mean - R_SPREAD, measured at 0.153 across N=18 with the term off - and NOT by delta itself.
+      This is worth stating explicitly because the obvious guess, sigma = delta^2, is wrong by a factor of over a hundred. It comes from carrying over the reasoning that works for population, where the deviation does settle at one move's worth because the optimiser can drive it there. Religion cannot be driven that close: NI's segregation is coarse enough that regions stay ~0.15 apart however the lines are drawn. Using delta^2 made the term 123x stronger than the population term at equal weights, which swamped everything else - max population deviation went from 1.4% to 33%.
+    - The zone values are extremely polarised, which is worth knowing before tuning anything: the deciles run 0.04, 0.14, 0.22, 0.44, 0.80, 0.93, 0.99. Most DZs are strongly one thing or the other and relatively few are mixed, so modes 2 and 3 have a lot of raw material to work with and mode 1 is the one asking for something geography resists.
+    - Cheap: two more running sums, O(1) per move.
+    - Use the religion table's own row totals as the denominator, not the pop field. The two tables differ by 10 people nationally from NISRA's disclosure control and will not agree exactly per zone.
+    - The pipeline is nearly ready but it is not one line: the religion entry is already sitting commented out in TABLES in prepare_attributes.py, but the joined fields also have to be added to field-types and -filter-fields in build_map_data.sh, and there are four new columns rather than one.

@@ -54,6 +54,15 @@ const els = {
   shapeValue: document.getElementById('ctl-shape-value'),
   pshape: document.getElementById('ctl-pshape'),
   pshapeValue: document.getElementById('ctl-pshape-value'),
+  relmode: document.getElementById('ctl-relmode'),
+  relw: document.getElementById('ctl-relw'),
+  relwValue: document.getElementById('ctl-relw-value'),
+  gerry: document.getElementById('ctl-gerry'),
+  relt: document.getElementById('ctl-relt'),
+  reltValue: document.getElementById('ctl-relt-value'),
+  rels: document.getElementById('ctl-rels'),
+  relsValue: document.getElementById('ctl-rels-value'),
+  rela: document.getElementById('ctl-rela'),
   branch: document.getElementById('ctl-branch'),
   go: document.getElementById('ctl-go'),
   pause: document.getElementById('ctl-pause'),
@@ -63,6 +72,7 @@ const els = {
   runDev: document.getElementById('run-dev'),
   runShape: document.getElementById('run-shape'),
   runPShape: document.getElementById('run-pshape'),
+  runRel: document.getElementById('run-rel'),
   runMoves: document.getElementById('run-moves'),
   runScore: document.getElementById('run-score'),
   runBest: document.getElementById('run-best'),
@@ -320,6 +330,11 @@ function readout() {
   // values are large and say little.
   els.runShape.textContent = m.meanPenalty.toFixed(2);
   els.runPShape.textContent = m.meanPopPenalty.toFixed(2);
+  // Mode-dependent, because the useful number differs: how far apart the
+  // regions are for average/extreme, how many clear the bar for gerrymander.
+  els.runRel.textContent = m.relMode === 'off' ? '—'
+    : m.relMode === 'gerrymander' ? `${m.relSeats}/${m.N}`
+      : m.relSpread.toFixed(3);
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
 }
@@ -341,8 +356,12 @@ function tick(map) {
       // best-so-far on the current state rather than leaving a stale one.
       const t = Number(els.temp.value);
       run.model.temperature = t > 0 ? t : 1;
+      // Religion first: turning the mode off zeroes its weight, and setWeights
+      // then reapplies the rest against the right total.
+      run.model.setReligion(els.relmode.value, Number(els.relt.value),
+        Number(els.rels.value), els.rela.checked);
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
-        weightOf(els.pshape));
+        weightOf(els.pshape), weightOf(els.relw));
       // Changes the move set, not the score, so best-so-far stays comparable
       // and this needs no re-base.
       run.model.allowBranchMoves = els.branch.checked;
@@ -369,8 +388,17 @@ function start(map) {
   stop(map, { silent: true });
   clearRegions(map);
 
-  run.model.start(n, Number(els.seed.value) || 0, Number(els.temp.value) || 1,
-    weightOf(els.shape), weightOf(els.pshape), weightOf(els.popw));
+  run.model.start(n, Number(els.seed.value) || 0, {
+    temperature: Number(els.temp.value) || 1,
+    wPop: weightOf(els.popw),
+    wShape: weightOf(els.shape),
+    wPopShape: weightOf(els.pshape),
+    wRel: weightOf(els.relw),
+    relMode: els.relmode.value,
+    relThreshold: Number(els.relt.value),
+    relSteepness: Number(els.rels.value),
+    relAbove: els.rela.checked,
+  });
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
 
@@ -446,9 +474,16 @@ function showResults() {
 async function main() {
   const map = createMap();
 
+  // Threshold, steepness and direction only mean anything in gerrymander mode.
+  const syncMode = () => { els.gerry.hidden = els.relmode.value !== 'gerrymander'; };
+  els.relmode.addEventListener('change', syncMode);
+  syncMode();
+
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
                              [els.opt, els.optValue], [els.popw, els.popwValue],
-                             [els.shape, els.shapeValue], [els.pshape, els.pshapeValue]]) {
+                             [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
+                             [els.relw, els.relwValue], [els.relt, els.reltValue],
+                             [els.rels, els.relsValue]]) {
     const show = () => {
       out.textContent = input.dataset.weight !== undefined
         ? formatWeight(weightOf(input)) : input.value;
@@ -484,7 +519,8 @@ async function main() {
         window.__graph = graph;
         const pops = Object.fromEntries(
           geojson.features.map((f) => [f.properties.code, f.properties.pop]));
-        run.model = new RegionModel(graph, pops, zoneGeometry(geojson.features));
+        run.model = new RegionModel(graph, pops, zoneGeometry(geojson.features),
+          zoneReligion(geojson.features));
         run.shadow = new Int32Array(run.model.n).fill(-1);
         window.__model = run.model;
         els.go.disabled = false;

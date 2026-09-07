@@ -77,7 +77,13 @@ await page.evaluate(() => {
   build.dispatchEvent(new Event('input'));
   document.getElementById('ctl-n').value = '12';
   document.getElementById('ctl-seed').value = '3';
+  // Exercise the religion term, and the sub-block that only gerrymander uses.
+  const mode = document.getElementById('ctl-relmode');
+  mode.value = 'gerrymander';
+  mode.dispatchEvent(new Event('change'));
 });
+const gerryVisible = await page.evaluate(() =>
+  !document.getElementById('ctl-gerry').hidden);
 await page.click('#ctl-go');
 await page.waitForFunction(
   () => document.getElementById('run-phase').textContent.startsWith('optimising'),
@@ -114,6 +120,7 @@ const pause = {
 
 await page.click('#ctl-stop');
 
+await page.evaluate((v) => { window.__gerryVisible = v; }, gerryVisible);
 const regions = await page.evaluate(() => {
   const m = window.__model;
   let painted = 0;
@@ -135,6 +142,10 @@ const regions = await page.evaluate(() => {
     meanPenalty: Number(m.meanPenalty.toFixed(3)),
     meanPopPenalty: Number(m.meanPopPenalty.toFixed(3)),
     sealed: m.sealed,
+    relMode: m.relMode,
+    relSeats: `${m.relSeats}/${m.N}`,
+    relShown: document.getElementById('run-rel').textContent,
+    gerryVisible: window.__gerryVisible,
     popsSumToTotal: pops.reduce((a, b) => a + b, 0),
   };
 });
@@ -194,6 +205,9 @@ if (!regions || regions.rows !== regions.regionCount) problems.push('results tab
 // sums never got real geometry.
 if (!regions || !(regions.meanPenalty > 0.99)) problems.push('land penalty not measured');
 if (!regions || !(regions.meanPopPenalty > 0)) problems.push('people penalty not measured');
+if (!regions || regions.relMode !== 'gerrymander') problems.push('religion mode did not take');
+if (!regions || !regions.gerryVisible) problems.push('gerrymander sub-controls stayed hidden');
+if (!regions || regions.relShown !== regions.relSeats) problems.push('religion readout wrong');
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
 if (problems.length) {

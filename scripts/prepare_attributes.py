@@ -19,15 +19,33 @@ DATA = ROOT / "data"
 OUT = ROOT / "build" / "dz_attributes.csv"
 
 # --- registry -------------------------------------------------------------
-# Each entry is one source file. For a 1-D table (zone -> number) `column` names
-# the output column. For a 2-D table (zone x category -> number) `prefix` is used
-# to build one column per category, e.g. rel_catholic, rel_none.
+# Each entry is one source file, in one of three shapes:
+#
+#   1-D table (zone -> number):        `column` names the single output column.
+#   2-D table (zone x category):       `prefix` gives one column per category,
+#                                      e.g. rel_catholic, rel_none.
+#   2-D table collapsed to an index:   `weights` maps each category label to a
+#                                      number, and the table becomes a single
+#                                      population-weighted mean per zone. Two
+#                                      columns come out: `column` for the index
+#                                      and `column`_n for the table's own row
+#                                      total, which is the correct denominator
+#                                      to aggregate by later and is not quite
+#                                      the same as `pop` (see the note below).
 #
 # To add a dataset: drop the JSON in data/ and add one line here.
+RELIGION = "ni-census21-people-dz21+religion_belong_to_or_brought_up_in_dvo-f4902c4c.json"
+
 TABLES: list[dict] = [
     {"column": "pop", "file": "ni-census21-people-dz21-96e78665.json"},
-    # {"prefix": "rel",
-    #  "file": "ni-census21-people-dz21+religion_belong_to_or_brought_up_in_dvo-f4902c4c.json"},
+    # Protestant 0, Catholic 1, and the unaligned at 0.5 on the assumption that
+    # in a two-way contest they split evenly. Changing these means a rebuild.
+    {"column": "rel", "file": RELIGION, "weights": {
+        "Catholic": 1.0,
+        "Protestant and Other Christian (including Christian related)": 0.0,
+        "Other religions": 0.5,
+        "None": 0.5,
+    }},
 ]
 
 ZONE_DIM = "DZ21"  # dimension we key on
@@ -70,6 +88,37 @@ def load_nisra_table(path: Path) -> tuple[list[str], dict[str, list]]:
     return cats, rows
 
 
+def collapse(spec: dict, path: Path, cats: list[str],
+             rows: dict[str, list]) -> tuple[list[str], dict[str, list]]:
+    """Collapse a 2-D table to a weighted index per zone, plus its row total.
+
+    The index is the population-weighted mean of the category weights, so for
+    religion it runs 0 (all Protestant) to 1 (all Catholic). The row total comes
+    out alongside because it is the right denominator to aggregate the index by
+    later, and it is not quite `pop`: NISRA's disclosure control leaves the two
+    differing in about a third of zones, by a handful of people each.
+
+    Every category must carry a weight, in both directions -- a renamed, added
+    or dropped category is a hard failure rather than a silently wrong index.
+    """
+    weights = spec["weights"]
+    missing = [c for c in cats if c not in weights]
+    if missing:
+        raise SystemExit(f"{path.name}: no weight given for category {missing}")
+    unused = [c for c in weights if c not in cats]
+    if unused:
+        raise SystemExit(f"{path.name}: weights given for absent categories {unused}")
+
+    ws = [weights[c] for c in cats]
+    name = spec["column"]
+    out: dict[str, list] = {}
+    for code, vals in rows.items():
+        n = sum(vals)
+        out[code] = [round(sum(v * w for v, w in zip(vals, ws)) / n, 6), n] if n \
+            else ["", 0]
+    return [name, f"{name}_n"], out
+
+
 def main() -> int:
     columns: list[str] = []
     data: dict[str, dict[str, object]] = {}
@@ -80,8 +129,11 @@ def main() -> int:
             raise SystemExit(f"missing source file: {path}")
 
         cats, rows = load_nisra_table(path)
+        total = sum(sum(v) for v in rows.values())   # before any collapsing
 
-        if len(cats) == 1 and cats[0] == "":
+        if spec.get("weights"):
+            names, rows = collapse(spec, path, cats, rows)
+        elif len(cats) == 1 and cats[0] == "":
             names = [spec["column"]]
         else:
             prefix = spec.get("prefix") or spec.get("column")
@@ -91,7 +143,6 @@ def main() -> int:
         for code, vals in rows.items():
             data.setdefault(code, {}).update(zip(names, vals))
 
-        total = sum(sum(v) for v in rows.values())
         print(f"  {path.name}\n    -> {len(rows):,} zones x {len(names)} column(s) "
               f"{names}, total {total:,}")
 
