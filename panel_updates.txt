@@ -1,0 +1,7 @@
+Remove 'Northern Ireland' and 'Census 2021...' titles
+Remove 'Zones' and 'Population' numbers
+Make panel a bit wider (350px)
+Move Go, Pause and Stop buttons to the top
+Remove Branch Moves button
+Make 'religion' controls under one collapsible block. When uncollapsed it should just show the weight slider.
+The Max Dev, Moves, score etc should live in the RHS results panel

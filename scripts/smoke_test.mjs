@@ -47,11 +47,6 @@ await page.waitForFunction(
 // let the WebGL frames settle
 await page.evaluate(() => new Promise(r => setTimeout(r, 2500)));
 
-const stats = await page.evaluate(() => ({
-  zones: document.getElementById('stat-zones').textContent,
-  pop: document.getElementById('stat-pop').textContent,
-}));
-
 // the adjacency graph loads off the critical path, so wait for it separately
 await page.waitForFunction(() => window.__graph, { timeout: 30000 }).catch(() => {});
 
@@ -81,6 +76,9 @@ await page.evaluate(() => {
   const mode = document.getElementById('ctl-relmode');
   mode.value = 'gerrymander';
   mode.dispatchEvent(new Event('change'));
+  const relw = document.getElementById('ctl-relw');
+  relw.value = '0';                       // log10 scale, so weight 1
+  relw.dispatchEvent(new Event('input'));
 });
 const gerryVisible = await page.evaluate(() =>
   !document.getElementById('ctl-gerry').hidden);
@@ -188,7 +186,7 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-console.log(JSON.stringify({ stats, graph, regions, pause, tip, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ graph, regions, pause, tip, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to

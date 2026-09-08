@@ -11,64 +11,76 @@
   <div id="map"></div>
 
   <div id="panel">
-    <h1>Northern Ireland</h1>
-    <p class="sub">Census 2021 Data Zones</p>
-    <dl id="stats">
-      <div><dt>Zones</dt><dd id="stat-zones">&mdash;</dd></div>
-      <div><dt>Population</dt><dd id="stat-pop">&mdash;</dd></div>
-    </dl>
+    <div class="ctl-buttons">
+      <button id="ctl-go" type="button" disabled>GO</button>
+      <button id="ctl-pause" type="button" disabled>PAUSE</button>
+      <button id="ctl-stop" type="button" disabled>STOP</button>
+    </div>
 
-    <div id="controls">
+    <div class="ctl-grid">
+      <label for="ctl-n">Regions</label>
+      <input id="ctl-n" type="number" min="2" max="500" step="1" value="18">
+      <label for="ctl-seed">Seed</label>
+      <input id="ctl-seed" type="number" min="0" step="1" value="1">
+      <label for="ctl-temp">Temperature</label>
+      <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
+      <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
+      <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
+      <label for="ctl-shape">Land shape <span id="ctl-shape-value">1</span></label>
+      <input id="ctl-shape" type="range" min="-1.02" max="1" step="0.02" value="0"
+             data-weight data-off>
+      <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
+      <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
+             data-weight data-off>
+    </div>
+
+    <div id="rel-block">
       <div class="ctl-grid">
-        <label for="ctl-n">Regions</label>
-        <input id="ctl-n" type="number" min="2" max="500" step="1" value="18">
-        <label for="ctl-seed">Seed</label>
-        <input id="ctl-seed" type="number" min="0" step="1" value="1">
-        <label for="ctl-temp">Temperature</label>
-        <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
-        <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
-        <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
-        <label for="ctl-shape">Land shape <span id="ctl-shape-value">1</span></label>
-        <input id="ctl-shape" type="range" min="-1.02" max="1" step="0.02" value="0"
+        <div class="ctl-head">
+          <button id="rel-toggle" type="button" aria-expanded="false" aria-controls="rel-body">
+            <span class="chev" aria-hidden="true">&#9656;</span> Religion
+          </button>
+          <span id="rel-mode-label">average</span>
+          <span id="ctl-relw-value">off</span>
+        </div>
+        <input id="ctl-relw" type="range" min="-1.02" max="1" step="0.02" value="-1.02"
                data-weight data-off>
-        <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
-        <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
-               data-weight data-off>
-        <label for="ctl-relmode">Religion</label>
-        <select id="ctl-relmode">
-          <option value="off" selected>off</option>
-          <option value="average">average</option>
-          <option value="extreme">extreme</option>
-          <option value="gerrymander">gerrymander</option>
-        </select>
-        <label for="ctl-relw">Religion wt <span id="ctl-relw-value">1</span></label>
-        <input id="ctl-relw" type="range" min="-1.02" max="1" step="0.02" value="0"
-               data-weight data-off>
-        <label for="ctl-branch">Branch moves</label>
-        <input id="ctl-branch" type="checkbox" checked>
-        <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
-        <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">
-        <label for="ctl-build">Build/frame <span id="ctl-build-value">10</span></label>
-        <input id="ctl-build" type="range" min="1" max="200" step="1" value="10">
-        <label for="ctl-opt">Optimise/frame <span id="ctl-opt-value">200</span></label>
-        <input id="ctl-opt" type="range" min="1" max="4000" step="1" value="200">
       </div>
-      <div class="ctl-grid ctl-sub" id="ctl-gerry" hidden>
-        <label for="ctl-relt">Threshold <span id="ctl-relt-value">0.6</span></label>
-        <input id="ctl-relt" type="range" min="0.05" max="0.95" step="0.01" value="0.6">
-        <label for="ctl-rels">Steepness <span id="ctl-rels-value">0.05</span></label>
-        <input id="ctl-rels" type="range" min="0.01" max="0.3" step="0.01" value="0.05">
-        <label for="ctl-rela">Above threshold</label>
-        <input id="ctl-rela" type="checkbox" checked>
-      </div>
-      <div class="ctl-buttons">
-        <button id="ctl-go" type="button" disabled>GO</button>
-        <button id="ctl-pause" type="button" disabled>PAUSE</button>
-        <button id="ctl-stop" type="button" disabled>STOP</button>
+
+      <div id="rel-body" hidden>
+        <div class="ctl-grid ctl-sub">
+          <label for="ctl-relmode">Mode</label>
+          <select id="ctl-relmode">
+            <option value="average" selected>average</option>
+            <option value="extreme">extreme</option>
+            <option value="gerrymander">gerrymander</option>
+          </select>
+        </div>
+        <div class="ctl-grid ctl-sub" id="ctl-gerry" hidden>
+          <label for="ctl-relt">Threshold <span id="ctl-relt-value">0.6</span></label>
+          <input id="ctl-relt" type="range" min="0.05" max="0.95" step="0.01" value="0.6">
+          <label for="ctl-rels">Steepness <span id="ctl-rels-value">0.05</span></label>
+          <input id="ctl-rels" type="range" min="0.01" max="0.3" step="0.01" value="0.05">
+          <label for="ctl-rela">Above threshold</label>
+          <input id="ctl-rela" type="checkbox" checked>
+        </div>
       </div>
     </div>
 
-    <dl id="run" hidden>
+    <div class="ctl-grid ctl-more">
+      <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
+      <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">
+      <label for="ctl-build">Build/frame <span id="ctl-build-value">10</span></label>
+      <input id="ctl-build" type="range" min="1" max="200" step="1" value="10">
+      <label for="ctl-opt">Optimise/frame <span id="ctl-opt-value">200</span></label>
+      <input id="ctl-opt" type="range" min="1" max="4000" step="1" value="200">
+    </div>
+
+    <p class="hint">Hover a zone for its figures, and its region's.</p>
+  </div>
+
+  <div id="results" hidden>
+    <dl id="run">
       <div class="run-wide"><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
       <div><dt>Max dev</dt><dd id="run-dev">&mdash;</dd></div>
       <div><dt>Moves</dt><dd id="run-moves">&mdash;</dd></div>
@@ -79,11 +91,13 @@
       <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
     </dl>
 
-    <div id="results" hidden>
-      <table id="results-table"><tbody></tbody></table>
+    <div id="results-list" hidden>
+      <h2>Regions <span id="results-count"></span></h2>
+      <p class="sub">largest first</p>
+      <div id="results-scroll">
+        <table id="results-table"><tbody></tbody></table>
+      </div>
     </div>
-
-    <p class="hint">Hover a zone for its figures, and its region's.</p>
   </div>
 
   <div id="status" role="status">Loading zones&hellip;</div>

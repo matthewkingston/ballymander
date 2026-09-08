@@ -40,8 +40,6 @@ const els = {
   ttRegionName: document.querySelector('.tt-region-name'),
   ttRegionPop: document.querySelector('.tt-region-pop-value'),
   ttRegionRel: document.querySelector('.tt-region-rel'),
-  statZones: document.getElementById('stat-zones'),
-  statPop: document.getElementById('stat-pop'),
   n: document.getElementById('ctl-n'),
   seed: document.getElementById('ctl-seed'),
   temp: document.getElementById('ctl-temp'),
@@ -57,6 +55,9 @@ const els = {
   shapeValue: document.getElementById('ctl-shape-value'),
   pshape: document.getElementById('ctl-pshape'),
   pshapeValue: document.getElementById('ctl-pshape-value'),
+  relToggle: document.getElementById('rel-toggle'),
+  relBody: document.getElementById('rel-body'),
+  relModeLabel: document.getElementById('rel-mode-label'),
   relmode: document.getElementById('ctl-relmode'),
   relw: document.getElementById('ctl-relw'),
   relwValue: document.getElementById('ctl-relw-value'),
@@ -66,11 +67,9 @@ const els = {
   rels: document.getElementById('ctl-rels'),
   relsValue: document.getElementById('ctl-rels-value'),
   rela: document.getElementById('ctl-rela'),
-  branch: document.getElementById('ctl-branch'),
   go: document.getElementById('ctl-go'),
   pause: document.getElementById('ctl-pause'),
   stop: document.getElementById('ctl-stop'),
-  run: document.getElementById('run'),
   runPhase: document.getElementById('run-phase'),
   runDev: document.getElementById('run-dev'),
   runShape: document.getElementById('run-shape'),
@@ -80,6 +79,8 @@ const els = {
   runScore: document.getElementById('run-score'),
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
+  resultsList: document.getElementById('results-list'),
+  resultsCount: document.getElementById('results-count'),
   resultsBody: document.querySelector('#results-table tbody'),
 };
 
@@ -101,12 +102,6 @@ async function loadZones() {
   const res = await fetch(CONFIG.dataUrl);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} fetching ${CONFIG.dataUrl}`);
   return res.json();
-}
-
-function summarise(geojson) {
-  let pop = 0;
-  for (const f of geojson.features) pop += f.properties.pop || 0;
-  return { zones: geojson.features.length, pop };
 }
 
 /* --- map ----------------------------------------------------------------- */
@@ -132,7 +127,8 @@ function createMap() {
   });
 
   map.touchZoomRotate.disableRotation();
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+  // Bottom-right, stacked above the scale: the results panel owns the top right.
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
   map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-right');
   return map;
 }
@@ -369,9 +365,6 @@ function tick(map) {
         Number(els.rels.value), els.rela.checked);
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
         weightOf(els.pshape), weightOf(els.relw));
-      // Changes the move set, not the score, so best-so-far stays comparable
-      // and this needs no re-base.
-      run.model.allowBranchMoves = els.branch.checked;
 
       if (run.phase === 'build') {
         const steps = Number(els.build.value);
@@ -413,8 +406,8 @@ function start(map) {
   run.paused = false;
   run.lastDraw = 0;
   setButtons('running');
-  els.run.hidden = false;
-  els.results.hidden = true;
+  els.results.hidden = false;      // the run readout lives there now
+  els.resultsList.hidden = true;   // the table only after STOP
   readout();
   run.raf = requestAnimationFrame(tick(map));
 }
@@ -454,6 +447,7 @@ function stop(map, { silent = false } = {}) {
 
 function showResults() {
   const rows = run.model.summary().sort((a, b) => b.pop - a.pop);
+  els.resultsCount.textContent = rows.length;
   els.resultsBody.innerHTML = '';
   for (const row of rows) {
     const tr = document.createElement('tr');
@@ -473,7 +467,7 @@ function showResults() {
     tr.append(swatch, name, pop, dev);
     els.resultsBody.appendChild(tr);
   }
-  els.results.hidden = false;
+  els.resultsList.hidden = false;
 }
 
 /* --- boot ---------------------------------------------------------------- */
@@ -481,10 +475,26 @@ function showResults() {
 async function main() {
   const map = createMap();
 
-  // Threshold, steepness and direction only mean anything in gerrymander mode.
-  const syncMode = () => { els.gerry.hidden = els.relmode.value !== 'gerrymander'; };
-  els.relmode.addEventListener('change', syncMode);
-  syncMode();
+  // Collapsed still shows the weight slider and the current mode; the selector
+  // and the gerrymander knobs are what fold away.
+  els.relToggle.addEventListener('click', () => {
+    const open = els.relBody.hidden;
+    els.relBody.hidden = !open;
+    els.relToggle.setAttribute('aria-expanded', String(open));
+  });
+
+  // There is no 'off' mode: the weight slider turns the term off, as it does
+  // for every other term. The mode label greys out to show when that has
+  // happened. Threshold and steepness only mean anything in gerrymander mode.
+  const syncRel = () => {
+    const mode = els.relmode.value;
+    els.gerry.hidden = mode !== 'gerrymander';
+    els.relModeLabel.textContent = mode;
+    els.relModeLabel.classList.toggle('is-off', weightOf(els.relw) === 0);
+  };
+  els.relmode.addEventListener('change', syncRel);
+  els.relw.addEventListener('input', syncRel);
+  syncRel();
 
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
                              [els.opt, els.optValue], [els.popw, els.popwValue],
@@ -514,9 +524,6 @@ async function main() {
     //   __model.summary()
     window.__map = map;
 
-    const { zones, pop } = summarise(geojson);
-    els.statZones.textContent = nf.format(zones);
-    els.statPop.textContent = nf.format(pop);
     els.status.hidden = true;
 
     // Adjacency is data, not a layer -- nothing on screen depends on it, so it
