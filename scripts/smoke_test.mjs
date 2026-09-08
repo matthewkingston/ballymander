@@ -132,7 +132,11 @@ const regions = await page.evaluate(() => {
     zones: m.n,
     assignedAll: m.assigned === m.n,
     regionCount: m.N,
-    rows: document.querySelectorAll('#results-table tbody tr').length,
+    rows: document.querySelectorAll('#bars .bar-row').length,
+    axis: [document.getElementById('bars-min').textContent,
+           document.getElementById('bars-max').textContent],
+    barsFilled: [...document.querySelectorAll('.bar-fill')]
+      .filter((b) => parseFloat(b.style.width) > 0).length,
     resultsShown: !document.getElementById('results').hidden,
     phase: document.getElementById('run-phase').textContent,
     maxDev: document.getElementById('run-dev').textContent,
@@ -201,7 +205,9 @@ if (!graph || graph.components !== 1) problems.push('adjacency graph did not loa
 if (!regions || !regions.assignedAll || regions.painted !== regions.zones) {
   problems.push('region run did not paint every zone');
 }
-if (!regions || regions.rows !== regions.regionCount) problems.push('results table incomplete');
+if (!regions || regions.rows !== regions.regionCount) problems.push('a bar per region missing');
+if (!regions || regions.barsFilled !== regions.regionCount) problems.push('bars not drawn');
+if (!regions || !regions.axis[0] || !regions.axis[1]) problems.push('bar axis not labelled');
 // A disc scores 1 and nothing can beat it, so anything below means the moment
 // sums never got real geometry.
 if (!regions || !(regions.meanPenalty > 0.99)) problems.push('land penalty not measured');

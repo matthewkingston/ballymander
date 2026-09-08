@@ -80,8 +80,9 @@ const els = {
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
   resultsList: document.getElementById('results-list'),
-  resultsCount: document.getElementById('results-count'),
-  resultsBody: document.querySelector('#results-table tbody'),
+  bars: document.getElementById('bars'),
+  barsMin: document.getElementById('bars-min'),
+  barsMax: document.getElementById('bars-max'),
 };
 
 /* Live run state. `shadow` is what the map currently shows, so each redraw only
@@ -92,9 +93,14 @@ const run = {
   raf: 0,
   paused: false,
   lastDraw: 0,
+  lastBars: 0,
   shadow: null,
   colors: [],
+  bars: [],               // one {row, fill, value} per region, never reordered
 };
+
+const BAR_ROW_H = 18;     // must match .bar-row height in style.css
+const BAR_INTERVAL = 200; // five redraws a second
 
 /* --- data ---------------------------------------------------------------- */
 
@@ -377,6 +383,12 @@ function tick(map) {
       }
       paintRegions(map);
       readout();
+      // Bars redraw on their own slower clock, and are bounded by the frame
+      // rate: below 5 frames/s they follow it rather than outpacing it.
+      if (now - run.lastBars >= BAR_INTERVAL) {
+        run.lastBars = now;
+        drawBars();
+      }
     }
     run.raf = requestAnimationFrame(frame);
   };
@@ -405,9 +417,12 @@ function start(map) {
   run.phase = 'build';
   run.paused = false;
   run.lastDraw = 0;
+  run.lastBars = 0;
   setButtons('running');
-  els.results.hidden = false;      // the run readout lives there now
-  els.resultsList.hidden = true;   // the table only after STOP
+  els.results.hidden = false;
+  els.resultsList.hidden = false;  // bars are live from the first build step
+  buildBars(n);
+  drawBars();
   readout();
   run.raf = requestAnimationFrame(tick(map));
 }
@@ -442,32 +457,67 @@ function stop(map, { silent = false } = {}) {
   run.phase = 'done';
   paintRegions(map);
   readout();
-  showResults();
+  drawBars();
 }
 
-function showResults() {
-  const rows = run.model.summary().sort((a, b) => b.pop - a.pop);
-  els.resultsCount.textContent = rows.length;
-  els.resultsBody.innerHTML = '';
-  for (const row of rows) {
-    const tr = document.createElement('tr');
-    const swatch = document.createElement('td');
-    const dot = document.createElement('span');
-    dot.className = 'swatch';
-    dot.style.background = run.colors[row.region];
-    swatch.appendChild(dot);
-    const name = document.createElement('td');
-    name.textContent = `Region ${row.region + 1}`;
-    const pop = document.createElement('td');
-    pop.className = 'num';
-    pop.textContent = nf.format(Math.round(row.pop));
-    const dev = document.createElement('td');
-    dev.className = 'num muted';
-    dev.textContent = pct.format(row.deviation);
-    tr.append(swatch, name, pop, dev);
-    els.resultsBody.appendChild(tr);
+/* One row per region, built once per run. drawBars() afterwards only writes a
+ * transform, a width and a string -- never rebuilds -- so hovering a bar is not
+ * destroyed mid-read and the cost does not grow with the update rate. */
+function buildBars(n) {
+  els.bars.textContent = '';
+  els.bars.style.height = `${n * BAR_ROW_H}px`;
+  run.bars = Array.from({ length: n }, (_, region) => {
+    const row = document.createElement('div');
+    row.className = 'bar-row';
+
+    const label = document.createElement('span');
+    label.className = 'bar-n';
+    label.textContent = region + 1;
+
+    const track = document.createElement('span');
+    track.className = 'bar-track';
+    const fill = document.createElement('span');
+    fill.className = 'bar-fill';
+    fill.style.background = run.colors[region];
+    const value = document.createElement('span');
+    value.className = 'bar-value';
+    track.append(fill, value);
+
+    row.append(label, track);
+    els.bars.appendChild(row);
+    return { row, fill, value };
+  });
+}
+
+function drawBars() {
+  const m = run.model;
+  if (!run.bars.length || run.bars.length !== m.N) return;
+
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (let r = 0; r < m.N; r++) {
+    const pop = m.regionPop[r];
+    if (pop < lo) lo = pop;
+    if (pop > hi) hi = pop;
   }
-  els.resultsList.hidden = false;
+  // Padded, or the smallest region is a zero-width bar by definition. The
+  // fallback covers every region being equal, where the range is zero.
+  const pad = (hi - lo) * 0.08 || Math.max(1, hi * 0.02);
+  const min = Math.max(0, lo - pad);
+  const max = hi + pad;
+  const span = max - min || 1;
+
+  const order = Array.from({ length: m.N }, (_, r) => r)
+    .sort((a, b) => m.regionPop[b] - m.regionPop[a]);
+  order.forEach((region, rank) => {
+    const bar = run.bars[region];
+    bar.row.style.transform = `translateY(${rank * BAR_ROW_H}px)`;
+    bar.fill.style.width = `${((m.regionPop[region] - min) / span) * 100}%`;
+    bar.value.textContent = nf.format(Math.round(m.regionPop[region]));
+  });
+
+  els.barsMin.textContent = nf.format(Math.round(min));
+  els.barsMax.textContent = nf.format(Math.round(max));
 }
 
 /* --- boot ---------------------------------------------------------------- */
