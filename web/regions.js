@@ -1073,8 +1073,14 @@ class RegionModel {
     for (let z = 0; z < this.n; z++) this._touchFrontier(z);
   }
 
-  /* A region's religion value, for display. */
+  /* Per-region values for display. The bars redraw five times a second, so
+   * these exist to avoid going through summary(), which allocates an object
+   * per region every time it is called. */
   regionReligion(r) { return this._relValue(r); }
+
+  regionPenalty(r) { return this._penalty(r); }
+
+  regionPopPenalty(r) { return this._penaltyPop(r); }
 
   regionOf(code) {
     const r = this.assign[this.index.get(code)];

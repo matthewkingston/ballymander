@@ -152,6 +152,22 @@ const regions = await page.evaluate(() => {
   };
 });
 
+// switching the statistic must rescale and re-rank the same bars, not rebuild
+const statSwitch = await page.evaluate(() => {
+  const sel = document.getElementById('bars-stat');
+  const max = () => document.getElementById('bars-max').textContent;
+  const rows = () => document.querySelectorAll('#bars .bar-row').length;
+  const before = { max: max(), rows: rows() };
+  sel.value = 'religion';
+  sel.dispatchEvent(new Event('change'));
+  return {
+    before,
+    after: { max: max(), rows: rows() },
+    filled: [...document.querySelectorAll('.bar-fill')]
+      .filter((b) => parseFloat(b.style.width) > 0).length,
+  };
+});
+
 await page.screenshot({ path: `${OUT}/map-full.png` });
 
 // --- hover a zone -------------------------------------------------------
@@ -190,7 +206,7 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-console.log(JSON.stringify({ graph, regions, pause, tip, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to
@@ -208,6 +224,13 @@ if (!regions || !regions.assignedAll || regions.painted !== regions.zones) {
 if (!regions || regions.rows !== regions.regionCount) problems.push('a bar per region missing');
 if (!regions || regions.barsFilled !== regions.regionCount) problems.push('bars not drawn');
 if (!regions || !regions.axis[0] || !regions.axis[1]) problems.push('bar axis not labelled');
+if (!statSwitch || statSwitch.before.max === statSwitch.after.max) {
+  problems.push('switching the statistic did not rescale the axis');
+}
+if (!statSwitch || statSwitch.after.rows !== statSwitch.before.rows
+    || statSwitch.filled !== statSwitch.before.rows) {
+  problems.push('switching the statistic disturbed the bars');
+}
 // A disc scores 1 and nothing can beat it, so anything below means the moment
 // sums never got real geometry.
 if (!regions || !(regions.meanPenalty > 0.99)) problems.push('land penalty not measured');

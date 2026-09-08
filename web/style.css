@@ -233,6 +233,20 @@ html, body {
   font-weight: 600;
   letter-spacing: -0.01em;
 }
+/* The statistic selector doubles as the panel's heading. */
+#bars-stat {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  width: 100%;
+  padding: 3px 4px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+}
+#bars-stat:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
 #results-scroll { min-height: 0; margin-top: 8px; overflow-y: auto; }
 
 /* --- population bars ---------------------------------------------------- */

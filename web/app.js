@@ -80,6 +80,7 @@ const els = {
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
   resultsList: document.getElementById('results-list'),
+  barsStat: document.getElementById('bars-stat'),
   bars: document.getElementById('bars'),
   barsMin: document.getElementById('bars-min'),
   barsMax: document.getElementById('bars-max'),
@@ -101,6 +102,17 @@ const run = {
 
 const BAR_ROW_H = 18;     // must match .bar-row height in style.css
 const BAR_INTERVAL = 200; // five redraws a second
+
+/* What the bars can show: one per score term that has a weight slider. Each
+ * needs its own format -- population wants thousands and no decimals, the
+ * others want decimals -- but the padded min-to-max scale is generic, so
+ * nothing else has to know which one is selected. */
+const BAR_STATS = {
+  pop: { get: (m, r) => m.regionPop[r], format: (v) => nf.format(Math.round(v)) },
+  land: { get: (m, r) => m.regionPenalty(r), format: (v) => v.toFixed(2) },
+  people: { get: (m, r) => m.regionPopPenalty(r), format: (v) => v.toFixed(2) },
+  religion: { get: (m, r) => m.regionReligion(r), format: (v) => v.toFixed(3) },
+};
 
 /* --- data ---------------------------------------------------------------- */
 
@@ -493,31 +505,36 @@ function drawBars() {
   const m = run.model;
   if (!run.bars.length || run.bars.length !== m.N) return;
 
+  const stat = BAR_STATS[els.barsStat.value] || BAR_STATS.pop;
+  const value = Array.from({ length: m.N }, (_, r) => stat.get(m, r));
+
   let lo = Infinity;
   let hi = -Infinity;
-  for (let r = 0; r < m.N; r++) {
-    const pop = m.regionPop[r];
-    if (pop < lo) lo = pop;
-    if (pop > hi) hi = pop;
+  for (const v of value) {
+    if (v < lo) lo = v;
+    if (v > hi) hi = v;
   }
   // Padded, or the smallest region is a zero-width bar by definition. The
-  // fallback covers every region being equal, where the range is zero.
-  const pad = (hi - lo) * 0.08 || Math.max(1, hi * 0.02);
+  // fallbacks cover every region being equal, and everything being zero.
+  const pad = (hi - lo) * 0.08 || Math.abs(hi) * 0.05 || 1;
   const min = Math.max(0, lo - pad);
   const max = hi + pad;
   const span = max - min || 1;
 
+  // Sorted by whatever is on show, so the selector reorders the panel too.
   const order = Array.from({ length: m.N }, (_, r) => r)
-    .sort((a, b) => m.regionPop[b] - m.regionPop[a]);
+    .sort((a, b) => value[b] - value[a]);
   order.forEach((region, rank) => {
     const bar = run.bars[region];
     bar.row.style.transform = `translateY(${rank * BAR_ROW_H}px)`;
-    bar.fill.style.width = `${((m.regionPop[region] - min) / span) * 100}%`;
-    bar.value.textContent = nf.format(Math.round(m.regionPop[region]));
+    bar.fill.style.width = `${((value[region] - min) / span) * 100}%`;
+    bar.value.textContent = stat.format(value[region]);
   });
 
-  els.barsMin.textContent = nf.format(Math.round(min));
-  els.barsMax.textContent = nf.format(Math.round(max));
+  // The labels report the actual extremes, not the padded domain -- the padding
+  // exists so the smallest bar is visible, not to be read off the axis.
+  els.barsMin.textContent = stat.format(lo);
+  els.barsMax.textContent = stat.format(hi);
 }
 
 /* --- boot ---------------------------------------------------------------- */
@@ -542,6 +559,10 @@ async function main() {
     els.relModeLabel.textContent = mode;
     els.relModeLabel.classList.toggle('is-off', weightOf(els.relw) === 0);
   };
+  // Switching the statistic re-ranks immediately rather than waiting for the
+  // next tick, so the panel responds even while paused or stopped.
+  els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
+
   els.relmode.addEventListener('change', syncRel);
   els.relw.addEventListener('input', syncRel);
   syncRel();
