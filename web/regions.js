@@ -210,6 +210,43 @@ class RegionModel {
     this.allowBranchMoves = true;
     this._single = [0];   // scratch, so a plain move allocates nothing
     this._cutMap = new Map();   // scratch: region -> edges leaving the moving set
+
+    // Recombination scratch, allocated once at capacity rather than per step.
+    // A step touches ~420 zones and ~1,200 induced edges at N=18, and runs
+    // often enough that allocating this each time would be pure GC churn.
+    const halfEdges = this.nbr.reduce((a, list) => a + list.length, 0);
+    const edgeCap = (halfEdges >> 1) + 1;
+    this._members = [];
+    this._local = new Int32Array(this.n);
+    this._uf = new Int32Array(this.n);
+    this._parent = new Int32Array(this.n);
+    this._depth = new Int32Array(this.n);
+    this._order = new Int32Array(this.n);
+    this._tin = new Int32Array(this.n);
+    this._tout = new Int32Array(this.n);
+    this._head = new Int32Array(this.n);
+    this._stack = new Int32Array(this.n);
+    this._sz = new Int32Array(this.n);
+    this._eu = new Int32Array(edgeCap);
+    this._ev = new Int32Array(edgeCap);
+    this._eord = new Int32Array(edgeCap);
+    this._nxt = new Int32Array(halfEdges);
+    this._to = new Int32Array(halfEdges);
+    const sums = () => new Float64Array(this.n);
+    this._sPop = sums(); this._sArea = sums(); this._sAx = sums(); this._sAy = sums();
+    this._sAxx = sums(); this._sOwn = sums(); this._sPx = sums(); this._sPy = sums();
+    this._sPxx = sums(); this._sRelS = sums(); this._sRelN = sums();
+    this._sDeg = sums(); this._sInt = sums();
+
+    // Flips between recombinations. Like sweepInterval, a knob rather than run
+    // state, so it survives start(). Infinity turns recombination off.
+    //
+    // 200 is where the return flattens off. A recombination costs roughly fifty
+    // flips, so this is a real trade: measured over an equal two seconds at
+    // N=18 seed 7, best score came out 260 with none, 230 every 2,000, 187
+    // every 500, 181 every 100 and 174 every 25 -- while throughput fell from
+    // 147k steps/sec to 84k at the far end.
+    this.recomInterval = 200;
     this._agg = {
       area: 0, ax: 0, ay: 0, axx: 0, own: 0, pop: 0, px: 0, py: 0, pxx: 0,
       relSum: 0, relN: 0,
@@ -270,6 +307,8 @@ class RegionModel {
     this.sweepCounter = 0;
     this.sealed = 0;
     this.branched = 0;
+    this.recomCounter = 0;
+    this.recombinations = 0;
   }
 
   /* Seed N regions and prepare the build phase. */
@@ -685,6 +724,10 @@ class RegionModel {
 
   /* One attempted move. Returns true if a zone actually changed region. */
   optimiseStep() {
+    if (++this.recomCounter >= this.recomInterval) {
+      this.recomCounter = 0;
+      return this.recombineStep();
+    }
     this.steps++;
     if (this.frontier.length === 0) return false;
 
@@ -954,6 +997,305 @@ class RegionModel {
       this.rPy[r] + sign * g.py,
       this.rPxx[r] + sign * g.pxx,
       this.rArea[r] + sign * g.area);
+  }
+
+  /* --- recombination ----------------------------------------------------- */
+
+  /* Merge two adjacent regions, draw a random spanning tree over the union and
+   * cut one edge of it. A tree splits into exactly two pieces when any edge is
+   * removed, and every tree edge is a real adjacency edge, so both pieces are
+   * connected in the graph too: contiguity here is structural rather than
+   * checked. That is what lets a whole boundary be redrawn in one step, and
+   * what dissolves the sealed pockets single-zone moves get stuck in.
+   *
+   * Returns true if the boundary actually changed. */
+  recombineStep() {
+    this.steps++;
+    if (this.frontier.length === 0) return false;
+
+    const seed = this.frontier[(this.rng() * this.frontier.length) | 0];
+    const a = this.assign[seed];
+    let b = -1;
+    let seen = 0;
+    for (const w of this.nbr[seed]) {          // reservoir-pick among differing
+      const r = this.assign[w];
+      if (r < 0 || r === a) continue;
+      seen++;
+      if (this.rng() * seen < 1) b = r;
+    }
+    if (b < 0) return false;
+
+    const size = this._recomCollect(seed, a, b);
+    if (size < 2) return false;
+    if (!this._recomTree(size)) return false;
+    this._recomAccumulate(size);
+    return this._recomChoose(size, a, b);
+  }
+
+  /* Every zone of both regions, by one flood from the seed. The union is
+   * connected -- both regions are, and they touch -- so one pass reaches all
+   * of it. There are no member lists on the model, only assign[]. */
+  _recomCollect(seed, a, b) {
+    const members = this._members;
+    members.length = 0;
+    const stamp = ++this._stamp;
+    this._seen[seed] = stamp;
+    members.push(seed);
+    for (let i = 0; i < members.length; i++) {
+      for (const w of this.nbr[members[i]]) {
+        const r = this.assign[w];
+        if ((r === a || r === b) && this._seen[w] !== stamp) {
+          this._seen[w] = stamp;
+          members.push(w);
+        }
+      }
+    }
+    for (let i = 0; i < members.length; i++) this._local[members[i]] = i;
+    this._stampMembers = stamp;
+    return members.length;
+  }
+
+  /* Random-order Kruskal. Preferred over a randomised BFS, whose trees come out
+   * shallow and bushy so that nearly every cut is tiny-versus-huge; this gives
+   * longer paths and therefore more balanced cuts to choose between. */
+  _recomTree(size) {
+    const members = this._members;
+    const stamp = this._stampMembers;
+    let m = 0;
+    for (let i = 0; i < size; i++) {
+      for (const w of this.nbr[members[i]]) {
+        if (this._seen[w] !== stamp) continue;
+        const j = this._local[w];
+        if (j > i) { this._eu[m] = i; this._ev[m] = j; m++; }
+      }
+    }
+    this._edgeCount = m;
+    if (m < size - 1) return false;
+
+    for (let i = 0; i < m; i++) this._eord[i] = i;
+    for (let i = m - 1; i > 0; i--) {          // Fisher-Yates
+      const j = (this.rng() * (i + 1)) | 0;
+      const t = this._eord[i]; this._eord[i] = this._eord[j]; this._eord[j] = t;
+    }
+
+    const uf = this._uf;
+    for (let i = 0; i < size; i++) uf[i] = i;
+    const find = (x) => { while (uf[x] !== x) { uf[x] = uf[uf[x]]; x = uf[x]; } return x; };
+
+    this._head.fill(-1, 0, size);
+    let added = 0;
+    let slot = 0;
+    for (let k = 0; k < m && added < size - 1; k++) {
+      const e = this._eord[k];
+      const u = this._eu[e];
+      const v = this._ev[e];
+      const ru = find(u);
+      const rv = find(v);
+      if (ru === rv) continue;
+      uf[ru] = rv;
+      this._to[slot] = v; this._nxt[slot] = this._head[u]; this._head[u] = slot++;
+      this._to[slot] = u; this._nxt[slot] = this._head[v]; this._head[v] = slot++;
+      added++;
+    }
+    return added === size - 1;
+  }
+
+  /* Root the tree, then one backward pass over the preorder gives every
+   * candidate cut's totals at once: population, area, the moment sums and the
+   * religion sums are all additive, so four of the five score terms come free.
+   *
+   * Cut edges is not a subtree sum, but the handshake lemma makes it one:
+   *   edges leaving S = (induced degrees in S) - 2 * (edges inside S)
+   * and an induced edge lies inside subtree(x) exactly when x is an ancestor of
+   * its LCA -- so counting at each edge's LCA and subtree-summing that gives
+   * the second half. A naive depth walk is enough at this size. */
+  _recomAccumulate(size) {
+    const { _members: members, _parent: parent, _depth: depth, _order: order,
+      _tin: tin, _sz: sz, _stack: stack, _head: head, _nxt: nxt, _to: to } = this;
+    const stamp = this._stampMembers;
+
+    let sp = 0;
+    let count = 0;
+    stack[sp++] = 0;
+    parent[0] = -1;
+    depth[0] = 0;
+    while (sp > 0) {
+      const u = stack[--sp];
+      tin[u] = count;
+      order[count++] = u;
+      for (let e = head[u]; e !== -1; e = nxt[e]) {
+        const v = to[e];
+        if (v === parent[u]) continue;
+        parent[v] = u;
+        depth[v] = depth[u] + 1;
+        stack[sp++] = v;
+      }
+    }
+
+    for (let i = 0; i < size; i++) {
+      const g = members[i];
+      let deg = 0;
+      for (const w of this.nbr[g]) if (this._seen[w] === stamp) deg++;
+      const rr = this.zx[g] * this.zx[g] + this.zy[g] * this.zy[g];
+      this._sPop[i] = this.pop[g];
+      this._sArea[i] = this.za[g];
+      this._sAx[i] = this.za[g] * this.zx[g];
+      this._sAy[i] = this.za[g] * this.zy[g];
+      this._sAxx[i] = this.za[g] * rr;
+      this._sOwn[i] = this.zOwn[g];
+      this._sPx[i] = this.pop[g] * this.zx[g];
+      this._sPy[i] = this.pop[g] * this.zy[g];
+      this._sPxx[i] = this.pop[g] * rr;
+      this._sRelS[i] = this.zRel[g] * this.zRelN[g];
+      this._sRelN[i] = this.zRelN[g];
+      this._sDeg[i] = deg;
+      this._sInt[i] = 0;
+      sz[i] = 1;
+    }
+
+    for (let e = 0; e < this._edgeCount; e++) {
+      let u = this._eu[e];
+      let v = this._ev[e];
+      while (depth[u] > depth[v]) u = parent[u];
+      while (depth[v] > depth[u]) v = parent[v];
+      while (u !== v) { u = parent[u]; v = parent[v]; }
+      this._sInt[u]++;
+    }
+
+    for (let i = size - 1; i >= 1; i--) {
+      const u = order[i];
+      const q = parent[u];
+      this._sPop[q] += this._sPop[u];
+      this._sArea[q] += this._sArea[u];
+      this._sAx[q] += this._sAx[u];
+      this._sAy[q] += this._sAy[u];
+      this._sAxx[q] += this._sAxx[u];
+      this._sOwn[q] += this._sOwn[u];
+      this._sPx[q] += this._sPx[u];
+      this._sPy[q] += this._sPy[u];
+      this._sPxx[q] += this._sPxx[u];
+      this._sRelS[q] += this._sRelS[u];
+      this._sRelN[q] += this._sRelN[u];
+      this._sDeg[q] += this._sDeg[u];
+      this._sInt[q] += this._sInt[u];
+      sz[q] += sz[u];
+    }
+  }
+
+  /* Score every cut against the existing boundary, pick one, apply it.
+   *
+   * The current split is added as a candidate with delta 0 -- a random tree
+   * will not generally contain an edge that reproduces it, so it has to be put
+   * in by hand. That makes it the reference the cuts are judged against, means
+   * a step never forces a change when the status quo is best, and removes any
+   * need for retry logic, since there is always a valid candidate. */
+  _recomChoose(size, a, b) {
+    const { _members: members, _order: order, _tin: tin, _sz: sz } = this;
+
+    let oldCross = 0;
+    for (let e = 0; e < this._edgeCount; e++) {
+      if (this.assign[members[this._eu[e]]] !== this.assign[members[this._ev[e]]]) oldCross++;
+    }
+    const devA = this.regionPop[a] - this.target;
+    const devB = this.regionPop[b] - this.target;
+    const oldPop = devA * devA + devB * devB;
+    const oldShape = this._penalty(a) + this._penalty(b) - 2;
+    const oldPeople = this._penaltyPop(a) + this._penaltyPop(b) - 2;
+    const oldRel = this._relTerm(a) + this._relTerm(b);
+
+    const totPop = this._sPop[0];
+    const relValue = (sum, n) => (n > 0 ? sum / n : this.relMean);
+
+    const cuts = [-1];          // -1 is the status quo
+    const deltas = [0];
+    for (let c = 1; c < size; c++) {   // every node but the root cuts its parent edge
+      const p1 = this._sPop[c];
+      const p2 = totPop - p1;
+      const d1 = p1 - this.target;
+      const d2 = p2 - this.target;
+      let delta = this.wPop * (d1 * d1 + d2 * d2 - oldPop) / this.eD2;
+
+      if (this.wShape > 0) {
+        const nw = this._penaltyFrom(this._sArea[c], this._sAx[c], this._sAy[c],
+          this._sAxx[c], this._sOwn[c])
+          + this._penaltyFrom(this._sArea[0] - this._sArea[c], this._sAx[0] - this._sAx[c],
+            this._sAy[0] - this._sAy[c], this._sAxx[0] - this._sAxx[c],
+            this._sOwn[0] - this._sOwn[c]) - 2;
+        delta += (this.wShape * (nw - oldShape)) / this.sigmaShape;
+      }
+      if (this.wPopShape > 0) {
+        const nw = this._penaltyPopFrom(p1, this._sPx[c], this._sPy[c], this._sPxx[c],
+          this._sArea[c])
+          + this._penaltyPopFrom(p2, this._sPx[0] - this._sPx[c], this._sPy[0] - this._sPy[c],
+            this._sPxx[0] - this._sPxx[c], this._sArea[0] - this._sArea[c]) - 2;
+        delta += (this.wPopShape * (nw - oldPeople)) / this.sigmaPopShape;
+      }
+      if (this.wRel > 0) {
+        const nw = this._relTermFrom(relValue(this._sRelS[c], this._sRelN[c]))
+          + this._relTermFrom(relValue(this._sRelS[0] - this._sRelS[c],
+            this._sRelN[0] - this._sRelN[c]));
+        delta += (this.wRel * (nw - oldRel)) / this.sigmaRel;
+      }
+      if (this.wCut > 0) {
+        const cross = this._sDeg[c] - 2 * this._sInt[c];
+        delta += (this.wCut * (cross - oldCross)) / this.sigmaCut;
+      }
+      cuts.push(c);
+      deltas.push(delta / this.weightSum);
+    }
+
+    let min = Infinity;
+    for (const d of deltas) if (d < min) min = d;
+    let total = 0;
+    const weights = deltas.map((d) => {
+      const w = Math.exp(-(d - min) / this.temperature);
+      total += w;
+      return w;
+    });
+    let pick = this.rng() * total;
+    let chosen = 0;
+    for (let i = 0; i < weights.length; i++) {
+      pick -= weights[i];
+      if (pick <= 0) { chosen = i; break; }
+    }
+
+    const c = cuts[chosen];
+    // Kept so the whole subtree/LCA scoring pass can be checked against a real
+    // rescore: after applying, score should have moved by exactly this.
+    this.lastRecomDelta = deltas[chosen];
+    if (c < 0) return false;          // status quo won
+
+    // Which piece keeps which number, by whichever pairing overlaps more --
+    // otherwise half of all steps would swap two regions' colours at random.
+    const start = tin[c];
+    const end = start + sz[c];
+    let s1inA = 0;
+    let s1inB = 0;
+    for (let i = start; i < end; i++) {
+      const g = members[order[i]];
+      if (this.assign[g] === a) s1inA += this.pop[g]; else s1inB += this.pop[g];
+    }
+    const keepOrder = s1inA + (this.regionPop[b] - s1inB)
+      >= s1inB + (this.regionPop[a] - s1inA);
+    const r1 = keepOrder ? a : b;
+    const r2 = keepOrder ? b : a;
+
+    const stamp = ++this._stamp;
+    for (let i = start; i < end; i++) this._seen[members[order[i]]] = stamp;
+    for (let i = 0; i < size; i++) {
+      const g = members[i];
+      this.assign[g] = this._seen[g] === stamp ? r1 : r2;
+    }
+
+    // Half of two regions has been rewritten, so recompute rather than thread
+    // hundreds of zones through the incremental path.
+    this._resum();
+    this.frontier = [];
+    this.frontierPos.fill(-1);
+    for (let z = 0; z < this.n; z++) this._touchFrontier(z);
+    this.recombinations++;
+    this._recordBest();
+    return true;
   }
 
   /* --- frontier ---------------------------------------------------------- */

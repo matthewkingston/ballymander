@@ -417,7 +417,37 @@ largest piece. There is no size cap — a big branch wrecks population equality,
 its delta is large and the temperature suppresses it without a blunt threshold.
 The set's totals are computed once and shared across candidate destinations, so
 each candidate's delta stays O(1) however big the branch. Turning it off restores
-the plain single-zone rule. Straight after the build, regions differ by tens of
+the plain single-zone rule.
+
+**Recombination** is the large move. Every so often — **Flips per ReCom**, default
+200 — instead of nudging one zone it takes two adjacent regions, merges them,
+draws a random spanning tree over the union and cuts a single edge of it. A tree
+splits into exactly two pieces when any edge is removed, and every tree edge is a
+real adjacency edge, so **both pieces are connected in the graph: contiguity is
+structural here rather than checked.**
+
+Every one of the `|U| − 1` possible cuts is scored on all five terms, not
+filtered down first. One backward pass over the tree gives each cut's totals,
+because population, area, the moment sums and the religion sums are all additive.
+Cut edges is not a subtree sum but is still exact, via the handshake lemma —
+`edges leaving S = (induced degrees in S) − 2 × (edges inside S)` — with the
+second half obtained by counting each induced edge at its LCA, since an edge lies
+inside `subtree(x)` exactly when `x` is an ancestor of that LCA.
+
+Two details that matter more than they look. **The existing boundary is entered
+as a candidate with delta 0**, because a random tree will not generally contain
+an edge reproducing it — that makes it the reference the cuts are judged against,
+means a step never forces a change when the status quo is best, and removes any
+need for retry logic. And **which piece keeps which region number is decided by
+population overlap**; without that, half of all steps would swap two regions'
+colours at random and the map would strobe.
+
+A recombination costs roughly fifty flips, so the rate is a real trade. Measured
+over an equal two seconds at N=18 seed 7, best score came out 260 with none, 230
+every 2,000, 187 every 500, 181 every 100 and 174 every 25, while throughput fell
+from 147k steps/sec to 84k. 200 is where the return flattens off. At equal *step*
+counts the gain is larger still: 322 on flips alone against 208 with
+recombination after 50,000 steps. Straight after the build, regions differ by tens of
 thousands of people, so normalised deltas reach several hundred — the softmax
 subtracts the minimum before exponentiating, or it overflows immediately. A
 pleasant side effect is that the phase starts nearly greedy and becomes genuinely

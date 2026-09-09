@@ -145,6 +145,8 @@ const regions = await page.evaluate(() => {
     meanPopPenalty: Number(m.meanPopPenalty.toFixed(3)),
     sealed: m.sealed,
     cutTotal: m.cutRaw,
+    recomTotal: m.recombinations,
+    recomShown: document.getElementById('run-recom').textContent,
     cutShown: document.getElementById('run-cut').textContent,
     relMode: m.relMode,
     relSeats: `${m.relSeats}/${m.N}`,
@@ -236,6 +238,10 @@ if (!statSwitch || statSwitch.before.max === statSwitch.religion
 }
 if (!regions || regions.cutShown !== regions.cutTotal.toLocaleString('en-GB')) {
   problems.push('cut edge readout does not match the model');
+}
+if (!regions || !(regions.recomTotal > 0)) problems.push('no recombinations happened');
+if (!regions || regions.recomShown !== regions.recomTotal.toLocaleString('en-GB')) {
+  problems.push('recombination readout does not match the model');
 }
 if (!statSwitch || statSwitch.after.rows !== statSwitch.before.rows
     || statSwitch.filled !== statSwitch.before.rows) {

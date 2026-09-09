@@ -57,6 +57,8 @@ const els = {
   pshapeValue: document.getElementById('ctl-pshape-value'),
   cut: document.getElementById('ctl-cut'),
   cutValue: document.getElementById('ctl-cut-value'),
+  recom: document.getElementById('ctl-recom'),
+  recomValue: document.getElementById('ctl-recom-value'),
   relToggle: document.getElementById('rel-toggle'),
   relBody: document.getElementById('rel-body'),
   relModeLabel: document.getElementById('rel-mode-label'),
@@ -77,6 +79,7 @@ const els = {
   runShape: document.getElementById('run-shape'),
   runPShape: document.getElementById('run-pshape'),
   runCut: document.getElementById('run-cut'),
+  runRecom: document.getElementById('run-recom'),
   runRel: document.getElementById('run-rel'),
   runMoves: document.getElementById('run-moves'),
   runScore: document.getElementById('run-score'),
@@ -227,6 +230,17 @@ function weightOf(el) {
   return 10 ** v;
 }
 
+/* Flips between recombinations. Log like the weights, but the "never" detent
+ * sits at the right-hand end, because in these units right means less often. */
+function recomIntervalOf(el) {
+  const v = Number(el.value);
+  return v >= Number(el.max) - 1e-9 ? Infinity : Math.round(10 ** v);
+}
+
+function formatInterval(v) {
+  return v === Infinity ? 'off' : nf.format(v);
+}
+
 function formatWeight(w) {
   return w === 0 ? 'off' : String(Number(w.toPrecision(3)));
 }
@@ -366,6 +380,7 @@ function readout() {
   els.runPhase.textContent = run.paused ? `${phase} — paused` : phase;
   els.runDev.textContent = pct.format(m.maxDeviation);
   els.runMoves.textContent = nf.format(m.moves);
+  els.runRecom.textContent = nf.format(m.recombinations);
   // The legible numbers: 1 is a circle for land, and evenly-spread population
   // for people. The normalised terms are measured per move, so their own
   // values are large and say little.
@@ -404,6 +419,9 @@ function tick(map) {
         Number(els.rels.value), els.rela.checked);
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
         weightOf(els.pshape), weightOf(els.relw), weightOf(els.cut));
+      // Changes the move set rather than the score, so best-so-far stays
+      // comparable and this needs no re-base.
+      run.model.recomInterval = recomIntervalOf(els.recom);
 
       if (run.phase === 'build') {
         const steps = Number(els.build.value);
@@ -592,12 +610,17 @@ async function main() {
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
                              [els.opt, els.optValue], [els.popw, els.popwValue],
                              [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
-                             [els.cut, els.cutValue],
+                             [els.cut, els.cutValue], [els.recom, els.recomValue],
                              [els.relw, els.relwValue], [els.relt, els.reltValue],
                              [els.rels, els.relsValue]]) {
     const show = () => {
-      out.textContent = input.dataset.weight !== undefined
-        ? formatWeight(weightOf(input)) : input.value;
+      if (input.dataset.weight !== undefined) {
+        out.textContent = formatWeight(weightOf(input));
+      } else if (input.dataset.interval !== undefined) {
+        out.textContent = formatInterval(recomIntervalOf(input));
+      } else {
+        out.textContent = input.value;
+      }
     };
     input.addEventListener('input', show);
     show();
