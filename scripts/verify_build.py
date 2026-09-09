@@ -12,10 +12,23 @@ OUT = ROOT / "web" / "data" / "dz.geojson"
 
 EXPECTED_FEATURES = 3780
 EXPECTED_POP = 1_903_168
-# The religion table is ten people short of the people table: NISRA's disclosure
-# control perturbs them independently. Checking it against EXPECTED_POP would
-# fail, and rel_n is the right denominator for the religion index anyway.
-EXPECTED_REL_TOTAL = 1_903_158
+
+# One entry per collapsed index: column, what to call it, the total its own
+# denominator must come to, and the range the index has to lie in.
+#
+# Every total is different, and none of them is EXPECTED_POP. Two reasons:
+# NISRA's disclosure control perturbs each table independently, which accounts
+# for the handful of people between religion, age and population; and the two
+# newest exclude non-answers from the denominator entirely, so they are a share
+# of those who answered rather than of everyone. Checking any of these against
+# EXPECTED_POP would fail, and each `_n` is the right denominator for its own
+# index anyway.
+INDEXES = [
+    ("rel", "religion", 1_903_158, 0, 1),
+    ("age", "age", 1_903_347, 0, 100),
+    ("orient", "sexual orientation", 1_395_521, 0, 1),
+    ("grade", "social grade", 1_511_617, 0, 1),
+]
 
 failures: list[str] = []
 
@@ -53,15 +66,18 @@ def main() -> int:
     check(total == EXPECTED_POP,
           f"populations sum to {EXPECTED_POP:,} (got {total:,})")
 
-    rel_total = sum(p["rel_n"] for p in props if p.get("rel_n") is not None)
-    check(rel_total == EXPECTED_REL_TOTAL,
-          f"religion counts sum to {EXPECTED_REL_TOTAL:,} (got {rel_total:,})")
+    for col, label, expected, lo, hi in INDEXES:
+        n_col = f"{col}_n"
+        got = sum(p[n_col] for p in props if p.get(n_col) is not None)
+        check(got == expected,
+              f"{label} counts sum to {expected:,} (got {got:,})")
 
-    bad_rel = [p.get("code") for p in props
-               if not isinstance(p.get("rel"), (int, float)) or not 0 <= p["rel"] <= 1]
-    check(not bad_rel, f"every 'rel' is a number in 0..1 (bad: {len(bad_rel)})")
+        bad = [p.get("code") for p in props
+               if not isinstance(p.get(col), (int, float)) or not lo <= p[col] <= hi]
+        check(not bad, f"every '{col}' is a number in {lo}..{hi} (bad: {len(bad)})")
 
-    for field in ("code", "name", "sdz", "lgd", "area_ha", "rel", "rel_n"):
+    index_fields = tuple(f for col, *_ in INDEXES for f in (col, f"{col}_n"))
+    for field in ("code", "name", "sdz", "lgd", "area_ha", *index_fields):
         n = sum(1 for p in props if p.get(field) in (None, ""))
         check(n == 0, f"every feature has '{field}' (missing: {n})")
 

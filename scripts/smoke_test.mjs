@@ -72,16 +72,26 @@ await page.evaluate(() => {
   build.dispatchEvent(new Event('input'));
   document.getElementById('ctl-n').value = '12';
   document.getElementById('ctl-seed').value = '3';
-  // Exercise the religion term, and the sub-block that only gerrymander uses.
-  const mode = document.getElementById('ctl-relmode');
-  mode.value = 'gerrymander';
-  mode.dispatchEvent(new Event('change'));
-  const relw = document.getElementById('ctl-relw');
-  relw.value = '0';                       // log10 scale, so weight 1
-  relw.dispatchEvent(new Event('input'));
+  // Every demographic block, in a mix of modes: religion gerrymandering, which
+  // is also what opens the sub-block only that mode uses, and the rest in the
+  // two modes that share a shape. The blocks are generated from the definition
+  // table, so this checks the generation as much as the terms.
+  for (const [key, want] of [['rel', 'gerrymander'], ['age', 'extreme'],
+                             ['orient', 'average'], ['grade', 'extreme']]) {
+    const mode = document.getElementById(`ctl-${key}-mode`);
+    mode.value = want;
+    mode.dispatchEvent(new Event('change'));
+    const w = document.getElementById(`ctl-${key}-w`);
+    w.value = '0';                        // log10 scale, so weight 1
+    w.dispatchEvent(new Event('input'));
+  }
 });
-const gerryVisible = await page.evaluate(() =>
-  !document.getElementById('ctl-gerry').hidden);
+const gerryVisible = await page.evaluate(() => ({
+  rel: !document.getElementById('demo-rel-gerry').hidden,
+  age: !document.getElementById('demo-age-gerry').hidden,   // extreme: stays shut
+  blocks: document.querySelectorAll('#demo-blocks .demo-block').length,
+  bars: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
+}));
 await page.click('#ctl-go');
 await page.waitForFunction(
   () => document.getElementById('run-phase').textContent.startsWith('optimising'),
@@ -148,9 +158,15 @@ const regions = await page.evaluate(() => {
     recomTotal: m.recombinations,
     recomShown: document.getElementById('run-recom').textContent,
     cutShown: document.getElementById('run-cut').textContent,
-    relMode: m.relMode,
-    relSeats: `${m.relSeats}/${m.N}`,
-    relShown: document.getElementById('run-rel').textContent,
+    relMode: m.demoByKey.rel.mode,
+    relSeats: `${m.demoSeats('rel')}/${m.N}`,
+    relShown: document.getElementById('run-demo-rel').textContent,
+    ageMode: m.demoByKey.age.mode,
+    ageSpread: m.demoSpread('age').toFixed(1),
+    ageShown: document.getElementById('run-demo-age').textContent,
+    demoKeys: m.demographics.map((d) => d.key),
+    demoReadouts: m.demographics.map((d) =>
+      document.getElementById(`run-demo-${d.key}`).textContent),
     gerryVisible: window.__gerryVisible,
     popsSumToTotal: pops.reduce((a, b) => a + b, 0),
   };
@@ -162,14 +178,14 @@ const statSwitch = await page.evaluate(() => {
   const max = () => document.getElementById('bars-max').textContent;
   const rows = () => document.querySelectorAll('#bars .bar-row').length;
   const before = { max: max(), rows: rows() };
-  sel.value = 'religion';
+  sel.value = 'demo:age';
   sel.dispatchEvent(new Event('change'));
-  const religion = max();
+  const demo = max();
   sel.value = 'cut';
   sel.dispatchEvent(new Event('change'));
   return {
     before,
-    religion,
+    demo,
     after: { max: max(), rows: rows() },
     filled: [...document.querySelectorAll('.bar-fill')]
       .filter((b) => parseFloat(b.style.width) > 0).length,
@@ -198,10 +214,11 @@ const tip = await page.evaluate(() => {
   return {
     name: t.querySelector('.tt-name')?.textContent,
     pop: t.querySelector('.tt-pop-value')?.textContent,
-    rel: t.querySelector('.tt-rel')?.textContent,
+    demo: [...t.querySelectorAll('.tt-demo div:not([hidden])')].map((d) => d.textContent),
     region: t.querySelector('.tt-region-name')?.textContent,
     regionPop: t.querySelector('.tt-region-pop-value')?.textContent,
-    regionRel: t.querySelector('.tt-region-rel')?.textContent,
+    regionDemo: [...t.querySelectorAll('.tt-region-demo div:not([hidden])')]
+      .map((d) => d.textContent),
   };
 });
 
@@ -232,8 +249,8 @@ if (!regions || !regions.assignedAll || regions.painted !== regions.zones) {
 if (!regions || regions.rows !== regions.regionCount) problems.push('a bar per region missing');
 if (!regions || regions.barsFilled !== regions.regionCount) problems.push('bars not drawn');
 if (!regions || !regions.axis[0] || !regions.axis[1]) problems.push('bar axis not labelled');
-if (!statSwitch || statSwitch.before.max === statSwitch.religion
-    || statSwitch.religion === statSwitch.after.max) {
+if (!statSwitch || statSwitch.before.max === statSwitch.demo
+    || statSwitch.demo === statSwitch.after.max) {
   problems.push('switching the statistic did not rescale the axis');
 }
 if (!regions || regions.cutShown !== regions.cutTotal.toLocaleString('en-GB')) {
@@ -252,8 +269,28 @@ if (!statSwitch || statSwitch.after.rows !== statSwitch.before.rows
 if (!regions || !(regions.meanPenalty > 0.99)) problems.push('land penalty not measured');
 if (!regions || !(regions.meanPopPenalty > 0)) problems.push('people penalty not measured');
 if (!regions || regions.relMode !== 'gerrymander') problems.push('religion mode did not take');
-if (!regions || !regions.gerryVisible) problems.push('gerrymander sub-controls stayed hidden');
+if (!regions || regions.ageMode !== 'extreme') problems.push('age mode did not take');
+if (!regions || !regions.gerryVisible.rel) problems.push('gerrymander sub-controls stayed hidden');
+if (!regions || regions.gerryVisible.age) problems.push('gerrymander sub-controls shown outside that mode');
+if (!regions || regions.gerryVisible.blocks !== regions.demoKeys.length) {
+  problems.push('a demographic control block is missing');
+}
+if (!regions || regions.demoKeys.some((k) => !regions.gerryVisible.bars.includes(`demo:${k}`))) {
+  problems.push('a demographic is missing from the statistic selector');
+}
+if (!regions || regions.demoReadouts.some((t) => !t || t === '\u2014')) {
+  problems.push('a demographic readout stayed empty');
+}
 if (!regions || regions.relShown !== regions.relSeats) problems.push('religion readout wrong');
+if (!regions || regions.ageShown !== regions.ageSpread) problems.push('age readout wrong');
+// Every weight is up, so every demographic counts as active and should show.
+const wantDemo = regions ? regions.demoKeys.length : 0;
+if (!tip || tip.demo.length !== wantDemo) {
+  problems.push('a demographic is missing from the tooltip');
+}
+if (!tip || tip.regionDemo.length !== wantDemo) {
+  problems.push("a demographic is missing from the tooltip's region block");
+}
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
 if (problems.length) {

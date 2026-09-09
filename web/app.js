@@ -35,11 +35,11 @@ const els = {
   tooltip: document.getElementById('tooltip'),
   ttName: document.querySelector('.tt-name'),
   ttPop: document.querySelector('.tt-pop-value'),
-  ttRel: document.querySelector('.tt-rel'),
+  ttDemo: document.querySelector('.tt-demo'),
   ttRegion: document.querySelector('.tt-region'),
   ttRegionName: document.querySelector('.tt-region-name'),
   ttRegionPop: document.querySelector('.tt-region-pop-value'),
-  ttRegionRel: document.querySelector('.tt-region-rel'),
+  ttRegionDemo: document.querySelector('.tt-region-demo'),
   n: document.getElementById('ctl-n'),
   seed: document.getElementById('ctl-seed'),
   temp: document.getElementById('ctl-temp'),
@@ -59,18 +59,7 @@ const els = {
   cutValue: document.getElementById('ctl-cut-value'),
   recom: document.getElementById('ctl-recom'),
   recomValue: document.getElementById('ctl-recom-value'),
-  relToggle: document.getElementById('rel-toggle'),
-  relBody: document.getElementById('rel-body'),
-  relModeLabel: document.getElementById('rel-mode-label'),
-  relmode: document.getElementById('ctl-relmode'),
-  relw: document.getElementById('ctl-relw'),
-  relwValue: document.getElementById('ctl-relw-value'),
-  gerry: document.getElementById('ctl-gerry'),
-  relt: document.getElementById('ctl-relt'),
-  reltValue: document.getElementById('ctl-relt-value'),
-  rels: document.getElementById('ctl-rels'),
-  relsValue: document.getElementById('ctl-rels-value'),
-  rela: document.getElementById('ctl-rela'),
+  demoBlocks: document.getElementById('demo-blocks'),
   go: document.getElementById('ctl-go'),
   pause: document.getElementById('ctl-pause'),
   stop: document.getElementById('ctl-stop'),
@@ -80,8 +69,8 @@ const els = {
   runPShape: document.getElementById('run-pshape'),
   runCut: document.getElementById('run-cut'),
   runRecom: document.getElementById('run-recom'),
-  runRel: document.getElementById('run-rel'),
   runMoves: document.getElementById('run-moves'),
+  runScoreRow: document.getElementById('run-score-row'),
   runScore: document.getElementById('run-score'),
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
@@ -128,14 +117,105 @@ const BAR_STATS = {
     values: (m) => perRegion(m, (x, r) => x.regionPopPenalty(r)),
     format: (v) => v.toFixed(2),
   },
-  religion: {
-    values: (m) => perRegion(m, (x, r) => x.regionReligion(r)),
-    format: (v) => v.toFixed(3),
-  },
   // One pass over the whole graph rather than one per region, which is why
   // statistics hand back an array instead of a per-region getter.
   cut: { values: (m) => Array.from(m.cutByRegion()), format: (v) => nf.format(v) },
 };
+for (const def of DEMOGRAPHICS) {
+  BAR_STATS[`demo:${def.key}`] = {
+    values: (m) => perRegion(m, (x, r) => x.regionDemo(def.key, r)),
+    format: (v) => v.toFixed(def.decimals),
+  };
+}
+
+/* --- demographic controls ------------------------------------------------ */
+/* One collapsible block per entry in DEMOGRAPHICS, plus its readout row, its
+ * bar-chart entry and its two tooltip lines. All of it is generated, so a third
+ * demographic is one entry in regions.js and nothing here or in the HTML. */
+const demoUI = [];
+
+const el = (tag, attrs = {}, ...kids) => {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') node.className = v;
+    else if (k === 'text') node.textContent = v;
+    else if (v === true) node.setAttribute(k, '');
+    else if (v !== false && v != null) node.setAttribute(k, v);
+  }
+  node.append(...kids);
+  return node;
+};
+
+function buildDemoControls() {
+  for (const def of DEMOGRAPHICS) {
+    const id = (part) => `ctl-${def.key}-${part}`;
+    const bodyId = `demo-${def.key}-body`;
+
+    const wValue = el('span', { text: 'off' });
+    const modeLabel = el('span', { class: 'demo-mode-label', text: 'average' });
+    const toggle = el('button', {
+      class: 'demo-toggle', type: 'button', 'aria-expanded': 'false',
+      'aria-controls': bodyId,
+    }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }),
+       ` ${def.label}`);
+    const w = el('input', {
+      id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
+      'data-weight': true, 'data-off': true,
+    });
+
+    const mode = el('select', { id: id('mode') },
+      ...['average', 'extreme', 'gerrymander'].map((v) =>
+        el('option', { value: v, selected: v === 'average' }, v)));
+
+    // The threshold and steepness sliders carry the term's own units and
+    // range -- 0-1 for religion, years for age -- straight from its definition.
+    const [tMin, tMax, tStep] = def.thresholdRange;
+    const [sMin, sMax, sStep] = def.steepnessRange;
+    const tValue = el('span', { text: String(def.threshold) });
+    const sValue = el('span', { text: String(def.steepness) });
+    const t = el('input', {
+      id: id('t'), type: 'range', min: tMin, max: tMax, step: tStep,
+      value: def.threshold,
+    });
+    const st = el('input', {
+      id: id('s'), type: 'range', min: sMin, max: sMax, step: sStep,
+      value: def.steepness,
+    });
+    const above = el('input', { id: id('a'), type: 'checkbox', checked: true });
+
+    const gerry = el('div', {
+      id: `demo-${def.key}-gerry`, class: 'ctl-grid ctl-sub', hidden: true },
+      el('label', { for: id('t') }, 'Threshold ', tValue), t,
+      el('label', { for: id('s') }, 'Steepness ', sValue), st,
+      el('label', { for: id('a'), text: 'Above threshold' }), above);
+
+    const body = el('div', { id: bodyId, class: 'demo-body', hidden: true },
+      el('div', { class: 'ctl-grid ctl-sub' },
+        el('label', { for: id('mode'), text: 'Mode' }), mode),
+      gerry);
+
+    els.demoBlocks.append(el('div', { class: 'demo-block' },
+      el('div', { class: 'ctl-grid' },
+        el('div', { class: 'ctl-head' }, toggle, modeLabel, wValue), w),
+      body));
+
+    // Mode-dependent, because the useful number differs: how far apart the
+    // regions are for average/extreme, how many clear the bar for gerrymander.
+    const readout = el('dd', { id: `run-demo-${def.key}`, text: '\u2014' });
+    els.runScoreRow.before(el('div', {}, el('dt', { text: def.label }), readout));
+
+    els.barsStat.querySelector('option[value="cut"]')
+      .before(el('option', { value: `demo:${def.key}` }, def.label));
+
+    const tip = el('div');
+    const regionTip = el('div');
+    els.ttDemo.append(tip);
+    els.ttRegionDemo.append(regionTip);
+
+    demoUI.push({ def, toggle, body, modeLabel, wValue, w, mode, gerry,
+                  t, tValue, s: st, sValue, above, readout, tip, regionTip });
+  }
+}
 
 /* --- data ---------------------------------------------------------------- */
 
@@ -296,11 +376,27 @@ function clearRegions(map) {
 
 /* --- interaction --------------------------------------------------------- */
 
+/* With four demographics the tooltip would run to eight extra lines, most of
+ * them about terms the run is ignoring. So it shows the ones being steered --
+ * falling back to all of them when none is, since an idle map should still let
+ * you read a zone's figures. Read off the sliders rather than the model so it
+ * follows a weight being dragged, run or no run. */
+function activeDemos() {
+  const on = demoUI.filter((u) => weightOf(u.w) > 0);
+  return on.length ? on : demoUI;
+}
+
 function showTooltip(point, props) {
   els.ttName.textContent = props.name || props.code;
   els.ttPop.textContent = props.pop == null ? '—' : nf.format(props.pop);
-  els.ttRel.textContent = props.rel == null ? '' : `religion ${props.rel.toFixed(2)}`;
-  els.ttRel.hidden = props.rel == null;
+  const shown = new Set(activeDemos());
+  for (const u of demoUI) {
+    const v = props[u.def.field];
+    const show = shown.has(u) && typeof v === 'number';
+    u.tip.textContent = show
+      ? `${u.def.label.toLowerCase()} ${v.toFixed(u.def.decimals)}` : '';
+    u.tip.hidden = !show;
+  }
 
   const region = run.model && run.model.regionOf(props.code);
   if (region == null) {
@@ -308,9 +404,14 @@ function showTooltip(point, props) {
   } else {
     els.ttRegionName.textContent = `Region ${region + 1}`;
     els.ttRegionPop.textContent = nf.format(Math.round(run.model.regionPop[region]));
-    const value = run.model.regionReligion(region);
-    els.ttRegionRel.textContent = `religion ${value.toFixed(2)}`;
-    els.ttRegionRel.hidden = !run.model.hasReligion;
+    for (const u of demoUI) {
+      const show = shown.has(u) && run.model.demoByKey[u.def.key] !== undefined;
+      u.regionTip.textContent = show
+        ? `${u.def.label.toLowerCase()} `
+          + `${run.model.regionDemo(u.def.key, region).toFixed(u.def.decimals)}`
+        : '';
+      u.regionTip.hidden = !show;
+    }
     els.ttRegion.hidden = false;
   }
   els.tooltip.hidden = false;
@@ -387,11 +488,12 @@ function readout() {
   els.runShape.textContent = m.meanPenalty.toFixed(2);
   els.runPShape.textContent = m.meanPopPenalty.toFixed(2);
   els.runCut.textContent = nf.format(m.cutRaw);
-  // Mode-dependent, because the useful number differs: how far apart the
-  // regions are for average/extreme, how many clear the bar for gerrymander.
-  els.runRel.textContent = m.relMode === 'off' ? '—'
-    : m.relMode === 'gerrymander' ? `${m.relSeats}/${m.N}`
-      : m.relSpread.toFixed(3);
+  for (const u of demoUI) {
+    const live = m.demoByKey[u.def.key];
+    u.readout.textContent = !live || live.weight === 0 ? '—'
+      : live.mode === 'gerrymander' ? `${m.demoSeats(u.def.key)}/${m.N}`
+        : m.demoSpread(u.def.key).toFixed(u.def.decimals);
+  }
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
 }
@@ -413,12 +515,16 @@ function tick(map) {
       // best-so-far on the current state rather than leaving a stale one.
       const t = Number(els.temp.value);
       run.model.temperature = t > 0 ? t : 1;
-      // Religion first: turning the mode off zeroes its weight, and setWeights
+      // Modes first: turning one off zeroes that term's weight, and setWeights
       // then reapplies the rest against the right total.
-      run.model.setReligion(els.relmode.value, Number(els.relt.value),
-        Number(els.rels.value), els.rela.checked);
+      const demoWeights = {};
+      for (const u of demoUI) {
+        run.model.setDemographic(u.def.key, u.mode.value, Number(u.t.value),
+          Number(u.s.value), u.above.checked);
+        demoWeights[u.def.key] = weightOf(u.w);
+      }
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
-        weightOf(els.pshape), weightOf(els.relw), weightOf(els.cut));
+        weightOf(els.pshape), weightOf(els.cut), demoWeights);
       // Changes the move set rather than the score, so best-so-far stays
       // comparable and this needs no re-base.
       run.model.recomInterval = recomIntervalOf(els.recom);
@@ -456,12 +562,14 @@ function start(map) {
     wPop: weightOf(els.popw),
     wShape: weightOf(els.shape),
     wPopShape: weightOf(els.pshape),
-    wRel: weightOf(els.relw),
     wCut: weightOf(els.cut),
-    relMode: els.relmode.value,
-    relThreshold: Number(els.relt.value),
-    relSteepness: Number(els.rels.value),
-    relAbove: els.rela.checked,
+    demo: Object.fromEntries(demoUI.map((u) => [u.def.key, {
+      weight: weightOf(u.w),
+      mode: u.mode.value,
+      threshold: Number(u.t.value),
+      steepness: Number(u.s.value),
+      above: u.above.checked,
+    }])),
   });
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
@@ -582,37 +690,42 @@ function drawBars() {
 async function main() {
   const map = createMap();
 
-  // Collapsed still shows the weight slider and the current mode; the selector
-  // and the gerrymander knobs are what fold away.
-  els.relToggle.addEventListener('click', () => {
-    const open = els.relBody.hidden;
-    els.relBody.hidden = !open;
-    els.relToggle.setAttribute('aria-expanded', String(open));
-  });
+  buildDemoControls();
 
-  // There is no 'off' mode: the weight slider turns the term off, as it does
-  // for every other term. The mode label greys out to show when that has
-  // happened. Threshold and steepness only mean anything in gerrymander mode.
-  const syncRel = () => {
-    const mode = els.relmode.value;
-    els.gerry.hidden = mode !== 'gerrymander';
-    els.relModeLabel.textContent = mode;
-    els.relModeLabel.classList.toggle('is-off', weightOf(els.relw) === 0);
-  };
   // Switching the statistic re-ranks immediately rather than waiting for the
   // next tick, so the panel responds even while paused or stopped.
   els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
 
-  els.relmode.addEventListener('change', syncRel);
-  els.relw.addEventListener('input', syncRel);
-  syncRel();
+  const readouts = [[els.fps, els.fpsValue], [els.build, els.buildValue],
+                    [els.opt, els.optValue], [els.popw, els.popwValue],
+                    [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
+                    [els.cut, els.cutValue], [els.recom, els.recomValue]];
 
-  for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
-                             [els.opt, els.optValue], [els.popw, els.popwValue],
-                             [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
-                             [els.cut, els.cutValue], [els.recom, els.recomValue],
-                             [els.relw, els.relwValue], [els.relt, els.reltValue],
-                             [els.rels, els.relsValue]]) {
+  for (const u of demoUI) {
+    // Collapsed still shows the weight slider and the current mode; the
+    // selector and the gerrymander knobs are what fold away.
+    u.toggle.addEventListener('click', () => {
+      const open = u.body.hidden;
+      u.body.hidden = !open;
+      u.toggle.setAttribute('aria-expanded', String(open));
+    });
+
+    // There is no 'off' mode: the weight slider turns the term off, as it does
+    // for every other term. The mode label greys out to show when that has
+    // happened. Threshold and steepness only mean anything in gerrymander mode.
+    const sync = () => {
+      u.gerry.hidden = u.mode.value !== 'gerrymander';
+      u.modeLabel.textContent = u.mode.value;
+      u.modeLabel.classList.toggle('is-off', weightOf(u.w) === 0);
+    };
+    u.mode.addEventListener('change', sync);
+    u.w.addEventListener('input', sync);
+    sync();
+
+    readouts.push([u.w, u.wValue], [u.t, u.tValue], [u.s, u.sValue]);
+  }
+
+  for (const [input, out] of readouts) {
     const show = () => {
       if (input.dataset.weight !== undefined) {
         out.textContent = formatWeight(weightOf(input));
@@ -651,7 +764,7 @@ async function main() {
         const pops = Object.fromEntries(
           geojson.features.map((f) => [f.properties.code, f.properties.pop]));
         run.model = new RegionModel(graph, pops, zoneGeometry(geojson.features),
-          zoneReligion(geojson.features));
+          zoneDemographics(geojson.features));
         run.shadow = new Int32Array(run.model.n).fill(-1);
         window.__model = run.model;
         els.go.disabled = false;

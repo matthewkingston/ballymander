@@ -60,11 +60,13 @@ html, body {
 }
 .ctl-more { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
 
-/* --- religion, collapsible ---------------------------------------------- */
-/* Collapsed still shows the weight slider and the current mode, because those
-   are what you glance at; the mode selector and gerrymander knobs fold away. */
-#rel-block { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
-#rel-body[hidden] { display: none; }
+/* --- demographics, collapsible ------------------------------------------ */
+/* One block per demographic, built by app.js from the definition table in
+   regions.js. Collapsed still shows the weight slider and the current mode,
+   because those are what you glance at; the mode selector and gerrymander
+   knobs fold away. */
+.demo-block { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
+.demo-body[hidden] { display: none; }
 
 /* Matches .ctl-grid label -- it is the same thing in the layout, but a div
    rather than a label because it holds the disclosure button. Wraps rather
@@ -80,7 +82,7 @@ html, body {
   letter-spacing: 0.06em;
   color: var(--ink-muted);
 }
-#rel-toggle {
+.demo-toggle {
   font: inherit;
   font-size: 10px;
   text-transform: uppercase;
@@ -91,23 +93,19 @@ html, body {
   border: 0;
   cursor: pointer;
 }
-#rel-toggle:hover { color: var(--ink); }
-#rel-toggle .chev { display: inline-block; transition: transform 0.12s; }
-#rel-toggle[aria-expanded="true"] .chev { transform: rotate(90deg); }
-#rel-mode-label {
+.demo-toggle:hover { color: var(--ink); }
+.demo-toggle .chev { display: inline-block; transition: transform 0.12s; }
+.demo-toggle[aria-expanded="true"] .chev { transform: rotate(90deg); }
+.demo-mode-label {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--accent);
 }
-#rel-mode-label.is-off { color: var(--ink-muted); }
+.demo-mode-label.is-off { color: var(--ink-muted); }
 
-#ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value,
-#ctl-pshape-value, #ctl-popw-value, #ctl-relw-value, #ctl-relt-value,
-#ctl-cut-value, #ctl-recom-value,
-#ctl-rels-value {
-  font-variant-numeric: tabular-nums;
-}
+/* Every slider readout, whether written into the HTML or generated. */
+.ctl-grid label span, .ctl-head span { font-variant-numeric: tabular-nums; }
 
 /* Form controls do not inherit the body font. */
 .ctl-grid input {
@@ -371,13 +369,12 @@ html, body {
 }
 .tt-unit { font-size: 11px; font-weight: 400; color: #b9c4cf; }
 
-.tt-rel {
+.tt-demo div {
   margin-top: 2px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: #a8b4c0;
 }
-.tt-rel[hidden] { display: none; }
 
 /* The region block mirrors the zone block above it, a size down, so the zone
    under the cursor stays the primary thing. */
@@ -398,13 +395,12 @@ html, body {
   color: #ffc9a8;
 }
 
-.tt-region-rel {
+.tt-region-demo div {
   margin-top: 1px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   color: #a8b4c0;
 }
-.tt-region-rel[hidden] { display: none; }
 
 /* MapLibre chrome */
 .maplibregl-ctrl-group { box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10) !important; }

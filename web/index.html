@@ -37,38 +37,9 @@
              data-weight data-off>
     </div>
 
-    <div id="rel-block">
-      <div class="ctl-grid">
-        <div class="ctl-head">
-          <button id="rel-toggle" type="button" aria-expanded="false" aria-controls="rel-body">
-            <span class="chev" aria-hidden="true">&#9656;</span> Religion
-          </button>
-          <span id="rel-mode-label">average</span>
-          <span id="ctl-relw-value">off</span>
-        </div>
-        <input id="ctl-relw" type="range" min="-1.02" max="1" step="0.02" value="-1.02"
-               data-weight data-off>
-      </div>
-
-      <div id="rel-body" hidden>
-        <div class="ctl-grid ctl-sub">
-          <label for="ctl-relmode">Mode</label>
-          <select id="ctl-relmode">
-            <option value="average" selected>average</option>
-            <option value="extreme">extreme</option>
-            <option value="gerrymander">gerrymander</option>
-          </select>
-        </div>
-        <div class="ctl-grid ctl-sub" id="ctl-gerry" hidden>
-          <label for="ctl-relt">Threshold <span id="ctl-relt-value">0.6</span></label>
-          <input id="ctl-relt" type="range" min="0.05" max="0.95" step="0.01" value="0.6">
-          <label for="ctl-rels">Steepness <span id="ctl-rels-value">0.05</span></label>
-          <input id="ctl-rels" type="range" min="0.01" max="0.3" step="0.01" value="0.05">
-          <label for="ctl-rela">Above threshold</label>
-          <input id="ctl-rela" type="checkbox" checked>
-        </div>
-      </div>
-    </div>
+    <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new
+         demographic is its data plus one entry there, and needs no markup. -->
+    <div id="demo-blocks"></div>
 
     <div class="ctl-grid ctl-more">
       <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
@@ -94,8 +65,7 @@
       <div><dt>Land</dt><dd id="run-shape">&mdash;</dd></div>
       <div><dt>People</dt><dd id="run-pshape">&mdash;</dd></div>
       <div><dt>Cut</dt><dd id="run-cut">&mdash;</dd></div>
-      <div><dt>Religion</dt><dd id="run-rel">&mdash;</dd></div>
-      <div><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
+      <div id="run-score-row"><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
       <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
     </dl>
 
@@ -104,7 +74,6 @@
         <option value="pop" selected>Population</option>
         <option value="land">Land shape</option>
         <option value="people">People shape</option>
-        <option value="religion">Religion</option>
         <option value="cut">Cut edges</option>
       </select>
       <div id="results-scroll">
@@ -122,13 +91,13 @@
   <div id="tooltip" hidden>
     <div class="tt-name"></div>
     <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
-    <div class="tt-rel" hidden></div>
+    <div class="tt-demo"></div>
     <div class="tt-region" hidden>
       <div class="tt-region-name"></div>
       <div class="tt-region-pop">
         <span class="tt-region-pop-value"></span> <span class="tt-unit">people</span>
       </div>
-      <div class="tt-region-rel" hidden></div>
+      <div class="tt-region-demo"></div>
     </div>
   </div>
 

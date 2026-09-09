@@ -12,8 +12,8 @@ const load = (file, name) =>
   new Function(`${fs.readFileSync(path.join(ROOT, file), 'utf8')}; return ${name};`)();
 
 const DZGraph = load('web/graph.js', 'DZGraph');
-const { RegionModel, zoneGeometry, zoneReligion } = load('web/regions.js',
-  '{ RegionModel, zoneGeometry, zoneReligion }');
+const { RegionModel, zoneGeometry, zoneDemographics } = load('web/regions.js',
+  '{ RegionModel, zoneGeometry, zoneDemographics }');
 
 const graph = new DZGraph(JSON.parse(
   fs.readFileSync(path.join(ROOT, 'web/data/dz_adjacency.json'), 'utf8')));
@@ -21,7 +21,7 @@ const feats = JSON.parse(
   fs.readFileSync(path.join(ROOT, 'web/data/dz.geojson'), 'utf8')).features;
 const pops = Object.fromEntries(feats.map((f) => [f.properties.code, f.properties.pop]));
 const geom = zoneGeometry(feats);
-const rel = zoneReligion(feats);
+const demo = zoneDemographics(feats);
 
 const failures = [];
 function check(ok, msg) {
@@ -66,7 +66,7 @@ function frontierFromScratch(model) {
   return set;
 }
 
-const model = new RegionModel(graph, pops, geom, rel);
+const model = new RegionModel(graph, pops, geom, demo);
 console.log(`\nregion model over ${model.n.toLocaleString()} zones, `
   + `total pop ${model.totalPop.toLocaleString()}, E[d^2] = `
   + `${Math.round(model.eD2).toLocaleString()}\n`);
@@ -120,7 +120,7 @@ function lonePocketExists(m) {
   return false;
 }
 
-const sealer = new RegionModel(graph, pops, geom, rel);
+const sealer = new RegionModel(graph, pops, geom, demo);
 sealer.start(18, 5);
 check(sealer.sweepInterval === 25,
   `sweepInterval survives start() (${sealer.sweepInterval})`);
@@ -134,7 +134,7 @@ check(sealer.assigned === sealer.n, 'sealing still assigns every zone');
 check(regionsContiguous(sealer) === null,
   'sealing keeps every region contiguous -- a pocket touching one region joins it whole');
 
-const bare = new RegionModel(graph, pops, geom, rel);
+const bare = new RegionModel(graph, pops, geom, demo);
 bare.sweepInterval = Infinity;
 bare.start(18, 5);
 while (bare.buildStep());
@@ -144,21 +144,21 @@ console.log(`  build score ${bare.scorePop.toFixed(0)} without sealing, `
   + `${sealer.scorePop.toFixed(0)} with (${sealer.steps.toLocaleString()} steps `
   + `vs ${bare.steps.toLocaleString()})`);
 
-const seal2 = new RegionModel(graph, pops, geom, rel);
+const seal2 = new RegionModel(graph, pops, geom, demo);
 seal2.start(18, 5);
 while (seal2.buildStep());
-const seal3 = new RegionModel(graph, pops, geom, rel);
+const seal3 = new RegionModel(graph, pops, geom, demo);
 seal3.start(18, 5);
 while (seal3.buildStep());
 check(seal2.assign.every((v, i) => v === seal3.assign[i]),
   'sealing stays deterministic for a given seed');
 
 /* --- determinism --------------------------------------------------------- */
-const a = new RegionModel(graph, pops, geom, rel);
+const a = new RegionModel(graph, pops, geom, demo);
 a.start(18, 42); while (a.buildStep());
-const b = new RegionModel(graph, pops, geom, rel);
+const b = new RegionModel(graph, pops, geom, demo);
 b.start(18, 42); while (b.buildStep());
-const c = new RegionModel(graph, pops, geom, rel);
+const c = new RegionModel(graph, pops, geom, demo);
 c.start(18, 43); while (c.buildStep());
 check(a.assign.every((v, i) => v === b.assign[i]), 'same seed gives an identical map');
 check(!a.assign.every((v, i) => v === c.assign[i]), 'a different seed gives a different map');
@@ -195,12 +195,12 @@ check(regionsContiguous(model) === null, 'restored best state is contiguous');
 /* --- branch moves -------------------------------------------------------- */
 console.log('\nbranch moves');
 
-const branchOn = new RegionModel(graph, pops, geom, rel);
+const branchOn = new RegionModel(graph, pops, geom, demo);
 branchOn.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (branchOn.buildStep());
 for (let i = 0; i < 50000; i++) branchOn.optimiseStep();
 
-const branchOff = new RegionModel(graph, pops, geom, rel);
+const branchOff = new RegionModel(graph, pops, geom, demo);
 branchOff.allowBranchMoves = false;
 branchOff.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (branchOff.buildStep());
@@ -265,9 +265,19 @@ console.log(`  branch moves on : score ${branchOn.scorePop.toFixed(1)}, `
 /* --- recombination -------------------------------------------------------- */
 console.log('\nrecombination');
 
-const recom = new RegionModel(graph, pops, geom, rel);
+const recom = new RegionModel(graph, pops, geom, demo);
 recom.recomInterval = Infinity;          // drive it by hand
-recom.start(18, 5, { wShape: 1, wPopShape: 1, wCut: 1, wRel: 1, relMode: 'extreme' });
+/* Every demographic is live, in a mix of modes, because each keeps its own pair
+ * of scratch arrays through the spanning-tree pass and each contributes its own
+ * subtree sums. Mixing extreme with gerrymander exercises both shapes of the
+ * term at once, and running all of them is what would catch a scratch array
+ * shared between two of them. */
+recom.start(18, 5, { wShape: 1, wPopShape: 1, wCut: 1, demo: {
+  rel: { weight: 1, mode: 'extreme' },
+  age: { weight: 1, mode: 'gerrymander', threshold: 41, above: true },
+  orient: { weight: 1, mode: 'average' },
+  grade: { weight: 1, mode: 'gerrymander', threshold: 0.51, above: false },
+} });
 while (recom.buildStep());
 for (let i = 0; i < 5000; i++) recom.optimiseStep();
 check(recom.recombinations === 0, 'recomInterval = Infinity turns it off');
@@ -328,7 +338,7 @@ check(recom.cutRaw === recom._countCut(), 'the cut count survives recombination'
  * the hard case -- it used to be a sealed pocket, which pocket sealing largely
  * fixed, but it is still where single-zone moves make the slowest progress. */
 function after(steps, interval) {
-  const m = new RegionModel(graph, pops, geom, rel);
+  const m = new RegionModel(graph, pops, geom, demo);
   m.recomInterval = interval;
   m.start(18, 7, { wShape: 1, wPopShape: 1 });
   while (m.buildStep());
@@ -398,7 +408,7 @@ check(gridPopPenalty(160, 10, uniform) > gridPopPenalty(80, 20, uniform),
   'a more elongated region strings its people out further');
 
 /* Weight 0 must be exactly the old behaviour, geometry present or not. */
-const off = new RegionModel(graph, pops, geom, rel);
+const off = new RegionModel(graph, pops, geom, demo);
 off.start(18, 5, { wShape: 0 });
 while (off.buildStep());
 for (let i = 0; i < 50000; i++) off.optimiseStep();
@@ -411,7 +421,7 @@ check(off.assign.every((v, i) => v === noGeom.assign[i]),
 
 /* Sums are maintained incrementally through tens of thousands of moves and are
  * a small difference of large numbers, so drift is the thing to watch. */
-const on = new RegionModel(graph, pops, geom, rel);
+const on = new RegionModel(graph, pops, geom, demo);
 on.start(18, 5, { wShape: 1 });
 while (on.buildStep());
 for (let i = 0; i < 50000; i++) on.optimiseStep();
@@ -433,7 +443,7 @@ check(regionsContiguous(on) === null, 'shaped regions are still contiguous');
 check(on.assigned === on.n, 'shaped run still assigns every zone');
 
 /* The people term, on its own and against the land term. */
-const people = new RegionModel(graph, pops, geom, rel);
+const people = new RegionModel(graph, pops, geom, demo);
 people.start(18, 5, { wShape: 0, wPopShape: 1 });
 while (people.buildStep());
 for (let i = 0; i < 50000; i++) people.optimiseStep();
@@ -453,7 +463,7 @@ check(people.meanPopPenalty < on.meanPopPenalty,
   + `(${people.meanPopPenalty.toFixed(3)} vs ${on.meanPopPenalty.toFixed(3)})`);
 check(regionsContiguous(people) === null, 'people-shaped regions are contiguous');
 
-const both = new RegionModel(graph, pops, geom, rel);
+const both = new RegionModel(graph, pops, geom, demo);
 both.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (both.buildStep());
 for (let i = 0; i < 50000; i++) both.optimiseStep();
@@ -463,7 +473,7 @@ check(both.meanPenalty < off.meanPenalty && both.meanPopPenalty < off.meanPopPen
   'both weights together improve both measures over no shape term at all');
 
 /* Weight changes re-base best for the people term too. */
-const liveP = new RegionModel(graph, pops, geom, rel);
+const liveP = new RegionModel(graph, pops, geom, demo);
 liveP.start(18, 5, {});
 while (liveP.buildStep());
 for (let i = 0; i < 20000; i++) liveP.optimiseStep();
@@ -475,11 +485,11 @@ check(liveP.setPopShapeWeight(2) === false, 'the same people weight is a no-op')
 /* Only the ratios between weights matter: the score is divided by their sum,
  * so scaling all three must be invisible. Checked through the whole dynamics,
  * not just the score getter -- a weight left out of a delta would show here. */
-const small = new RegionModel(graph, pops, geom, rel);
+const small = new RegionModel(graph, pops, geom, demo);
 small.start(18, 5, { wShape: 1, wPopShape: 1, wPop: 0.1 });          // land 1, people 1, population 0.1
 while (small.buildStep());
 for (let i = 0; i < 30000; i++) small.optimiseStep();
-const big = new RegionModel(graph, pops, geom, rel);
+const big = new RegionModel(graph, pops, geom, demo);
 big.start(18, 5, { wShape: 10, wPopShape: 10, wPop: 1 });            // the same thing, times ten
 while (big.buildStep());
 for (let i = 0; i < 30000; i++) big.optimiseStep();
@@ -488,7 +498,7 @@ check(small.assign.every((v, i) => v === big.assign[i]),
 check(near(small.score, big.score, 1e-9 * Math.max(1, Math.abs(small.score))),
   `and an identical score (${small.score.toFixed(6)} vs ${big.score.toFixed(6)})`);
 
-const even = new RegionModel(graph, pops, geom, rel);
+const even = new RegionModel(graph, pops, geom, demo);
 even.start(18, 5, { wShape: 1, wPopShape: 1, wPop: 1 });
 while (even.buildStep());
 check(near(even.score,
@@ -496,7 +506,7 @@ check(near(even.score,
   'equal weights make the score the mean of the three terms');
 check(even.weightSum === 3, `weightSum tracks the weights (${even.weightSum})`);
 
-const popw = new RegionModel(graph, pops, geom, rel);
+const popw = new RegionModel(graph, pops, geom, demo);
 popw.start(18, 5, { wShape: 1, wPopShape: 1, wPop: 1 });
 while (popw.buildStep());
 for (let i = 0; i < 20000; i++) popw.optimiseStep();
@@ -507,7 +517,7 @@ check(popw.setPopWeight(0.3) === false, 'the same population weight is a no-op')
 
 /* Changing the weight mid-run changes the objective, so the old best is not
  * comparable and must not survive. */
-const live = new RegionModel(graph, pops, geom, rel);
+const live = new RegionModel(graph, pops, geom, demo);
 live.start(18, 5, {});
 while (live.buildStep());
 for (let i = 0; i < 20000; i++) live.optimiseStep();
@@ -522,35 +532,14 @@ check(live.setShapeWeight(0.5) === true, 'a real change is reported as one');
 /* --- religion ------------------------------------------------------------ */
 console.log('\nreligion');
 
-check(near(model.relMean, 0.5111, 5e-4),
-  `national value is 0.511 (${model.relMean.toFixed(4)})`);
+check(near(model.demoByKey.rel.mean, 0.5111, 5e-4),
+  `national value is 0.511 (${model.demoByKey.rel.mean.toFixed(4)})`);
 
-/* The index in the geojson against the raw NISRA table. This is what proves the
- * collapse in prepare_attributes.py did what it claims, end to end. */
-const rawTable = JSON.parse(fs.readFileSync(path.join(ROOT,
-  'data/ni-census21-people-dz21+religion_belong_to_or_brought_up_in_dvo-f4902c4c.json'),
-  'utf8')).table;
-const WEIGHTS = {
-  Catholic: 1,
-  'Protestant and Other Christian (including Christian related)': 0,
-  'Other religions': 0.5,
-  None: 0.5,
-};
-const catWeights = rawTable.dimensions[1].categories.map((c) => WEIGHTS[c.label]);
-const width = catWeights.length;
-let worstZone = 0;
-rawTable.dimensions[0].categories.forEach((zc, i) => {
-  const row = rawTable.values.slice(i * width, (i + 1) * width);
-  const n = row.reduce((x, y) => x + y, 0);
-  const want = row.reduce((acc, v, j) => acc + v * catWeights[j], 0) / n;
-  const got = rel[zc.code];
-  worstZone = Math.max(worstZone, Math.abs(want - got.value), Math.abs(n - got.n));
-});
-check(worstZone < 1e-5,
-  `every zone index matches the raw table (worst error ${worstZone.toExponential(1)})`);
+/* The index against the raw NISRA table is checked for every demographic at
+ * once, in the section below. */
 
 function relRun(opts, steps = 50000) {
-  const m = new RegionModel(graph, pops, geom, rel);
+  const m = new RegionModel(graph, pops, geom, demo);
   m.start(18, 5, opts);
   while (m.buildStep());
   for (let i = 0; i < steps; i++) m.optimiseStep();
@@ -558,45 +547,45 @@ function relRun(opts, steps = 50000) {
   return m;
 }
 const seatsAt = (m, t, above) =>
-  m.summary().filter((r) => (above ? r.religion >= t : r.religion <= t)).length;
+  m.summary().filter((r) => (above ? r.demo.rel >= t : r.demo.rel <= t)).length;
 
 const relOff = relRun({});
-const relAvg = relRun({ wRel: 1, relMode: 'average' });
-const relExt = relRun({ wRel: 1, relMode: 'extreme' });
-console.log(`  off      spread ${relOff.relSpread.toFixed(3)}   `
-  + `range ${Math.min(...relOff.summary().map((r) => r.religion)).toFixed(2)}`
-  + `-${Math.max(...relOff.summary().map((r) => r.religion)).toFixed(2)}`);
-console.log(`  average  spread ${relAvg.relSpread.toFixed(3)}   `
-  + `range ${Math.min(...relAvg.summary().map((r) => r.religion)).toFixed(2)}`
-  + `-${Math.max(...relAvg.summary().map((r) => r.religion)).toFixed(2)}`);
-console.log(`  extreme  spread ${relExt.relSpread.toFixed(3)}   `
-  + `range ${Math.min(...relExt.summary().map((r) => r.religion)).toFixed(2)}`
-  + `-${Math.max(...relExt.summary().map((r) => r.religion)).toFixed(2)}`);
-check(relAvg.relSpread < relOff.relSpread,
-  `average mode narrows the spread (${relAvg.relSpread.toFixed(3)} vs `
-  + `${relOff.relSpread.toFixed(3)})`);
-check(relExt.relSpread > relOff.relSpread,
-  `extreme mode widens it (${relExt.relSpread.toFixed(3)} vs `
-  + `${relOff.relSpread.toFixed(3)})`);
+const relAvg = relRun({ demo: { rel: { weight: 1, mode: 'average' } } });
+const relExt = relRun({ demo: { rel: { weight: 1, mode: 'extreme' } } });
+console.log(`  off      spread ${relOff.demoSpread('rel').toFixed(3)}   `
+  + `range ${Math.min(...relOff.summary().map((r) => r.demo.rel)).toFixed(2)}`
+  + `-${Math.max(...relOff.summary().map((r) => r.demo.rel)).toFixed(2)}`);
+console.log(`  average  spread ${relAvg.demoSpread('rel').toFixed(3)}   `
+  + `range ${Math.min(...relAvg.summary().map((r) => r.demo.rel)).toFixed(2)}`
+  + `-${Math.max(...relAvg.summary().map((r) => r.demo.rel)).toFixed(2)}`);
+console.log(`  extreme  spread ${relExt.demoSpread('rel').toFixed(3)}   `
+  + `range ${Math.min(...relExt.summary().map((r) => r.demo.rel)).toFixed(2)}`
+  + `-${Math.max(...relExt.summary().map((r) => r.demo.rel)).toFixed(2)}`);
+check(relAvg.demoSpread('rel') < relOff.demoSpread('rel'),
+  `average mode narrows the spread (${relAvg.demoSpread('rel').toFixed(3)} vs `
+  + `${relOff.demoSpread('rel').toFixed(3)})`);
+check(relExt.demoSpread('rel') > relOff.demoSpread('rel'),
+  `extreme mode widens it (${relExt.demoSpread('rel').toFixed(3)} vs `
+  + `${relOff.demoSpread('rel').toFixed(3)})`);
 
 /* Seats are a coarse integer that moves slowly, so these get more steps than
  * the modes above; 50,000 is not enough to flip one at N=18. */
 const GERRY_STEPS = 300000;
-const gAbove = relRun({ wRel: 1, relMode: 'gerrymander', relThreshold: 0.6, relAbove: true },
+const gAbove = relRun({ demo: { rel: { weight: 1, mode: 'gerrymander', threshold: 0.6, above: true } } },
   GERRY_STEPS);
-const gBelow = relRun({ wRel: 1, relMode: 'gerrymander', relThreshold: 0.4, relAbove: false },
+const gBelow = relRun({ demo: { rel: { weight: 1, mode: 'gerrymander', threshold: 0.4, above: false } } },
   GERRY_STEPS);
-const marginals = (m, t) => m.summary().filter((r) => Math.abs(r.religion - t) <= 0.05).length;
+const marginals = (m, t) => m.summary().filter((r) => Math.abs(r.demo.rel - t) <= 0.05).length;
 console.log(`  gerrymander above 0.6: ${seatsAt(gAbove, 0.6, true)}/18 seats `
   + `(${seatsAt(relOff, 0.6, true)}/18 with the term off)`);
 console.log(`  gerrymander below 0.4: ${seatsAt(gBelow, 0.4, false)}/18 seats `
   + `(${seatsAt(relOff, 0.4, false)}/18 with the term off)`);
-console.log(`  values: ${gAbove.summary().map((r) => r.religion.toFixed(2)).sort().join(' ')}`);
+console.log(`  values: ${gAbove.summary().map((r) => r.demo.rel.toFixed(2)).sort().join(' ')}`);
 check(seatsAt(gAbove, 0.6, true) > seatsAt(relOff, 0.6, true),
   'gerrymander above wins more regions over the threshold');
 check(seatsAt(gBelow, 0.4, false) > seatsAt(relOff, 0.4, false),
   'and the direction toggle wins more the other way');
-check(gAbove.relSeats === seatsAt(gAbove, 0.6, true),
+check(gAbove.demoSeats('rel') === seatsAt(gAbove, 0.6, true),
   "the model's own seat count agrees with an independent one");
 
 /* Packing and cracking means abandoning the middle, so regions vacate the
@@ -607,47 +596,272 @@ check(gAbove.relSeats === seatsAt(gAbove, 0.6, true),
 console.log(`  regions within 0.05 of the threshold: `
   + `${marginals(relOff, 0.6)} with the term off, ${marginals(gAbove, 0.6)} gerrymandering`);
 
-/* Two more running sums maintained through 50,000 moves, branch moves included. */
-const relRawBefore = relExt.relRaw;
-let worstValue = 0;
-for (let r = 0; r < relExt.N; r++) {
-  let sum = 0;
-  let n = 0;
-  for (let z = 0; z < relExt.n; z++) {
-    if (relExt.assign[z] === r) { sum += relExt.zRel[z] * relExt.zRelN[z]; n += relExt.zRelN[z]; }
+/* Two more running sums per term, maintained through 50,000 moves, branch moves
+ * included. Both terms are checked even though only religion was being steered:
+ * age's sums are updated by every move regardless, so this catches a term that
+ * is carried along but not threaded through some move type. */
+const rawBefore = relExt.demographics.map((d) => d.raw);
+for (const d of relExt.demographics) {
+  let worstValue = 0;
+  for (let r = 0; r < relExt.N; r++) {
+    let sum = 0;
+    let n = 0;
+    for (let z = 0; z < relExt.n; z++) {
+      if (relExt.assign[z] === r) { sum += d.zValue[z] * d.zN[z]; n += d.zN[z]; }
+    }
+    worstValue = Math.max(worstValue, Math.abs(sum / n - relExt._demoValue(d, r)));
   }
-  worstValue = Math.max(worstValue, Math.abs(sum / n - relExt._relValue(r)));
+  check(worstValue < 1e-9,
+    `${d.key} region values match a from-scratch weighted mean `
+    + `(worst ${worstValue.toExponential(1)})`);
 }
-check(worstValue < 1e-9,
-  `region values match a from-scratch weighted mean (worst ${worstValue.toExponential(1)})`);
 relExt._resum();
-check(near(relRawBefore, relExt.relRaw, 1e-6 * Math.max(1, Math.abs(relRawBefore))),
-  `no drift in the religion total (${relRawBefore.toFixed(9)} vs ${relExt.relRaw.toFixed(9)})`);
+relExt.demographics.forEach((d, i) => {
+  check(near(rawBefore[i], d.raw, 1e-6 * Math.max(1, Math.abs(rawBefore[i]))),
+    `no drift in the ${d.key} total (${rawBefore[i].toFixed(9)} vs ${d.raw.toFixed(9)})`);
+});
 check(regionsContiguous(relExt) === null, 'religion-steered regions stay contiguous');
 
 /* Without the data the term is inert, whatever is asked for. */
 const noRel = new RegionModel(graph, pops, geom);
-noRel.start(18, 5, { wRel: 1, relMode: 'average' });
+noRel.start(18, 5, { demo: { rel: { weight: 1, mode: 'average' } } });
 while (noRel.buildStep());
 for (let i = 0; i < 50000; i++) noRel.optimiseStep();
 noRel.restoreBest();
 check(noRel.assign.every((v, i) => v === relOff.assign[i]),
   'with no religion data the term is inert whatever the mode');
 
-const relLive = relRun({ wRel: 1, relMode: 'average' }, 20000);
-check(relLive.setReligion('gerrymander', 0.6, 0.05, true) === true,
+const relLive = relRun({ demo: { rel: { weight: 1, mode: 'average' } } }, 20000);
+check(relLive.setDemographic('rel', 'gerrymander', 0.6, 0.05, true) === true,
   'changing the religion mode is reported as a change');
 check(near(relLive.bestScore, relLive.score, 1e-9),
   'changing the religion mode re-bases best-so-far');
-check(relLive.setReligion('gerrymander', 0.6, 0.05, true) === false,
+check(relLive.setDemographic('rel', 'gerrymander', 0.6, 0.05, true) === false,
   'the same religion settings are a no-op');
-check(relLive.setReligion('gerrymander', 0.55, 0.05, true) === true,
+check(relLive.setDemographic('rel', 'gerrymander', 0.55, 0.05, true) === true,
   'a threshold change alone counts as a change');
+
+/* --- demographics --------------------------------------------------------- */
+/* Everything past religion is generic: the term list in regions.js drives the
+ * model, the UI and this. So every demographic present gets the same battery,
+ * and adding a fifth adds nothing here. Religion's own section above keeps only
+ * what is specific to it.
+ *
+ * Two things vary between them and are declared rather than derived: the
+ * gerrymander thresholds to probe, which have to sit inside each variable's own
+ * reachable band, and the raw table to check the zone index against. */
+console.log('\ndemographics');
+
+const DEMO_PROBES = {
+  rel: { mean: 0.5111, tol: 5e-4, above: 0.6, below: 0.4 },
+  age: { mean: 39.6, tol: 0.05, above: 41, below: 38.5 },
+  orient: { mean: 0.0227, tol: 5e-4, above: 0.03, below: 0.017 },
+  grade: { mean: 0.4829, tol: 5e-4, above: 0.51, below: 0.45 },
+};
+
+/* The zone index in the geojson against the raw NISRA table -- what proves the
+ * collapse in prepare_attributes.py did what it claims, end to end. `null`
+ * means the category is excluded from the numerator *and* the denominator, so
+ * these also check that "prefer not to say" and the under-16s never reach the
+ * index. `fromCode` is the ordinal path, where the category codes are the
+ * values themselves and a label table could not express them. */
+const RAW_TABLES = {
+  rel: {
+    file: 'ni-census21-people-dz21+religion_belong_to_or_brought_up_in_dvo-f4902c4c.json',
+    total: 1903158,
+    weights: {
+      Catholic: 1,
+      'Protestant and Other Christian (including Christian related)': 0,
+      'Other religions': 0.5,
+      None: 0.5,
+    },
+  },
+  age: {
+    file: 'ni-census21-people-dz21+age_syoa-6e5d3e2d.json',
+    total: 1903347,
+    fromCode: true,
+  },
+  orient: {
+    file: 'ni-census21-people-dz21+sexual_orientation_dvo_agg4-4310722c.json',
+    total: 1395521,
+    weights: {
+      'Straight or heterosexual': 0,
+      'Gay, lesbian, bisexual, other sexual orientation': 1,
+      'Prefer not to say/Not stated': null,
+      'No code required': null,
+    },
+  },
+  grade: {
+    file: 'ni-census21-people-dz21+social_grade-52ba72e2.json',
+    total: 1511617,
+    weights: {
+      ['AB: Higher and intermediate managerial, administrative and professional '
+        + 'occupations']: 1,
+      ['C1: Supervisory, clerical, and junior managerial, administrative and '
+        + 'professional occupations']: 2 / 3,
+      'C2: Skilled manual occupations': 1 / 3,
+      ['Semi-skilled and unskilled manual occupations; unemployed and lowest '
+        + 'grade occupations']: 0,
+      'No code required': null,
+    },
+  },
+};
+
+const demoRun = (opts, steps = 50000) => {
+  const m = new RegionModel(graph, pops, geom, demo);
+  m.start(18, 5, opts);
+  while (m.buildStep());
+  for (let i = 0; i < steps; i++) m.optimiseStep();
+  m.restoreBest();
+  return m;
+};
+const demoOff = demoRun({ wPop: 1 });
+
+check(model.demographics.length === Object.keys(RAW_TABLES).length,
+  `every demographic in the model is covered here (${model.demographics.length})`);
+
+for (const d of model.demographics) {
+  const probe = DEMO_PROBES[d.key];
+  const raw = RAW_TABLES[d.key];
+  const dp = d.def.decimals;
+  const values = (m) => m.summary().map((r) => r.demo[d.key]);
+  console.log(`\n  ${d.label}`);
+
+  check(near(d.mean, probe.mean, probe.tol),
+    `national value is ${probe.mean} (${d.mean.toFixed(Math.max(dp, 4))})`);
+
+  /* --- the data ---------------------------------------------------------- */
+  const table = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', raw.file), 'utf8')).table;
+  const cells = table.dimensions[1].categories;
+  const ws = raw.fromCode
+    ? cells.map((c) => Number(c.code))
+    : cells.map((c) => raw.weights[c.label]);
+  check(ws.every((w) => w !== undefined),
+    'every category in the raw table is accounted for');
+  if (raw.fromCode) {
+    check(ws.every(Number.isFinite) && Math.min(...ws) === 0 && Math.max(...ws) === 100,
+      `the categories are the ages 0-100 (${ws.length} of them)`);
+  }
+  const width = ws.length;
+  let worstZone = 0;
+  let total = 0;
+  table.dimensions[0].categories.forEach((zc, i) => {
+    const row = table.values.slice(i * width, (i + 1) * width);
+    let num = 0;
+    let n = 0;
+    row.forEach((v, j) => {
+      if (ws[j] === null) return;      // excluded from both, not counted as an answer
+      num += v * ws[j];
+      n += v;
+    });
+    total += n;
+    const got = demo[d.key][zc.code];
+    worstZone = Math.max(worstZone, Math.abs(num / n - got.value), Math.abs(n - got.n));
+  });
+  check(worstZone < 1e-5,
+    `every zone index matches the raw table (worst error ${worstZone.toExponential(1)})`);
+  check(total === raw.total,
+    `the denominator totals ${raw.total.toLocaleString()} (${total.toLocaleString()})`);
+
+  /* --- average and extreme ------------------------------------------------ */
+  const avg = demoRun({ wPop: 1, demo: { [d.key]: { weight: 1, mode: 'average' } } });
+  const ext = demoRun({ wPop: 1, demo: { [d.key]: { weight: 1, mode: 'extreme' } } });
+  for (const [tag, m] of [['off', demoOff], ['average', avg], ['extreme', ext]]) {
+    console.log(`    ${tag.padEnd(8)} spread ${m.demoSpread(d.key).toFixed(dp)}   `
+      + `range ${Math.min(...values(m)).toFixed(dp)}-${Math.max(...values(m)).toFixed(dp)}`);
+  }
+  check(avg.demoSpread(d.key) < demoOff.demoSpread(d.key),
+    `average mode narrows the spread (${avg.demoSpread(d.key).toFixed(dp)} `
+    + `vs ${demoOff.demoSpread(d.key).toFixed(dp)})`);
+  check(ext.demoSpread(d.key) > demoOff.demoSpread(d.key),
+    `extreme mode widens it (${ext.demoSpread(d.key).toFixed(dp)} `
+    + `vs ${demoOff.demoSpread(d.key).toFixed(dp)})`);
+
+  /* --- gerrymander -------------------------------------------------------- */
+  const seatsAt = (m, t, above) =>
+    values(m).filter((v) => (above ? v >= t : v <= t)).length;
+  const up = demoRun({ wPop: 1, demo: { [d.key]: {
+    weight: 1, mode: 'gerrymander', threshold: probe.above, above: true } } });
+  const down = demoRun({ wPop: 1, demo: { [d.key]: {
+    weight: 1, mode: 'gerrymander', threshold: probe.below, above: false } } });
+  console.log(`    gerrymander above ${probe.above}: `
+    + `${seatsAt(up, probe.above, true)}/18 seats `
+    + `(${seatsAt(demoOff, probe.above, true)}/18 off)   `
+    + `below ${probe.below}: ${seatsAt(down, probe.below, false)}/18 `
+    + `(${seatsAt(demoOff, probe.below, false)}/18 off)`);
+  check(seatsAt(up, probe.above, true) > seatsAt(demoOff, probe.above, true),
+    'gerrymander above wins more regions over the threshold');
+  check(seatsAt(down, probe.below, false) > seatsAt(demoOff, probe.below, false),
+    'and the direction toggle wins more the other way');
+  check(up.demoSeats(d.key) === seatsAt(up, probe.above, true),
+    "the model's own seat count agrees with an independent one");
+  check(regionsContiguous(up) === null, 'steered regions stay contiguous');
+
+  /* --- the extreme-mode cap ----------------------------------------------- */
+  /* Uncapped, `-(x - mu)^2` buys a region made of one outlier zone: nothing
+   * else in the score resists, since a one-zone region scores about 1 on both
+   * shape terms, the best either gives. Religion is the only one that cannot
+   * reach the cap, its values being confined to [0, 1] within 3.3x rSpread of
+   * the national figure; the rest all can, and all need it. */
+  const reach = Math.max(...Array.from(d.zValue, (v) => Math.abs(v - d.mean)));
+  const binds = reach > d.cap;
+  console.log(`    cap ${d.cap.toFixed(dp)}, furthest zone ${reach.toFixed(dp)} `
+    + `(${(reach / d.rSpread).toFixed(1)}x rSpread) -- ${binds ? 'binds' : 'unreachable'}`);
+  check(binds === (d.key !== 'rel'),
+    `the cap ${d.key === 'rel' ? 'is unreachable, so religion is unchanged'
+      : 'is reachable, which is why it is needed'}`);
+
+  const savedMode = d.mode;
+  d.mode = 'extreme';
+  const termAt = (gap) => model._demoTermFrom(d, d.mean + gap);
+  check(near(termAt(d.cap / 2), -((d.cap / 2) ** 2), 1e-12 * d.cap ** 2 + 1e-15),
+    'below the cap the term is the plain negated square');
+  check(near(termAt(d.cap * 3), -(d.cap ** 2), 1e-12 * d.cap ** 2 + 1e-15)
+    && near(termAt(-d.cap * 9), -(d.cap ** 2), 1e-12 * d.cap ** 2 + 1e-15),
+    'past it the term saturates, in both directions');
+  d.mode = savedMode;
+
+  /* At weight 10 an uncapped age term collapses to a one-zone region at 99.8%
+   * population deviation; every variable that can reach its cap could. */
+  const hot = demoRun({ wPop: 1, wShape: 1, wPopShape: 1, wCut: 1,
+    demo: { [d.key]: { weight: 10, mode: 'extreme' } } });
+  const smallest = Math.min(...hot.summary().map((r) => r.zones));
+  console.log(`    extreme at weight 10: smallest region ${smallest} zones, `
+    + `max deviation ${(100 * hot.maxDeviation).toFixed(1)}%`);
+  check(smallest > 50,
+    `a heavy extreme weight buys no degenerate region (smallest ${smallest} zones)`);
+  check(hot.maxDeviation < 0.25,
+    `and population equality survives it (${(100 * hot.maxDeviation).toFixed(1)}%)`);
+
+  /* --- inert when it should be -------------------------------------------- */
+  check(demoRun({ wPop: 1, demo: { [d.key]: { weight: 0, mode: 'extreme' } } })
+    .assign.every((v, i) => v === demoOff.assign[i]),
+    'weight 0 is inert whatever the mode');
+  const without = { ...demo };
+  delete without[d.key];
+  const blind = new RegionModel(graph, pops, geom, without);
+  blind.start(18, 5, { wPop: 1, demo: { [d.key]: { weight: 1, mode: 'average' } } });
+  while (blind.buildStep());
+  for (let i = 0; i < 50000; i++) blind.optimiseStep();
+  blind.restoreBest();
+  check(blind.assign.every((v, i) => v === demoOff.assign[i]),
+    'with no data for it the term is inert whatever the mode');
+}
+
+/* All four at once, which is the case none of the single-term runs covers: the
+ * per-term running sums, sigmas and scratch arrays all have to stay separate. */
+const allOn = demoRun({ wPop: 1, demo: Object.fromEntries(
+  model.demographics.map((d) => [d.key, { weight: 1, mode: 'average' }])) });
+console.log(`\n  all four averaged: ${model.demographics.map((d) =>
+  `${d.key} ${allOn.demoSpread(d.key).toFixed(d.def.decimals)}`).join('  ')}`);
+check(model.demographics.every((d) => allOn.demoSpread(d.key) < demoOff.demoSpread(d.key)),
+  'steering all four at once narrows every one of them');
+check(regionsContiguous(allOn) === null, 'and the regions stay contiguous');
 
 /* --- cut edges ------------------------------------------------------------ */
 console.log('\ncut edges');
 
-const cutOff = new RegionModel(graph, pops, geom, rel);
+const cutOff = new RegionModel(graph, pops, geom, demo);
 cutOff.start(18, 5, { wShape: 1, wPopShape: 1 });
 while (cutOff.buildStep());
 check(cutOff.cutRaw === cutOff._countCut(),
@@ -671,7 +885,7 @@ for (let i = 0; i < 50000; i++) cutOff.optimiseStep();
 check(cutOff.cutRaw === cutOff._countCut(),
   `still exact after 50,000 more (${cutOff.cutRaw} vs ${cutOff._countCut()})`);
 
-const cutOn = new RegionModel(graph, pops, geom, rel);
+const cutOn = new RegionModel(graph, pops, geom, demo);
 cutOn.start(18, 5, { wShape: 1, wPopShape: 1, wCut: 1 });
 while (cutOn.buildStep());
 for (let i = 0; i < 50000; i++) cutOn.optimiseStep();
@@ -719,13 +933,14 @@ check(cutOn.maxDeviation > cutOff.maxDeviation,
  * lines are drawn. At equal weights that swamped everything else. */
 console.log('\nsigma calibration');
 
-const calib = new RegionModel(graph, pops, geom, rel);
+const calib = new RegionModel(graph, pops, geom, demo);
 calib.start(18, 5, { wPop: 1 });
 while (calib.buildStep());
 for (let i = 0; i < 50000; i++) calib.optimiseStep();
 
 function perMoveDeltas(m) {
-  const acc = { population: [], land: [], people: [], religion: [], cut: [] };
+  const acc = { population: [], land: [], people: [], cut: [] };
+  for (const d of m.demographics) acc[d.key] = [];
   for (let k = 0; k < 4000; k++) {
     const z = m.frontier[(m.rng() * m.frontier.length) | 0];
     const from = m.assign[z];
@@ -740,8 +955,10 @@ function perMoveDeltas(m) {
         + m._penaltyWithAgg(r, g, 1) - m._penalty(r)) / m.sigmaShape));
       acc.people.push(Math.abs((m._penaltyPopWithAgg(from, g, -1) - m._penaltyPop(from)
         + m._penaltyPopWithAgg(r, g, 1) - m._penaltyPop(r)) / m.sigmaPopShape));
-      acc.religion.push(Math.abs((m._relTermWithAgg(from, g, -1) - m._relTerm(from)
-        + m._relTermWithAgg(r, g, 1) - m._relTerm(r)) / m.sigmaRel));
+      m.demographics.forEach((d, k) => {
+        acc[d.key].push(Math.abs((m._demoTermWithAgg(d, from, g, -1, k) - m._demoTerm(d, from)
+          + m._demoTermWithAgg(d, r, g, 1, k) - m._demoTerm(d, r)) / d.sigma));
+      });
       const tally = m._cutTally([z]);   // scratch map, so read both before reusing
       acc.cut.push(Math.abs(((tally.get(from) || 0) - (tally.get(r) || 0)) / m.sigmaCut));
       break;
@@ -751,9 +968,18 @@ function perMoveDeltas(m) {
   return Object.fromEntries(Object.entries(acc).map(([k, v]) => [k, rms(v)]));
 }
 
-const SPREAD_LIMIT = 25;
+/* A coarse net for order-of-magnitude mistakes, not a tight one, because both
+ * ends of the range are deliberate. The cut term is 8x hotter than its nominal
+ * per-move size on purpose, since the cut count is structural and moving a town
+ * takes a run of consecutive moves rather than one. And gerrymander mode is
+ * meant to be flat away from its threshold -- that flatness is what produces
+ * cracking -- so measuring it over all moves understates it by ~2x against the
+ * same term in average mode. */
+const SPREAD_LIMIT = 40;
 for (const mode of ['average', 'extreme', 'gerrymander']) {
-  calib.setReligion(mode, 0.6, 0.05, true);
+  for (const d of calib.demographics) {
+    calib.setDemographic(d.key, mode, d.def.threshold, d.def.steepness, true);
+  }
   const d = perMoveDeltas(calib);
   const vals = Object.values(d);
   const ratio = Math.max(...vals) / Math.min(...vals);
@@ -770,7 +996,7 @@ const STEPS = 200000;
 console.log(`\nconvergence after ${STEPS.toLocaleString()} steps`);
 console.log('  N   seed     build dev    optimised dev      build score   optimised score');
 for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) {
-  const m = new RegionModel(graph, pops, geom, rel);
+  const m = new RegionModel(graph, pops, geom, demo);
   m.start(N, seed);
   while (m.buildStep());
   const devBuild = m.maxDeviation;
@@ -801,7 +1027,7 @@ for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) 
  * of why single-zone moves alone are limited. Swap moves are the standard fix
  * and are already deferred in major_checkpoint_1.txt. */
 console.log('\nthe known slow case: N=18 seed 7, sealed pocket');
-const slow = new RegionModel(graph, pops, geom, rel);
+const slow = new RegionModel(graph, pops, geom, demo);
 slow.start(18, 7);
 while (slow.buildStep());
 for (const upTo of [200000, 600000, 1600000]) {

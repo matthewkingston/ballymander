@@ -97,6 +97,32 @@ That emits `rel` (the weighted mean) and `rel_n` (the table's own row total).
 Every category must carry a weight, both ways — a renamed or added category is a
 hard failure rather than a silently wrong index.
 
+For an ordinal table whose *category codes are already the values*, ask for them
+by code instead of writing them out:
+
+```python
+{"column": "age", "file": "...age_syoa...json", "weight_from": "code"},
+```
+
+Age has 101 categories coded `0`–`100` (`100+ years` folded onto 100), so a
+literal weights table would be 101 entries that break on any label rewording.
+
+A weight of `None` drops a category from the numerator **and** the denominator,
+which is how a non-answer is kept from being counted as an answer:
+
+```python
+{"column": "orient", "file": "...sexual_orientation...json", "weights": {
+    "Straight or heterosexual": 0.0,
+    "Gay, lesbian, bisexual, other sexual orientation": 1.0,
+    "Prefer not to say/Not stated": None,
+    "No code required": None,     # under 16
+}},
+```
+
+It still has to be named, so the every-category rule holds. `<column>_n` then
+holds the post-exclusion denominator, and `prepare_attributes.py` prints both
+totals so the gap is visible.
+
 Then `./run.sh --rebuild`. **It is not quite one line**: the joined fields also
 have to be listed in `field-types` and `-filter-fields` in
 `scripts/build_map_data.sh`, or mapshaper drops them.
@@ -258,16 +284,34 @@ large thinly-populated zones — that was the deliberate trade against a fixed
 scale, which has no such incentive but would steer rural regions hard and urban
 ones barely at all.
 
-**Religion** is the fourth term, and the first demographic one. Each zone carries
-an index from the census religion table — Protestant 0, Catholic 1, and the
-unaligned at 0.5 on the assumption that in a two-way contest they split evenly.
-A region's value is the population-weighted mean, and the national figure is
-**0.511**. A mode selector picks what to do with it:
+**Demographics** are the fourth kind of term, and there are four of them. All
+work the same way — each zone carries one number, a region's value is the
+population-weighted mean of its zones, and a mode selector picks what to do with
+the spread of those values across regions. They live in a `DEMOGRAPHICS` table
+in `regions.js`; a fifth is its two columns from the pipeline plus one entry
+there, and no new UI markup, since the control block, the readout row, the
+bar-chart entry and the tooltip lines are all generated from that table.
+
+| | zone value | national |
+|---|---|---|
+| **religion** | Protestant 0, Catholic 1, the unaligned at 0.5, on the assumption that in a two-way contest they split evenly | **0.511** |
+| **age** | mean age in years, from single-year-of-age counts, 100+ folded onto 100 | **39.60** |
+| **orientation** | share who answered other than straight — 0 straight, 1 gay, lesbian, bisexual or other | **0.0227** |
+| **social grade** | the four grades evenly spaced: AB 1, C1 ⅔, C2 ⅓, semi-skilled and below 0 | **0.4829** |
+
+**The last two are shares of the people who answered, not of everyone.**
+"Prefer not to say" and the under-16s the question was never put to are dropped
+from the denominator rather than counted as an answer, so 26.7% of the
+population sits outside the orientation figure and 20.6% outside social grade.
+Each index therefore has its own `_n` column and its own national total, and
+none of them is the population total.
+
+A mode selector picks what to do with it:
 
 | mode | term per region | effect |
 |---|---|---|
 | average | `(x − μ)²` | every region near the national mix |
-| extreme | `−(x − μ)²` | the same negated: segregate as far as geography allows |
+| extreme | `−min(\|x − μ\|, cap)²` | the same negated and capped: segregate as far as geography allows |
 | gerrymander | `1 / (1 + exp((x − t)/s))` | maximise how many regions clear a threshold |
 
 A selector rather than a signed weight, because the score divides by the sum of
@@ -287,20 +331,74 @@ values split into a clean gap: `0.21 … 0.39 │ 0.66 … 0.75`.
 step function with no gradient to climb; too soft and it degenerates into average
 mode. At N=18, `s = 0.05` wins 9 seats where `s = 0.15` wins 6.
 
-Its sigma is closed form rather than measured. The value is *intensive* — a ratio,
+Sigma is closed form rather than measured. The value is *intensive* — a ratio,
 not a sum — so one move shifts it by about `(zone n / region n) × (zone value −
 region value)`, which **scales with N** where the population term's does not:
 
 ```
-delta(N) = 0.2 * N / 3780
-average, extreme:  sigma = 2 * 0.15 * delta
+delta(N) = vSpread * N / 3780
+average, extreme:  sigma = 2 * rSpread * delta
 gerrymander:       sigma = delta / (4s)
 ```
 
-The 0.2 is how far a boundary zone typically sits from its own region's value,
-bracketed by two measured figures: 0.176 rms between adjacent zones, 0.301 SD
-across NI. The 0.15 is a different thing — how far *regions* sit from the
-national value, measured at 0.153 with the term off.
+`vSpread` is how far a boundary zone sits from its own region's value; `rSpread`
+is the different question of how far *regions* sit from the national value.
+
+**The two demographics need genuinely different constants, and the reason is
+worth stating.** Religion is strongly spatially correlated: neighbours resemble
+each other, so a region's value stays a long way from the national one however
+the lines are drawn. Age is not — adjacent zones differ by *more* than the
+overall spread (a student area beside a family one), so averaging ~210 zones per
+region washes almost all of it out.
+
+| | national | zone SD | adjacent rms | regional SD (N=18) | vSpread | rSpread |
+|---|---|---|---|---|---|---|
+| religion | 0.511 | 0.301 | 0.176 | 0.160 | 0.2 | 0.15 |
+| age | 39.60 | 5.389 | 6.139 | 1.431 | 5.1 | 1.6 |
+| orientation | 0.0227 | 0.0206 | 0.0187 | 0.0103 | 0.019 | 0.011 |
+| social grade | 0.4829 | 0.1616 | 0.1457 | 0.0356 | 0.16 | 0.04 |
+
+Every `vSpread` but religion's is measured directly — the rms of (zone value −
+its region's value) over the frontier, at N=18 with population the only weight,
+and it barely moves at N=50 or 100. Religion's 0.2 predates that measurement and
+reads 0.270 the same way, so that term runs about a third hotter than nominal;
+it is left alone because the slider absorbs it and the settings tuned so far
+assume it. Measured at a common state, the four terms' per-move deltas come out
+at 1.40, 0.88, 0.87 and 1.26 — the same order, which is the whole point of the
+normalisation.
+
+The narrow regional band is also why each default gerrymander threshold sits
+just above its own national figure — 41 years, not anything like 45. Averaging
+~210 zones washes most of the zone-level variation out, so the reachable band at
+N=18 is only 37.8–43.0 for age, 0.012–0.049 for orientation and 0.411–0.551 for
+social grade; a threshold outside that is a target no region could ever reach.
+
+**Extreme mode pays only up to a cap of `5 × rSpread`**, and this is not
+cosmetic. `−(x − μ)²` rewards separation without limit, so it will buy a region
+made of a single outlier Data Zone — `Bangor_Central_F2` is 180 people in 2
+hectares at mean age 72.4. Nothing else in the score resists: a one-zone region
+scores about 1 on land shape and on people shape, the best either can give, and
+near-minimal on cut edges. Only population equality pushes back, and its cost for
+stranding a region falls as `1/N²` while this term's gain falls as `1/N`, so the
+weight at which the trade wins drops with N — measured, weight 10 at N=18, 3 at
+N=50, **1 at N=100**.
+
+**Religion is the only one of the four that cannot trigger this**, and it is an
+accident of its scale rather than anything in the design: a value in [0, 1] sits
+at most 0.48 from the national 0.511, which is 3.2× its rSpread. The others all
+reach far past 5× — age 20.5×, orientation 13.0×, social grade 10.8× — so all
+three need the cap, and each was calibrated on a typical deviation then asked to
+price one an order of magnitude larger. At 5× the cap is unreachable for religion
+and that term is bit-identical to before; for age it is 8 years, against the 3.6×
+that extreme mode already reaches legitimately at N=18. With it, N=18 at weight
+10 goes from a one-zone region at 99.8% population deviation to a smallest region
+of 186 zones at 5.4%.
+
+The cap is on the *reward* only. Average mode keeps the plain square: it is a
+penalty, bounded below by zero, with nothing to gain from a degenerate region —
+and capping it would remove the pull on exactly the outliers it exists to bring
+in. Gerrymander mode needs no cap either, since the logistic already saturates:
+a one-zone region wins one seat, the same as any other.
 
 > The obvious guess for the first line, `sigma = delta^2`, is wrong by a factor
 > of over a hundred, and it is an instructive mistake. It carries over the
@@ -311,10 +409,16 @@ national value, measured at 0.153 with the term off.
 > scale. The wrong version made the term 123× stronger than population at equal
 > weights and swamped everything: max deviation went from 1.4% to 33%.
 > `test_regions.mjs` now measures every term's per-move delta at a common state
-> and asserts they stay within 25× of each other. It aggregates by `rel_n`, the religion table's own row total, not by
-`pop` — disclosure control leaves the two differing in 1,261 of 3,780 zones.
+> and asserts they stay within 40× of each other.
 
-**Cut edges** is the fifth term, and the one that keeps towns whole. It counts
+Each term aggregates by its own table's row total — `rel_n`, `age_n`,
+`orient_n`, `grade_n` — never by `pop`. No two of those totals agree. Disclosure
+control perturbs every table independently, which is the handful of people
+between population, religion and age (1,903,168 / 1,903,158 / 1,903,347 — and
+religion and population disagree in 1,261 of 3,780 zones); the other two are far
+smaller because non-answers are excluded outright (1,395,521 and 1,511,617).
+
+**Cut edges** is the last term, and the one that keeps towns whole. It counts
 adjacency edges whose two zones ended up in different regions — a *count*, not a
 length: two zones sharing 3 km count 1, exactly like two sharing 30 m.
 
@@ -337,8 +441,8 @@ measure, indifferent to what the boundary passes through.
 A move changes the count by `(z's neighbours in A) − (z's neighbours in B)`,
 which reads as you would want: move to where more of your neighbours already
 are. Branch moves need the edges *inside* the moving set excluded, since those
-never change status. Unlike religion's, σ does not depend on N — the delta is
-purely local.
+never change status. Unlike the demographic terms', σ does not depend on N — the
+delta is purely local.
 
 At the default weight of 1, measured at N=18 across Omagh, Enniskillen,
 Ballymena, Coleraine, Armagh and Newry: those six towns span **9 regions with
@@ -355,8 +459,11 @@ populations.
 > population pressure. Normalising by per-move size made weight 1 do almost
 > nothing. It is `meanDegree / 24` instead — 8× stronger — so that 1 is a
 > setting worth using. The consequence is that its per-move delta is the largest
-> of the five, and the σ-calibration test's spread widens from about 5× to 14×
-> against a 25× limit.
+> of them all, and the σ-calibration test's spread widens from about 5× to 12×
+> against a 40× limit. The limit is that loose because the other end is
+> deliberate too: gerrymander mode is *meant* to be flat away from its threshold
+> — that flatness is what produces cracking — so measuring it over all moves
+> understates it by about 2× against the same term in average mode.
 
 It is also partly a compactness measure, so it overlaps with land shape. Expect
 to want the land weight lower once this is turned up.
@@ -426,9 +533,9 @@ splits into exactly two pieces when any edge is removed, and every tree edge is 
 real adjacency edge, so **both pieces are connected in the graph: contiguity is
 structural here rather than checked.**
 
-Every one of the `|U| − 1` possible cuts is scored on all five terms, not
-filtered down first. One backward pass over the tree gives each cut's totals,
-because population, area, the moment sums and the religion sums are all additive.
+Every one of the `|U| − 1` possible cuts is scored on every term, not filtered
+down first. One backward pass over the tree gives each cut's totals, because
+population, area, the moment sums and the demographic sums are all additive.
 Cut edges is not a subtree sum but is still exact, via the handshake lemma —
 `edges leaving S = (induced degrees in S) − 2 × (edges inside S)` — with the
 second half obtained by counting each induced edge at its LCA, since an edge lies
@@ -546,6 +653,9 @@ Without the fonts, text renders as zero-width glyphs and screenshots look blank.
 | `data/SDZ2021.geojson` | 850 Super Data Zones — parent tier, unused so far |
 | `data/ni-census21-people-dz21-*.json` | population per DZ |
 | `data/ni-census21-...religion...json` | religion per DZ × 4 categories |
+| `data/ni-census21-...age_syoa...json` | single year of age per DZ × 101 categories |
+| `data/ni-census21-...sexual_orientation...json` | sexual orientation per DZ × 4 categories |
+| `data/ni-census21-...social_grade...json` | social grade per DZ × 5 categories |
 
 Hierarchy is a clean tree: DZ → SDZ → DEA → LGD. Source `.geojson` files are
 gitignored (large); the census JSON is small enough to keep.
