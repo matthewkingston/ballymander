@@ -104,6 +104,7 @@ html, body {
 
 #ctl-fps-value, #ctl-build-value, #ctl-opt-value, #ctl-shape-value,
 #ctl-pshape-value, #ctl-popw-value, #ctl-relw-value, #ctl-relt-value,
+#ctl-cut-value,
 #ctl-rels-value {
   font-variant-numeric: tabular-nums;
 }

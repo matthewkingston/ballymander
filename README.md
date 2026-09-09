@@ -314,7 +314,54 @@ national value, measured at 0.153 with the term off.
 > and asserts they stay within 25× of each other. It aggregates by `rel_n`, the religion table's own row total, not by
 `pop` — disclosure control leaves the two differing in 1,261 of 3,780 zones.
 
-All four weight sliders are logarithmic, running 0.1 to 10 with **1 in the
+**Cut edges** is the fifth term, and the one that keeps towns whole. It counts
+adjacency edges whose two zones ended up in different regions — a *count*, not a
+length: two zones sharing 3 km count 1, exactly like two sharing 30 m.
+
+That works because Data Zones hold roughly equal population, so their borders
+are dense where people are dense. Measured on the real graph, a 1 km stretch of
+region boundary crosses:
+
+| | mean shared border | borders per km |
+|---|---|---|
+| countryside (<500/km²) | 2,018 m | **0.5** |
+| edge of town | 398 m | 2.5 |
+| town (2,500–6,000/km²) | 279 m | **3.6** |
+| city (>6,000/km²) | 189 m | 5.3 |
+
+So cutting through Omagh costs about 7× what the same distance of farmland
+costs, and the optimiser routes around towns without ever being told what a town
+is. Penalising boundary *length* would not do this — that is a compactness
+measure, indifferent to what the boundary passes through.
+
+A move changes the count by `(z's neighbours in A) − (z's neighbours in B)`,
+which reads as you would want: move to where more of your neighbours already
+are. Branch moves need the edges *inside* the moving set excluded, since those
+never change status. Unlike religion's, σ does not depend on N — the delta is
+purely local.
+
+At the default weight of 1, measured at N=18 across Omagh, Enniskillen,
+Ballymena, Coleraine, Armagh and Newry: those six towns span **9 regions with
+the term off and 7 with it on**, and the cut count falls from 1,883 to 541. It
+costs population equality — max deviation 0.81% → 2.79% — necessarily so, since
+keeping a town whole means declining the move that would have balanced the
+populations.
+
+> **This term's σ is calibrated, not derived**, and it is the one place the
+> "one move's worth" convention is knowingly broken. The per-move size is
+> `meanDegree / 3`, but that is the wrong yardstick: every other term can be
+> shifted by a single well-chosen move, whereas the cut count is structural and
+> moving a town out of a region takes a long run of consecutive moves against
+> population pressure. Normalising by per-move size made weight 1 do almost
+> nothing. It is `meanDegree / 24` instead — 8× stronger — so that 1 is a
+> setting worth using. The consequence is that its per-move delta is the largest
+> of the five, and the σ-calibration test's spread widens from about 5× to 14×
+> against a 25× limit.
+
+It is also partly a compactness measure, so it overlaps with land shape. Expect
+to want the land weight lower once this is turned up.
+
+All five weight sliders are logarithmic, running 0.1 to 10 with **1 in the
 middle** — the slider carries log₁₀ of the weight. The two shape terms have one
 extra detent at the left that reads *off*; population does not, since with every
 weight at zero there would be nothing anchoring the regions to equal population.

@@ -55,6 +55,8 @@ const els = {
   shapeValue: document.getElementById('ctl-shape-value'),
   pshape: document.getElementById('ctl-pshape'),
   pshapeValue: document.getElementById('ctl-pshape-value'),
+  cut: document.getElementById('ctl-cut'),
+  cutValue: document.getElementById('ctl-cut-value'),
   relToggle: document.getElementById('rel-toggle'),
   relBody: document.getElementById('rel-body'),
   relModeLabel: document.getElementById('rel-mode-label'),
@@ -74,6 +76,7 @@ const els = {
   runDev: document.getElementById('run-dev'),
   runShape: document.getElementById('run-shape'),
   runPShape: document.getElementById('run-pshape'),
+  runCut: document.getElementById('run-cut'),
   runRel: document.getElementById('run-rel'),
   runMoves: document.getElementById('run-moves'),
   runScore: document.getElementById('run-score'),
@@ -107,11 +110,28 @@ const BAR_INTERVAL = 200; // five redraws a second
  * needs its own format -- population wants thousands and no decimals, the
  * others want decimals -- but the padded min-to-max scale is generic, so
  * nothing else has to know which one is selected. */
+const perRegion = (m, get) => Array.from({ length: m.N }, (_, r) => get(m, r));
+
 const BAR_STATS = {
-  pop: { get: (m, r) => m.regionPop[r], format: (v) => nf.format(Math.round(v)) },
-  land: { get: (m, r) => m.regionPenalty(r), format: (v) => v.toFixed(2) },
-  people: { get: (m, r) => m.regionPopPenalty(r), format: (v) => v.toFixed(2) },
-  religion: { get: (m, r) => m.regionReligion(r), format: (v) => v.toFixed(3) },
+  pop: {
+    values: (m) => perRegion(m, (x, r) => x.regionPop[r]),
+    format: (v) => nf.format(Math.round(v)),
+  },
+  land: {
+    values: (m) => perRegion(m, (x, r) => x.regionPenalty(r)),
+    format: (v) => v.toFixed(2),
+  },
+  people: {
+    values: (m) => perRegion(m, (x, r) => x.regionPopPenalty(r)),
+    format: (v) => v.toFixed(2),
+  },
+  religion: {
+    values: (m) => perRegion(m, (x, r) => x.regionReligion(r)),
+    format: (v) => v.toFixed(3),
+  },
+  // One pass over the whole graph rather than one per region, which is why
+  // statistics hand back an array instead of a per-region getter.
+  cut: { values: (m) => Array.from(m.cutByRegion()), format: (v) => nf.format(v) },
 };
 
 /* --- data ---------------------------------------------------------------- */
@@ -351,6 +371,7 @@ function readout() {
   // values are large and say little.
   els.runShape.textContent = m.meanPenalty.toFixed(2);
   els.runPShape.textContent = m.meanPopPenalty.toFixed(2);
+  els.runCut.textContent = nf.format(m.cutRaw);
   // Mode-dependent, because the useful number differs: how far apart the
   // regions are for average/extreme, how many clear the bar for gerrymander.
   els.runRel.textContent = m.relMode === 'off' ? '—'
@@ -382,7 +403,7 @@ function tick(map) {
       run.model.setReligion(els.relmode.value, Number(els.relt.value),
         Number(els.rels.value), els.rela.checked);
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
-        weightOf(els.pshape), weightOf(els.relw));
+        weightOf(els.pshape), weightOf(els.relw), weightOf(els.cut));
 
       if (run.phase === 'build') {
         const steps = Number(els.build.value);
@@ -418,6 +439,7 @@ function start(map) {
     wShape: weightOf(els.shape),
     wPopShape: weightOf(els.pshape),
     wRel: weightOf(els.relw),
+    wCut: weightOf(els.cut),
     relMode: els.relmode.value,
     relThreshold: Number(els.relt.value),
     relSteepness: Number(els.rels.value),
@@ -506,7 +528,7 @@ function drawBars() {
   if (!run.bars.length || run.bars.length !== m.N) return;
 
   const stat = BAR_STATS[els.barsStat.value] || BAR_STATS.pop;
-  const value = Array.from({ length: m.N }, (_, r) => stat.get(m, r));
+  const value = stat.values(m);
 
   let lo = Infinity;
   let hi = -Infinity;
@@ -570,6 +592,7 @@ async function main() {
   for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
                              [els.opt, els.optValue], [els.popw, els.popwValue],
                              [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
+                             [els.cut, els.cutValue],
                              [els.relw, els.relwValue], [els.relt, els.reltValue],
                              [els.rels, els.relsValue]]) {
     const show = () => {

@@ -151,6 +151,7 @@ class RegionModel {
     this.index = new Map(this.codes.map((code, i) => [code, i]));
     this.nbr = this.codes.map((code) =>
       graph.neighbours(code).map((other) => this.index.get(other)));
+    this.meanDegree = this.nbr.reduce((a, list) => a + list.length, 0) / this.n;
 
     this.pop = new Float64Array(this.n);
     for (let i = 0; i < this.n; i++) this.pop[i] = popByCode[this.codes[i]] || 0;
@@ -208,6 +209,7 @@ class RegionModel {
     // than run state, so it survives start().
     this.allowBranchMoves = true;
     this._single = [0];   // scratch, so a plain move allocates nothing
+    this._cutMap = new Map();   // scratch: region -> edges leaving the moving set
     this._agg = {
       area: 0, ax: 0, ay: 0, axx: 0, own: 0, pop: 0, px: 0, py: 0, pxx: 0,
       relSum: 0, relN: 0,
@@ -236,11 +238,14 @@ class RegionModel {
     this.rawScore = 0;
     this.shapeRaw = 0;        // SUM_r (land penalty_r - 1)
     this.popShapeRaw = 0;     // SUM_r (people penalty_r - 1)
+    this.cutRaw = 0;          // edges whose two zones ended in different regions
     this.relRaw = 0;          // SUM_r of the religion term, already signed
     this.wPop = 1;
     this.wShape = 0;
     this.wPopShape = 0;
     this.wRel = 0;
+    this.wCut = 0;
+    this.sigmaCut = 1;
     this.weightSum = 1;
     this.relMode = 'off';     // off | average | extreme | gerrymander
     this.relThreshold = 0.6;
@@ -272,6 +277,7 @@ class RegionModel {
     const {
       temperature = 1, wPop = 1, wShape = 0, wPopShape = 0, wRel = 0,
       relMode = 'off', relThreshold = 0.6, relSteepness = 0.05, relAbove = true,
+      wCut = 0,
     } = opts;
     this.reset();
     this.N = N;
@@ -285,7 +291,20 @@ class RegionModel {
     this.wShape = this.hasGeometry ? Math.max(0, wShape) : 0;
     this.wPopShape = this.hasGeometry ? Math.max(0, wPopShape) : 0;
     this.wRel = this.relMode === 'off' ? 0 : Math.max(0, wRel);
-    this.weightSum = this.wPop + this.wShape + this.wPopShape + this.wRel || 1;
+    this.wCut = Math.max(0, wCut);
+    // A move changes the cut count by the difference between a zone's
+    // neighbour counts in two regions, which depends on local degree and not
+    // on N at all -- so unlike the religion term this scale is fixed with N.
+    //
+    // meanDegree/3 is the per-move size, but that is the wrong yardstick here.
+    // Every other term can be shifted by a single well-chosen move; the cut
+    // count is structural, and moving a town out of one region takes a long
+    // run of consecutive moves against population pressure. Calibrated by what
+    // actually works instead, which is 8x stronger, so weight 1 is a setting
+    // worth using rather than one that does almost nothing.
+    this.sigmaCut = this.meanDegree / 24;
+    this.weightSum = this.wPop + this.wShape + this.wPopShape + this.wRel
+      + this.wCut || 1;
     this.sigmaRel = this._sigmaRel(N);
     // One move shifts a region's land penalty by about (zone area / region
     // area) and its people penalty by about (zone pop / region pop); see the
@@ -591,6 +610,7 @@ class RegionModel {
     const shaped = this.wShape > 0;
     const peopled = this.wPopShape > 0;
     const religious = this.wRel > 0;
+    const cutting = this.wCut > 0;
     const penNow = shaped ? this._penalty(region) : 0;
     const penPopNow = peopled ? this._penaltyPop(region) : 0;
     const relNow = religious ? this._relTerm(region) : 0;
@@ -612,6 +632,14 @@ class RegionModel {
         delta += (this.wRel * (this._relTermWith(region, z, 1) - relNow))
           / this.sigmaRel;
       }
+      if (cutting) {
+        let dc = 0;
+        for (const w of this.nbr[z]) {
+          const other = this.assign[w];
+          if (other >= 0 && other !== region) dc++;
+        }
+        delta += (this.wCut * dc) / this.sigmaCut;
+      }
       delta /= this.weightSum;
       if (delta < pickDelta || (delta === pickDelta && z < pick)) {
         pickDelta = delta;
@@ -628,6 +656,13 @@ class RegionModel {
   }
 
   _place(z, region) {
+    // Before assign[z] is written. Edges to neighbours already assigned
+    // elsewhere become cut; edges to unassigned neighbours are cut neither
+    // before nor after, which is why the count grows through the build.
+    for (const w of this.nbr[z]) {
+      const r = this.assign[w];
+      if (r >= 0 && r !== region) this.cutRaw++;
+    }
     const before = this.regionPop[region] - this.target;
     this.assign[z] = region;
     this._accumulate(region, z, 1);   // also updates regionPop
@@ -678,6 +713,9 @@ class RegionModel {
     const shaped = this.wShape > 0;
     const peopled = this.wPopShape > 0;
     const religious = this.wRel > 0;
+    const cutting = this.wCut > 0;
+    const cutTally = cutting ? this._cutTally(moving) : null;
+    const leavingCut = cutting ? cutTally.get(from) || 0 : 0;
     const leaving = shaped ? this._penaltyWithAgg(from, g, -1) - this._penalty(from) : 0;
     const leavingPop = peopled
       ? this._penaltyPopWithAgg(from, g, -1) - this._penaltyPop(from) : 0;
@@ -701,6 +739,9 @@ class RegionModel {
       if (religious) {
         const joining = this._relTermWithAgg(r, g, 1) - this._relTerm(r);
         delta += (this.wRel * (leavingRel + joining)) / this.sigmaRel;
+      }
+      if (cutting) {
+        delta += (this.wCut * (leavingCut - (cutTally.get(r) || 0))) / this.sigmaCut;
       }
       deltas.push(delta / this.weightSum);
     }
@@ -734,6 +775,14 @@ class RegionModel {
     const a0 = this.regionPop[from] - this.target;
     const b0 = this.regionPop[to] - this.target;
     for (const z of zones) {
+      // assign[z] is still `from` here and earlier zones of the set have
+      // already moved, so this telescopes: an edge inside the set is counted
+      // cut when its first end moves and uncut again when its second does.
+      for (const w of this.nbr[z]) {
+        const r = this.assign[w];
+        if (r === from) this.cutRaw++;
+        else if (r === to) this.cutRaw--;
+      }
       this._accumulate(from, z, -1);  // both also update regionPop
       this._accumulate(to, z, 1);
       this.regionSize[from]--;
@@ -750,6 +799,52 @@ class RegionModel {
       this._touchFrontier(z);
       for (const w of this.nbr[z]) this._touchFrontier(w);
     }
+  }
+
+  /* Edges leaving the moving set, tallied by the region on the far side.
+   * Edges inside the set never change status, so they are skipped. Built once
+   * per step and shared across candidates, like the geometric aggregate. */
+  _cutTally(zones) {
+    const tally = this._cutMap;
+    tally.clear();
+    const stamp = ++this._stamp;
+    for (const z of zones) this._seen[z] = stamp;
+    for (const z of zones) {
+      for (const w of this.nbr[z]) {
+        if (this._seen[w] === stamp) continue;
+        const r = this.assign[w];
+        if (r >= 0) tally.set(r, (tally.get(r) || 0) + 1);
+      }
+    }
+    return tally;
+  }
+
+  /* Cut edges counted from scratch, for the drift checks. */
+  _countCut() {
+    let cut = 0;
+    for (let z = 0; z < this.n; z++) {
+      const r = this.assign[z];
+      if (r < 0) continue;
+      for (const w of this.nbr[z]) {
+        if (w > z && this.assign[w] >= 0 && this.assign[w] !== r) cut++;
+      }
+    }
+    return cut;
+  }
+
+  /* Each region's own cut edges, in one pass. For the bar chart, which redraws
+   * five times a second -- not worth maintaining incrementally. */
+  cutByRegion() {
+    const out = new Float64Array(this.N);
+    for (let z = 0; z < this.n; z++) {
+      const r = this.assign[z];
+      if (r < 0) continue;
+      for (const w of this.nbr[z]) {
+        const rw = this.assign[w];
+        if (rw >= 0 && rw !== r) out[r]++;
+      }
+    }
+    return out;
   }
 
   /* Would `region` still be one piece with z taken out of it? */
@@ -904,6 +999,7 @@ class RegionModel {
     this.shapeRaw = shape;
     this.popShapeRaw = popShape;
     this.relRaw = rel;
+    this.cutRaw = this._countCut();
     return total;
   }
 
@@ -951,13 +1047,16 @@ class RegionModel {
 
   get scoreReligion() { return this.relRaw / this.sigmaRel; }
 
+  get scoreCut() { return this.cutRaw / this.sigmaCut; }
+
   /* Divided by the total weight, so only the ratios matter: (0.1, 1, 1) and
    * (1, 10, 10) are the same objective. */
   get score() {
     return (this.wPop * this.scorePop
       + this.wShape * this.scoreShape
       + this.wPopShape * this.scorePopShape
-      + this.wRel * this.scoreReligion) / this.weightSum;
+      + this.wRel * this.scoreReligion
+      + this.wCut * this.scoreCut) / this.weightSum;
   }
 
   /* The legible versions: 1 is a circle for land, and for people it is a region
@@ -1018,18 +1117,20 @@ class RegionModel {
   /* Any weight is part of the score, so changing one is a change of
    * objective: anything recorded under the old weights is not comparable and
    * best-so-far restarts from the current state. Returns whether it changed. */
-  setWeights(wPop, wShape, wPopShape, wRel = this.wRel) {
+  setWeights(wPop, wShape, wPopShape, wRel = this.wRel, wCut = this.wCut) {
     const p = Math.max(0, wPop);
     const l = this.hasGeometry ? Math.max(0, wShape) : 0;
     const q = this.hasGeometry ? Math.max(0, wPopShape) : 0;
     const x = this.relMode === 'off' ? 0 : Math.max(0, wRel);
+    const c = Math.max(0, wCut);
     if (p === this.wPop && l === this.wShape && q === this.wPopShape
-        && x === this.wRel) return false;
+        && x === this.wRel && c === this.wCut) return false;
     this.wPop = p;
     this.wShape = l;
     this.wPopShape = q;
     this.wRel = x;
-    this.weightSum = p + l + q + x || 1;
+    this.wCut = c;
+    this.weightSum = p + l + q + x + c || 1;
     this.bestScore = Infinity;
     // A partial map cannot be compared against a complete one; the build phase
     // records the first comparable state when it finishes.
@@ -1051,7 +1152,8 @@ class RegionModel {
     this.relSteepness = steepness;
     this.relAbove = above;
     if (m === 'off') this.wRel = 0;
-    this.weightSum = this.wPop + this.wShape + this.wPopShape + this.wRel || 1;
+    this.weightSum = this.wPop + this.wShape + this.wPopShape + this.wRel
+      + this.wCut || 1;
     this.sigmaRel = this._sigmaRel(this.N);
     this.relRaw = 0;
     for (let r = 0; r < this.N; r++) this.relRaw += this._relTerm(r);

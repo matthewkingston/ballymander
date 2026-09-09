@@ -563,6 +563,72 @@ check(relLive.setReligion('gerrymander', 0.6, 0.05, true) === false,
 check(relLive.setReligion('gerrymander', 0.55, 0.05, true) === true,
   'a threshold change alone counts as a change');
 
+/* --- cut edges ------------------------------------------------------------ */
+console.log('\ncut edges');
+
+const cutOff = new RegionModel(graph, pops, geom, rel);
+cutOff.start(18, 5, { wShape: 1, wPopShape: 1 });
+while (cutOff.buildStep());
+check(cutOff.cutRaw === cutOff._countCut(),
+  `count is right after the build (${cutOff.cutRaw} vs ${cutOff._countCut()})`);
+
+/* The incremental delta is the only genuinely fiddly part, and branch moves --
+ * where a whole set moves and its internal edges must not change status -- are
+ * where it would go wrong. So recount from scratch after every step. */
+let mismatch = 0;
+let branches = 0;
+for (let i = 0; i < 500; i++) {
+  const before = cutOff.branched;
+  cutOff.optimiseStep();
+  if (cutOff.branched > before) branches++;
+  if (cutOff.cutRaw !== cutOff._countCut()) mismatch++;
+}
+check(mismatch === 0, `count stays exact over 500 steps (${mismatch} mismatches)`);
+check(branches > 0, `and those steps included branch moves (${branches})`);
+
+for (let i = 0; i < 50000; i++) cutOff.optimiseStep();
+check(cutOff.cutRaw === cutOff._countCut(),
+  `still exact after 50,000 more (${cutOff.cutRaw} vs ${cutOff._countCut()})`);
+
+const cutOn = new RegionModel(graph, pops, geom, rel);
+cutOn.start(18, 5, { wShape: 1, wPopShape: 1, wCut: 1 });
+while (cutOn.buildStep());
+for (let i = 0; i < 50000; i++) cutOn.optimiseStep();
+cutOn.restoreBest();
+cutOff.restoreBest();
+console.log(`  weight 0: ${cutOff.cutRaw} cut edges,  weight 1: ${cutOn.cutRaw}`);
+check(cutOn.cutRaw < cutOff.cutRaw,
+  `weighting it cuts fewer edges (${cutOn.cutRaw} vs ${cutOff.cutRaw})`);
+check(regionsContiguous(cutOn) === null, 'cut-weighted regions stay contiguous');
+
+const byRegion = cutOn.cutByRegion();
+check(Math.round(byRegion.reduce((a, b) => a + b, 0)) === cutOn.cutRaw * 2,
+  'cutByRegion sums to twice the total, one count per endpoint');
+
+/* The point of the term: towns should stop being split. Zone names carry their
+ * DEA, so a town's zones are identifiable by prefix, and its built-up part by
+ * density. Belfast is excluded -- at N=18 it cannot fit in one region. */
+const TOWNS = ['Omagh', 'Enniskillen', 'Ballymena', 'Coleraine', 'Armagh', 'Newry'];
+const dense = {};
+for (const f of feats) {
+  const p = f.properties;
+  const town = TOWNS.find((name) => p.name.startsWith(`${name}_`));
+  if (town && p.pop / (p.area_ha / 100) >= 2000) {
+    (dense[town] ||= []).push(model.index.get(p.code));
+  }
+}
+const splits = (m) => TOWNS.reduce(
+  (total, town) => total + new Set(dense[town].map((z) => m.assign[z])).size, 0);
+
+for (const [label, m] of [['weight 0', cutOff], ['weight 1', cutOn]]) {
+  console.log(`  ${label}: ${splits(m)} regions for ${TOWNS.length} towns, `
+    + `${m.cutRaw} cut edges, max dev ${(m.maxDeviation * 100).toFixed(2)}%`);
+}
+check(splits(cutOn) < splits(cutOff),
+  `at the default weight the towns are split less (${splits(cutOn)} vs ${splits(cutOff)})`);
+check(cutOn.maxDeviation > cutOff.maxDeviation,
+  'and it costs population equality to do it, as it must');
+
 /* --- sigma calibration --------------------------------------------------- */
 /* Every term is normalised to "one typical move's worth", so at a common state
  * their per-move deltas should be the same order. This is the check that would
@@ -578,7 +644,7 @@ while (calib.buildStep());
 for (let i = 0; i < 50000; i++) calib.optimiseStep();
 
 function perMoveDeltas(m) {
-  const acc = { population: [], land: [], people: [], religion: [] };
+  const acc = { population: [], land: [], people: [], religion: [], cut: [] };
   for (let k = 0; k < 4000; k++) {
     const z = m.frontier[(m.rng() * m.frontier.length) | 0];
     const from = m.assign[z];
@@ -595,6 +661,8 @@ function perMoveDeltas(m) {
         + m._penaltyPopWithAgg(r, g, 1) - m._penaltyPop(r)) / m.sigmaPopShape));
       acc.religion.push(Math.abs((m._relTermWithAgg(from, g, -1) - m._relTerm(from)
         + m._relTermWithAgg(r, g, 1) - m._relTerm(r)) / m.sigmaRel));
+      const tally = m._cutTally([z]);   // scratch map, so read both before reusing
+      acc.cut.push(Math.abs(((tally.get(from) || 0) - (tally.get(r) || 0)) / m.sigmaCut));
       break;
     }
   }

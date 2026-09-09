@@ -144,6 +144,8 @@ const regions = await page.evaluate(() => {
     meanPenalty: Number(m.meanPenalty.toFixed(3)),
     meanPopPenalty: Number(m.meanPopPenalty.toFixed(3)),
     sealed: m.sealed,
+    cutTotal: m.cutRaw,
+    cutShown: document.getElementById('run-cut').textContent,
     relMode: m.relMode,
     relSeats: `${m.relSeats}/${m.N}`,
     relShown: document.getElementById('run-rel').textContent,
@@ -160,8 +162,12 @@ const statSwitch = await page.evaluate(() => {
   const before = { max: max(), rows: rows() };
   sel.value = 'religion';
   sel.dispatchEvent(new Event('change'));
+  const religion = max();
+  sel.value = 'cut';
+  sel.dispatchEvent(new Event('change'));
   return {
     before,
+    religion,
     after: { max: max(), rows: rows() },
     filled: [...document.querySelectorAll('.bar-fill')]
       .filter((b) => parseFloat(b.style.width) > 0).length,
@@ -224,8 +230,12 @@ if (!regions || !regions.assignedAll || regions.painted !== regions.zones) {
 if (!regions || regions.rows !== regions.regionCount) problems.push('a bar per region missing');
 if (!regions || regions.barsFilled !== regions.regionCount) problems.push('bars not drawn');
 if (!regions || !regions.axis[0] || !regions.axis[1]) problems.push('bar axis not labelled');
-if (!statSwitch || statSwitch.before.max === statSwitch.after.max) {
+if (!statSwitch || statSwitch.before.max === statSwitch.religion
+    || statSwitch.religion === statSwitch.after.max) {
   problems.push('switching the statistic did not rescale the axis');
+}
+if (!regions || regions.cutShown !== regions.cutTotal.toLocaleString('en-GB')) {
+  problems.push('cut edge readout does not match the model');
 }
 if (!statSwitch || statSwitch.after.rows !== statSwitch.before.rows
     || statSwitch.filled !== statSwitch.before.rows) {

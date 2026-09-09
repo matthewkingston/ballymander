@@ -32,6 +32,9 @@
       <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
       <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
              data-weight data-off>
+      <label for="ctl-cut">Cut edges <span id="ctl-cut-value">1</span></label>
+      <input id="ctl-cut" type="range" min="-1.02" max="1" step="0.02" value="0"
+             data-weight data-off>
     </div>
 
     <div id="rel-block">
@@ -86,6 +89,7 @@
       <div><dt>Moves</dt><dd id="run-moves">&mdash;</dd></div>
       <div><dt>Land</dt><dd id="run-shape">&mdash;</dd></div>
       <div><dt>People</dt><dd id="run-pshape">&mdash;</dd></div>
+      <div><dt>Cut</dt><dd id="run-cut">&mdash;</dd></div>
       <div><dt>Religion</dt><dd id="run-rel">&mdash;</dd></div>
       <div><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
       <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
@@ -97,6 +101,7 @@
         <option value="land">Land shape</option>
         <option value="people">People shape</option>
         <option value="religion">Religion</option>
+        <option value="cut">Cut edges</option>
       </select>
       <div id="results-scroll">
         <div id="bars"></div>
