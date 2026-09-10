@@ -1,0 +1,1668 @@
+{
+ "generated": "2026-09-10",
+ "election": "UK parliamentary general election, 4 July 2024",
+ "source": "uk-parliamentary-election-2024-results-website-4.xlsx",
+ "keyed_by": "PARLCON24 constituency code, as in pc24_reference.json",
+ "notes": {
+  "votes_polled": "Total votes polled at the end of the verification stage, per the footnote on every sheet. In 8 of 18 constituencies this differs from valid + rejected; see the per-constituency `reconciliation` field. Candidate votes sum exactly to valid_votes in all 18.",
+  "candidate_names": "As printed on the declaration: 'SURNAME, Forename'.",
+  "party": "Short label normalised from the sheet's own description, which is kept verbatim (whitespace collapsed) in each candidate's `description`.",
+  "share": "Candidate votes as a fraction of valid_votes in that constituency."
+ },
+ "totals": {
+  "electorate": 1363961,
+  "votes_polled": 783909,
+  "valid_votes": 779840,
+  "rejected_votes": 3962,
+  "candidates": 136,
+  "turnout": 0.57473
+ },
+ "parties": [
+  {
+   "party": "Sinn Féin",
+   "party_name": "Sinn Féin",
+   "votes": 210891,
+   "share": 0.27043,
+   "candidates": 14,
+   "seats": 7
+  },
+  {
+   "party": "DUP",
+   "party_name": "Democratic Unionist Party",
+   "votes": 172058,
+   "share": 0.22063,
+   "candidates": 16,
+   "seats": 5
+  },
+  {
+   "party": "Alliance",
+   "party_name": "Alliance Party of Northern Ireland",
+   "votes": 117191,
+   "share": 0.15028,
+   "candidates": 18,
+   "seats": 1
+  },
+  {
+   "party": "UUP",
+   "party_name": "Ulster Unionist Party",
+   "votes": 94779,
+   "share": 0.12154,
+   "candidates": 17,
+   "seats": 1
+  },
+  {
+   "party": "SDLP",
+   "party_name": "Social Democratic and Labour Party",
+   "votes": 86861,
+   "share": 0.11138,
+   "candidates": 18,
+   "seats": 2
+  },
+  {
+   "party": "TUV",
+   "party_name": "Traditional Unionist Voice",
+   "votes": 48685,
+   "share": 0.06243,
+   "candidates": 14,
+   "seats": 1
+  },
+  {
+   "party": "Independent",
+   "party_name": "Independent",
+   "votes": 23602,
+   "share": 0.03027,
+   "candidates": 9,
+   "seats": 1
+  },
+  {
+   "party": "Green",
+   "party_name": "Green Party Northern Ireland",
+   "votes": 8692,
+   "share": 0.01115,
+   "candidates": 11,
+   "seats": 0
+  },
+  {
+   "party": "PBP",
+   "party_name": "People Before Profit",
+   "votes": 8438,
+   "share": 0.01082,
+   "candidates": 3,
+   "seats": 0
+  },
+  {
+   "party": "Aontú",
+   "party_name": "Aontú",
+   "votes": 7466,
+   "share": 0.00957,
+   "candidates": 10,
+   "seats": 0
+  },
+  {
+   "party": "CCLA",
+   "party_name": "Cross-Community Labour Alternative",
+   "votes": 624,
+   "share": 0.0008,
+   "candidates": 1,
+   "seats": 0
+  },
+  {
+   "party": "Conservative",
+   "party_name": "Conservative and Unionist Party",
+   "votes": 553,
+   "share": 0.00071,
+   "candidates": 5,
+   "seats": 0
+  }
+ ],
+ "constituencies": [
+  {
+   "code": "N05000001",
+   "name": "Belfast East",
+   "results_sheet": "BE",
+   "elected": {
+    "name": "Gavin Robinson",
+    "party": "DUP"
+   },
+   "electorate": 72917,
+   "votes_polled": 42890,
+   "valid_votes": 42706,
+   "rejected_votes": 184,
+   "turnout": 0.5882,
+   "reconciliation": 0,
+   "majority": 2676,
+   "candidates": [
+    {
+     "name": "ROBINSON, GAVIN",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 19894,
+     "share": 0.46584,
+     "elected": true
+    },
+    {
+     "name": "LONG, NAOMI",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 17218,
+     "share": 0.40318,
+     "elected": false
+    },
+    {
+     "name": "ROSS, JOHN",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 1918,
+     "share": 0.04491,
+     "elected": false
+    },
+    {
+     "name": "WARREN, RYAN",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 1818,
+     "share": 0.04257,
+     "elected": false
+    },
+    {
+     "name": "SMYTH, BRIAN",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 1077,
+     "share": 0.02522,
+     "elected": false
+    },
+    {
+     "name": "DE FAOITE, SÉAMAS",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 619,
+     "share": 0.01449,
+     "elected": false
+    },
+    {
+     "name": "NORTH, RYAN",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 162,
+     "share": 0.00379,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000002",
+   "name": "Belfast North",
+   "results_sheet": "BN",
+   "elected": {
+    "name": "John Finucane",
+    "party": "Sinn Féin"
+   },
+   "electorate": 74240,
+   "votes_polled": 40745,
+   "valid_votes": 40452,
+   "rejected_votes": 293,
+   "turnout": 0.54883,
+   "reconciliation": 0,
+   "majority": 5612,
+   "candidates": [
+    {
+     "name": "FINUCANE, JOHN",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 17674,
+     "share": 0.43691,
+     "elected": true
+    },
+    {
+     "name": "BRETT, PHILLIP",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 12062,
+     "share": 0.29818,
+     "elected": false
+    },
+    {
+     "name": "MCALLISTER, NUALA",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 4274,
+     "share": 0.10566,
+     "elected": false
+    },
+    {
+     "name": "CLARKE, DAVID",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2877,
+     "share": 0.07112,
+     "elected": false
+    },
+    {
+     "name": "WHYTE, CARL",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 1413,
+     "share": 0.03493,
+     "elected": false
+    },
+    {
+     "name": "O'HARA, MAL",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 1206,
+     "share": 0.02981,
+     "elected": false
+    },
+    {
+     "name": "FERGUSON, FIONA",
+     "party": "PBP",
+     "party_name": "People Before Profit",
+     "description": "People Before Profit",
+     "votes": 946,
+     "share": 0.02339,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000003",
+   "name": "Belfast South and Mid Down",
+   "results_sheet": "BS",
+   "elected": {
+    "name": "Claire Hanna",
+    "party": "SDLP"
+   },
+   "electorate": 74749,
+   "votes_polled": 43757,
+   "valid_votes": 43491,
+   "rejected_votes": 266,
+   "turnout": 0.58539,
+   "reconciliation": 0,
+   "majority": 12506,
+   "candidates": [
+    {
+     "name": "HANNA, CLAIRE",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 21345,
+     "share": 0.49079,
+     "elected": true
+    },
+    {
+     "name": "NICHOLL, KATE",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 8839,
+     "share": 0.20324,
+     "elected": false
+    },
+    {
+     "name": "KELLY, TRACY",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 6859,
+     "share": 0.15771,
+     "elected": false
+    },
+    {
+     "name": "HENDERSON, MICHAEL",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 2653,
+     "share": 0.061,
+     "elected": false
+    },
+    {
+     "name": "BOUCHER, DAN",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2218,
+     "share": 0.051,
+     "elected": false
+    },
+    {
+     "name": "GROOGAN, ÁINE",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 1577,
+     "share": 0.03626,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000004",
+   "name": "Belfast West",
+   "results_sheet": "BW",
+   "elected": {
+    "name": "Paul Maskey",
+    "party": "Sinn Féin"
+   },
+   "electorate": 75346,
+   "votes_polled": 40003,
+   "valid_votes": 39743,
+   "rejected_votes": 256,
+   "turnout": 0.53092,
+   "reconciliation": 4,
+   "majority": 15961,
+   "candidates": [
+    {
+     "name": "MASKEY, PAUL",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 21009,
+     "share": 0.52862,
+     "elected": true
+    },
+    {
+     "name": "CARROLL, GERRY",
+     "party": "PBP",
+     "party_name": "People Before Profit",
+     "description": "People Before Profit",
+     "votes": 5048,
+     "share": 0.12702,
+     "elected": false
+    },
+    {
+     "name": "DOHERTY, PAUL",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 4318,
+     "share": 0.10865,
+     "elected": false
+    },
+    {
+     "name": "MCCOUBREY, FRANK",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 4304,
+     "share": 0.1083,
+     "elected": false
+    },
+    {
+     "name": "MCCLURE, ANN",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2010,
+     "share": 0.05057,
+     "elected": false
+    },
+    {
+     "name": "MILLAR, EÓIN",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 1077,
+     "share": 0.0271,
+     "elected": false
+    },
+    {
+     "name": "HERDMAN, GERARD",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 904,
+     "share": 0.02275,
+     "elected": false
+    },
+    {
+     "name": "SHARKEY, BEN",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 461,
+     "share": 0.0116,
+     "elected": false
+    },
+    {
+     "name": "JONES, ASH",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 451,
+     "share": 0.01135,
+     "elected": false
+    },
+    {
+     "name": "MALLON, TONY",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 161,
+     "share": 0.00405,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000005",
+   "name": "East Antrim",
+   "results_sheet": "EA",
+   "elected": {
+    "name": "Sammy Wilson",
+    "party": "DUP"
+   },
+   "electorate": 73302,
+   "votes_polled": 39817,
+   "valid_votes": 39675,
+   "rejected_votes": 142,
+   "turnout": 0.54319,
+   "reconciliation": 0,
+   "majority": 1306,
+   "candidates": [
+    {
+     "name": "WILSON, SAMMY",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 11462,
+     "share": 0.2889,
+     "elected": true
+    },
+    {
+     "name": "DONNELLY, DANNY",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance",
+     "votes": 10156,
+     "share": 0.25598,
+     "elected": false
+    },
+    {
+     "name": "STEWART, JOHN",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 9476,
+     "share": 0.23884,
+     "elected": false
+    },
+    {
+     "name": "WARWICK, MATTHEW",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 4135,
+     "share": 0.10422,
+     "elected": false
+    },
+    {
+     "name": "MCMULLAN, OLIVER",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 2986,
+     "share": 0.07526,
+     "elected": false
+    },
+    {
+     "name": "MCKILLOP, MARGARET ANNE",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 892,
+     "share": 0.02248,
+     "elected": false
+    },
+    {
+     "name": "BAILEY, MARK FRANCIS",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 568,
+     "share": 0.01432,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000006",
+   "name": "East Londonderry",
+   "results_sheet": "EL",
+   "elected": {
+    "name": "Gregory Campbell",
+    "party": "DUP"
+   },
+   "electorate": 75707,
+   "votes_polled": 41430,
+   "valid_votes": 41277,
+   "rejected_votes": 158,
+   "turnout": 0.54724,
+   "reconciliation": -5,
+   "majority": 179,
+   "candidates": [
+    {
+     "name": "CAMPBELL, GREGORY",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 11506,
+     "share": 0.27875,
+     "elected": true
+    },
+    {
+     "name": "MCGURK, KATHLEEN",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 11327,
+     "share": 0.27441,
+     "elected": false
+    },
+    {
+     "name": "HUNTER, CARA",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 5260,
+     "share": 0.12743,
+     "elected": false
+    },
+    {
+     "name": "KYLE, ALLISTER",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 4363,
+     "share": 0.1057,
+     "elected": false
+    },
+    {
+     "name": "STEWART, RICHARD JOHN",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 3734,
+     "share": 0.09046,
+     "elected": false
+    },
+    {
+     "name": "MILLER, GLEN ALEXANDER",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 3412,
+     "share": 0.08266,
+     "elected": false
+    },
+    {
+     "name": "BROLLY, GEMMA",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 1043,
+     "share": 0.02527,
+     "elected": false
+    },
+    {
+     "name": "MCCAHON, JEN",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 445,
+     "share": 0.01078,
+     "elected": false
+    },
+    {
+     "name": "SCULL, CLAIRE LOUISE",
+     "party": "Conservative",
+     "party_name": "Conservative and Unionist Party",
+     "description": "Conservative and Unionist Party",
+     "votes": 187,
+     "share": 0.00453,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000007",
+   "name": "Fermanagh and South Tyrone",
+   "results_sheet": "FST",
+   "elected": {
+    "name": "Pat Cullen",
+    "party": "Sinn Féin"
+   },
+   "electorate": 77828,
+   "votes_polled": 51340,
+   "valid_votes": 51076,
+   "rejected_votes": 260,
+   "turnout": 0.65966,
+   "reconciliation": 4,
+   "majority": 4571,
+   "candidates": [
+    {
+     "name": "CULLEN, PAT",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 24844,
+     "share": 0.48641,
+     "elected": true
+    },
+    {
+     "name": "ARMSTRONG, DIANA MAUREEN",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 20273,
+     "share": 0.39692,
+     "elected": false
+    },
+    {
+     "name": "ROOFE, EDDIE",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance",
+     "votes": 2420,
+     "share": 0.04738,
+     "elected": false
+    },
+    {
+     "name": "BLAKE, PAUL PATRICK",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 2386,
+     "share": 0.04671,
+     "elected": false
+    },
+    {
+     "name": "CULLEN, GERRY",
+     "party": "CCLA",
+     "party_name": "Cross-Community Labour Alternative",
+     "description": "Cross-Community Labour Alternative",
+     "votes": 624,
+     "share": 0.01222,
+     "elected": false
+    },
+    {
+     "name": "DUFFY, CARL",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 529,
+     "share": 0.01036,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000008",
+   "name": "Foyle",
+   "results_sheet": "FY",
+   "elected": {
+    "name": "Colum Eastwood",
+    "party": "SDLP"
+   },
+   "electorate": 73496,
+   "votes_polled": 38765,
+   "valid_votes": 38358,
+   "rejected_votes": 310,
+   "turnout": 0.52744,
+   "reconciliation": 97,
+   "majority": 4166,
+   "candidates": [
+    {
+     "name": "EASTWOOD, COLUM",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 15647,
+     "share": 0.40792,
+     "elected": true
+    },
+    {
+     "name": "DUFFY, SANDRA",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 11481,
+     "share": 0.29931,
+     "elected": false
+    },
+    {
+     "name": "MIDDLETON, GARY",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 3915,
+     "share": 0.10206,
+     "elected": false
+    },
+    {
+     "name": "HARKIN, SHAUN",
+     "party": "PBP",
+     "party_name": "People Before Profit",
+     "description": "People Before Profit",
+     "votes": 2444,
+     "share": 0.06372,
+     "elected": false
+    },
+    {
+     "name": "MCCLOSKEY, ANNE",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 1519,
+     "share": 0.0396,
+     "elected": false
+    },
+    {
+     "name": "MONTGOMERY, JANICE MELISSA",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 1422,
+     "share": 0.03707,
+     "elected": false
+    },
+    {
+     "name": "FERGUSON, RACHAEL LOUISE",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance",
+     "votes": 1268,
+     "share": 0.03306,
+     "elected": false
+    },
+    {
+     "name": "BOYLE, JOHN",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 662,
+     "share": 0.01726,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000009",
+   "name": "Lagan Valley",
+   "results_sheet": "LV",
+   "elected": {
+    "name": "Sorcha-Lucy Eastwood",
+    "party": "Alliance"
+   },
+   "electorate": 82201,
+   "votes_polled": 49243,
+   "valid_votes": 49081,
+   "rejected_votes": 162,
+   "turnout": 0.59906,
+   "reconciliation": 0,
+   "majority": 2959,
+   "candidates": [
+    {
+     "name": "EASTWOOD, SORCHA-LUCY",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 18618,
+     "share": 0.37933,
+     "elected": true
+    },
+    {
+     "name": "BUCKLEY, JONATHAN",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 15659,
+     "share": 0.31904,
+     "elected": false
+    },
+    {
+     "name": "BUTLER, ROBBIE",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 11157,
+     "share": 0.22732,
+     "elected": false
+    },
+    {
+     "name": "SMYTH, LORNA",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2186,
+     "share": 0.04454,
+     "elected": false
+    },
+    {
+     "name": "LEE, SIMON",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 1028,
+     "share": 0.02094,
+     "elected": false
+    },
+    {
+     "name": "DENVIR, PATRICIA",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 433,
+     "share": 0.00882,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000010",
+   "name": "Mid Ulster",
+   "results_sheet": "MU",
+   "elected": {
+    "name": "Cathal Sean Mallaghan",
+    "party": "Sinn Féin"
+   },
+   "electorate": 74000,
+   "votes_polled": 45691,
+   "valid_votes": 45445,
+   "rejected_votes": 246,
+   "turnout": 0.61745,
+   "reconciliation": 0,
+   "majority": 14923,
+   "candidates": [
+    {
+     "name": "MALLAGHAN, CATHAL SEAN",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 24085,
+     "share": 0.52998,
+     "elected": true
+    },
+    {
+     "name": "BUCHANAN, KEITH ALEXANDER",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 9162,
+     "share": 0.20161,
+     "elected": false
+    },
+    {
+     "name": "JOHNSTON, DENISE",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 3722,
+     "share": 0.0819,
+     "elected": false
+    },
+    {
+     "name": "MOORE, GLENN KEITH",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2978,
+     "share": 0.06553,
+     "elected": false
+    },
+    {
+     "name": "BASRA, JAY",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 2269,
+     "share": 0.04993,
+     "elected": false
+    },
+    {
+     "name": "FARRELL, PADRAIC",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 2001,
+     "share": 0.04403,
+     "elected": false
+    },
+    {
+     "name": "HALLIDAY, ALIXANDRA",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 1047,
+     "share": 0.02304,
+     "elected": false
+    },
+    {
+     "name": "KELLY, JOHN",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 181,
+     "share": 0.00398,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000011",
+   "name": "Newry and Armagh",
+   "results_sheet": "NYA",
+   "elected": {
+    "name": "Dáire Hughes",
+    "party": "Sinn Féin"
+   },
+   "electorate": 78244,
+   "votes_polled": 46236,
+   "valid_votes": 45942,
+   "rejected_votes": 294,
+   "turnout": 0.59092,
+   "reconciliation": 0,
+   "majority": 15493,
+   "candidates": [
+    {
+     "name": "HUGHES, DÁIRE",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 22299,
+     "share": 0.48537,
+     "elected": true
+    },
+    {
+     "name": "BYRNE, PETE",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 6806,
+     "share": 0.14814,
+     "elected": false
+    },
+    {
+     "name": "WILSON, GARETH",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 5900,
+     "share": 0.12842,
+     "elected": false
+    },
+    {
+     "name": "RATCLIFFE, KEITH",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 4099,
+     "share": 0.08922,
+     "elected": false
+    },
+    {
+     "name": "NICHOLSON, SAM",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 3175,
+     "share": 0.06911,
+     "elected": false
+    },
+    {
+     "name": "YOUNG, HELENA MARY",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 2692,
+     "share": 0.0586,
+     "elected": false
+    },
+    {
+     "name": "REICHENBERG, LIAM",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 888,
+     "share": 0.01933,
+     "elected": false
+    },
+    {
+     "name": "RAYNER, SAMANTHA",
+     "party": "Conservative",
+     "party_name": "Conservative and Unionist Party",
+     "description": "Conservative and Unionist Party",
+     "votes": 83,
+     "share": 0.00181,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000012",
+   "name": "North Antrim",
+   "results_sheet": "NA",
+   "elected": {
+    "name": "Jim Allister",
+    "party": "TUV"
+   },
+   "electorate": 74697,
+   "votes_polled": 41361,
+   "valid_votes": 41185,
+   "rejected_votes": 176,
+   "turnout": 0.55372,
+   "reconciliation": 0,
+   "majority": 450,
+   "candidates": [
+    {
+     "name": "ALLISTER, JIM",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 11642,
+     "share": 0.28268,
+     "elected": true
+    },
+    {
+     "name": "PAISLEY, IAN RICHARD KYLE",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 11192,
+     "share": 0.27175,
+     "elected": false
+    },
+    {
+     "name": "MCGUIGAN, PHILIP",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 7714,
+     "share": 0.1873,
+     "elected": false
+    },
+    {
+     "name": "MULHOLLAND, SIAN",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 4488,
+     "share": 0.10897,
+     "elected": false
+    },
+    {
+     "name": "MINFORD, JACKSON",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 3901,
+     "share": 0.09472,
+     "elected": false
+    },
+    {
+     "name": "MAHER, HELEN",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 1661,
+     "share": 0.04033,
+     "elected": false
+    },
+    {
+     "name": "MHIC NIOCAILL, RÁICHÉAL",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 451,
+     "share": 0.01095,
+     "elected": false
+    },
+    {
+     "name": "MORROW, TRISTAN",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 136,
+     "share": 0.0033,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000013",
+   "name": "North Down",
+   "results_sheet": "ND",
+   "elected": {
+    "name": "Alex Easton",
+    "party": "Independent"
+   },
+   "electorate": 73885,
+   "votes_polled": 43464,
+   "valid_votes": 43296,
+   "rejected_votes": 168,
+   "turnout": 0.58827,
+   "reconciliation": 0,
+   "majority": 7305,
+   "candidates": [
+    {
+     "name": "EASTON, ALEX",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 20913,
+     "share": 0.48302,
+     "elected": true
+    },
+    {
+     "name": "FARRY, STEPHEN ANTHONY",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 13608,
+     "share": 0.3143,
+     "elected": false
+    },
+    {
+     "name": "COLLINS, TIM",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 6754,
+     "share": 0.156,
+     "elected": false
+    },
+    {
+     "name": "MCKEE, BARRY",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 1247,
+     "share": 0.0288,
+     "elected": false
+    },
+    {
+     "name": "VAUGHAN, DEIRDRE",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 657,
+     "share": 0.01517,
+     "elected": false
+    },
+    {
+     "name": "CARTER, CHRIS",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 117,
+     "share": 0.0027,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000014",
+   "name": "South Antrim",
+   "results_sheet": "SA",
+   "elected": {
+    "name": "Robin Swann",
+    "party": "UUP"
+   },
+   "electorate": 77058,
+   "votes_polled": 43089,
+   "valid_votes": 42908,
+   "rejected_votes": 181,
+   "turnout": 0.55918,
+   "reconciliation": 0,
+   "majority": 7512,
+   "candidates": [
+    {
+     "name": "SWANN, ROBIN",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 16311,
+     "share": 0.38014,
+     "elected": true
+    },
+    {
+     "name": "GIRVAN, PAUL",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 8799,
+     "share": 0.20507,
+     "elected": false
+    },
+    {
+     "name": "KEARNEY, DECLAN",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 8034,
+     "share": 0.18724,
+     "elected": false
+    },
+    {
+     "name": "BLAIR, JOHN",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance",
+     "votes": 4574,
+     "share": 0.1066,
+     "elected": false
+    },
+    {
+     "name": "LUCAS, MEL",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2693,
+     "share": 0.06276,
+     "elected": false
+    },
+    {
+     "name": "LYNCH, ROISIN",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 1589,
+     "share": 0.03703,
+     "elected": false
+    },
+    {
+     "name": "VERONICA, LESLEY",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 541,
+     "share": 0.01261,
+     "elected": false
+    },
+    {
+     "name": "MCERLEAN, SIOBHAN",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 367,
+     "share": 0.00855,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000015",
+   "name": "South Down",
+   "results_sheet": "SD",
+   "elected": {
+    "name": "Chris Hazzard",
+    "party": "Sinn Féin"
+   },
+   "electorate": 76248,
+   "votes_polled": 45472,
+   "valid_votes": 45243,
+   "rejected_votes": 228,
+   "turnout": 0.59637,
+   "reconciliation": 1,
+   "majority": 9280,
+   "candidates": [
+    {
+     "name": "HAZZARD, CHRIS",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 19698,
+     "share": 0.43538,
+     "elected": true
+    },
+    {
+     "name": "MCGRATH, COLIN PAUL",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 10418,
+     "share": 0.23027,
+     "elected": false
+    },
+    {
+     "name": "FORSYTHE, DIANE",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 7349,
+     "share": 0.16243,
+     "elected": false
+    },
+    {
+     "name": "MCMURRAY, ANDREW",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance",
+     "votes": 3187,
+     "share": 0.07044,
+     "elected": false
+    },
+    {
+     "name": "WELLS, JIM",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 1893,
+     "share": 0.04184,
+     "elected": false
+    },
+    {
+     "name": "O'LOAN, MICHAEL",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 1411,
+     "share": 0.03119,
+     "elected": false
+    },
+    {
+     "name": "MCGLONE, ROSEMARY",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 797,
+     "share": 0.01762,
+     "elected": false
+    },
+    {
+     "name": "WALSH, DECLAN PAUL",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 444,
+     "share": 0.00981,
+     "elected": false
+    },
+    {
+     "name": "WESTROPP, HANNAH",
+     "party": "Conservative",
+     "party_name": "Conservative and Unionist Party",
+     "description": "Conservative and Unionist Party",
+     "votes": 46,
+     "share": 0.00102,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000016",
+   "name": "Strangford",
+   "results_sheet": "ST",
+   "elected": {
+    "name": "Jim Shannon",
+    "party": "DUP"
+   },
+   "electorate": 74525,
+   "votes_polled": 39046,
+   "valid_votes": 38909,
+   "rejected_votes": 135,
+   "turnout": 0.52393,
+   "reconciliation": 2,
+   "majority": 5131,
+   "candidates": [
+    {
+     "name": "SHANNON, JIM",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 15559,
+     "share": 0.39988,
+     "elected": true
+    },
+    {
+     "name": "GUY, MICHELLE",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 10428,
+     "share": 0.26801,
+     "elected": false
+    },
+    {
+     "name": "SMART, RICHARD",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 3941,
+     "share": 0.10129,
+     "elected": false
+    },
+    {
+     "name": "MCDOWELL, RON",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 3143,
+     "share": 0.08078,
+     "elected": false
+    },
+    {
+     "name": "SANDS, NOEL",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 2793,
+     "share": 0.07178,
+     "elected": false
+    },
+    {
+     "name": "POLLAND, WILL",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 1783,
+     "share": 0.04582,
+     "elected": false
+    },
+    {
+     "name": "BRAIDNER, ALEXANDRA",
+     "party": "Green",
+     "party_name": "Green Party Northern Ireland",
+     "description": "Green Party Northern Ireland",
+     "votes": 703,
+     "share": 0.01807,
+     "elected": false
+    },
+    {
+     "name": "FALLS, GARRETH",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 256,
+     "share": 0.00658,
+     "elected": false
+    },
+    {
+     "name": "BURNS, GARETH",
+     "party": "Independent",
+     "party_name": "Independent",
+     "description": "Independent",
+     "votes": 157,
+     "share": 0.00404,
+     "elected": false
+    },
+    {
+     "name": "HETHERINGTON, BARRY",
+     "party": "Conservative",
+     "party_name": "Conservative and Unionist Party",
+     "description": "Conservative and Unionist Party",
+     "votes": 146,
+     "share": 0.00375,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000017",
+   "name": "Upper Bann",
+   "results_sheet": "UB",
+   "elected": {
+    "name": "Carla Lockhart",
+    "party": "DUP"
+   },
+   "electorate": 81249,
+   "votes_polled": 47595,
+   "valid_votes": 47358,
+   "rejected_votes": 241,
+   "turnout": 0.58579,
+   "reconciliation": -4,
+   "majority": 7406,
+   "candidates": [
+    {
+     "name": "LOCKHART, CARLA",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 21642,
+     "share": 0.45699,
+     "elected": true
+    },
+    {
+     "name": "NELSON, CATHERINE",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 14236,
+     "share": 0.3006,
+     "elected": false
+    },
+    {
+     "name": "TENNYSON, EÓIN",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 6322,
+     "share": 0.13349,
+     "elected": false
+    },
+    {
+     "name": "EVANS, KATE",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 3662,
+     "share": 0.07733,
+     "elected": false
+    },
+    {
+     "name": "QUINN, MALACHY",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 1496,
+     "share": 0.03159,
+     "elected": false
+    }
+   ]
+  },
+  {
+   "code": "N05000018",
+   "name": "West Tyrone",
+   "results_sheet": "WT",
+   "elected": {
+    "name": "Órfhlaith Begley",
+    "party": "Sinn Féin"
+   },
+   "electorate": 74269,
+   "votes_polled": 43965,
+   "valid_votes": 43695,
+   "rejected_votes": 262,
+   "turnout": 0.59197,
+   "reconciliation": 8,
+   "majority": 15917,
+   "candidates": [
+    {
+     "name": "BEGLEY, ÓRFHLAITH",
+     "party": "Sinn Féin",
+     "party_name": "Sinn Féin",
+     "description": "Sinn Féin",
+     "votes": 22711,
+     "share": 0.51976,
+     "elected": true
+    },
+    {
+     "name": "BUCHANAN, TOM",
+     "party": "DUP",
+     "party_name": "Democratic Unionist Party",
+     "description": "Democratic Unionist Party - D.U.P.",
+     "votes": 6794,
+     "share": 0.15549,
+     "elected": false
+    },
+    {
+     "name": "MCCROSSAN, DANIEL",
+     "party": "SDLP",
+     "party_name": "Social Democratic and Labour Party",
+     "description": "SDLP (Social Democratic & Labour Party)",
+     "votes": 5821,
+     "share": 0.13322,
+     "elected": false
+    },
+    {
+     "name": "BELL, MATTHEW",
+     "party": "UUP",
+     "party_name": "Ulster Unionist Party",
+     "description": "Ulster Unionist Party",
+     "votes": 2683,
+     "share": 0.0614,
+     "elected": false
+    },
+    {
+     "name": "PATTERSON, STEVAN",
+     "party": "TUV",
+     "party_name": "Traditional Unionist Voice",
+     "description": "TUV - No Sea Border",
+     "votes": 2530,
+     "share": 0.0579,
+     "elected": false
+    },
+    {
+     "name": "DONNELLY, STEPHEN",
+     "party": "Alliance",
+     "party_name": "Alliance Party of Northern Ireland",
+     "description": "Alliance Party",
+     "votes": 2287,
+     "share": 0.05234,
+     "elected": false
+    },
+    {
+     "name": "HOUSTON, LEZA MARIE",
+     "party": "Aontú",
+     "party_name": "Aontú",
+     "description": "Aontú for Life, Unity, Economic Justice",
+     "votes": 778,
+     "share": 0.01781,
+     "elected": false
+    },
+    {
+     "name": "LYNCH, STEPHEN GERARD",
+     "party": "Conservative",
+     "party_name": "Conservative and Unionist Party",
+     "description": "Conservative and Unionist Party",
+     "votes": 91,
+     "share": 0.00208,
+     "elected": false
+    }
+   ]
+  }
+ ]
+}
