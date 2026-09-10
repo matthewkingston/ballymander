@@ -1,0 +1,2219 @@
+{
+ "election": "Northern Ireland Assembly election, 5 May 2022",
+ "poll_date": "2022-05-05",
+ "source": "https://www.eoni.org.uk/results-data/ni-assembly-election-2022-results/",
+ "measure": "first preference votes by party, by constituency",
+ "keyed_by": "constituency name, as PC_NAME in the 2008 boundaries geojson",
+ "notes": {
+  "party": "Short label normalised from the sheet's own description, kept verbatim in `party_raw`. Labels match council_elections_2023.json and pc24_results_2024.json, so the three join on `party`. Resume NI and Heritage stood only in 2022.",
+  "party_source": "'source' throughout: no voting modelling assumption has been applied to this dataset. See \"Voting modelling assumptions\" in README.md for the ones applied elsewhere.",
+  "verification": "Each constituency's first preferences are summed and compared with the Total Valid Votes printed on the same sheet."
+ },
+ "constituency_count": 18,
+ "candidate_count": 239,
+ "reconciled_count": 18,
+ "party_names": {
+  "Sinn Féin": "Sinn Féin",
+  "DUP": "Democratic Unionist Party",
+  "Alliance": "Alliance Party of Northern Ireland",
+  "UUP": "Ulster Unionist Party",
+  "SDLP": "Social Democratic and Labour Party",
+  "TUV": "Traditional Unionist Voice",
+  "Independent": "Independent",
+  "Green": "Green Party Northern Ireland",
+  "PBP": "People Before Profit",
+  "Aontú": "Aontú",
+  "CCLA": "Cross-Community Labour Alternative",
+  "Conservative": "Conservative and Unionist Party",
+  "Workers Party": "The Workers Party",
+  "PUP": "Progressive Unionist Party",
+  "IRSP": "Irish Republican Socialist Party",
+  "Socialist Party": "Socialist Party",
+  "Resume NI": "Resume NI",
+  "Heritage": "Heritage Party"
+ },
+ "ni_party_first_prefs": {
+  "Sinn Féin": 250385,
+  "DUP": 184002,
+  "Alliance": 116681,
+  "UUP": 96390,
+  "SDLP": 78237,
+  "TUV": 65788,
+  "Independent": 25315,
+  "Green": 16433,
+  "Aontú": 12777,
+  "PBP": 9798,
+  "PUP": 2665,
+  "IRSP": 1869,
+  "Workers Party": 839,
+  "CCLA": 602,
+  "Socialist Party": 524,
+  "Conservative": 254,
+  "Heritage": 128,
+  "Resume NI": 13
+ },
+ "flags": [],
+ "constituencies": [
+  {
+   "constituency": "Belfast East",
+   "source_file": "ni-assembly-election-2022-result-sheet-belfast-east-xls.xlsx",
+   "seats": 5,
+   "electorate": 70123,
+   "votes_polled": 43840,
+   "valid_votes": 43248,
+   "invalid_votes": 592,
+   "quota": 7209,
+   "poll_pct": 62.51871711136147,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 43248,
+   "party_first_prefs": {
+    "Alliance": 14015,
+    "DUP": 13886,
+    "UUP": 6563,
+    "TUV": 3087,
+    "Green": 2302,
+    "Sinn Féin": 1369,
+    "PUP": 970,
+    "PBP": 500,
+    "SDLP": 484,
+    "Workers Party": 72
+   },
+   "candidates": [
+    {
+     "candidate": "LONG, Naomi",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 8195
+    },
+    {
+     "candidate": "BUNTING, Joanne",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 7253
+    },
+    {
+     "candidate": "BROOKS, David",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6633
+    },
+    {
+     "candidate": "MCREYNOLDS, Peter",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 5820
+    },
+    {
+     "candidate": "ALLEN, Andy",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 5281
+    },
+    {
+     "candidate": "ROSS, John",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3087
+    },
+    {
+     "candidate": "SMYTH, Brian",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 2302
+    },
+    {
+     "candidate": "O'DONNELL, Mairead",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1369
+    },
+    {
+     "candidate": "KERR, Lauren Alana",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1282
+    },
+    {
+     "candidate": "BENNETT, Karl George",
+     "party": "PUP",
+     "party_raw": "Progressive Unionist Party of Northern Ireland",
+     "party_source": "source",
+     "first_pref": 970
+    },
+    {
+     "candidate": "KENNY, Hannah",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 500
+    },
+    {
+     "candidate": "CARSON, Charlotte",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 484
+    },
+    {
+     "candidate": "MACNEILL, Eoin",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 72
+    }
+   ]
+  },
+  {
+   "constituency": "Belfast North",
+   "source_file": "ni-assembly-election-2022-result-sheet-belfast-north-xls.xlsx",
+   "seats": 5,
+   "electorate": 75801,
+   "votes_polled": 46796,
+   "valid_votes": 46027,
+   "invalid_votes": 769,
+   "quota": 7672,
+   "poll_pct": 61.73533330694846,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 46027,
+   "party_first_prefs": {
+    "Sinn Féin": 16327,
+    "DUP": 11173,
+    "Alliance": 4381,
+    "SDLP": 3604,
+    "TUV": 3335,
+    "UUP": 2643,
+    "Green": 1446,
+    "PBP": 1059,
+    "PUP": 762,
+    "Aontú": 640,
+    "Independent": 489,
+    "Workers Party": 168
+   },
+   "candidates": [
+    {
+     "candidate": "KELLY, Gerry",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 8395
+    },
+    {
+     "candidate": "NÍ CHUILÍN, Carál",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 7932
+    },
+    {
+     "candidate": "BRETT, Phillip",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6329
+    },
+    {
+     "candidate": "KINGSTON, Brian",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 4844
+    },
+    {
+     "candidate": "MCALLISTER, Nuala",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 4381
+    },
+    {
+     "candidate": "MALLON, Nichola",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3604
+    },
+    {
+     "candidate": "MCDOWELL, Ron",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3335
+    },
+    {
+     "candidate": "CORR-JOHNSTON, Julie-Anne",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2643
+    },
+    {
+     "candidate": "O'HARA, Mal",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 1446
+    },
+    {
+     "candidate": "FERGUSON, Fiona",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 1059
+    },
+    {
+     "candidate": "HUTCHINSON, Billy",
+     "party": "PUP",
+     "party_raw": "Progressive Unionist Party of Northern Ireland",
+     "party_source": "source",
+     "first_pref": 762
+    },
+    {
+     "candidate": "MAC NIOCAILL, Seán",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 640
+    },
+    {
+     "candidate": "WARD, Stafford",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 489
+    },
+    {
+     "candidate": "KERR, Lily",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 168
+    }
+   ]
+  },
+  {
+   "constituency": "Belfast South",
+   "source_file": "ni-assembly-election-2022-result-sheet-belfast-south-xls.xlsx",
+   "seats": 5,
+   "electorate": 73497,
+   "votes_polled": 47306,
+   "valid_votes": 46938,
+   "invalid_votes": 368,
+   "quota": 7824,
+   "poll_pct": 64.3645318856552,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 46938,
+   "party_first_prefs": {
+    "Alliance": 11704,
+    "Sinn Féin": 9511,
+    "SDLP": 7424,
+    "DUP": 7211,
+    "Green": 4058,
+    "UUP": 3061,
+    "TUV": 1935,
+    "Aontú": 806,
+    "PBP": 629,
+    "Socialist Party": 353,
+    "Workers Party": 139,
+    "Independent": 107
+   },
+   "candidates": [
+    {
+     "candidate": "HARGEY, Deirdre",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9511
+    },
+    {
+     "candidate": "POOTS, Edwin",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 7211
+    },
+    {
+     "candidate": "BRADSHAW, Paula",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 6503
+    },
+    {
+     "candidate": "O'TOOLE, Matthew",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 5394
+    },
+    {
+     "candidate": "NICHOLL, Kate",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 5201
+    },
+    {
+     "candidate": "BAILEY, Clare",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 4058
+    },
+    {
+     "candidate": "MCCARTHY, Stephen Michael",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3061
+    },
+    {
+     "candidate": "TRAINOR, Elsie",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 2030
+    },
+    {
+     "candidate": "GIRVIN, Andrew",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 1935
+    },
+    {
+     "candidate": "MCCANN, Luke",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 806
+    },
+    {
+     "candidate": "SIBANDA, Sipho",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 629
+    },
+    {
+     "candidate": "MOORE, Neil",
+     "party": "Socialist Party",
+     "party_raw": "Socialist Party (Northern Ireland)",
+     "party_source": "source",
+     "first_pref": 353
+    },
+    {
+     "candidate": "LYNN, Paddy",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 139
+    },
+    {
+     "candidate": "ODHIAMBO, Elly",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 107
+    }
+   ]
+  },
+  {
+   "constituency": "Belfast West",
+   "source_file": "ni-assembly-election-results-belfast-west.xlsx",
+   "seats": 5,
+   "electorate": 68727,
+   "votes_polled": 44440,
+   "valid_votes": 43664,
+   "invalid_votes": 776,
+   "quota": 7278,
+   "poll_pct": 64.66163225515446,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 43664,
+   "party_first_prefs": {
+    "Sinn Féin": 27805,
+    "DUP": 4166,
+    "PBP": 3279,
+    "SDLP": 2528,
+    "Aontú": 1753,
+    "IRSP": 1103,
+    "Alliance": 907,
+    "TUV": 802,
+    "UUP": 474,
+    "Independent": 347,
+    "Green": 307,
+    "Workers Party": 193
+   },
+   "candidates": [
+    {
+     "candidate": "BAKER, Danny",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9011
+    },
+    {
+     "candidate": "FLYNN, Órlaithí",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 6743
+    },
+    {
+     "candidate": "SHEEHAN, Pat",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 6370
+    },
+    {
+     "candidate": "REILLY, Aisling",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 5681
+    },
+    {
+     "candidate": "MCCOUBREY, Frank",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 4166
+    },
+    {
+     "candidate": "CARROLL, Gerry",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 3279
+    },
+    {
+     "candidate": "DOHERTY, Paul",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 2528
+    },
+    {
+     "candidate": "HERDMAN, Gerard",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 1753
+    },
+    {
+     "candidate": "MURPHY, Dan",
+     "party": "IRSP",
+     "party_raw": "IRSP - For A Socialist Republic",
+     "party_source": "source",
+     "first_pref": 1103
+    },
+    {
+     "candidate": "HIGGINS, Donnamarie",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 907
+    },
+    {
+     "candidate": "DORAN, Jordan",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 802
+    },
+    {
+     "candidate": "GIBSON, Linsey Victoria",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 474
+    },
+    {
+     "candidate": "MAGINN, Stevie",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 307
+    },
+    {
+     "candidate": "CROSSAN, Patrick",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 193
+    },
+    {
+     "candidate": "BURNS, Gerard",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 192
+    },
+    {
+     "candidate": "MALLON, Tony",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 129
+    },
+    {
+     "candidate": "HILL, Declan",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 26
+    }
+   ]
+  },
+  {
+   "constituency": "East Antrim",
+   "source_file": "ni-assembly-election-2022-result-sheet-east-antrim.xlsx",
+   "seats": 5,
+   "electorate": 67699,
+   "votes_polled": 40693,
+   "valid_votes": 40235,
+   "invalid_votes": 458,
+   "quota": 6706,
+   "poll_pct": 60.10871652461631,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 40235,
+   "party_first_prefs": {
+    "DUP": 11918,
+    "UUP": 9744,
+    "Alliance": 9283,
+    "Sinn Féin": 3675,
+    "TUV": 3661,
+    "SDLP": 1200,
+    "Green": 754
+   },
+   "candidates": [
+    {
+     "candidate": "LYONS, Gordon",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6256
+    },
+    {
+     "candidate": "STEWART, John",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 6195
+    },
+    {
+     "candidate": "HILDITCH, David William",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 5662
+    },
+    {
+     "candidate": "DICKSON, Stewart Clyde",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 5059
+    },
+    {
+     "candidate": "DONNELLY, Danny",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 4224
+    },
+    {
+     "candidate": "MCMULLAN, Oliver",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 3675
+    },
+    {
+     "candidate": "BOYD, Norman",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3661
+    },
+    {
+     "candidate": "BEGGS, Roy",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3549
+    },
+    {
+     "candidate": "MCALISTER, Siobhán Marie",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1200
+    },
+    {
+     "candidate": "BAILEY, Mark Francis",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 754
+    }
+   ]
+  },
+  {
+   "constituency": "East Londonderry",
+   "source_file": "ni-assembly-election-2022-result-sheet-east-londonderry.xlsx",
+   "seats": 5,
+   "electorate": 72959,
+   "votes_polled": 44796,
+   "valid_votes": 44360,
+   "invalid_votes": 436,
+   "quota": 7394,
+   "poll_pct": 61.39886785728971,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 44360,
+   "party_first_prefs": {
+    "DUP": 11937,
+    "Sinn Féin": 11368,
+    "Independent": 5747,
+    "SDLP": 3664,
+    "Alliance": 3338,
+    "TUV": 2959,
+    "UUP": 2625,
+    "Aontú": 1095,
+    "PUP": 933,
+    "Green": 347,
+    "PBP": 347
+   },
+   "candidates": [
+    {
+     "candidate": "ARCHIBALD, Caoimhe",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 6868
+    },
+    {
+     "candidate": "BRADLEY, Maurice",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6786
+    },
+    {
+     "candidate": "ROBINSON, Alan Derek Joseph",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 5151
+    },
+    {
+     "candidate": "MCGURK, Kathleen",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 4500
+    },
+    {
+     "candidate": "SUGDEN, Claire Elizabeth",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 3981
+    },
+    {
+     "candidate": "HUNTER, Cara",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3664
+    },
+    {
+     "candidate": "MCCAW, Chris",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 3338
+    },
+    {
+     "candidate": "ARMSTRONG, Jordan",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 2959
+    },
+    {
+     "candidate": "WILSON, Darryl",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2625
+    },
+    {
+     "candidate": "QUIGLEY, Stephanie",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1503
+    },
+    {
+     "candidate": "BROLLY, Gemma",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 1095
+    },
+    {
+     "candidate": "WATTON, Russell",
+     "party": "PUP",
+     "party_raw": "Progressive Unionist Party of Northern Ireland",
+     "party_source": "source",
+     "first_pref": 933
+    },
+    {
+     "candidate": "COULSON, Mark",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 347
+    },
+    {
+     "candidate": "MERRON, Amy Louise",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 347
+    },
+    {
+     "candidate": "MURPHY, Niall",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 181
+    },
+    {
+     "candidate": "STEWART, Billy",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 82
+    }
+   ]
+  },
+  {
+   "constituency": "Fermanagh and South Tyrone",
+   "source_file": "ni-assembly-election-2022-result-sheet-fermanagh-south-tyrone-xls.xlsx",
+   "seats": 5,
+   "electorate": 78963,
+   "votes_polled": 54560,
+   "valid_votes": 53743,
+   "invalid_votes": 817,
+   "quota": 8958,
+   "poll_pct": 69.09565239415929,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 53743,
+   "party_first_prefs": {
+    "Sinn Féin": 24008,
+    "DUP": 9527,
+    "UUP": 8354,
+    "SDLP": 3836,
+    "TUV": 3091,
+    "Alliance": 2583,
+    "Aontú": 927,
+    "CCLA": 602,
+    "Independent": 377,
+    "Green": 335,
+    "PBP": 103
+   },
+   "candidates": [
+    {
+     "candidate": "DOLAN, Jemma",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9067
+    },
+    {
+     "candidate": "GILDERNEW, Colm",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 7562
+    },
+    {
+     "candidate": "MURPHY, Áine",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 7379
+    },
+    {
+     "candidate": "ELLIOTT, Tom",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 5442
+    },
+    {
+     "candidate": "ERSKINE, Deborah",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 5272
+    },
+    {
+     "candidate": "BELL, Paul",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 4255
+    },
+    {
+     "candidate": "GANNON, Adam",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3836
+    },
+    {
+     "candidate": "ELLIOTT, Alex",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3091
+    },
+    {
+     "candidate": "BARTON, Rosemary",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2912
+    },
+    {
+     "candidate": "BEAUMONT, Matthew",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 2583
+    },
+    {
+     "candidate": "MULLEN, Denise",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 927
+    },
+    {
+     "candidate": "O'COFAIGH, Donal",
+     "party": "CCLA",
+     "party_raw": "Cross-Community Labour Alternative",
+     "party_source": "source",
+     "first_pref": 602
+    },
+    {
+     "candidate": "TURTLE, Kellie",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 335
+    },
+    {
+     "candidate": "DESOUZA, Emma",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 249
+    },
+    {
+     "candidate": "BACKHOUSE, Derek",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 128
+    },
+    {
+     "candidate": "KILPATRICK, Emmett",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 103
+    }
+   ]
+  },
+  {
+   "constituency": "Foyle",
+   "source_file": "ni-assembly-election-2022-result-sheet-foyle-xls.xlsx",
+   "seats": 5,
+   "electorate": 77343,
+   "votes_polled": 47674,
+   "valid_votes": 46864,
+   "invalid_votes": 810,
+   "quota": 7811,
+   "poll_pct": 61.63970882949976,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 46864,
+   "party_first_prefs": {
+    "Sinn Féin": 15384,
+    "SDLP": 14460,
+    "DUP": 4101,
+    "UUP": 3744,
+    "PBP": 2621,
+    "Alliance": 2220,
+    "Aontú": 2000,
+    "Independent": 854,
+    "IRSP": 766,
+    "TUV": 499,
+    "Green": 215
+   },
+   "candidates": [
+    {
+     "candidate": "DELARGY, Padraig",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9471
+    },
+    {
+     "candidate": "DURKAN, Mark H.",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 7999
+    },
+    {
+     "candidate": "FERGUSON, Ciara",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 5913
+    },
+    {
+     "candidate": "MIDDLETON, Gary",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 4101
+    },
+    {
+     "candidate": "MCCREADY, Ryan",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3744
+    },
+    {
+     "candidate": "TIERNEY, Brian James",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3272
+    },
+    {
+     "candidate": "MCLAUGHLIN, Sinéad",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3189
+    },
+    {
+     "candidate": "HARKIN, Shaun",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 2621
+    },
+    {
+     "candidate": "FERGUSON, Rachael Louise",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 2220
+    },
+    {
+     "candidate": "DOYLE, Emmet",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 2000
+    },
+    {
+     "candidate": "MCCLOSKEY, Anne",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 854
+    },
+    {
+     "candidate": "MCLAUGHLIN, Colly",
+     "party": "IRSP",
+     "party_raw": "IRSP - For A Socialist Republic",
+     "party_source": "source",
+     "first_pref": 766
+    },
+    {
+     "candidate": "NEELY, Elizabeth",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 499
+    },
+    {
+     "candidate": "HAMILTON, Gillian",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 215
+    }
+   ]
+  },
+  {
+   "constituency": "Lagan Valley",
+   "source_file": "ni-assembly-election-2022-result-sheet-lagan-valley-xls.xlsx",
+   "seats": 5,
+   "electorate": 81562,
+   "votes_polled": 51543,
+   "valid_votes": 51033,
+   "invalid_votes": 510,
+   "quota": 8506,
+   "poll_pct": 63.194870160123585,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 51033,
+   "party_first_prefs": {
+    "DUP": 17688,
+    "Alliance": 12394,
+    "UUP": 9849,
+    "TUV": 3488,
+    "SDLP": 3235,
+    "Sinn Féin": 2725,
+    "Independent": 735,
+    "Green": 648,
+    "PBP": 271
+   },
+   "candidates": [
+    {
+     "candidate": "DONALDSON, Jeffrey",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 12626
+    },
+    {
+     "candidate": "BUTLER, Robbie",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 8242
+    },
+    {
+     "candidate": "EASTWOOD, Sorcha-Lucy",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 8211
+    },
+    {
+     "candidate": "GIVAN, Paul",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 5062
+    },
+    {
+     "candidate": "HONEYFORD, David",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 4183
+    },
+    {
+     "candidate": "SMYTH, Lorna",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3488
+    },
+    {
+     "candidate": "CATNEY, Pat",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3235
+    },
+    {
+     "candidate": "MCCLEAVE, Gary",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2725
+    },
+    {
+     "candidate": "TURNER, Laura",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1607
+    },
+    {
+     "candidate": "HYNDS, Gary",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 735
+    },
+    {
+     "candidate": "LEE, Simon",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 648
+    },
+    {
+     "candidate": "DOHERTY, Amanda",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 271
+    }
+   ]
+  },
+  {
+   "constituency": "Mid Ulster",
+   "source_file": "ni-assembly-election-results-mid-ulster.xlsx",
+   "seats": 5,
+   "electorate": 75168,
+   "votes_polled": 52274,
+   "valid_votes": 51689,
+   "invalid_votes": 585,
+   "quota": 8615,
+   "poll_pct": 69.54289059174117,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 51689,
+   "party_first_prefs": {
+    "Sinn Féin": 27259,
+    "DUP": 8521,
+    "SDLP": 5144,
+    "TUV": 3818,
+    "UUP": 2191,
+    "Alliance": 2138,
+    "Aontú": 1305,
+    "Independent": 877,
+    "PBP": 179,
+    "Green": 137,
+    "Workers Party": 107,
+    "Resume NI": 13
+   },
+   "candidates": [
+    {
+     "candidate": "O'NEILL, Michelle",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 10845
+    },
+    {
+     "candidate": "BUCHANAN, Keith Alexander",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 8521
+    },
+    {
+     "candidate": "SHEERIN, Emma",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 8215
+    },
+    {
+     "candidate": "DILLON, Linda",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 8199
+    },
+    {
+     "candidate": "MCGLONE, Patsy",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 5144
+    },
+    {
+     "candidate": "MOORE, Glenn",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3818
+    },
+    {
+     "candidate": "GRAHAM, Meta",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2191
+    },
+    {
+     "candidate": "HACKETT, Claire",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 2138
+    },
+    {
+     "candidate": "HALLIDAY, Alixandra",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 1305
+    },
+    {
+     "candidate": "HAUGHEY, Patrick",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 877
+    },
+    {
+     "candidate": "MCFEELY, Sophia",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 179
+    },
+    {
+     "candidate": "TAYLOR, Stefan",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 137
+    },
+    {
+     "candidate": "SCULLION, Hugh Francis",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 107
+    },
+    {
+     "candidate": "RAFFERTY, Conor",
+     "party": "Resume NI",
+     "party_raw": "Resume NI",
+     "party_source": "source",
+     "first_pref": 13
+    }
+   ]
+  },
+  {
+   "constituency": "Newry and Armagh",
+   "source_file": "ni-assembly-election-2022-result-sheet-newry-and-armagh.xlsx",
+   "seats": 5,
+   "electorate": 87156,
+   "votes_polled": 59693,
+   "valid_votes": 58884,
+   "invalid_votes": 809,
+   "quota": 9815,
+   "poll_pct": 68.48983432006976,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 58884,
+   "party_first_prefs": {
+    "Sinn Féin": 27654,
+    "DUP": 7577,
+    "SDLP": 6217,
+    "TUV": 5407,
+    "UUP": 3864,
+    "Alliance": 3345,
+    "Independent": 3157,
+    "Aontú": 1189,
+    "Green": 314,
+    "Workers Party": 160
+   },
+   "candidates": [
+    {
+     "candidate": "MURPHY, Conor",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9847
+    },
+    {
+     "candidate": "BOYLAN, Cathal",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9843
+    },
+    {
+     "candidate": "KIMMINS, Liz",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 7964
+    },
+    {
+     "candidate": "IRWIN, William George",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 7577
+    },
+    {
+     "candidate": "MCNULTY, Justin",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 6217
+    },
+    {
+     "candidate": "RATCLIFFE, Keith",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 5407
+    },
+    {
+     "candidate": "TAYLOR, David Samuel",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3864
+    },
+    {
+     "candidate": "COADE, Jackie",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 3345
+    },
+    {
+     "candidate": "MALONE, Gavin",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 3157
+    },
+    {
+     "candidate": "CONNOLLY, Daniel",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 1189
+    },
+    {
+     "candidate": "HENRY, Ciara",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 314
+    },
+    {
+     "candidate": "GRANT, Nicola",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 160
+    }
+   ]
+  },
+  {
+   "constituency": "North Antrim",
+   "source_file": "ni-assembly-election-results-north-antrim.xlsx",
+   "seats": 5,
+   "electorate": 81935,
+   "votes_polled": 51220,
+   "valid_votes": 50624,
+   "invalid_votes": 596,
+   "quota": 8438,
+   "poll_pct": 62.512967596265334,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 50624,
+   "party_first_prefs": {
+    "DUP": 12989,
+    "TUV": 10763,
+    "UUP": 10386,
+    "Sinn Féin": 9348,
+    "Alliance": 4810,
+    "SDLP": 1919,
+    "Green": 343,
+    "Independent": 66
+   },
+   "candidates": [
+    {
+     "candidate": "SWANN, Robin",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 9530
+    },
+    {
+     "candidate": "MCGUIGAN, Philip",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9348
+    },
+    {
+     "candidate": "ALLISTER, Jim",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 8282
+    },
+    {
+     "candidate": "STOREY, Mervyn",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6747
+    },
+    {
+     "candidate": "FREW, Paul",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6242
+    },
+    {
+     "candidate": "O'LYNN, Patricia",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 4810
+    },
+    {
+     "candidate": "ARMSTRONG, Matthew",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 2481
+    },
+    {
+     "candidate": "REID, Eugene",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1919
+    },
+    {
+     "candidate": "FERRIS, Bethany",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 856
+    },
+    {
+     "candidate": "VERONICA, Paul",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 343
+    },
+    {
+     "candidate": "SHINGLETON, Laird",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 66
+    }
+   ]
+  },
+  {
+   "constituency": "North Down",
+   "source_file": "ni-assembly-election-results-north-down.xlsx",
+   "seats": 5,
+   "electorate": 70176,
+   "votes_polled": 42198,
+   "valid_votes": 41743,
+   "invalid_votes": 455,
+   "quota": 6958,
+   "poll_pct": 60.13166894664843,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 41743,
+   "party_first_prefs": {
+    "Alliance": 12062,
+    "Independent": 10244,
+    "DUP": 8294,
+    "UUP": 5167,
+    "Green": 2734,
+    "TUV": 1574,
+    "SDLP": 727,
+    "Sinn Féin": 687,
+    "Conservative": 254
+   },
+   "candidates": [
+    {
+     "candidate": "EASTON, Alex",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 9568
+    },
+    {
+     "candidate": "MUIR, Andrew",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 6838
+    },
+    {
+     "candidate": "DUNNE, Stephen Gordon",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6226
+    },
+    {
+     "candidate": "EGAN, Connie",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 5224
+    },
+    {
+     "candidate": "CHAMBERS, Alan",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3825
+    },
+    {
+     "candidate": "WOODS, Rachel Elizabeth",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 2734
+    },
+    {
+     "candidate": "GILMOUR, Jennifer Mary",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 2068
+    },
+    {
+     "candidate": "GORDON, John",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 1574
+    },
+    {
+     "candidate": "MCBURNEY, Naomi",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1342
+    },
+    {
+     "candidate": "VAUGHAN, Deirdre Maria",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 727
+    },
+    {
+     "candidate": "MCCARTNEY, Thérèse",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 687
+    },
+    {
+     "candidate": "MCKIMM, Ray",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 604
+    },
+    {
+     "candidate": "ROBINSON, Matthew",
+     "party": "Conservative",
+     "party_raw": "Conservative and Unionist Party",
+     "party_source": "source",
+     "first_pref": 254
+    },
+    {
+     "candidate": "CARTER, Chris",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 72
+    }
+   ]
+  },
+  {
+   "constituency": "South Antrim",
+   "source_file": "ni-assembly-election-2022-result-sheet-south-antrim-xls.xlsx",
+   "seats": 5,
+   "electorate": 76950,
+   "votes_polled": 46195,
+   "valid_votes": 45736,
+   "invalid_votes": 459,
+   "quota": 7623,
+   "poll_pct": 60.03248862897985,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 45736,
+   "party_first_prefs": {
+    "DUP": 11842,
+    "Sinn Féin": 9185,
+    "UUP": 8175,
+    "Alliance": 7315,
+    "TUV": 4371,
+    "SDLP": 3139,
+    "Aontú": 657,
+    "Green": 539,
+    "Independent": 262,
+    "PBP": 251
+   },
+   "candidates": [
+    {
+     "candidate": "KEARNEY, Declan",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9185
+    },
+    {
+     "candidate": "BLAIR, John Kenneth",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 7315
+    },
+    {
+     "candidate": "CAMERON, Pam",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6899
+    },
+    {
+     "candidate": "AIKEN, Steve",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 5354
+    },
+    {
+     "candidate": "CLARKE, Trevor",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 4943
+    },
+    {
+     "candidate": "LUCAS, Mel",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 4371
+    },
+    {
+     "candidate": "LYNCH, Roisin",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3139
+    },
+    {
+     "candidate": "MICHAEL, Paul",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2821
+    },
+    {
+     "candidate": "BENNETT, Roisin",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 657
+    },
+    {
+     "candidate": "VERONICA, Lesley",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 539
+    },
+    {
+     "candidate": "MORAN, Andrew",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 262
+    },
+    {
+     "candidate": "MAGUIRE, Jerry",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 251
+    }
+   ]
+  },
+  {
+   "constituency": "South Down",
+   "source_file": "ni-assembly-election-results-south-down.xlsx",
+   "seats": 5,
+   "electorate": 84046,
+   "votes_polled": 55631,
+   "valid_votes": 54952,
+   "invalid_votes": 679,
+   "quota": 9159,
+   "poll_pct": 66.19113342693286,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 54952,
+   "party_first_prefs": {
+    "Sinn Féin": 24344,
+    "SDLP": 9088,
+    "Alliance": 6942,
+    "DUP": 6497,
+    "TUV": 3273,
+    "UUP": 2880,
+    "Aontú": 1177,
+    "Green": 412,
+    "PBP": 205,
+    "Independent": 134
+   },
+   "candidates": [
+    {
+     "candidate": "ENNIS, Sinéad",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 14381
+    },
+    {
+     "candidate": "MASON, Cathy",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9963
+    },
+    {
+     "candidate": "BROWN, Patrick",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 6942
+    },
+    {
+     "candidate": "FORSYTHE, Diane",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6497
+    },
+    {
+     "candidate": "MCGRATH, Colin Paul",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 6082
+    },
+    {
+     "candidate": "MCKEE, Harold",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 3273
+    },
+    {
+     "candidate": "MCKEVITT, Karen",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3006
+    },
+    {
+     "candidate": "MACAULEY, Jill",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2880
+    },
+    {
+     "candidate": "MCGLONE, Rosemary",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 1177
+    },
+    {
+     "candidate": "LYNCH, Noeleen",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 412
+    },
+    {
+     "candidate": "MCCRORY, Paul",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 205
+    },
+    {
+     "candidate": "CLARKE, Patrick",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 134
+    }
+   ]
+  },
+  {
+   "constituency": "Strangford",
+   "source_file": "ni-assembly-election-2022-result-sheet-strangford-xls.xlsx",
+   "seats": 5,
+   "electorate": 70775,
+   "votes_polled": 41345,
+   "valid_votes": 40865,
+   "invalid_votes": 480,
+   "quota": 6811,
+   "poll_pct": 58.41752031084423,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 40865,
+   "party_first_prefs": {
+    "DUP": 14618,
+    "Alliance": 9837,
+    "UUP": 6228,
+    "TUV": 5186,
+    "SDLP": 2440,
+    "Sinn Féin": 1607,
+    "Green": 831,
+    "Independent": 118
+   },
+   "candidates": [
+    {
+     "candidate": "ARMSTRONG, Kellie",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 7015
+    },
+    {
+     "candidate": "MCILVEEN, Michelle Elizabeth",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6601
+    },
+    {
+     "candidate": "COOPER, Stephen",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 5186
+    },
+    {
+     "candidate": "HARVEY, Harry",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 4704
+    },
+    {
+     "candidate": "NESBITT, Mike",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3693
+    },
+    {
+     "candidate": "WEIR, Peter James",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 3313
+    },
+    {
+     "candidate": "MATHISON, Nick",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 2822
+    },
+    {
+     "candidate": "SMITH, Philip",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 2535
+    },
+    {
+     "candidate": "HOUSTON, Conor",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 2440
+    },
+    {
+     "candidate": "MCGIVERN, Róisé",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1607
+    },
+    {
+     "candidate": "MACARTNEY, Maurice",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 831
+    },
+    {
+     "candidate": "KING, Ben",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 118
+    }
+   ]
+  },
+  {
+   "constituency": "Upper Bann",
+   "source_file": "ni-assembly-election-results-upper-bann.xlsx",
+   "seats": 5,
+   "electorate": 91149,
+   "votes_polled": 56954,
+   "valid_votes": 56101,
+   "invalid_votes": 853,
+   "quota": 9351,
+   "poll_pct": 62.48450339553917,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 56101,
+   "party_first_prefs": {
+    "Sinn Féin": 16502,
+    "DUP": 15417,
+    "UUP": 8566,
+    "Alliance": 6440,
+    "TUV": 4373,
+    "SDLP": 3645,
+    "Aontú": 571,
+    "Green": 459,
+    "Heritage": 128
+   },
+   "candidates": [
+    {
+     "candidate": "O'DOWD, John",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 9242
+    },
+    {
+     "candidate": "BUCKLEY, Jonathan Glen",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 8869
+    },
+    {
+     "candidate": "MACKLE, Liam",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 7260
+    },
+    {
+     "candidate": "DODDS, Diane",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6548
+    },
+    {
+     "candidate": "TENNYSON, Eóin",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 6440
+    },
+    {
+     "candidate": "BEATTIE, Doug",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 5199
+    },
+    {
+     "candidate": "FOSTER, Darrin",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 4373
+    },
+    {
+     "candidate": "KELLY, Dolores",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 3645
+    },
+    {
+     "candidate": "BARR, Glenn",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 3367
+    },
+    {
+     "candidate": "GRIBBIN, Aidan",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 571
+    },
+    {
+     "candidate": "KENDALL, Lauren",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 459
+    },
+    {
+     "candidate": "BEATTIE, Glenn",
+     "party": "Heritage",
+     "party_raw": "Heritage Party - Pro-freedom. Pro-family. Pro-life.",
+     "party_source": "source",
+     "first_pref": 128
+    }
+   ]
+  },
+  {
+   "constituency": "West Tyrone",
+   "source_file": "ni-assembly-election-2022-result-sheet-west-tyrone-xls.xlsx",
+   "seats": 5,
+   "electorate": 69702,
+   "votes_polled": 46629,
+   "valid_votes": 45994,
+   "invalid_votes": 635,
+   "quota": 7666,
+   "poll_pct": 66.89764999569596,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 45994,
+   "party_first_prefs": {
+    "Sinn Féin": 21627,
+    "DUP": 6640,
+    "SDLP": 5483,
+    "TUV": 4166,
+    "Alliance": 2967,
+    "UUP": 1876,
+    "Independent": 1801,
+    "Aontú": 657,
+    "PBP": 354,
+    "Green": 252,
+    "Socialist Party": 171
+   },
+   "candidates": [
+    {
+     "candidate": "BROGAN, Nicola",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 8626
+    },
+    {
+     "candidate": "MCHUGH, Maolíosa",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 6658
+    },
+    {
+     "candidate": "BUCHANAN, Tom",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 6640
+    },
+    {
+     "candidate": "MCALEER, Declan",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 6343
+    },
+    {
+     "candidate": "MCCROSSAN, Daniel",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 5483
+    },
+    {
+     "candidate": "CLARKE, Trevor",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 4166
+    },
+    {
+     "candidate": "DONNELLY, Stephen",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 2967
+    },
+    {
+     "candidate": "MARSHALL, Ian",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1876
+    },
+    {
+     "candidate": "GALLAGHER, Paul Gags",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1682
+    },
+    {
+     "candidate": "HOPE, James",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 657
+    },
+    {
+     "candidate": "GALLAGHER, Carol",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 354
+    },
+    {
+     "candidate": "GLASS, Susan",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 252
+    },
+    {
+     "candidate": "FERGUSON, Amy",
+     "party": "Socialist Party",
+     "party_raw": "Socialist Party (Northern Ireland)",
+     "party_source": "source",
+     "first_pref": 171
+    },
+    {
+     "candidate": "BROWN, Barry",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 119
+    }
+   ]
+  }
+ ]
+}

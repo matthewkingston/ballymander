@@ -16,3 +16,6 @@ __pycache__/
 
 # Raw EONI result sheets (5.3MB; re-fetchable from manifest.tsv)
 data/council_elections_23/raw/
+
+# Raw EONI Assembly result sheets (re-fetchable from manifest.tsv)
+data/assembly_elections_22/raw/
