@@ -45,6 +45,9 @@ GRADE = "ni-census21-people-dz21+social_grade-52ba72e2.json"
 
 TABLES: list[dict] = [
     {"column": "pop", "file": "ni-census21-people-dz21-96e78665.json"},
+    # Not census: each DEA's registered electorate apportioned over its Data
+    # Zones by adult population. Built by scripts/build_dz_electorate.py.
+    {"column": "electorate", "file": "dz21_electorate.json"},
     # Protestant 0, Catholic 1, and the unaligned at 0.5 on the assumption that
     # in a two-way contest they split evenly. Changing these means a rebuild.
     # Single year of age, codes "0".."100" with 100+ folded onto 100.
