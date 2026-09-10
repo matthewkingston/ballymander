@@ -1,0 +1,7614 @@
+{
+ "election": "Northern Ireland local council elections 2023",
+ "poll_date": "2023-05-18",
+ "source": "https://www.eoni.org.uk/results-data/local-council-elections-2023-results/",
+ "measure": "first preference votes by party, by district electoral area",
+ "keyed_by": "DEA name, as FinalR_DEA in DEA2021.geojson",
+ "notes": {
+  "party": "Short label normalised from the sheet's own description, which is kept verbatim in each candidate's `party_raw`. Labels and `party_names` match data/pc24_results_2024.json exactly for all 12 parties common to both, so the two elections join on `party`. IRSP, PUP, Socialist Party and Workers Party stood at council level only.",
+  "party_source": "'source' where the party comes from the sheet's own description, 'manual' where the sheet gives none and the party was assigned by hand (see `flags`, level 'info'). A 'UNKNOWN' party key would mean neither was available.",
+  "verification": "Each DEA's first preferences are summed and compared with the Total Valid Votes printed on the same sheet; all 80 reconcile (`reconciled_to_stated_total`).",
+  "candidate_names": "As printed on the result sheet, usually 'Surname, Forename'."
+ },
+ "dea_count": 80,
+ "candidate_count": 807,
+ "reconciled_dea_count": 80,
+ "party_names": {
+  "Sinn Féin": "Sinn Féin",
+  "DUP": "Democratic Unionist Party",
+  "Alliance": "Alliance Party of Northern Ireland",
+  "UUP": "Ulster Unionist Party",
+  "SDLP": "Social Democratic and Labour Party",
+  "TUV": "Traditional Unionist Voice",
+  "Independent": "Independent",
+  "Green": "Green Party Northern Ireland",
+  "PBP": "People Before Profit",
+  "Aontú": "Aontú",
+  "CCLA": "Cross-Community Labour Alternative",
+  "Conservative": "Conservative and Unionist Party",
+  "Workers Party": "The Workers Party",
+  "PUP": "Progressive Unionist Party",
+  "IRSP": "Irish Republican Socialist Party",
+  "Socialist Party": "Socialist Party"
+ },
+ "ni_party_first_prefs": {
+  "Sinn Féin": 230793,
+  "DUP": 173033,
+  "Alliance": 99251,
+  "UUP": 81283,
+  "SDLP": 64996,
+  "Independent": 34396,
+  "TUV": 29202,
+  "Green": 12692,
+  "PBP": 8059,
+  "Aontú": 6771,
+  "PUP": 2103,
+  "IRSP": 825,
+  "CCLA": 772,
+  "Workers Party": 678,
+  "Conservative": 438,
+  "Socialist Party": 224
+ },
+ "flags": [
+  {
+   "level": "info",
+   "dea": "Sperrin",
+   "source": "local-council-elections-2023-result-sheet-sperrin.xlsx",
+   "issue": "party assigned manually; source gives none",
+   "detail": "Barr, Raymond -> Independent (sheet Description = '0')"
+  },
+  {
+   "level": "info",
+   "dea": "Sperrin",
+   "source": "local-council-elections-2023-result-sheet-sperrin.xlsx",
+   "issue": "party assigned manually; source gives none",
+   "detail": "Gallagher, Paul -> Independent (sheet Description = '0')"
+  }
+ ],
+ "deas": [
+  {
+   "dea": "Airport",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 15479,
+   "votes_polled": 8071,
+   "valid_votes": 8016,
+   "invalid_votes": 55,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8016,
+   "party_first_prefs": {
+    "Sinn Féin": 2909,
+    "DUP": 1827,
+    "Alliance": 1209,
+    "UUP": 1075,
+    "SDLP": 862,
+    "Green": 134
+   },
+   "candidates": [
+    {
+     "candidate": "MAGILL, Matthew",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1827
+    },
+    {
+     "candidate": "LOGUE, Anne-Marie",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1574
+    },
+    {
+     "candidate": "NÍ CHONGHAILE, Maighréad",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1335
+    },
+    {
+     "candidate": "McAULEY, Andrew",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 1209
+    },
+    {
+     "candidate": "MICHAEL, Paul",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1075
+    },
+    {
+     "candidate": "BURNS, Thomas",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 862
+    },
+    {
+     "candidate": "JOHNSTON, Terri",
+     "party": "Green",
+     "party_raw": "GRN",
+     "party_source": "source",
+     "first_pref": 134
+    }
+   ]
+  },
+  {
+   "dea": "Antrim",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 16652,
+   "votes_polled": 7215,
+   "valid_votes": 7126,
+   "invalid_votes": 89,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7126,
+   "party_first_prefs": {
+    "DUP": 1964,
+    "Alliance": 1487,
+    "Sinn Féin": 1270,
+    "UUP": 1186,
+    "SDLP": 678,
+    "TUV": 453,
+    "Green": 88
+   },
+   "candidates": [
+    {
+     "candidate": "O'HAGAN, Lucille",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1270
+    },
+    {
+     "candidate": "KELLY, Neil",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 1091
+    },
+    {
+     "candidate": "DUNLOP, Paul",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 986
+    },
+    {
+     "candidate": "SMYTH, Leah",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 744
+    },
+    {
+     "candidate": "SMYTH, John",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 721
+    },
+    {
+     "candidate": "LYNCH, Roisin",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 678
+    },
+    {
+     "candidate": "SHIELDS, Richard",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 453
+    },
+    {
+     "candidate": "MONTGOMERY, Jim",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 442
+    },
+    {
+     "candidate": "MONAHAN, Tommy",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 396
+    },
+    {
+     "candidate": "McMEEKIN, Karl",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 257
+    },
+    {
+     "candidate": "BAILEY, Eleanor",
+     "party": "Green",
+     "party_raw": "GRN",
+     "party_source": "source",
+     "first_pref": 88
+    }
+   ]
+  },
+  {
+   "dea": "Ards Peninsula",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 19000,
+   "votes_polled": 9295,
+   "valid_votes": 9184,
+   "invalid_votes": 111,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9184,
+   "party_first_prefs": {
+    "DUP": 4106,
+    "SDLP": 1279,
+    "Alliance": 1266,
+    "Sinn Féin": 945,
+    "UUP": 739,
+    "TUV": 592,
+    "Green": 149,
+    "Independent": 108
+   },
+   "candidates": [
+    {
+     "candidate": "ADAIR, Robert Hugh",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1959
+    },
+    {
+     "candidate": "BOYLE, Joe",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1279
+    },
+    {
+     "candidate": "McALPINE, Lorna",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1266
+    },
+    {
+     "candidate": "SANDS, Noel",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 945
+    },
+    {
+     "candidate": "KERR, David",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 827
+    },
+    {
+     "candidate": "WRAY, Pete",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 739
+    },
+    {
+     "candidate": "THOMPSON, Eddie",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 687
+    },
+    {
+     "candidate": "EDMUND, Nigel",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 633
+    },
+    {
+     "candidate": "THOMPSON, Tom",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 592
+    },
+    {
+     "candidate": "McNAULL, Gillian",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 149
+    },
+    {
+     "candidate": "IRELAND, Boyd",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 108
+    }
+   ]
+  },
+  {
+   "dea": "Armagh",
+   "source_file": "local-council-elections-2023-result-sheet-armagh.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": 22800,
+   "votes_polled": 13789,
+   "valid_votes": 13584,
+   "invalid_votes": 205,
+   "quota": 1941,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 13584,
+   "party_first_prefs": {
+    "Sinn Féin": 6736,
+    "SDLP": 2620,
+    "DUP": 1924,
+    "UUP": 1328,
+    "Alliance": 619,
+    "Aontú": 357
+   },
+   "candidates": [
+    {
+     "candidate": "Donnelly, Fergal",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 2158
+    },
+    {
+     "candidate": "Armstrong, Scott",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1924
+    },
+    {
+     "candidate": "Mallon, Ashley",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1661
+    },
+    {
+     "candidate": "O'Hanlon, Thomas",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1654
+    },
+    {
+     "candidate": "O'Kane, John Og",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1508
+    },
+    {
+     "candidate": "Duffy, Sarah",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1409
+    },
+    {
+     "candidate": "Nicholson, Sam",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1328
+    },
+    {
+     "candidate": "O'Neill, Grainne",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 966
+    },
+    {
+     "candidate": "Winter, Hanagh",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 619
+    },
+    {
+     "candidate": "Connelly, Daniel",
+     "party": "Aontú",
+     "party_raw": "AONTU",
+     "party_source": "source",
+     "first_pref": 357
+    }
+   ]
+  },
+  {
+   "dea": "Ballyarnett",
+   "source_file": "local-council-elections-2023-result-sheet-ballyarnett.xlsx",
+   "source_format": "xlsx",
+   "seats": 6,
+   "electorate": 19139,
+   "votes_polled": 9929,
+   "valid_votes": 9740,
+   "invalid_votes": 189,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9740,
+   "party_first_prefs": {
+    "Sinn Féin": 4423,
+    "SDLP": 3267,
+    "Aontú": 887,
+    "PBP": 727,
+    "Alliance": 436
+   },
+   "candidates": [
+    {
+     "candidate": "Duffy, Sandra",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2164
+    },
+    {
+     "candidate": "Farrell, Rory",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1405
+    },
+    {
+     "candidate": "Mc Gowan, John",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1299
+    },
+    {
+     "candidate": "Tierney, Brian",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1006
+    },
+    {
+     "candidate": "Murphy, Patrick James",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 960
+    },
+    {
+     "candidate": "Doyle, Emmet",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 887
+    },
+    {
+     "candidate": "Mc Daid, Catherine",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 856
+    },
+    {
+     "candidate": "Doherty, Damien",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 727
+    },
+    {
+     "candidate": "Cavanagh, Colm",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 436
+    }
+   ]
+  },
+  {
+   "dea": "Ballyclare",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 14151,
+   "votes_polled": 7248,
+   "valid_votes": 7184,
+   "invalid_votes": 64,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7184,
+   "party_first_prefs": {
+    "DUP": 2602,
+    "UUP": 1735,
+    "Alliance": 977,
+    "Independent": 928,
+    "TUV": 747,
+    "Green": 109,
+    "Sinn Féin": 86
+   },
+   "candidates": [
+    {
+     "candidate": "ARCHIBALD, Jeannie",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1655
+    },
+    {
+     "candidate": "MCWILLIAM, Vera",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1131
+    },
+    {
+     "candidate": "BOYLE, Lewis",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 977
+    },
+    {
+     "candidate": "MAGILL, Helen",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 947
+    },
+    {
+     "candidate": "STEWART, Michael",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 928
+    },
+    {
+     "candidate": "LUCAS, Mel",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 747
+    },
+    {
+     "candidate": "RAMSAY, Norrie",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 604
+    },
+    {
+     "candidate": "ROBINSON, Robert",
+     "party": "Green",
+     "party_raw": "GRN",
+     "party_source": "source",
+     "first_pref": 109
+    },
+    {
+     "candidate": "MAGEE, Gerard",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 86
+    }
+   ]
+  },
+  {
+   "dea": "Ballymena",
+   "source_file": "local-council-elections-2023-result-sheet-ballymena.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 16173,
+   "votes_polled": 7366,
+   "valid_votes": 7296,
+   "invalid_votes": 70,
+   "quota": 913,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7296,
+   "party_first_prefs": {
+    "DUP": 1685,
+    "Independent": 1023,
+    "TUV": 991,
+    "UUP": 969,
+    "Sinn Féin": 926,
+    "Alliance": 897,
+    "SDLP": 805
+   },
+   "candidates": [
+    {
+     "candidate": "Quigley, Rodney",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1023
+    },
+    {
+     "candidate": "Armstrong, Matthew",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 991
+    },
+    {
+     "candidate": "Crawford, Colin",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 969
+    },
+    {
+     "candidate": "Lyness, Bréanainn",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 926
+    },
+    {
+     "candidate": "Glover, Reuben",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 913
+    },
+    {
+     "candidate": "Hyland, John",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 897
+    },
+    {
+     "candidate": "Reid, Eugene",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 805
+    },
+    {
+     "candidate": "Philpott, Lawrie",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 462
+    },
+    {
+     "candidate": "Wright, Andrew",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 310
+    }
+   ]
+  },
+  {
+   "dea": "Ballymoney",
+   "source_file": "local-council-elections-2023-result-sheet-ballymoney.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 18117,
+   "votes_polled": 10090,
+   "valid_votes": 9971,
+   "invalid_votes": 119,
+   "quota": 1247,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9971,
+   "party_first_prefs": {
+    "DUP": 3448,
+    "Sinn Féin": 2514,
+    "UUP": 1693,
+    "TUV": 995,
+    "Alliance": 880,
+    "SDLP": 286,
+    "Independent": 155
+   },
+   "candidates": [
+    {
+     "candidate": "Storey,Mervyn",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1779
+    },
+    {
+     "candidate": "McQuillan, Ciarán",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1320
+    },
+    {
+     "candidate": "Wilson, Darryl",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1255
+    },
+    {
+     "candidate": "Peacock, Leanne",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1194
+    },
+    {
+     "candidate": "McAuley, Jonathan",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 995
+    },
+    {
+     "candidate": "Kane,Lee",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 880
+    },
+    {
+     "candidate": "McLean,Alan",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 861
+    },
+    {
+     "candidate": "Wallace,Ivor",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 808
+    },
+    {
+     "candidate": "McKeown, Tom",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 438
+    },
+    {
+     "candidate": "Bond, Caitlin",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 286
+    },
+    {
+     "candidate": "McLaughlin, Cathal",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 155
+    }
+   ]
+  },
+  {
+   "dea": "Balmoral",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 18691,
+   "votes_polled": 10376,
+   "valid_votes": 10229,
+   "invalid_votes": 147,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10229,
+   "party_first_prefs": {
+    "Alliance": 2612,
+    "Sinn Féin": 2464,
+    "DUP": 2330,
+    "SDLP": 1939,
+    "UUP": 551,
+    "Green": 333
+   },
+   "candidates": [
+    {
+     "candidate": "McAteer, Geraldine",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2037
+    },
+    {
+     "candidate": "Lyons, Dónal",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1616
+    },
+    {
+     "candidate": "Brooks, Tara",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1522
+    },
+    {
+     "candidate": "Bunting, Sarah",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P",
+     "party_source": "source",
+     "first_pref": 1513
+    },
+    {
+     "candidate": "Murray, Micky",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1090
+    },
+    {
+     "candidate": "Spratt, Gareth",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P",
+     "party_source": "source",
+     "first_pref": 817
+    },
+    {
+     "candidate": "Lowry, Joshua",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 551
+    },
+    {
+     "candidate": "Napier, Sean Patrick",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 427
+    },
+    {
+     "candidate": "Kendall, Lauren",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 333
+    },
+    {
+     "candidate": "Mulgrew, Sarah",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 323
+    }
+   ]
+  },
+  {
+   "dea": "Banbridge",
+   "source_file": "local-council-elections-2023-result-sheet-banbridge.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 25504,
+   "votes_polled": 13812,
+   "valid_votes": 13671,
+   "invalid_votes": 141,
+   "quota": 1709,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 13671,
+   "party_first_prefs": {
+    "UUP": 3942,
+    "Sinn Féin": 3345,
+    "DUP": 3043,
+    "Alliance": 1961,
+    "SDLP": 787,
+    "TUV": 593
+   },
+   "candidates": [
+    {
+     "candidate": "FERGUSON, Joy",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1961
+    },
+    {
+     "candidate": "BARR, Glenn",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1903
+    },
+    {
+     "candidate": "MCCARTAN, Chris",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1750
+    },
+    {
+     "candidate": "GREENFIELD, Paul",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1747
+    },
+    {
+     "candidate": "SAVAGE, Kevin",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1595
+    },
+    {
+     "candidate": "WILSON, Ian",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1296
+    },
+    {
+     "candidate": "MACAULEY, Jill",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1055
+    },
+    {
+     "candidate": "BURNS, Ian",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 984
+    },
+    {
+     "candidate": "DOYLE, Seamus",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 787
+    },
+    {
+     "candidate": "MOORHEAD, Brian",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 593
+    }
+   ]
+  },
+  {
+   "dea": "Bangor Central",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 19376,
+   "votes_polled": 8555,
+   "valid_votes": 8450,
+   "invalid_votes": 105,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8450,
+   "party_first_prefs": {
+    "Alliance": 2429,
+    "Independent": 2254,
+    "DUP": 1414,
+    "UUP": 1230,
+    "Green": 583,
+    "TUV": 454,
+    "Conservative": 86
+   },
+   "candidates": [
+    {
+     "candidate": "DOUGLAS, Karen",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1378
+    },
+    {
+     "candidate": "IRVINE, Wesley Graham",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1369
+    },
+    {
+     "candidate": "CATHCART, Alistair",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1053
+    },
+    {
+     "candidate": "BLANEY, Craig",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 917
+    },
+    {
+     "candidate": "McKIMM, Ray",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 885
+    },
+    {
+     "candidate": "McCRACKEN, Chris",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 666
+    },
+    {
+     "candidate": "DUNLOP, Stephen John",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 583
+    },
+    {
+     "candidate": "WILSON, Peter",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 454
+    },
+    {
+     "candidate": "HARBINSON, Alex",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 385
+    },
+    {
+     "candidate": "McSORLEY, Dean",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 361
+    },
+    {
+     "candidate": "McCORD, Rachel Deborah",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 313
+    },
+    {
+     "candidate": "MULLEN, Tim",
+     "party": "Conservative",
+     "party_raw": "Conservative and Unionist Party",
+     "party_source": "source",
+     "first_pref": 86
+    }
+   ]
+  },
+  {
+   "dea": "Bangor East and Donaghadee",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 18066,
+   "votes_polled": 8590,
+   "valid_votes": 8496,
+   "invalid_votes": 94,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8496,
+   "party_first_prefs": {
+    "UUP": 2904,
+    "Alliance": 2030,
+    "DUP": 1987,
+    "Independent": 1101,
+    "Green": 355,
+    "Conservative": 119
+   },
+   "candidates": [
+    {
+     "candidate": "BROOKS, Mark Ronald",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1972
+    },
+    {
+     "candidate": "IRWIN, Hannah",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1445
+    },
+    {
+     "candidate": "COCHRANE, James",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1275
+    },
+    {
+     "candidate": "CHAMBERS, David Alan",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 932
+    },
+    {
+     "candidate": "MacARTHUR, Janice",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 712
+    },
+    {
+     "candidate": "KEERY, Bill",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 641
+    },
+    {
+     "candidate": "McCOLLUM, Gillian",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 585
+    },
+    {
+     "candidate": "SMITH, Tom",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 460
+    },
+    {
+     "candidate": "HENRY, Ciara",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 355
+    },
+    {
+     "candidate": "LEEMAN, Paul",
+     "party": "Conservative",
+     "party_raw": "Conservative and Unionist Party",
+     "party_source": "source",
+     "first_pref": 119
+    }
+   ]
+  },
+  {
+   "dea": "Bangor West",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 14486,
+   "votes_polled": 6588,
+   "valid_votes": 6505,
+   "invalid_votes": 83,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6505,
+   "party_first_prefs": {
+    "Alliance": 1958,
+    "DUP": 1673,
+    "UUP": 867,
+    "Green": 737,
+    "Independent": 510,
+    "TUV": 331,
+    "SDLP": 297,
+    "Conservative": 132
+   },
+   "candidates": [
+    {
+     "candidate": "CREIGHTON, Christine",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1175
+    },
+    {
+     "candidate": "GILMOUR, Jennifer",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1033
+    },
+    {
+     "candidate": "HOLLYWOOD, Stephen",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 867
+    },
+    {
+     "candidate": "McKEE, Barry",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 737
+    },
+    {
+     "candidate": "MARTIN, Peter James",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 640
+    },
+    {
+     "candidate": "PRENTICE, Susan",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 510
+    },
+    {
+     "candidate": "STACEY, Huw",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 395
+    },
+    {
+     "candidate": "McWHINNEY, Alison",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 388
+    },
+    {
+     "candidate": "GORDON, John",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 331
+    },
+    {
+     "candidate": "McCANN, Tony",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 297
+    },
+    {
+     "candidate": "BREEN, Colin",
+     "party": "Conservative",
+     "party_raw": "Conservative and Unionist Party",
+     "party_source": "source",
+     "first_pref": 132
+    }
+   ]
+  },
+  {
+   "dea": "Bann",
+   "source_file": "local-council-elections-2023-result-sheet-bann.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 13347,
+   "votes_polled": 7987,
+   "valid_votes": 7917,
+   "invalid_votes": 70,
+   "quota": 1320,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7917,
+   "party_first_prefs": {
+    "Sinn Féin": 2139,
+    "DUP": 1905,
+    "UUP": 1542,
+    "Independent": 701,
+    "Alliance": 573,
+    "TUV": 456,
+    "Aontú": 336,
+    "SDLP": 173,
+    "Green": 92
+   },
+   "candidates": [
+    {
+     "candidate": "BATESON, Sean",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1277
+    },
+    {
+     "candidate": "KNIGHT-McQUILLAN, Michelle",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1054
+    },
+    {
+     "candidate": "ARCHIBALD, Ciáran",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 862
+    },
+    {
+     "candidate": "HUGGINS, Dawn",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 851
+    },
+    {
+     "candidate": "HOLMES, Richard John",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 782
+    },
+    {
+     "candidate": "KERR, Andrew Thomas Glenn",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 760
+    },
+    {
+     "candidate": "McQUILLAN, Adrian",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 701
+    },
+    {
+     "candidate": "HUTCHINSON, Joe",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 573
+    },
+    {
+     "candidate": "CRAIG, William",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 456
+    },
+    {
+     "candidate": "BROLLY, Gemma",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 336
+    },
+    {
+     "candidate": "BARKLEY, Ryan",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 173
+    },
+    {
+     "candidate": "McCAHON, Jen",
+     "party": "Green",
+     "party_raw": "Green Party",
+     "party_source": "source",
+     "first_pref": 92
+    }
+   ]
+  },
+  {
+   "dea": "Bannside",
+   "source_file": "local-council-elections-2023-result-sheet-bannside.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": 15197,
+   "votes_polled": 8862,
+   "valid_votes": 8780,
+   "invalid_votes": 82,
+   "quota": 1255,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8780,
+   "party_first_prefs": {
+    "TUV": 3472,
+    "DUP": 2094,
+    "Sinn Féin": 1292,
+    "UUP": 943,
+    "Alliance": 768,
+    "SDLP": 211
+   },
+   "candidates": [
+    {
+     "candidate": "Gaston, Timothy",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 1468
+    },
+    {
+     "candidate": "McDonald, Stewart",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 1442
+    },
+    {
+     "candidate": "Friary, Ian",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1292
+    },
+    {
+     "candidate": "Gordon, Thomas John",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1256
+    },
+    {
+     "candidate": "Minford, Jackson Bolton",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 943
+    },
+    {
+     "candidate": "Hoey, Tyler Marcus Anthony",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 838
+    },
+    {
+     "candidate": "Gibson, Jack",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 768
+    },
+    {
+     "candidate": "Henry, Anna",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 562
+    },
+    {
+     "candidate": "Murphy, Morgan",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 211
+    }
+   ]
+  },
+  {
+   "dea": "Benbradagh",
+   "source_file": "local-council-elections-2023-result-sheet-benbradagh.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 13317,
+   "votes_polled": 7903,
+   "valid_votes": 7853,
+   "invalid_votes": 50,
+   "quota": 1309,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7853,
+   "party_first_prefs": {
+    "Sinn Féin": 4618,
+    "DUP": 1231,
+    "UUP": 600,
+    "Aontú": 494,
+    "SDLP": 441,
+    "Alliance": 353,
+    "Independent": 116
+   },
+   "candidates": [
+    {
+     "candidate": "McGLINCHEY, Sean",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1888
+    },
+    {
+     "candidate": "NICHOLL, Dermot",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1558
+    },
+    {
+     "candidate": "SCOTT, Edgar",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1231
+    },
+    {
+     "candidate": "McGURK, Kathleen",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1172
+    },
+    {
+     "candidate": "CARMICHAEL, Robert Thomas",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 600
+    },
+    {
+     "candidate": "McELHINNEY, Liam",
+     "party": "Aontú",
+     "party_raw": "AONTÚ",
+     "party_source": "source",
+     "first_pref": 494
+    },
+    {
+     "candidate": "COYLE, Michael",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 441
+    },
+    {
+     "candidate": "TURNER, Christine",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 353
+    },
+    {
+     "candidate": "MURPHY, Niall",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 116
+    }
+   ]
+  },
+  {
+   "dea": "Black Mountain",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 7,
+   "electorate": 27143,
+   "votes_polled": 16280,
+   "valid_votes": 15971,
+   "invalid_votes": 309,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 15971,
+   "party_first_prefs": {
+    "Sinn Féin": 11582,
+    "SDLP": 1685,
+    "PBP": 1316,
+    "Aontú": 543,
+    "IRSP": 426,
+    "Workers Party": 185,
+    "Alliance": 166,
+    "Green": 68
+   },
+   "candidates": [
+    {
+     "candidate": "Beattie, Ciaran",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2336
+    },
+    {
+     "candidate": "Donnelly, Micheal",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2158
+    },
+    {
+     "candidate": "Carson, Arder",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2073
+    },
+    {
+     "candidate": "McCabe, Áine",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1838
+    },
+    {
+     "candidate": "Doherty, Paul",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1685
+    },
+    {
+     "candidate": "McLaughlin, Ronan",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1641
+    },
+    {
+     "candidate": "Donnelly, Róis-Máire",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1536
+    },
+    {
+     "candidate": "Collins, Matt",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 1316
+    },
+    {
+     "candidate": "Herdman, Gerard",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 543
+    },
+    {
+     "candidate": "Murphy, Dan",
+     "party": "IRSP",
+     "party_raw": "IRSP - For A Socialist Republic",
+     "party_source": "source",
+     "first_pref": 426
+    },
+    {
+     "candidate": "Meighan, Ursula",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 185
+    },
+    {
+     "candidate": "Brown, Ryan",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 166
+    },
+    {
+     "candidate": "Maginn, Stevie",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 68
+    }
+   ]
+  },
+  {
+   "dea": "Botanic",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 23049,
+   "votes_polled": 10755,
+   "valid_votes": 10593,
+   "invalid_votes": 162,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10593,
+   "party_first_prefs": {
+    "Sinn Féin": 2581,
+    "DUP": 2021,
+    "SDLP": 1881,
+    "Alliance": 1814,
+    "Green": 1006,
+    "UUP": 380,
+    "TUV": 312,
+    "PBP": 308,
+    "Socialist Party": 149,
+    "Workers Party": 89,
+    "Conservative": 52
+   },
+   "candidates": [
+    {
+     "candidate": "McKeown, Gary",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1881
+    },
+    {
+     "candidate": "Gormley, John",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1533
+    },
+    {
+     "candidate": "Kelly, Tracy",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Part - D.U.P",
+     "party_source": "source",
+     "first_pref": 1372
+    },
+    {
+     "candidate": "McDonough-Brown, Emmet",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1086
+    },
+    {
+     "candidate": "Faulkner, Emma-Jane",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1048
+    },
+    {
+     "candidate": "Groogan, Áine",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 1006
+    },
+    {
+     "candidate": "Ogle, Chris",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 728
+    },
+    {
+     "candidate": "Leighton, Darren",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Part - D.U.P",
+     "party_source": "source",
+     "first_pref": 649
+    },
+    {
+     "candidate": "Dudgeon, Jeffrey",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 380
+    },
+    {
+     "candidate": "Dickson, Billy",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 312
+    },
+    {
+     "candidate": "Sibanda, Sipho",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 308
+    },
+    {
+     "candidate": "Moore, Neil",
+     "party": "Socialist Party",
+     "party_raw": "Socialist Party (Northenr Ireland)",
+     "party_source": "source",
+     "first_pref": 149
+    },
+    {
+     "candidate": "Lynn, Paddy",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 89
+    },
+    {
+     "candidate": "Maiga, Idris",
+     "party": "Conservative",
+     "party_raw": "Conservative and Unionist Party",
+     "party_source": "source",
+     "first_pref": 52
+    }
+   ]
+  },
+  {
+   "dea": "Braid",
+   "source_file": "local-council-elections-2023-result-sheet-braid.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 17809,
+   "votes_polled": 9552,
+   "valid_votes": 9463,
+   "invalid_votes": 89,
+   "quota": 1183,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9463,
+   "party_first_prefs": {
+    "DUP": 3342,
+    "TUV": 2035,
+    "UUP": 1768,
+    "Sinn Féin": 1302,
+    "Alliance": 1016
+   },
+   "candidates": [
+    {
+     "candidate": "Rae, Archie",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1302
+    },
+    {
+     "candidate": "Adger, Beth",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1246
+    },
+    {
+     "candidate": "McCaughey, William",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1224
+    },
+    {
+     "candidate": "Jamieson, Christopher",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 1195
+    },
+    {
+     "candidate": "Barr, Alan",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1058
+    },
+    {
+     "candidate": "Harwood, Chelsea",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1016
+    },
+    {
+     "candidate": "Philpott, Julie",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 872
+    },
+    {
+     "candidate": "Warwick, Matthew",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 840
+    },
+    {
+     "candidate": "Turner, Keith James",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 710
+    }
+   ]
+  },
+  {
+   "dea": "Carntogher",
+   "source_file": "local-council-elections-2023-result-sheet-carntogher.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 8830,
+   "invalid_votes": null,
+   "quota": 1472,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8830,
+   "party_first_prefs": {
+    "Sinn Féin": 5781,
+    "DUP": 1209,
+    "SDLP": 829,
+    "TUV": 530,
+    "Aontú": 481
+   },
+   "candidates": [
+    {
+     "candidate": "McGUIGAN, Brian",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1909
+    },
+    {
+     "candidate": "McPEAKE, Sean",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1540
+    },
+    {
+     "candidate": "CORRY, Córa",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1283
+    },
+    {
+     "candidate": "BLACK, Kyle",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1209
+    },
+    {
+     "candidate": "KELLY, Paddy",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1049
+    },
+    {
+     "candidate": "KEARNEY, Martin Gerard",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 829
+    },
+    {
+     "candidate": "ARTT, James Alastair",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 530
+    },
+    {
+     "candidate": "McELDOWNEY, Noreen",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 481
+    }
+   ]
+  },
+  {
+   "dea": "Carrick Castle",
+   "source_file": "local-council-elections-2023-result-sheet-carrick-castle.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 13886,
+   "votes_polled": 6325,
+   "valid_votes": 6254,
+   "invalid_votes": 71,
+   "quota": 1043,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6254,
+   "party_first_prefs": {
+    "DUP": 2453,
+    "Alliance": 1607,
+    "UUP": 1457,
+    "TUV": 437,
+    "PUP": 164,
+    "Green": 136
+   },
+   "candidates": [
+    {
+     "candidate": "Gray, Lauren",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1607
+    },
+    {
+     "candidate": "Brownlee, Cheryl",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1154
+    },
+    {
+     "candidate": "Ashe, Billy",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1030
+    },
+    {
+     "candidate": "Stewart, Robin",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 751
+    },
+    {
+     "candidate": "Ferris, Bethany",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 706
+    },
+    {
+     "candidate": "Henderson, Frances Margaret",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 437
+    },
+    {
+     "candidate": "McDermott, John",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 269
+    },
+    {
+     "candidate": "McCaw, Jim",
+     "party": "PUP",
+     "party_raw": "Progressive Unionist Party of Northern Ireland",
+     "party_source": "source",
+     "first_pref": 164
+    },
+    {
+     "candidate": "Hutchinson, Jenny",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 136
+    }
+   ]
+  },
+  {
+   "dea": "Castle",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 23442,
+   "votes_polled": 12479,
+   "valid_votes": 12300,
+   "invalid_votes": 179,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 12300,
+   "party_first_prefs": {
+    "Sinn Féin": 4547,
+    "DUP": 3446,
+    "Alliance": 1392,
+    "SDLP": 1047,
+    "Green": 979,
+    "UUP": 553,
+    "PBP": 250,
+    "Workers Party": 86
+   },
+   "candidates": [
+    {
+     "candidate": "Anglin, Brónach",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2479
+    },
+    {
+     "candidate": "Maskey, Conor",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2068
+    },
+    {
+     "candidate": "Cobain, Fred",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1775
+    },
+    {
+     "candidate": "McCullough, Dean",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1671
+    },
+    {
+     "candidate": "Nelson, Sam",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1392
+    },
+    {
+     "candidate": "Whyte, Carl",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1047
+    },
+    {
+     "candidate": "O'Hara, Mal",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 979
+    },
+    {
+     "candidate": "Corr-Johnston, Julie-Anne",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 553
+    },
+    {
+     "candidate": "Doherty, Barney",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 250
+    },
+    {
+     "candidate": "Kerr, Lily",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 86
+    }
+   ]
+  },
+  {
+   "dea": "Castlereagh East",
+   "source_file": "local-council-elections-2023-result-sheet-castlereagh-east.xlsx",
+   "source_format": "xlsx",
+   "seats": 6,
+   "electorate": 16289,
+   "votes_polled": 7957,
+   "valid_votes": 7867,
+   "invalid_votes": 90,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7867,
+   "party_first_prefs": {
+    "DUP": 4006,
+    "Alliance": 2422,
+    "UUP": 710,
+    "TUV": 534,
+    "Green": 195
+   },
+   "candidates": [
+    {
+     "candidate": "SKILLEN",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1655
+    },
+    {
+     "candidate": "GREGG",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1377
+    },
+    {
+     "candidate": "LOWRY",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1045
+    },
+    {
+     "candidate": "LAVERTY",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 890
+    },
+    {
+     "candidate": "BURNS",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 879
+    },
+    {
+     "candidate": "LEGGE",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 710
+    },
+    {
+     "candidate": "DRYSDALE",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 582
+    },
+    {
+     "candidate": "GIRVIN",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 534
+    },
+    {
+     "candidate": "WINCHCOMBE",
+     "party": "Green",
+     "party_raw": "Green Party NI",
+     "party_source": "source",
+     "first_pref": 195
+    }
+   ]
+  },
+  {
+   "dea": "Castlereagh South",
+   "source_file": "local-council-elections-2023-result-sheet-castlereagh-south.xlsx",
+   "source_format": "xlsx",
+   "seats": 7,
+   "electorate": 18120,
+   "votes_polled": 10280,
+   "valid_votes": 10185,
+   "invalid_votes": 95,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10185,
+   "party_first_prefs": {
+    "Alliance": 3295,
+    "Sinn Féin": 2201,
+    "SDLP": 1691,
+    "DUP": 1533,
+    "UUP": 760,
+    "Green": 656,
+    "Independent": 49
+   },
+   "candidates": [
+    {
+     "candidate": "GUY",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1452
+    },
+    {
+     "candidate": "CARLIN",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1204
+    },
+    {
+     "candidate": "EATON",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1116
+    },
+    {
+     "candidate": "GALLEN",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1035
+    },
+    {
+     "candidate": "HIGGINSON",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1006
+    },
+    {
+     "candidate": "BASSETT",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 997
+    },
+    {
+     "candidate": "HENDERSON",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 760
+    },
+    {
+     "candidate": "MCKEEVER",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 727
+    },
+    {
+     "candidate": "HAMLEY",
+     "party": "Green",
+     "party_raw": "Green Party NI",
+     "party_source": "source",
+     "first_pref": 656
+    },
+    {
+     "candidate": "LEE",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 656
+    },
+    {
+     "candidate": "TRAYNOR",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 527
+    },
+    {
+     "candidate": "MILLER",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 49
+    }
+   ]
+  },
+  {
+   "dea": "Causeway",
+   "source_file": "local-council-elections-2023-result-sheet-causeway.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 17620,
+   "votes_polled": 8908,
+   "valid_votes": 8811,
+   "invalid_votes": 97,
+   "quota": 1102,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8811,
+   "party_first_prefs": {
+    "DUP": 3043,
+    "UUP": 1401,
+    "Alliance": 1392,
+    "TUV": 867,
+    "Sinn Féin": 715,
+    "Independent": 681,
+    "SDLP": 450,
+    "Green": 262
+   },
+   "candidates": [
+    {
+     "candidate": "Fielding Mark",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1305
+    },
+    {
+     "candidate": "McCully Peter",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 924
+    },
+    {
+     "candidate": "McKillop Sharon",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 878
+    },
+    {
+     "candidate": "Kyle Allister",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 867
+    },
+    {
+     "candidate": "McAuley John",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 860
+    },
+    {
+     "candidate": "Hunter Sandra",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 793
+    },
+    {
+     "candidate": "Thompson Emma",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 715
+    },
+    {
+     "candidate": "Torrens Barry Ian",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 608
+    },
+    {
+     "candidate": "Stewart Richard",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 468
+    },
+    {
+     "candidate": "Shevlin Paul",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 450
+    },
+    {
+     "candidate": "Alexander David",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 354
+    },
+    {
+     "candidate": "Mulholland Angela",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 327
+    },
+    {
+     "candidate": "Coulson Mark",
+     "party": "Green",
+     "party_raw": "GREEN PARTY",
+     "party_source": "source",
+     "first_pref": 262
+    }
+   ]
+  },
+  {
+   "dea": "Clogher Valley",
+   "source_file": "local-council-elections-2023-result-sheet-clogher-valley.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 10731,
+   "invalid_votes": null,
+   "quota": 1534,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10731,
+   "party_first_prefs": {
+    "Sinn Féin": 3841,
+    "DUP": 3224,
+    "Independent": 1361,
+    "UUP": 1260,
+    "SDLP": 1045
+   },
+   "candidates": [
+    {
+     "candidate": "BURTON, Frances Ann",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1656
+    },
+    {
+     "candidate": "ROBINSON, Mark",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1568
+    },
+    {
+     "candidate": "GILDERNEW, Gael",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1475
+    },
+    {
+     "candidate": "McELVOGUE, Kevin",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 1361
+    },
+    {
+     "candidate": "GRAHAM, Meta",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1260
+    },
+    {
+     "candidate": "McCONNELL, Eugene",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1212
+    },
+    {
+     "candidate": "McGUIGAN, Seán",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1154
+    },
+    {
+     "candidate": "McALEER, Sharon",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1045
+    }
+   ]
+  },
+  {
+   "dea": "Coast Road",
+   "source_file": "local-council-elections-2023-result-sheet-coast-road.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 12799,
+   "votes_polled": 5937,
+   "valid_votes": 5877,
+   "invalid_votes": 60,
+   "quota": 980,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 5877,
+   "party_first_prefs": {
+    "DUP": 1919,
+    "Alliance": 1542,
+    "Sinn Féin": 1180,
+    "UUP": 783,
+    "TUV": 340,
+    "Green": 113
+   },
+   "candidates": [
+    {
+     "candidate": "McKeown, James",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1180
+    },
+    {
+     "candidate": "Clarke, Andrew",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1111
+    },
+    {
+     "candidate": "Mulvenna, Gerardine Marie",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1094
+    },
+    {
+     "candidate": "Smyth, Angela",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 808
+    },
+    {
+     "candidate": "Morrow, Maureen",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 457
+    },
+    {
+     "candidate": "Spurle, Niamh",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 448
+    },
+    {
+     "candidate": "Stevenson, Wes",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 340
+    },
+    {
+     "candidate": "Swan, Olivia",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 326
+    },
+    {
+     "candidate": "Alcorn, Eddie",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 113
+    }
+   ]
+  },
+  {
+   "dea": "Coleraine",
+   "source_file": "local-council-elections-2023-result-sheet-coleraine.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": 16874,
+   "votes_polled": 7489,
+   "valid_votes": 7392,
+   "invalid_votes": 97,
+   "quota": 1057,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7392,
+   "party_first_prefs": {
+    "DUP": 2485,
+    "PUP": 1016,
+    "Alliance": 947,
+    "Sinn Féin": 858,
+    "UUP": 721,
+    "Independent": 450,
+    "TUV": 339,
+    "SDLP": 329,
+    "PBP": 247
+   },
+   "candidates": [
+    {
+     "candidate": "Anderson, Philip",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1389
+    },
+    {
+     "candidate": "Watton, Russell",
+     "party": "PUP",
+     "party_raw": "PUP",
+     "party_source": "source",
+     "first_pref": 1016
+    },
+    {
+     "candidate": "Boyle, Yvonne",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 947
+    },
+    {
+     "candidate": "Archibald, Niamh",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 858
+    },
+    {
+     "candidate": "Wisener, John",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 721
+    },
+    {
+     "candidate": "Tomb, Adele",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 655
+    },
+    {
+     "candidate": "Duddy, George",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 450
+    },
+    {
+     "candidate": "Stirling, Tanya",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 441
+    },
+    {
+     "candidate": "Sweeney, Michael",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 339
+    },
+    {
+     "candidate": "Maher, Helen",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 329
+    },
+    {
+     "candidate": "Merron, Amy Louise",
+     "party": "PBP",
+     "party_raw": "PBPA",
+     "party_source": "source",
+     "first_pref": 247
+    }
+   ]
+  },
+  {
+   "dea": "Collin",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 24938,
+   "votes_polled": 14217,
+   "valid_votes": 13962,
+   "invalid_votes": 255,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 13962,
+   "party_first_prefs": {
+    "Sinn Féin": 10003,
+    "PBP": 1193,
+    "SDLP": 903,
+    "Independent": 534,
+    "Aontú": 526,
+    "Alliance": 492,
+    "Green": 228,
+    "Workers Party": 83
+   },
+   "candidates": [
+    {
+     "candidate": "Duffy, Joe",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2559
+    },
+    {
+     "candidate": "McCann, Caoimhín",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 2350
+    },
+    {
+     "candidate": "Garrett, Matt",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1924
+    },
+    {
+     "candidate": "Nic Bhranair, Clíodhna",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1649
+    },
+    {
+     "candidate": "Walsh, Séanna",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1521
+    },
+    {
+     "candidate": "Collins, Michael",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 1193
+    },
+    {
+     "candidate": "McDonald, Gerard",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 903
+    },
+    {
+     "candidate": "McCann, Luke",
+     "party": "Aontú",
+     "party_raw": "Aontú For Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 526
+    },
+    {
+     "candidate": "Millar, Eoin",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 492
+    },
+    {
+     "candidate": "McNally, Julieann",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 368
+    },
+    {
+     "candidate": "Jones, Ash",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 228
+    },
+    {
+     "candidate": "Mallon, Tony",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 166
+    },
+    {
+     "candidate": "Crossan, Patrick",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 83
+    }
+   ]
+  },
+  {
+   "dea": "Comber",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 15112,
+   "votes_polled": 7381,
+   "valid_votes": 7286,
+   "invalid_votes": 95,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7286,
+   "party_first_prefs": {
+    "DUP": 2804,
+    "Alliance": 2100,
+    "UUP": 1407,
+    "TUV": 409,
+    "Independent": 369,
+    "Green": 197
+   },
+   "candidates": [
+    {
+     "candidate": "DOUGLAS, Libby",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1501
+    },
+    {
+     "candidate": "SMITH, Philip",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1407
+    },
+    {
+     "candidate": "CUMMINGS, Trevor",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1303
+    },
+    {
+     "candidate": "MORGAN, Patricia",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1081
+    },
+    {
+     "candidate": "ASHE, Rachel",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1019
+    },
+    {
+     "candidate": "PATTERSON, Sam",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 409
+    },
+    {
+     "candidate": "COOPER, Stephen James",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 322
+    },
+    {
+     "candidate": "QUINN, Cory",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 197
+    },
+    {
+     "candidate": "SLOAN, John",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 47
+    }
+   ]
+  },
+  {
+   "dea": "Cookstown",
+   "source_file": "local-council-elections-2023-result-sheet-cookstown.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 10288,
+   "invalid_votes": null,
+   "quota": 1287,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10288,
+   "party_first_prefs": {
+    "Sinn Féin": 5143,
+    "DUP": 2017,
+    "UUP": 1228,
+    "SDLP": 769,
+    "TUV": 663,
+    "Alliance": 424,
+    "Independent": 44
+   },
+   "candidates": [
+    {
+     "candidate": "MALLAGHAN, Cathal",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 2157
+    },
+    {
+     "candidate": "McNAMEE, John Fitzgerald",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1771
+    },
+    {
+     "candidate": "BUCHANAN, Wilbert",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1249
+    },
+    {
+     "candidate": "BELL, Gavin",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1215
+    },
+    {
+     "candidate": "MARTIN, Kerri",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 769
+    },
+    {
+     "candidate": "CAHOON, Eva",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 768
+    },
+    {
+     "candidate": "WILSON, Trevor James",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 702
+    },
+    {
+     "candidate": "HAGAN, Timmy",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 663
+    },
+    {
+     "candidate": "GLASGOW, Mark",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 526
+    },
+    {
+     "candidate": "HILLCOX, Chris",
+     "party": "Alliance",
+     "party_raw": "AP",
+     "party_source": "source",
+     "first_pref": 424
+    },
+    {
+     "candidate": "TAYLOR, Louise",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 44
+    }
+   ]
+  },
+  {
+   "dea": "Court",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 23779,
+   "votes_polled": 12275,
+   "valid_votes": 12023,
+   "invalid_votes": 252,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 12023,
+   "party_first_prefs": {
+    "DUP": 5421,
+    "Sinn Féin": 3438,
+    "TUV": 963,
+    "PUP": 679,
+    "PBP": 408,
+    "IRSP": 399,
+    "Alliance": 329,
+    "SDLP": 175,
+    "Green": 108,
+    "Workers Party": 85,
+    "Independent": 18
+   },
+   "candidates": [
+    {
+     "candidate": "McCoubrey, Frank",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 2645
+    },
+    {
+     "candidate": "Black, Tina",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1822
+    },
+    {
+     "candidate": "Verner, Nicola",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1783
+    },
+    {
+     "candidate": "Canavan, Claire",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1616
+    },
+    {
+     "candidate": "McLaughlin, Ian",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 993
+    },
+    {
+     "candidate": "McDowell, Ron",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 963
+    },
+    {
+     "candidate": "Hutchinson, Billy",
+     "party": "PUP",
+     "party_raw": "Progressive Unionist Party of Northern Ireland",
+     "party_source": "source",
+     "first_pref": 679
+    },
+    {
+     "candidate": "McCaffrey, Cailín",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 408
+    },
+    {
+     "candidate": "Kelly, Michael",
+     "party": "IRSP",
+     "party_raw": "IRSP - For A Socialist Republic",
+     "party_source": "source",
+     "first_pref": 399
+    },
+    {
+     "candidate": "Haydock, Ally",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 329
+    },
+    {
+     "candidate": "McSparron, Olcan",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 175
+    },
+    {
+     "candidate": "Haller, Sara",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 108
+    },
+    {
+     "candidate": "Walls, Tony",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 85
+    },
+    {
+     "candidate": "Wilson, Geoffrey",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 18
+    }
+   ]
+  },
+  {
+   "dea": "Craigavon",
+   "source_file": "local-council-elections-2023-result-sheet-craigavon.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 20449,
+   "votes_polled": 10929,
+   "valid_votes": 10757,
+   "invalid_votes": 172,
+   "quota": 1793,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10757,
+   "party_first_prefs": {
+    "Sinn Féin": 3861,
+    "DUP": 3241,
+    "Alliance": 1392,
+    "UUP": 1305,
+    "SDLP": 958
+   },
+   "candidates": [
+    {
+     "candidate": "MALLON, Jude",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1964
+    },
+    {
+     "candidate": "NELSON, Catherine",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1897
+    },
+    {
+     "candidate": "TINSLEY, Margaret",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1881
+    },
+    {
+     "candidate": "ALEXANDER, Robbie",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1392
+    },
+    {
+     "candidate": "PATTERSON, Ian",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1360
+    },
+    {
+     "candidate": "EVANS, Kate",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1305
+    },
+    {
+     "candidate": "MCALINDEN, Declan",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 762
+    },
+    {
+     "candidate": "COADE, Jackie",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 196
+    }
+   ]
+  },
+  {
+   "dea": "Crotlieve",
+   "source_file": "local-council-elections-2023-result-sheet-crotlieve.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": 21313,
+   "votes_polled": 13258,
+   "valid_votes": 13118,
+   "invalid_votes": 140,
+   "quota": 1875,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 13118,
+   "party_first_prefs": {
+    "Sinn Féin": 5992,
+    "Independent": 2995,
+    "SDLP": 2327,
+    "Alliance": 660,
+    "DUP": 600,
+    "UUP": 448,
+    "Green": 96
+   },
+   "candidates": [
+    {
+     "candidate": "MURPHY, SELINA",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1863
+    },
+    {
+     "candidate": "MURPHY, KATE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1397
+    },
+    {
+     "candidate": "RUANE, MICKEY",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1387
+    },
+    {
+     "candidate": "O'HARE, GERRY",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1345
+    },
+    {
+     "candidate": "MCATEER, DECLAN",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 1233
+    },
+    {
+     "candidate": "GIBBONS, MARK",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 1111
+    },
+    {
+     "candidate": "TINNELLY, JARLATH",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 1043
+    },
+    {
+     "candidate": "MCKEVITT, KAREN",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 911
+    },
+    {
+     "candidate": "BOYLAN, JIM",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 818
+    },
+    {
+     "candidate": "NEARY, DANIEL",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 660
+    },
+    {
+     "candidate": "PARKE, KEITH",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 600
+    },
+    {
+     "candidate": "MCGAFFIN, RICKY",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 448
+    },
+    {
+     "candidate": "SHERIDAN, ANNE",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 183
+    },
+    {
+     "candidate": "O'REILLY, HUGH",
+     "party": "Green",
+     "party_raw": "GREEN PARTY NORTHERN IRELAND",
+     "party_source": "source",
+     "first_pref": 96
+    },
+    {
+     "candidate": "LAMBE, FINBARR",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 23
+    }
+   ]
+  },
+  {
+   "dea": "Cusher",
+   "source_file": "local-council-elections-2023-result-sheet-cusher_1.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 19358,
+   "votes_polled": 12370,
+   "valid_votes": 12278,
+   "invalid_votes": 92,
+   "quota": 2047,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 12278,
+   "party_first_prefs": {
+    "DUP": 3292,
+    "Sinn Féin": 2177,
+    "Independent": 2059,
+    "TUV": 2037,
+    "UUP": 1541,
+    "Alliance": 594,
+    "SDLP": 578
+   },
+   "candidates": [
+    {
+     "candidate": "HAUGHEY, Brona",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 2177
+    },
+    {
+     "candidate": "BERRY, Paul",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 2059
+    },
+    {
+     "candidate": "RATCLIFFE, Keith",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 2037
+    },
+    {
+     "candidate": "WILSON, Gareth",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1912
+    },
+    {
+     "candidate": "WEIR, Philip",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1380
+    },
+    {
+     "candidate": "KENNEDY, Gordon",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1099
+    },
+    {
+     "candidate": "SKILLEN, Mark",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 594
+    },
+    {
+     "candidate": "MCKERNAN, Emma Jay",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 578
+    },
+    {
+     "candidate": "MCNEILL, Ewan",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 442
+    }
+   ]
+  },
+  {
+   "dea": "Derg",
+   "source_file": "local-council-elections-2023-result-sheet-derg.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 13672,
+   "votes_polled": 8660,
+   "valid_votes": 8549,
+   "invalid_votes": 111,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8549,
+   "party_first_prefs": {
+    "Sinn Féin": 3885,
+    "DUP": 1669,
+    "UUP": 1377,
+    "SDLP": 723,
+    "Independent": 507,
+    "Alliance": 177,
+    "PBP": 112,
+    "Aontú": 99
+   },
+   "candidates": [
+    {
+     "candidate": "Kerrigan, Keith",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1669
+    },
+    {
+     "candidate": "McHugh, Ruairí",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1442
+    },
+    {
+     "candidate": "Hussey, Derek R",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1377
+    },
+    {
+     "candidate": "Devine, Caroline",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1246
+    },
+    {
+     "candidate": "Ó Fearghail, Antaine",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1197
+    },
+    {
+     "candidate": "Edwards, Steven",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 723
+    },
+    {
+     "candidate": "Patton, Andy",
+     "party": "Independent",
+     "party_raw": "Indepdendent",
+     "party_source": "source",
+     "first_pref": 507
+    },
+    {
+     "candidate": "Murray, Anne",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 177
+    },
+    {
+     "candidate": "Mc Ginley, Adam",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 112
+    },
+    {
+     "candidate": "Houston, Leza Marie",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 99
+    }
+   ]
+  },
+  {
+   "dea": "Downpatrick",
+   "source_file": "local-council-elections-2023-result-sheet-downpatrick.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 15691,
+   "votes_polled": 8286,
+   "valid_votes": 8173,
+   "invalid_votes": 113,
+   "quota": 1363,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8173,
+   "party_first_prefs": {
+    "Sinn Féin": 3551,
+    "SDLP": 2510,
+    "Alliance": 1124,
+    "Independent": 404,
+    "DUP": 267,
+    "UUP": 200,
+    "Green": 117
+   },
+   "candidates": [
+    {
+     "candidate": "HANLON, OONAGH",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1579
+    },
+    {
+     "candidate": "SHARVIN, GARETH",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 1307
+    },
+    {
+     "candidate": "CAMPBELL, PHILLIP",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1160
+    },
+    {
+     "candidate": "ENRIGHT, CADOGAN",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1124
+    },
+    {
+     "candidate": "ROONEY, LOUISE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 812
+    },
+    {
+     "candidate": "KING, AURLA",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 613
+    },
+    {
+     "candidate": "GALBRAITH, CONOR",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 590
+    },
+    {
+     "candidate": "MAC CON MIDHE, ÉAMONN",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 404
+    },
+    {
+     "candidate": "HARVEY, SHARON",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 267
+    },
+    {
+     "candidate": "BURGESS, ALEXANDER",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 200
+    },
+    {
+     "candidate": "WALSH, DECLAN",
+     "party": "Green",
+     "party_raw": "GREEN PART NORTHERN IRELAND",
+     "party_source": "source",
+     "first_pref": 117
+    }
+   ]
+  },
+  {
+   "dea": "Downshire East",
+   "source_file": "local-council-elections-2023-result-sheet-downshire-east.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 12763,
+   "votes_polled": 6914,
+   "valid_votes": 6852,
+   "invalid_votes": 62,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6852,
+   "party_first_prefs": {
+    "DUP": 2858,
+    "Alliance": 2078,
+    "UUP": 1208,
+    "TUV": 396,
+    "SDLP": 312
+   },
+   "candidates": [
+    {
+     "candidate": "GOWAN",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1798
+    },
+    {
+     "candidate": "MCINTYRE",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1102
+    },
+    {
+     "candidate": "MACKIN",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1060
+    },
+    {
+     "candidate": "DICKSON",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 976
+    },
+    {
+     "candidate": "BAIRD",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 726
+    },
+    {
+     "candidate": "SWAN",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 482
+    },
+    {
+     "candidate": "FERRIS",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 396
+    },
+    {
+     "candidate": "DRAKE",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 312
+    }
+   ]
+  },
+  {
+   "dea": "Downshire West",
+   "source_file": "local-council-elections-2023-result-sheet-downshire-west.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 13284,
+   "votes_polled": 7251,
+   "valid_votes": 7179,
+   "invalid_votes": 72,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7179,
+   "party_first_prefs": {
+    "DUP": 2885,
+    "Alliance": 2629,
+    "UUP": 1239,
+    "Sinn Féin": 302,
+    "Green": 124
+   },
+   "candidates": [
+    {
+     "candidate": "GAWITH",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1693
+    },
+    {
+     "candidate": "MCCREADY",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 996
+    },
+    {
+     "candidate": "EWART",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 971
+    },
+    {
+     "candidate": "THOMPSON",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 936
+    },
+    {
+     "candidate": "LEATHEM",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 918
+    },
+    {
+     "candidate": "MARTIN",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 624
+    },
+    {
+     "candidate": "MCCORD",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 615
+    },
+    {
+     "candidate": "MURPHY",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 302
+    },
+    {
+     "candidate": "ROBINSON",
+     "party": "Green",
+     "party_raw": "Green Party NI",
+     "party_source": "source",
+     "first_pref": 124
+    }
+   ]
+  },
+  {
+   "dea": "Dungannon",
+   "source_file": "local-council-elections-2023-result-sheet-dungannon.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 9610,
+   "invalid_votes": null,
+   "quota": 1373,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9610,
+   "party_first_prefs": {
+    "DUP": 2752,
+    "Sinn Féin": 2738,
+    "Independent": 1808,
+    "SDLP": 601,
+    "UUP": 527,
+    "Alliance": 471,
+    "TUV": 299,
+    "CCLA": 268,
+    "Aontú": 146
+   },
+   "candidates": [
+    {
+     "candidate": "CUTHBERTSON, Clement",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 2096
+    },
+    {
+     "candidate": "MOLLOY, Dominic",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1519
+    },
+    {
+     "candidate": "VARSANI, Deirdre",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1219
+    },
+    {
+     "candidate": "MONTEITH, Barry",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 1180
+    },
+    {
+     "candidate": "BURTON, James",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 656
+    },
+    {
+     "candidate": "VINCENT, Marian",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 628
+    },
+    {
+     "candidate": "McQUADE, Karol",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 601
+    },
+    {
+     "candidate": "IRWIN, Ian",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 527
+    },
+    {
+     "candidate": "HACKETT, Claire",
+     "party": "Alliance",
+     "party_raw": "AP",
+     "party_source": "source",
+     "first_pref": 471
+    },
+    {
+     "candidate": "TENER, Kinley",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 299
+    },
+    {
+     "candidate": "CULLEN, Gerry",
+     "party": "CCLA",
+     "party_raw": "CCLA",
+     "party_source": "source",
+     "first_pref": 268
+    },
+    {
+     "candidate": "MULLEN, Denise",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 146
+    }
+   ]
+  },
+  {
+   "dea": "Dunsilly",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 13300,
+   "votes_polled": 7523,
+   "valid_votes": 7454,
+   "invalid_votes": 69,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7454,
+   "party_first_prefs": {
+    "Sinn Féin": 2604,
+    "DUP": 1682,
+    "Alliance": 913,
+    "UUP": 843,
+    "SDLP": 724,
+    "TUV": 445,
+    "Aontú": 243
+   },
+   "candidates": [
+    {
+     "candidate": "CUSHINAN, Henry",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1390
+    },
+    {
+     "candidate": "O'LONE, Annie",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1214
+    },
+    {
+     "candidate": "CLARKE, Linda",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 977
+    },
+    {
+     "candidate": "BURBANK, Jay",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 913
+    },
+    {
+     "candidate": "WILSON, Stewart",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 843
+    },
+    {
+     "candidate": "WILSON, Ryan",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 724
+    },
+    {
+     "candidate": "CUNNINGHAM, Tom",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 705
+    },
+    {
+     "candidate": "CAMPBELL, Jonathan",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 445
+    },
+    {
+     "candidate": "McERLEAN, Siobhán",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 243
+    }
+   ]
+  },
+  {
+   "dea": "Enniskillen",
+   "source_file": "local-council-elections-2023-result-sheet-enniskillen.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 6,
+   "electorate": 13642,
+   "votes_polled": 7775,
+   "valid_votes": 7676,
+   "invalid_votes": 99,
+   "quota": 1097,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7676,
+   "party_first_prefs": {
+    "Sinn Féin": 2650,
+    "DUP": 1466,
+    "UUP": 1229,
+    "Alliance": 779,
+    "SDLP": 539,
+    "TUV": 509,
+    "CCLA": 504
+   },
+   "candidates": [
+    {
+     "candidate": "Elliott, Keith",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1029
+    },
+    {
+     "candidate": "Maguire, Tommy",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1024
+    },
+    {
+     "candidate": "Browne, Dermot",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 846
+    },
+    {
+     "candidate": "McManus, Andrea",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 780
+    },
+    {
+     "candidate": "Roofe, Eddie",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 779
+    },
+    {
+     "candidate": "Crawford, Roy",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 667
+    },
+    {
+     "candidate": "Irvine, Robert",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 562
+    },
+    {
+     "candidate": "Blake, Paul",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 539
+    },
+    {
+     "candidate": "Crawford, Donald",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 509
+    },
+    {
+     "candidate": "O'Cofaigh, Donal",
+     "party": "CCLA",
+     "party_raw": "Cross-Community Labour Alternative",
+     "party_source": "source",
+     "first_pref": 504
+    },
+    {
+     "candidate": "Mahon, Jill",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 437
+    }
+   ]
+  },
+  {
+   "dea": "Erne East",
+   "source_file": "local-council-elections-2023-result-sheet-erne-east.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 6,
+   "electorate": 12127,
+   "votes_polled": 8588,
+   "valid_votes": 8478,
+   "invalid_votes": 110,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8478,
+   "party_first_prefs": {
+    "Sinn Féin": 4436,
+    "DUP": 1410,
+    "UUP": 1115,
+    "Independent": 798,
+    "SDLP": 498,
+    "Alliance": 221
+   },
+   "candidates": [
+    {
+     "candidate": "Greene, Sheamus",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1753
+    },
+    {
+     "candidate": "Robinson, Paul",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1410
+    },
+    {
+     "candidate": "O'Reilly Thomas",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1387
+    },
+    {
+     "candidate": "Hayes, Noeleen",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1296
+    },
+    {
+     "candidate": "Warrington, Victor",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1115
+    },
+    {
+     "candidate": "Keenan, Eamon",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 560
+    },
+    {
+     "candidate": "McPhillips, Garbhan",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 498
+    },
+    {
+     "candidate": "McDermott, Tina",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 238
+    },
+    {
+     "candidate": "Bullick, Richard",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 221
+    }
+   ]
+  },
+  {
+   "dea": "Erne North",
+   "source_file": "local-council-elections-2023-result-sheet-erne-north.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 5,
+   "electorate": 11509,
+   "votes_polled": 7193,
+   "valid_votes": 7100,
+   "invalid_votes": 93,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7100,
+   "party_first_prefs": {
+    "Sinn Féin": 2413,
+    "UUP": 1921,
+    "DUP": 1203,
+    "SDLP": 783,
+    "TUV": 422,
+    "Alliance": 358
+   },
+   "candidates": [
+    {
+     "candidate": "Coyle, Debbie",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1561
+    },
+    {
+     "candidate": "Armstrong, Diana",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1392
+    },
+    {
+     "candidate": "Mahon, David",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 984
+    },
+    {
+     "candidate": "Feely, John",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 852
+    },
+    {
+     "candidate": "Coyle, John",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 783
+    },
+    {
+     "candidate": "McClaughry, John",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 529
+    },
+    {
+     "candidate": "Elliott, Alex",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 422
+    },
+    {
+     "candidate": "Bullick, Eric",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 358
+    },
+    {
+     "candidate": "Stevenson, Paul",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 219
+    }
+   ]
+  },
+  {
+   "dea": "Erne West",
+   "source_file": "local-council-elections-2023-result-sheet-erne-west.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 5,
+   "electorate": 11196,
+   "votes_polled": 7652,
+   "valid_votes": 7586,
+   "invalid_votes": 66,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7586,
+   "party_first_prefs": {
+    "Sinn Féin": 4111,
+    "UUP": 1197,
+    "SDLP": 835,
+    "DUP": 687,
+    "Independent": 506,
+    "Alliance": 250
+   },
+   "candidates": [
+    {
+     "candidate": "Feely, Anthony",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1493
+    },
+    {
+     "candidate": "Brough, Elaine",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1362
+    },
+    {
+     "candidate": "McArdle, Declan",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1256
+    },
+    {
+     "candidate": "Ovens, Mark",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1197
+    },
+    {
+     "candidate": "Gannon, Adam",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 835
+    },
+    {
+     "candidate": "Elliott, Aaron",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 687
+    },
+    {
+     "candidate": "McGoldrick, Paul",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 506
+    },
+    {
+     "candidate": "McCusker, Gerard",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 250
+    }
+   ]
+  },
+  {
+   "dea": "Faughan",
+   "source_file": "local-council-elections-2023-result-sheet-faughan.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 14532,
+   "votes_polled": 8188,
+   "valid_votes": 8095,
+   "invalid_votes": 93,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8095,
+   "party_first_prefs": {
+    "Sinn Féin": 2355,
+    "DUP": 1641,
+    "SDLP": 1533,
+    "UUP": 1282,
+    "Alliance": 695,
+    "PBP": 310,
+    "Independent": 279
+   },
+   "candidates": [
+    {
+     "candidate": "McCready, Ryan",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1282
+    },
+    {
+     "candidate": "Duffy, Alex",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1193
+    },
+    {
+     "candidate": "Fleming, Sean",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1162
+    },
+    {
+     "candidate": "Middleton, Julie",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 988
+    },
+    {
+     "candidate": "Norris, Declan",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 919
+    },
+    {
+     "candidate": "Ferguson, Rachael",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 695
+    },
+    {
+     "candidate": "Wilkinson, Gary",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 653
+    },
+    {
+     "candidate": "Canning, Hayley",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 614
+    },
+    {
+     "candidate": "Gallagher, Damian Martin",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 310
+    },
+    {
+     "candidate": "Warke, Graham",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 279
+    }
+   ]
+  },
+  {
+   "dea": "Foyleside",
+   "source_file": "local-council-elections-2023-result-sheet-foyleside.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 13372,
+   "votes_polled": 7299,
+   "valid_votes": 7163,
+   "invalid_votes": 136,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7163,
+   "party_first_prefs": {
+    "Sinn Féin": 2961,
+    "SDLP": 2534,
+    "PBP": 979,
+    "Aontú": 423,
+    "Alliance": 266
+   },
+   "candidates": [
+    {
+     "candidate": "Heaney, Conor",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1846
+    },
+    {
+     "candidate": "Uí Niallais, Grace",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1115
+    },
+    {
+     "candidate": "Harkin, Shaun",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 979
+    },
+    {
+     "candidate": "Barr, Lilian Seenoi",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 960
+    },
+    {
+     "candidate": "Cusack, Shauna",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 948
+    },
+    {
+     "candidate": "Mc Callion, Stephen",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 626
+    },
+    {
+     "candidate": "Mac Cearáin, Seán",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 423
+    },
+    {
+     "candidate": "McCloskey, Danny",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 266
+    }
+   ]
+  },
+  {
+   "dea": "Glengormley Urban",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 7,
+   "electorate": 16445,
+   "votes_polled": 8894,
+   "valid_votes": 8765,
+   "invalid_votes": 129,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8765,
+   "party_first_prefs": {
+    "Sinn Féin": 3093,
+    "DUP": 2284,
+    "Alliance": 1407,
+    "UUP": 952,
+    "SDLP": 565,
+    "Green": 313,
+    "Independent": 102,
+    "Conservative": 49
+   },
+   "candidates": [
+    {
+     "candidate": "BENNINGTON, Alison",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1432
+    },
+    {
+     "candidate": "McLAUGHLIN, Eamonn",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1280
+    },
+    {
+     "candidate": "McGRATH, Julian",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 994
+    },
+    {
+     "candidate": "KINNEAR, Rosie",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 972
+    },
+    {
+     "candidate": "COSGROVE, Mark",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 952
+    },
+    {
+     "candidate": "BRADLEY, Paula",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 852
+    },
+    {
+     "candidate": "GOODMAN, Michael",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 841
+    },
+    {
+     "candidate": "McCLELLAND, Noreen",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 565
+    },
+    {
+     "candidate": "PIATEK, Anita",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 413
+    },
+    {
+     "candidate": "VERONICA, Lesley",
+     "party": "Green",
+     "party_raw": "GRN",
+     "party_source": "source",
+     "first_pref": 313
+    },
+    {
+     "candidate": "MAGUIRE, Michael",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 102
+    },
+    {
+     "candidate": "REID, Jason",
+     "party": "Conservative",
+     "party_raw": "CON",
+     "party_source": "source",
+     "first_pref": 49
+    }
+   ]
+  },
+  {
+   "dea": "Holywood and Clandeboye",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 5,
+   "electorate": 15973,
+   "votes_polled": 7815,
+   "valid_votes": 7728,
+   "invalid_votes": 87,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7728,
+   "party_first_prefs": {
+    "Alliance": 3171,
+    "DUP": 1531,
+    "Green": 1134,
+    "UUP": 989,
+    "SDLP": 539,
+    "TUV": 364
+   },
+   "candidates": [
+    {
+     "candidate": "McRANDAL, Martin Joseph",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1222
+    },
+    {
+     "candidate": "WOODS, Rachel Elizabeth",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 1134
+    },
+    {
+     "candidate": "GRAHAM, Alan",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1112
+    },
+    {
+     "candidate": "ROSSITER, David",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1074
+    },
+    {
+     "candidate": "McLAREN, Linzi",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 989
+    },
+    {
+     "candidate": "CORBETT, Helen",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 875
+    },
+    {
+     "candidate": "VAUGHAN, Deirdre",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 539
+    },
+    {
+     "candidate": "McCLEAN, Carl",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 419
+    },
+    {
+     "candidate": "ADAMS, Diane",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 364
+    }
+   ]
+  },
+  {
+   "dea": "Killultagh",
+   "source_file": "local-council-elections-2023-result-sheet-killultagh.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 15956,
+   "votes_polled": 8449,
+   "valid_votes": 8381,
+   "invalid_votes": 68,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8381,
+   "party_first_prefs": {
+    "DUP": 2806,
+    "Sinn Féin": 1958,
+    "Alliance": 1862,
+    "UUP": 1313,
+    "SDLP": 364,
+    "Independent": 78
+   },
+   "candidates": [
+    {
+     "candidate": "MCCLEAVE",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1958
+    },
+    {
+     "candidate": "KEMP",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1862
+    },
+    {
+     "candidate": "BECKETT",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1509
+    },
+    {
+     "candidate": "TINSLEY",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1297
+    },
+    {
+     "candidate": "TURNER",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 659
+    },
+    {
+     "candidate": "MCLERNON",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 654
+    },
+    {
+     "candidate": "PATTON",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 364
+    },
+    {
+     "candidate": "BROWN",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 78
+    }
+   ]
+  },
+  {
+   "dea": "Knockagh",
+   "source_file": "local-council-elections-2023-result-sheet-knockagh.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 13223,
+   "votes_polled": 6545,
+   "valid_votes": 6486,
+   "invalid_votes": 59,
+   "quota": 1082,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6486,
+   "party_first_prefs": {
+    "DUP": 2075,
+    "Alliance": 1656,
+    "UUP": 1225,
+    "Independent": 1182,
+    "TUV": 348
+   },
+   "candidates": [
+    {
+     "candidate": "Hadden, Bobby",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1182
+    },
+    {
+     "candidate": "Johnston, Peter",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1144
+    },
+    {
+     "candidate": "Collins, Marc Neill",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 931
+    },
+    {
+     "candidate": "Skinner, Aaron",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 903
+    },
+    {
+     "candidate": "Wilson, Andrew",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 792
+    },
+    {
+     "candidate": "Williams, Noel",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 753
+    },
+    {
+     "candidate": "McCabe, Gary William",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 433
+    },
+    {
+     "candidate": "Strange, James",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 348
+    }
+   ]
+  },
+  {
+   "dea": "Lagan River",
+   "source_file": "local-council-elections-2023-result-sheet-lagan-river.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 18389,
+   "votes_polled": 10069,
+   "valid_votes": 10000,
+   "invalid_votes": 69,
+   "quota": 1667,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10000,
+   "party_first_prefs": {
+    "DUP": 4903,
+    "UUP": 1986,
+    "Alliance": 1762,
+    "TUV": 627,
+    "Sinn Féin": 502,
+    "SDLP": 220
+   },
+   "candidates": [
+    {
+     "candidate": "BAXTER, Mark",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 2261
+    },
+    {
+     "candidate": "JOHNSTON, Jessica",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1762
+    },
+    {
+     "candidate": "RANKIN, Paul",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1505
+    },
+    {
+     "candidate": "SAVAGE, Kyle",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1393
+    },
+    {
+     "candidate": "MCCLELLAND, Tim",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1137
+    },
+    {
+     "candidate": "MORRISON, Sammy",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 627
+    },
+    {
+     "candidate": "OGLE, Sammy",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 593
+    },
+    {
+     "candidate": "MCALEENAN, Vincent",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 502
+    },
+    {
+     "candidate": "EDWARDS, Oisin",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 220
+    }
+   ]
+  },
+  {
+   "dea": "Larne Lough",
+   "source_file": "local-council-elections-2023-result-sheet-larne-lough.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 13744,
+   "votes_polled": 6513,
+   "valid_votes": 6405,
+   "invalid_votes": 108,
+   "quota": 1068,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6405,
+   "party_first_prefs": {
+    "Alliance": 2085,
+    "DUP": 2059,
+    "UUP": 1619,
+    "TUV": 427,
+    "Green": 215
+   },
+   "candidates": [
+    {
+     "candidate": "Donnelly, Maeve",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1389
+    },
+    {
+     "candidate": "McKeen, Gregg",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1197
+    },
+    {
+     "candidate": "Beggs, Roy",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1139
+    },
+    {
+     "candidate": "Reid, Paul",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 862
+    },
+    {
+     "candidate": "Logan, Robert",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 696
+    },
+    {
+     "candidate": "Carson, James",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 480
+    },
+    {
+     "candidate": "Donnell, Ronnie",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 427
+    },
+    {
+     "candidate": "Randle, Philip George",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 215
+    }
+   ]
+  },
+  {
+   "dea": "Limavady",
+   "source_file": "local-council-elections-2023-result-sheet-limavady.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 11615,
+   "votes_polled": 6081,
+   "valid_votes": 6031,
+   "invalid_votes": 50,
+   "quota": 1006,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6031,
+   "party_first_prefs": {
+    "DUP": 1984,
+    "Sinn Féin": 1800,
+    "Independent": 593,
+    "Alliance": 547,
+    "UUP": 511,
+    "SDLP": 443,
+    "Aontú": 153
+   },
+   "candidates": [
+    {
+     "candidate": "Chivers, Brenda",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1800
+    },
+    {
+     "candidate": "Callaghan, Steven Garth",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1010
+    },
+    {
+     "candidate": "McCorkell, James Alexander",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 562
+    },
+    {
+     "candidate": "Mairs, Amy",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 547
+    },
+    {
+     "candidate": "Crawford, Barry",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 511
+    },
+    {
+     "candidate": "Callan, Aaron Andrew",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 496
+    },
+    {
+     "candidate": "Wallace, Jordan Mark",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 478
+    },
+    {
+     "candidate": "Schenning, Ashleen",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 443
+    },
+    {
+     "candidate": "Boyle, John",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 153
+    },
+    {
+     "candidate": "Stewart, Billy",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 31
+    }
+   ]
+  },
+  {
+   "dea": "Lisburn North",
+   "source_file": "local-council-elections-2023-result-sheet-lisburn-north.xlsx",
+   "source_format": "xlsx",
+   "seats": 6,
+   "electorate": 16680,
+   "votes_polled": 8533,
+   "valid_votes": 8444,
+   "invalid_votes": 89,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8444,
+   "party_first_prefs": {
+    "DUP": 2235,
+    "Alliance": 1993,
+    "Sinn Féin": 1239,
+    "UUP": 1152,
+    "SDLP": 935,
+    "Independent": 890
+   },
+   "candidates": [
+    {
+     "candidate": "BURKE",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1239
+    },
+    {
+     "candidate": "CRAIG",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1220
+    },
+    {
+     "candidate": "PARKER",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1137
+    },
+    {
+     "candidate": "CARSON",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1015
+    },
+    {
+     "candidate": "CATNEY",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 935
+    },
+    {
+     "candidate": "HYNDS",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 890
+    },
+    {
+     "candidate": "MARTIN",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 856
+    },
+    {
+     "candidate": "TRIMBLE",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 627
+    },
+    {
+     "candidate": "GIBSON",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 525
+    }
+   ]
+  },
+  {
+   "dea": "Lisburn South",
+   "source_file": "local-council-elections-2023-result-sheet-lisburn-south_1.xlsx",
+   "source_format": "xlsx",
+   "seats": 6,
+   "electorate": 16838,
+   "votes_polled": 7595,
+   "valid_votes": 7496,
+   "invalid_votes": 99,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7496,
+   "party_first_prefs": {
+    "DUP": 2864,
+    "Alliance": 1785,
+    "UUP": 1495,
+    "Sinn Féin": 493,
+    "SDLP": 472,
+    "TUV": 387
+   },
+   "candidates": [
+    {
+     "candidate": "EWING",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1139
+    },
+    {
+     "candidate": "GREHAN",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1111
+    },
+    {
+     "candidate": "GIVAN",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 1038
+    },
+    {
+     "candidate": "MITCHELL",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 870
+    },
+    {
+     "candidate": "PORTER",
+     "party": "DUP",
+     "party_raw": "D.U.P.",
+     "party_source": "source",
+     "first_pref": 687
+    },
+    {
+     "candidate": "KENNEDY",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 674
+    },
+    {
+     "candidate": "PALMER",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 625
+    },
+    {
+     "candidate": "FLYNN",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 493
+    },
+    {
+     "candidate": "FRENCH",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 472
+    },
+    {
+     "candidate": "MCEVOY",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 387
+    }
+   ]
+  },
+  {
+   "dea": "Lisnasharragh",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 21488,
+   "votes_polled": 12091,
+   "valid_votes": 11975,
+   "invalid_votes": 116,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 11975,
+   "party_first_prefs": {
+    "Alliance": 3476,
+    "DUP": 3143,
+    "SDLP": 1580,
+    "Sinn Féin": 1231,
+    "Green": 1157,
+    "UUP": 820,
+    "TUV": 368,
+    "PBP": 200
+   },
+   "candidates": [
+    {
+     "candidate": "Douglas, Davy",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 2083
+    },
+    {
+     "candidate": "De Faoite, Séamas",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 1580
+    },
+    {
+     "candidate": "Long, Michael",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1437
+    },
+    {
+     "candidate": "Jenkins, Stevie",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1231
+    },
+    {
+     "candidate": "Smyth, Brian",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 1157
+    },
+    {
+     "candidate": "Hanvey, Eric",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1078
+    },
+    {
+     "candidate": "Ferguson, Bradley",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1060
+    },
+    {
+     "candidate": "McErlean, Anna",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 961
+    },
+    {
+     "candidate": "Manwaring, Bill",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 820
+    },
+    {
+     "candidate": "Ferguson, Stephen",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 368
+    },
+    {
+     "candidate": "Cropper, Nick",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 200
+    }
+   ]
+  },
+  {
+   "dea": "Lurgan",
+   "source_file": "local-council-elections-2023-result-sheet-lurgan.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 26807,
+   "votes_polled": 14299,
+   "valid_votes": 14078,
+   "invalid_votes": 221,
+   "quota": 1760,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 14078,
+   "party_first_prefs": {
+    "Sinn Féin": 6841,
+    "DUP": 3265,
+    "Alliance": 1877,
+    "UUP": 1104,
+    "SDLP": 991
+   },
+   "candidates": [
+    {
+     "candidate": "HAUGHIAN, Keith",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 2153
+    },
+    {
+     "candidate": "LAVERY, Peter",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1877
+    },
+    {
+     "candidate": "HAIRE, Peter",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1849
+    },
+    {
+     "candidate": "MACKLE, Liam",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1835
+    },
+    {
+     "candidate": "O'DOWD, Mary",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1554
+    },
+    {
+     "candidate": "MOUTRAY, Stephen",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1416
+    },
+    {
+     "candidate": "MCGEOWN, Sorcha",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1299
+    },
+    {
+     "candidate": "MCKINSTREY, Louise",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1104
+    },
+    {
+     "candidate": "TOMAN, Ciaran",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 991
+    }
+   ]
+  },
+  {
+   "dea": "Macedon",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 14554,
+   "votes_polled": 7203,
+   "valid_votes": 7118,
+   "invalid_votes": 85,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7118,
+   "party_first_prefs": {
+    "DUP": 2347,
+    "Sinn Féin": 1326,
+    "UUP": 1138,
+    "Alliance": 1085,
+    "Independent": 487,
+    "TUV": 333,
+    "PUP": 244,
+    "Green": 158
+   },
+   "candidates": [
+    {
+     "candidate": "McGRANN, Taylor",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1326
+    },
+    {
+     "candidate": "BRADY, Matthew",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1220
+    },
+    {
+     "candidate": "FOSTER, Robert",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1138
+    },
+    {
+     "candidate": "WEBB, Billy",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 1085
+    },
+    {
+     "candidate": "MALLON, Ben",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 574
+    },
+    {
+     "candidate": "ROBINSON, Victor",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 553
+    },
+    {
+     "candidate": "WARD, Stafford",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 487
+    },
+    {
+     "candidate": "BOYD, Norman",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 333
+    },
+    {
+     "candidate": "BELL-McCRACKEN, Rosemary",
+     "party": "PUP",
+     "party_raw": "PUP",
+     "party_source": "source",
+     "first_pref": 244
+    },
+    {
+     "candidate": "BYRNE, Ellie",
+     "party": "Green",
+     "party_raw": "GRN",
+     "party_source": "source",
+     "first_pref": 158
+    }
+   ]
+  },
+  {
+   "dea": "Magherafelt",
+   "source_file": "local-council-elections-2023-result-sheet-magherafelt.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 8257,
+   "invalid_votes": null,
+   "quota": 1377,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8257,
+   "party_first_prefs": {
+    "Sinn Féin": 3607,
+    "DUP": 2110,
+    "SDLP": 804,
+    "TUV": 671,
+    "UUP": 587,
+    "Alliance": 478
+   },
+   "candidates": [
+    {
+     "candidate": "TOTTEN, Darren Oliver",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 2077
+    },
+    {
+     "candidate": "CLARKE, Sean",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1530
+    },
+    {
+     "candidate": "McLEAN, Paul",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1143
+    },
+    {
+     "candidate": "BROWN, Wesley",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 967
+    },
+    {
+     "candidate": "McFLYNN, Christine Josephine",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 804
+    },
+    {
+     "candidate": "LOVE, Raymond",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 671
+    },
+    {
+     "candidate": "BROWN, Ian",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 587
+    },
+    {
+     "candidate": "FARRELL, Padraic David",
+     "party": "Alliance",
+     "party_raw": "AP",
+     "party_source": "source",
+     "first_pref": 478
+    }
+   ]
+  },
+  {
+   "dea": "Mid Tyrone",
+   "source_file": "local-council-elections-2023-result-sheet-mid-tyrone.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 6,
+   "electorate": 13083,
+   "votes_polled": 8661,
+   "valid_votes": 8542,
+   "invalid_votes": 119,
+   "quota": 1221,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8542,
+   "party_first_prefs": {
+    "Sinn Féin": 5361,
+    "DUP": 1057,
+    "UUP": 687,
+    "Independent": 629,
+    "SDLP": 497,
+    "Alliance": 311
+   },
+   "candidates": [
+    {
+     "candidate": "Kelly, Padraigin",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1621
+    },
+    {
+     "candidate": "Devine Gallagher, Ro",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1464
+    },
+    {
+     "candidate": "Fitzgerald, Anne-Marie",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1204
+    },
+    {
+     "candidate": "Withers, Patrick",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1072
+    },
+    {
+     "candidate": "Hawkes, Shirley",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1057
+    },
+    {
+     "candidate": "Barton, Rosemary",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 687
+    },
+    {
+     "candidate": "McAleer, Emmet",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 629
+    },
+    {
+     "candidate": "McGrath, Bernard",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 497
+    },
+    {
+     "candidate": "Beaumont, Matthew",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 311
+    }
+   ]
+  },
+  {
+   "dea": "Moyola",
+   "source_file": "local-council-elections-2023-result-sheet-moyola.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 9156,
+   "invalid_votes": null,
+   "quota": 1527,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9156,
+   "party_first_prefs": {
+    "Sinn Féin": 5237,
+    "DUP": 1563,
+    "SDLP": 651,
+    "UUP": 592,
+    "TUV": 519,
+    "Aontú": 347,
+    "Alliance": 247
+   },
+   "candidates": [
+    {
+     "candidate": "MILNE, Ian",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 2219
+    },
+    {
+     "candidate": "GROOGAN, Jolene",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1874
+    },
+    {
+     "candidate": "FORDE, Anne",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1563
+    },
+    {
+     "candidate": "McPEAKE, Donal",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1144
+    },
+    {
+     "candidate": "JOHNSTON, Denise",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 651
+    },
+    {
+     "candidate": "McKINNEY, Derek Irwin",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 592
+    },
+    {
+     "candidate": "MOORE, Glenn",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 519
+    },
+    {
+     "candidate": "FULLERTON, Sheila Maria",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 347
+    },
+    {
+     "candidate": "ROSS, Caleb",
+     "party": "Alliance",
+     "party_raw": "AP",
+     "party_source": "source",
+     "first_pref": 247
+    }
+   ]
+  },
+  {
+   "dea": "Newry",
+   "source_file": "local-council-elections-2023-result-sheet-newry.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": 19901,
+   "votes_polled": 10623,
+   "valid_votes": 10451,
+   "invalid_votes": 172,
+   "quota": 1494,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10451,
+   "party_first_prefs": {
+    "Sinn Féin": 6809,
+    "SDLP": 1896,
+    "Alliance": 830,
+    "Aontú": 318,
+    "UUP": 285,
+    "Independent": 209,
+    "Workers Party": 104
+   },
+   "candidates": [
+    {
+     "candidate": "HARTE, VALERIE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 2085
+    },
+    {
+     "candidate": "KING, CATHAL",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1982
+    },
+    {
+     "candidate": "MATHERS, AIDAN",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1483
+    },
+    {
+     "candidate": "KEARNS, GERALDINE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1259
+    },
+    {
+     "candidate": "FINN, DOIRE",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 961
+    },
+    {
+     "candidate": "SAVAGE, MICHAEL",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 935
+    },
+    {
+     "candidate": "YOUNG, HELENA",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 830
+    },
+    {
+     "candidate": "LOUGHRAN, SHARON",
+     "party": "Aontú",
+     "party_raw": "AONTÚ FOR LIFE, UNITY, ECONOMIC JUSTICE",
+     "party_source": "source",
+     "first_pref": 318
+    },
+    {
+     "candidate": "MCCRACKEN, ANDREW",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 285
+    },
+    {
+     "candidate": "KRUPSKA, MARIYA",
+     "party": "Independent",
+     "party_raw": "INDEPENDENT",
+     "party_source": "source",
+     "first_pref": 209
+    },
+    {
+     "candidate": "GRANT, NICOLA",
+     "party": "Workers Party",
+     "party_raw": "THE WORKERS PARTY",
+     "party_source": "source",
+     "first_pref": 104
+    }
+   ]
+  },
+  {
+   "dea": "Newtownards",
+   "source_file": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 7,
+   "electorate": 21723,
+   "votes_polled": 9452,
+   "valid_votes": 9285,
+   "invalid_votes": 167,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9285,
+   "party_first_prefs": {
+    "DUP": 3007,
+    "Alliance": 2183,
+    "Independent": 2014,
+    "UUP": 1257,
+    "TUV": 598,
+    "Green": 226
+   },
+   "candidates": [
+    {
+     "candidate": "IRVINE, Steven Gary",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1463
+    },
+    {
+     "candidate": "ARMSTRONG, Naomi Esther Hannah",
+     "party": "DUP",
+     "party_raw": "Democratic Ulster Unionist - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1370
+    },
+    {
+     "candidate": "SMART, Richard",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist",
+     "party_source": "source",
+     "first_pref": 1257
+    },
+    {
+     "candidate": "McDOWELL, Alan Joseph",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 1236
+    },
+    {
+     "candidate": "McILVEEN, Stephen Harold",
+     "party": "DUP",
+     "party_raw": "Democratic Ulster Unionist - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1057
+    },
+    {
+     "candidate": "MOORE, Vicky",
+     "party": "Alliance",
+     "party_raw": "Alliance",
+     "party_source": "source",
+     "first_pref": 947
+    },
+    {
+     "candidate": "ALLEN, Eddie",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 598
+    },
+    {
+     "candidate": "KENNEDY, Colin George Dallas",
+     "party": "DUP",
+     "party_raw": "Democratic Ulster Unionist - D.U.P.",
+     "party_source": "source",
+     "first_pref": 580
+    },
+    {
+     "candidate": "COX, Ian",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 527
+    },
+    {
+     "candidate": "MaCARTNEY, Maurice",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 226
+    },
+    {
+     "candidate": "KING, Ben",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 24
+    }
+   ]
+  },
+  {
+   "dea": "Oldpark",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 23871,
+   "votes_polled": 12559,
+   "valid_votes": 12366,
+   "invalid_votes": 193,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 12366,
+   "party_first_prefs": {
+    "Sinn Féin": 6249,
+    "DUP": 2182,
+    "Independent": 1747,
+    "PBP": 700,
+    "TUV": 595,
+    "Alliance": 453,
+    "SDLP": 245,
+    "Green": 149,
+    "Workers Party": 46
+   },
+   "candidates": [
+    {
+     "candidate": "Bradley, Nichola",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1870
+    },
+    {
+     "candidate": "McCusker, Paul",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1747
+    },
+    {
+     "candidate": "Magee, JJ",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1619
+    },
+    {
+     "candidate": "Murphy, Ryan",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1430
+    },
+    {
+     "candidate": "Ó Néill, Tomás",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1330
+    },
+    {
+     "candidate": "Doran, Jordan",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1263
+    },
+    {
+     "candidate": "Simpson, Gillian",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 919
+    },
+    {
+     "candidate": "Ferguson, Fiona",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 700
+    },
+    {
+     "candidate": "McClure, Ann",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 595
+    },
+    {
+     "candidate": "Shannon, Chris",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 453
+    },
+    {
+     "candidate": "Carson, Charlotte",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 245
+    },
+    {
+     "candidate": "Cruz, Ange",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 149
+    },
+    {
+     "candidate": "McCarthy, Fiona",
+     "party": "Workers Party",
+     "party_raw": "The Workers Party",
+     "party_source": "source",
+     "first_pref": 46
+    }
+   ]
+  },
+  {
+   "dea": "Omagh",
+   "source_file": "local-council-elections-2023-result-sheet-omagh.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 6,
+   "electorate": 13279,
+   "votes_polled": 6739,
+   "valid_votes": 6636,
+   "invalid_votes": 103,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 6636,
+   "party_first_prefs": {
+    "Sinn Féin": 3128,
+    "DUP": 1138,
+    "Alliance": 872,
+    "Independent": 549,
+    "UUP": 489,
+    "SDLP": 385,
+    "Socialist Party": 75
+   },
+   "candidates": [
+    {
+     "candidate": "McElduff, Barry",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1342
+    },
+    {
+     "candidate": "Thompson, Errol",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1138
+    },
+    {
+     "candidate": "Kelly, Catherine",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1013
+    },
+    {
+     "candidate": "Donnelly, Stephen",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 872
+    },
+    {
+     "candidate": "McColgan, Marty",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 773
+    },
+    {
+     "candidate": "Bell, Matthew",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 489
+    },
+    {
+     "candidate": "Deehan, Josephine",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 469
+    },
+    {
+     "candidate": "Mellon, Brenda",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 385
+    },
+    {
+     "candidate": "Dunphy, Kathy",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 80
+    },
+    {
+     "candidate": "Ferguson, Amy",
+     "party": "Socialist Party",
+     "party_raw": "Socialist Party (Northern Ireland)",
+     "party_source": "source",
+     "first_pref": 75
+    }
+   ]
+  },
+  {
+   "dea": "Ormiston",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 7,
+   "electorate": 26314,
+   "votes_polled": 14379,
+   "valid_votes": 14295,
+   "invalid_votes": 84,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 14295,
+   "party_first_prefs": {
+    "Alliance": 6329,
+    "DUP": 4039,
+    "UUP": 1851,
+    "Green": 999,
+    "TUV": 680,
+    "Sinn Féin": 174,
+    "PBP": 117,
+    "SDLP": 106
+   },
+   "candidates": [
+    {
+     "candidate": "Bower, Christine",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 2661
+    },
+    {
+     "candidate": "Lawlor, James David Warnock",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 2397
+    },
+    {
+     "candidate": "McCormick, Andrew William",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1642
+    },
+    {
+     "candidate": "McMullan, Ross",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1480
+    },
+    {
+     "candidate": "Maghie, Jenna",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1299
+    },
+    {
+     "candidate": "Rodgers, Jim",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 1004
+    },
+    {
+     "candidate": "Flynn, Anthony",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 999
+    },
+    {
+     "candidate": "Sullivan, Caitlin",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 889
+    },
+    {
+     "candidate": "Howard, Carole",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 847
+    },
+    {
+     "candidate": "Hiddleston, John",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 680
+    },
+    {
+     "candidate": "Mallaghan, Caitríona",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 174
+    },
+    {
+     "candidate": "Doran, Fiona",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 117
+    },
+    {
+     "candidate": "McGuirk, Lorcan",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 106
+    }
+   ]
+  },
+  {
+   "dea": "Portadown",
+   "source_file": "local-council-elections-2023-result-sheet-portadown.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": 22318,
+   "votes_polled": 12416,
+   "valid_votes": 12202,
+   "invalid_votes": 214,
+   "quota": 1744,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 12202,
+   "party_first_prefs": {
+    "DUP": 5074,
+    "Sinn Féin": 2893,
+    "UUP": 1677,
+    "Alliance": 921,
+    "SDLP": 842,
+    "TUV": 795
+   },
+   "candidates": [
+    {
+     "candidate": "DUFFY, Paul",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 1986
+    },
+    {
+     "candidate": "MCILWRATH, Lavelle",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1826
+    },
+    {
+     "candidate": "MOUTRAY, Kyle",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1816
+    },
+    {
+     "candidate": "MULLHOLLAND, Alan",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1432
+    },
+    {
+     "candidate": "FLAHERTY, Julie",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1355
+    },
+    {
+     "candidate": "HUTCHINSON, Emma",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 921
+    },
+    {
+     "candidate": "MCCONVILLE-WALKER, Clare",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FEIN",
+     "party_source": "source",
+     "first_pref": 907
+    },
+    {
+     "candidate": "MCNEILL, Eamon",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 842
+    },
+    {
+     "candidate": "OLIVER, Robert",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 795
+    },
+    {
+     "candidate": "MCCULLOUGH, Zoe",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 322
+    }
+   ]
+  },
+  {
+   "dea": "Rowallane",
+   "source_file": "local-council-elections-2023-result-sheet-rowallane.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 15865,
+   "votes_polled": 8115,
+   "valid_votes": 8034,
+   "invalid_votes": 81,
+   "quota": 1340,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8034,
+   "party_first_prefs": {
+    "DUP": 2745,
+    "Alliance": 1976,
+    "SDLP": 1319,
+    "UUP": 1038,
+    "Sinn Féin": 866,
+    "Green": 90
+   },
+   "candidates": [
+    {
+     "candidate": "JACKSON, JONNY",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1414
+    },
+    {
+     "candidate": "BOWSIE, CALLUM",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1331
+    },
+    {
+     "candidate": "ANDREWS, TERRY",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 1319
+    },
+    {
+     "candidate": "LEE-SURGINOR, DAVID",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1011
+    },
+    {
+     "candidate": "KELLY, TIERNA",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 965
+    },
+    {
+     "candidate": "BURGESS, ROBERT",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 937
+    },
+    {
+     "candidate": "KENNEDY, DERMOT",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 866
+    },
+    {
+     "candidate": "GRACEY, RACHEL",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 101
+    },
+    {
+     "candidate": "MCCOLL, ALI",
+     "party": "Green",
+     "party_raw": "GREEN PARTY NORTHERN IRELAND",
+     "party_source": "source",
+     "first_pref": 90
+    }
+   ]
+  },
+  {
+   "dea": "Slieve Croob",
+   "source_file": "local-council-elections-2023-result-sheet-slieve-croob.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 15797,
+   "votes_polled": 9003,
+   "valid_votes": 8911,
+   "invalid_votes": 92,
+   "quota": 1486,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8911,
+   "party_first_prefs": {
+    "Sinn Féin": 4238,
+    "DUP": 1723,
+    "Alliance": 1183,
+    "SDLP": 1041,
+    "UUP": 383,
+    "Aontú": 245,
+    "Green": 98
+   },
+   "candidates": [
+    {
+     "candidate": "LEWIS, ALAN",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1723
+    },
+    {
+     "candidate": "BRENNAN, JIM",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1569
+    },
+    {
+     "candidate": "HOWELL, ROISIN",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1443
+    },
+    {
+     "candidate": "O'HARE, SIOBHÁN",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1226
+    },
+    {
+     "candidate": "MCMURRAY, ANDREW",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1183
+    },
+    {
+     "candidate": "GALLAGHER, HUGH",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 756
+    },
+    {
+     "candidate": "LYONS, WALTER",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 383
+    },
+    {
+     "candidate": "POLLAND, WILL",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 285
+    },
+    {
+     "candidate": "MCGLONE, ROSEMARY",
+     "party": "Aontú",
+     "party_raw": "AONTÚ FOR LIFE, UNITY, ECONOMIC JUSTICE",
+     "party_source": "source",
+     "first_pref": 245
+    },
+    {
+     "candidate": "PITT, SEANA",
+     "party": "Green",
+     "party_raw": "GREEN PARTY NORTHERN IRELAND",
+     "party_source": "source",
+     "first_pref": 98
+    }
+   ]
+  },
+  {
+   "dea": "Slieve Gullion",
+   "source_file": "local-council-elections-2023-result-sheet-slieve-gullion.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 22734,
+   "votes_polled": 14957,
+   "valid_votes": 14691,
+   "invalid_votes": 266,
+   "quota": 1837,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 14691,
+   "party_first_prefs": {
+    "Sinn Féin": 9978,
+    "SDLP": 2350,
+    "UUP": 1197,
+    "Aontú": 439,
+    "DUP": 360,
+    "Alliance": 298,
+    "Green": 69
+   },
+   "candidates": [
+    {
+     "candidate": "FINNEGAN, AOIFÉ",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1934
+    },
+    {
+     "candidate": "QUINN, AINE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1932
+    },
+    {
+     "candidate": "MURPHY, DECLAN",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1907
+    },
+    {
+     "candidate": "LARKIN, MICKEY",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1558
+    },
+    {
+     "candidate": "BYRNE, PETE",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 1447
+    },
+    {
+     "candidate": "Ó MUIRÍ, BARRA",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1331
+    },
+    {
+     "candidate": "MAGENNIS, OONAGH",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1316
+    },
+    {
+     "candidate": "TAYLOR, DAVID SAMUEL",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 1197
+    },
+    {
+     "candidate": "FEEHAN, KILLIAN",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 903
+    },
+    {
+     "candidate": "REICHENBERG, LIAM",
+     "party": "Aontú",
+     "party_raw": "AONTÚ FOR LIFE, UNITY, ECONOMIC JUSTICE",
+     "party_source": "source",
+     "first_pref": 439
+    },
+    {
+     "candidate": "HENRY, LINDA",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 360
+    },
+    {
+     "candidate": "GREGORY, CAOLAN",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 298
+    },
+    {
+     "candidate": "NI MHÁNAIS, MOLLY",
+     "party": "Green",
+     "party_raw": "GREEN PARTY NORTHERN IRELAND",
+     "party_source": "source",
+     "first_pref": 69
+    }
+   ]
+  },
+  {
+   "dea": "Sperrin",
+   "source_file": "local-council-elections-2023-result-sheet-sperrin.xlsx",
+   "source_format": "xlsx",
+   "seats": 7,
+   "electorate": 19143,
+   "votes_polled": 11995,
+   "valid_votes": 11812,
+   "invalid_votes": 183,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 11812,
+   "party_first_prefs": {
+    "Sinn Féin": 4768,
+    "Independent": 2273,
+    "DUP": 2158,
+    "SDLP": 1349,
+    "UUP": 489,
+    "Alliance": 381,
+    "PBP": 226,
+    "Aontú": 168
+   },
+   "candidates": [
+    {
+     "candidate": "Boggs, Paul",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1993
+    },
+    {
+     "candidate": "Leonard, Fergal",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1650
+    },
+    {
+     "candidate": "Bresland, Allan",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1194
+    },
+    {
+     "candidate": "Harte, Brian",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1125
+    },
+    {
+     "candidate": "Gallagher, Paul",
+     "party": "Independent",
+     "party_raw": "0",
+     "party_source": "manual",
+     "first_pref": 1042
+    },
+    {
+     "candidate": "Barr, Raymond",
+     "party": "Independent",
+     "party_raw": "0",
+     "party_source": "manual",
+     "first_pref": 985
+    },
+    {
+     "candidate": "Devenney, Maurice",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 964
+    },
+    {
+     "candidate": "Barr, Jason",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 811
+    },
+    {
+     "candidate": "Forbes, Tommy",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 538
+    },
+    {
+     "candidate": "Miller, Glen",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 489
+    },
+    {
+     "candidate": "Boyle, Mel",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 381
+    },
+    {
+     "candidate": "Kelly, Patsy",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 246
+    },
+    {
+     "candidate": "Gallagher, Carol",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 226
+    },
+    {
+     "candidate": "Mac Meanman, Darán",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 168
+    }
+   ]
+  },
+  {
+   "dea": "The Glens",
+   "source_file": "local-council-elections-2023-result-sheet-the-glens.pdf",
+   "source_format": "pdf_text",
+   "seats": 5,
+   "electorate": 13178,
+   "votes_polled": 7799,
+   "valid_votes": 7699,
+   "invalid_votes": 100,
+   "quota": 1284,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7699,
+   "party_first_prefs": {
+    "Sinn Féin": 4517,
+    "DUP": 945,
+    "Alliance": 733,
+    "SDLP": 652,
+    "UUP": 587,
+    "Aontú": 265
+   },
+   "candidates": [
+    {
+     "candidate": "McShane, Cara",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1913
+    },
+    {
+     "candidate": "McMullan, Oliver",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1462
+    },
+    {
+     "candidate": "Watson, Maighréad",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1142
+    },
+    {
+     "candidate": "Kennedy, Bill",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 945
+    },
+    {
+     "candidate": "Morgan, Glenise",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 733
+    },
+    {
+     "candidate": "McKillop, Margaret Anne",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 652
+    },
+    {
+     "candidate": "Craig, Wesley",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 587
+    },
+    {
+     "candidate": "Robbin, John",
+     "party": "Aontú",
+     "party_raw": "Aontú",
+     "party_source": "source",
+     "first_pref": 265
+    }
+   ]
+  },
+  {
+   "dea": "The Moor",
+   "source_file": "local-council-elections-2023-result-sheet-the-moor.xlsx",
+   "source_format": "xlsx",
+   "seats": 5,
+   "electorate": 13403,
+   "votes_polled": 7598,
+   "valid_votes": 7397,
+   "invalid_votes": 201,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7397,
+   "party_first_prefs": {
+    "Sinn Féin": 3298,
+    "Independent": 1868,
+    "SDLP": 1206,
+    "PBP": 578,
+    "Aontú": 301,
+    "Alliance": 146
+   },
+   "candidates": [
+    {
+     "candidate": "Donnelly, Gary",
+     "party": "Independent",
+     "party_raw": "Independent",
+     "party_source": "source",
+     "first_pref": 1868
+    },
+    {
+     "candidate": "Hutton, Aisling",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1317
+    },
+    {
+     "candidate": "Logue, Patricia",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1069
+    },
+    {
+     "candidate": "Mc Ginley, Emma",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 912
+    },
+    {
+     "candidate": "Boyle, John",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 761
+    },
+    {
+     "candidate": "O'Neill, Maeve",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 578
+    },
+    {
+     "candidate": "Henderson, Dermott Sean",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 445
+    },
+    {
+     "candidate": "Christy, Darryl",
+     "party": "Aontú",
+     "party_raw": "Aontú for Life, Unity, Economic Justice",
+     "party_source": "source",
+     "first_pref": 301
+    },
+    {
+     "candidate": "Downey, Michael",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 146
+    }
+   ]
+  },
+  {
+   "dea": "The Mournes",
+   "source_file": "local-council-elections-2023-result-sheet-the-mournes.pdf",
+   "source_format": "pdf_text",
+   "seats": 7,
+   "electorate": 22227,
+   "votes_polled": 13548,
+   "valid_votes": 13369,
+   "invalid_votes": 179,
+   "quota": 1672,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 13369,
+   "party_first_prefs": {
+    "Sinn Féin": 5598,
+    "DUP": 3429,
+    "SDLP": 1727,
+    "Alliance": 1105,
+    "TUV": 880,
+    "UUP": 511,
+    "Green": 119
+   },
+   "candidates": [
+    {
+     "candidate": "HANNA, GLYN",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 2340
+    },
+    {
+     "candidate": "RICE, MICHAEL",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 2040
+    },
+    {
+     "candidate": "CLARKE, WILLIE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1915
+    },
+    {
+     "candidate": "MCCEVOY, LEEANNE",
+     "party": "Sinn Féin",
+     "party_raw": "SINN FÉIN",
+     "party_source": "source",
+     "first_pref": 1643
+    },
+    {
+     "candidate": "DEVLIN, LAURA",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 1370
+    },
+    {
+     "candidate": "TRUESDALE, JILL",
+     "party": "Alliance",
+     "party_raw": "ALLIANCE",
+     "party_source": "source",
+     "first_pref": 1105
+    },
+    {
+     "candidate": "REILLY, HENRY",
+     "party": "DUP",
+     "party_raw": "DEMOCRATIC UNIONIST PARTY - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1089
+    },
+    {
+     "candidate": "MCKEE, HAROLD",
+     "party": "TUV",
+     "party_raw": "TUV - NO SEA BORDER",
+     "party_source": "source",
+     "first_pref": 880
+    },
+    {
+     "candidate": "DOUGLAS, LLOYD",
+     "party": "UUP",
+     "party_raw": "ULSTER UNIONIST PARTY",
+     "party_source": "source",
+     "first_pref": 511
+    },
+    {
+     "candidate": "O'REILLY, DOMINIC VINCENT",
+     "party": "SDLP",
+     "party_raw": "SDLP (SOCIAL DEMOCRATIC AND LABOUR PARTY)",
+     "party_source": "source",
+     "first_pref": 357
+    },
+    {
+     "candidate": "O BAOILL, SEAN",
+     "party": "Green",
+     "party_raw": "GREEN PARTY NORTHERN IRELAND",
+     "party_source": "source",
+     "first_pref": 119
+    }
+   ]
+  },
+  {
+   "dea": "Three Mile Water",
+   "source_file": "local-council-elections-2023-result-sheets-antrim-and-newtownabbey.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 15531,
+   "votes_polled": 7876,
+   "valid_votes": 7802,
+   "invalid_votes": 74,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 7802,
+   "party_first_prefs": {
+    "DUP": 3360,
+    "Alliance": 2101,
+    "UUP": 1429,
+    "TUV": 425,
+    "Sinn Féin": 325,
+    "Green": 162
+   },
+   "candidates": [
+    {
+     "candidate": "COOPER, Mark",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1575
+    },
+    {
+     "candidate": "CAMPBELL, Tom",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 1390
+    },
+    {
+     "candidate": "ROSS, Stephen",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1211
+    },
+    {
+     "candidate": "COSGROVE, Stephen",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 899
+    },
+    {
+     "candidate": "GILMOUR, Julie",
+     "party": "Alliance",
+     "party_raw": "ALL",
+     "party_source": "source",
+     "first_pref": 711
+    },
+    {
+     "candidate": "FLANAGHAN, Sam",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 574
+    },
+    {
+     "candidate": "KERR, Brian",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 530
+    },
+    {
+     "candidate": "MAWHINNEY, Trevor",
+     "party": "TUV",
+     "party_raw": "TUV",
+     "party_source": "source",
+     "first_pref": 425
+    },
+    {
+     "candidate": "MULLEN, Emmanuel",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 325
+    },
+    {
+     "candidate": "LOUGHLIN, Dylan",
+     "party": "Green",
+     "party_raw": "GRN",
+     "party_source": "source",
+     "first_pref": 162
+    }
+   ]
+  },
+  {
+   "dea": "Titanic",
+   "source_file": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "source_format": "xlsx_bundle",
+   "seats": 6,
+   "electorate": 24018,
+   "votes_polled": 10163,
+   "valid_votes": 9954,
+   "invalid_votes": 209,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 9954,
+   "party_first_prefs": {
+    "DUP": 3562,
+    "Alliance": 2509,
+    "Sinn Féin": 1284,
+    "UUP": 968,
+    "Green": 938,
+    "TUV": 564,
+    "SDLP": 129
+   },
+   "candidates": [
+    {
+     "candidate": "Brooks, Ruth Susan",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1690
+    },
+    {
+     "candidate": "Bell, David",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1360
+    },
+    {
+     "candidate": "Donnelly, Pádraig",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1284
+    },
+    {
+     "candidate": "Douglas, Sammy",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1214
+    },
+    {
+     "candidate": "McAteer, Fiona",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 1149
+    },
+    {
+     "candidate": "Copeland, Sonia",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 968
+    },
+    {
+     "candidate": "Hamilton, Gillian",
+     "party": "Green",
+     "party_raw": "Green Party Northern Ireland",
+     "party_source": "source",
+     "first_pref": 938
+    },
+    {
+     "candidate": "Dorrian, George",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 658
+    },
+    {
+     "candidate": "Smyth, Anne",
+     "party": "TUV",
+     "party_raw": "TUV - No Sea Border",
+     "party_source": "source",
+     "first_pref": 564
+    },
+    {
+     "candidate": "Odhiambo, Elly",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic & Labour Party)",
+     "party_source": "source",
+     "first_pref": 129
+    }
+   ]
+  },
+  {
+   "dea": "Torrent",
+   "source_file": "local-council-elections-2023-result-sheet-torrent_1.pdf",
+   "source_format": "pdf_text",
+   "seats": 6,
+   "electorate": null,
+   "votes_polled": null,
+   "valid_votes": 10633,
+   "invalid_votes": null,
+   "quota": 1520,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10633,
+   "party_first_prefs": {
+    "Sinn Féin": 5487,
+    "Independent": 2017,
+    "DUP": 1170,
+    "SDLP": 961,
+    "UUP": 714,
+    "Alliance": 284
+   },
+   "candidates": [
+    {
+     "candidate": "CARNEY, Eimear",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1678
+    },
+    {
+     "candidate": "MCALEER, Niall",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1666
+    },
+    {
+     "candidate": "KERR, Dan",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 1395
+    },
+    {
+     "candidate": "BUCHANAN, Jonathan",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1170
+    },
+    {
+     "candidate": "MCLERNON, Nuala",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 1147
+    },
+    {
+     "candidate": "KELLY, Paul",
+     "party": "Sinn Féin",
+     "party_raw": "SF",
+     "party_source": "source",
+     "first_pref": 996
+    },
+    {
+     "candidate": "QUINN, Malachy",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 961
+    },
+    {
+     "candidate": "COLVIN, Robert",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 714
+    },
+    {
+     "candidate": "QUINN, Teresa",
+     "party": "Independent",
+     "party_raw": "IND",
+     "party_source": "source",
+     "first_pref": 622
+    },
+    {
+     "candidate": "GRAHAM, Simon Fredrick",
+     "party": "Alliance",
+     "party_raw": "AP",
+     "party_source": "source",
+     "first_pref": 284
+    }
+   ]
+  },
+  {
+   "dea": "Waterside",
+   "source_file": "local-council-elections-2023-result-sheet-waterside.xlsx",
+   "source_format": "xlsx",
+   "seats": 7,
+   "electorate": 21241,
+   "votes_polled": 11115,
+   "valid_votes": 10913,
+   "invalid_votes": 202,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 10913,
+   "party_first_prefs": {
+    "Sinn Féin": 2968,
+    "DUP": 2487,
+    "UUP": 2245,
+    "SDLP": 2077,
+    "Alliance": 748,
+    "PBP": 388
+   },
+   "candidates": [
+    {
+     "candidate": "Deeney, Caitlin",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1949
+    },
+    {
+     "candidate": "Guy, Darren",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 1797
+    },
+    {
+     "candidate": "Cooke, Chelsea",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1262
+    },
+    {
+     "candidate": "Mc Morris, Niree",
+     "party": "DUP",
+     "party_raw": "DUP",
+     "party_source": "source",
+     "first_pref": 1225
+    },
+    {
+     "candidate": "Mooney, Sean Dermott",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1071
+    },
+    {
+     "candidate": "Jackson, Christopher",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1019
+    },
+    {
+     "candidate": "Reilly, Martin",
+     "party": "SDLP",
+     "party_raw": "SDLP",
+     "party_source": "source",
+     "first_pref": 1006
+    },
+    {
+     "candidate": "McKinney, Philip",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 748
+    },
+    {
+     "candidate": "Montgomery, Janice",
+     "party": "UUP",
+     "party_raw": "UUP",
+     "party_source": "source",
+     "first_pref": 448
+    },
+    {
+     "candidate": "Pulis, Davina",
+     "party": "PBP",
+     "party_raw": "People Before Profit Alliance",
+     "party_source": "source",
+     "first_pref": 388
+    }
+   ]
+  },
+  {
+   "dea": "West Tyrone",
+   "source_file": "local-council-elections-2023-result-sheet-west-tyrone.pdf",
+   "source_format": "pdf_scanned_transcribed",
+   "seats": 6,
+   "electorate": 12652,
+   "votes_polled": 8413,
+   "valid_votes": 8301,
+   "invalid_votes": 112,
+   "quota": null,
+   "reconciled_to_stated_total": true,
+   "first_prefs_total": 8301,
+   "party_first_prefs": {
+    "Sinn Féin": 4650,
+    "DUP": 1619,
+    "UUP": 829,
+    "SDLP": 746,
+    "Alliance": 457
+   },
+   "candidates": [
+    {
+     "candidate": "Buchanan, Mark",
+     "party": "DUP",
+     "party_raw": "Democratic Unionist Party - D.U.P.",
+     "party_source": "source",
+     "first_pref": 1619
+    },
+    {
+     "candidate": "Campbell, Glenn",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1279
+    },
+    {
+     "candidate": "McNulty, Colette",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1149
+    },
+    {
+     "candidate": "Donnelly, Ann-Marie",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1129
+    },
+    {
+     "candidate": "McCann, Stephen",
+     "party": "Sinn Féin",
+     "party_raw": "Sinn Féin",
+     "party_source": "source",
+     "first_pref": 1093
+    },
+    {
+     "candidate": "Rainey, Allan",
+     "party": "UUP",
+     "party_raw": "Ulster Unionist Party",
+     "party_source": "source",
+     "first_pref": 829
+    },
+    {
+     "candidate": "Garrity, Mary",
+     "party": "SDLP",
+     "party_raw": "SDLP (Social Democratic and Labour Party)",
+     "party_source": "source",
+     "first_pref": 746
+    },
+    {
+     "candidate": "Donnelly, Joyce",
+     "party": "Alliance",
+     "party_raw": "Alliance Party",
+     "party_source": "source",
+     "first_pref": 457
+    }
+   ]
+  }
+ ]
+}
