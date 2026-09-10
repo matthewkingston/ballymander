@@ -44,9 +44,17 @@ so their party is not in the source at all:
 Both are recorded as **Independent** by manual assignment (confirmed 2026-09-10),
 not from the sheet. Every candidate carries `party_source`, which is `"source"`
 except for these two, where it is `"manual"` — so the assignment stays visible
-to anything consuming the file, and `flags` records it. These are the only two
-manual assignments in the dataset. With them included the NI independent share
-is 4.61%, matching the published figure.
+to anything consuming the file, and `flags` records it. With them included the
+NI independent share is 4.61%, matching the published figure.
+
+These are the only two manual assignments in the dataset, and they fill genuine
+blanks rather than reassigning a declared party.
+
+Separately, seven independents are counted as the party their voters would
+strongly tend to back at Westminster level (`party_source: "assumed"`, declared
+label kept in `party_as_declared`). See "Voting modelling assumptions" in the
+top-level `README.md` for the list, the reasoning and the `party_source`
+vocabulary.
 
 ## Party standardisation
 

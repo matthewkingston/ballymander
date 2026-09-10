@@ -446,6 +446,24 @@ PARTY_MAP = {
   "independent":"Independent", "ind":"Independent", "indepdendent":"Independent",  # typo in source
 }
 
+# --- voting modelling assumptions ------------------------------------------
+# Independents counted as the party their voters would strongly tend to back at
+# Westminster level, since this data exists to be extrapolated upward. These are
+# deliberate modelling choices, not data corrections: the sheet's own wording is
+# kept in `party_raw`, the declared label in `party_as_declared`, and the
+# candidate is marked party_source="assumed". Independents not listed here are
+# left as Independent by explicit decision. See "Voting modelling assumptions"
+# in README.md.
+ALIGNED = {
+  ("Cusher",         "BERRY, Paul"):          "DUP",
+  ("The Moor",       "Donnelly, Gary"):       "Sinn Féin",
+  ("Oldpark",        "McCusker, Paul"):       "SDLP",
+  ("Newtownards",    "IRVINE, Steven Gary"):  "DUP",
+  ("Bangor Central", "IRVINE, Wesley Graham"): "DUP",
+  ("Dungannon",      "MONTEITH, Barry"):      "Sinn Féin",
+  ("Bann",           "McQUILLAN, Adrian"):    "DUP",
+}
+
 # Manual party assignments, keyed by (DEA, candidate). Used only where the
 # source itself carries no description; never to override what a sheet states.
 # Sperrin's workbook leaves the Description cell as 0 for these two; both
@@ -510,9 +528,17 @@ def build():
                                   "issue": "unrecognised party description",
                                   "detail": r["party_raw"], "candidate": r["candidate"],
                                   "first_pref": r["first_pref"]})
-            cands.append({"candidate": r["candidate"], "party": party,
-                          "party_raw": r["party_raw"], "party_source": party_source,
-                          "first_pref": r["first_pref"]})
+            row = {"candidate": r["candidate"], "party": party,
+                   "party_raw": r["party_raw"], "party_source": party_source,
+                   "first_pref": r["first_pref"]}
+            aligned = ALIGNED.get((name, r["candidate"]))
+            if aligned:
+                row["party_as_declared"] = party
+                row["party"], row["party_source"] = aligned, "assumed"
+                flags.append({"level": "info", "dea": name, "source": src,
+                              "issue": "party assigned by voting modelling assumption",
+                              "detail": f"{r['candidate']}: {party} -> {aligned}"})
+            cands.append(row)
         total = sum(c["first_pref"] for c in cands)
         valid = meta.get("valid_votes")
         ok = (valid is not None and total == valid)
@@ -593,9 +619,12 @@ def build():
                      "IRSP, PUP, Socialist Party and Workers Party stood at council "
                      "level only.",
             "party_source": "'source' where the party comes from the sheet's own "
-                            "description, 'manual' where the sheet gives none and the "
-                            "party was assigned by hand (see `flags`, level 'info'). "
-                            "A 'UNKNOWN' party key would mean neither was available.",
+                            "description; 'assumed' where a voting modelling assumption "
+                            "counts the candidate as a different party, with the declared "
+                            "label kept in `party_as_declared`; 'manual' where the sheet "
+                            "gives no party at all and one was assigned by hand. Both "
+                            "non-source cases are listed in `flags`. See \"Voting "
+                            "modelling assumptions\" in README.md.",
             "verification": "Each DEA's first preferences are summed and compared with "
                             "the Total Valid Votes printed on the same sheet; all 80 "
                             "reconcile (`reconciled_to_stated_total`).",

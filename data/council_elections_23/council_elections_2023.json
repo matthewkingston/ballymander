@@ -6,7 +6,7 @@
  "keyed_by": "DEA name, as FinalR_DEA in DEA2021.geojson",
  "notes": {
   "party": "Short label normalised from the sheet's own description, which is kept verbatim in each candidate's `party_raw`. Labels and `party_names` match data/pc24_results_2024.json exactly for all 12 parties common to both, so the two elections join on `party`. IRSP, PUP, Socialist Party and Workers Party stood at council level only.",
-  "party_source": "'source' where the party comes from the sheet's own description, 'manual' where the sheet gives none and the party was assigned by hand (see `flags`, level 'info'). A 'UNKNOWN' party key would mean neither was available.",
+  "party_source": "'source' where the party comes from the sheet's own description; 'assumed' where a voting modelling assumption counts the candidate as a different party, with the declared label kept in `party_as_declared`; 'manual' where the sheet gives no party at all and one was assigned by hand. Both non-source cases are listed in `flags`. See \"Voting modelling assumptions\" in README.md.",
   "verification": "Each DEA's first preferences are summed and compared with the Total Valid Votes printed on the same sheet; all 80 reconcile (`reconciled_to_stated_total`).",
   "candidate_names": "As printed on the result sheet, usually 'Surname, Forename'."
  },
@@ -32,13 +32,13 @@
   "Socialist Party": "Socialist Party"
  },
  "ni_party_first_prefs": {
-  "Sinn Féin": 230793,
-  "DUP": 173033,
+  "Sinn Féin": 233841,
+  "DUP": 178625,
   "Alliance": 99251,
   "UUP": 81283,
-  "SDLP": 64996,
-  "Independent": 34396,
+  "SDLP": 66743,
   "TUV": 29202,
+  "Independent": 24009,
   "Green": 12692,
   "PBP": 8059,
   "Aontú": 6771,
@@ -52,6 +52,27 @@
  "flags": [
   {
    "level": "info",
+   "dea": "Bann",
+   "source": "local-council-elections-2023-result-sheet-bann.pdf",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "McQUILLAN, Adrian: Independent -> DUP"
+  },
+  {
+   "level": "info",
+   "dea": "Cusher",
+   "source": "local-council-elections-2023-result-sheet-cusher_1.pdf",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "BERRY, Paul: Independent -> DUP"
+  },
+  {
+   "level": "info",
+   "dea": "Dungannon",
+   "source": "local-council-elections-2023-result-sheet-dungannon.pdf",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "MONTEITH, Barry: Independent -> Sinn Féin"
+  },
+  {
+   "level": "info",
    "dea": "Sperrin",
    "source": "local-council-elections-2023-result-sheet-sperrin.xlsx",
    "issue": "party assigned manually; source gives none",
@@ -63,6 +84,34 @@
    "source": "local-council-elections-2023-result-sheet-sperrin.xlsx",
    "issue": "party assigned manually; source gives none",
    "detail": "Gallagher, Paul -> Independent (sheet Description = '0')"
+  },
+  {
+   "level": "info",
+   "dea": "The Moor",
+   "source": "local-council-elections-2023-result-sheet-the-moor.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "Donnelly, Gary: Independent -> Sinn Féin"
+  },
+  {
+   "level": "info",
+   "dea": "Bangor Central",
+   "source": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "IRVINE, Wesley Graham: Independent -> DUP"
+  },
+  {
+   "level": "info",
+   "dea": "Newtownards",
+   "source": "local-council-elections-2023-result-sheets-ards-and-north-down.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "IRVINE, Steven Gary: Independent -> DUP"
+  },
+  {
+   "level": "info",
+   "dea": "Oldpark",
+   "source": "local-council-elections-2023-result-sheets-belfast.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "McCusker, Paul: Independent -> SDLP"
   }
  ],
  "deas": [
@@ -993,10 +1042,10 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8450,
    "party_first_prefs": {
+    "DUP": 2783,
     "Alliance": 2429,
-    "Independent": 2254,
-    "DUP": 1414,
     "UUP": 1230,
+    "Independent": 885,
     "Green": 583,
     "TUV": 454,
     "Conservative": 86
@@ -1011,10 +1060,11 @@
     },
     {
      "candidate": "IRVINE, Wesley Graham",
-     "party": "Independent",
+     "party": "DUP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 1369
+     "party_source": "assumed",
+     "first_pref": 1369,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "CATHCART, Alistair",
@@ -1296,10 +1346,9 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7917,
    "party_first_prefs": {
+    "DUP": 2606,
     "Sinn Féin": 2139,
-    "DUP": 1905,
     "UUP": 1542,
-    "Independent": 701,
     "Alliance": 573,
     "TUV": 456,
     "Aontú": 336,
@@ -1351,10 +1400,11 @@
     },
     {
      "candidate": "McQUILLAN, Adrian",
-     "party": "Independent",
+     "party": "DUP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 701
+     "party_source": "assumed",
+     "first_pref": 701,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "HUTCHINSON, Joe",
@@ -3377,9 +3427,8 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 12278,
    "party_first_prefs": {
-    "DUP": 3292,
+    "DUP": 5351,
     "Sinn Féin": 2177,
-    "Independent": 2059,
     "TUV": 2037,
     "UUP": 1541,
     "Alliance": 594,
@@ -3395,10 +3444,11 @@
     },
     {
      "candidate": "BERRY, Paul",
-     "party": "Independent",
+     "party": "DUP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 2059
+     "party_source": "assumed",
+     "first_pref": 2059,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "RATCLIFFE, Keith",
@@ -3823,9 +3873,9 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9610,
    "party_first_prefs": {
+    "Sinn Féin": 3918,
     "DUP": 2752,
-    "Sinn Féin": 2738,
-    "Independent": 1808,
+    "Independent": 628,
     "SDLP": 601,
     "UUP": 527,
     "Alliance": 471,
@@ -3857,10 +3907,11 @@
     },
     {
      "candidate": "MONTEITH, Barry",
-     "party": "Independent",
+     "party": "Sinn Féin",
      "party_raw": "IND",
-     "party_source": "source",
-     "first_pref": 1180
+     "party_source": "assumed",
+     "first_pref": 1180,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "BURTON, James",
@@ -5968,20 +6019,21 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9285,
    "party_first_prefs": {
-    "DUP": 3007,
+    "DUP": 4470,
     "Alliance": 2183,
-    "Independent": 2014,
     "UUP": 1257,
     "TUV": 598,
+    "Independent": 551,
     "Green": 226
    },
    "candidates": [
     {
      "candidate": "IRVINE, Steven Gary",
-     "party": "Independent",
+     "party": "DUP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 1463
+     "party_source": "assumed",
+     "first_pref": 1463,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "ARMSTRONG, Naomi Esther Hannah",
@@ -6070,11 +6122,10 @@
    "party_first_prefs": {
     "Sinn Féin": 6249,
     "DUP": 2182,
-    "Independent": 1747,
+    "SDLP": 1992,
     "PBP": 700,
     "TUV": 595,
     "Alliance": 453,
-    "SDLP": 245,
     "Green": 149,
     "Workers Party": 46
    },
@@ -6088,10 +6139,11 @@
     },
     {
      "candidate": "McCusker, Paul",
-     "party": "Independent",
+     "party": "SDLP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 1747
+     "party_source": "assumed",
+     "first_pref": 1747,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "Magee, JJ",
@@ -6985,8 +7037,7 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7397,
    "party_first_prefs": {
-    "Sinn Féin": 3298,
-    "Independent": 1868,
+    "Sinn Féin": 5166,
     "SDLP": 1206,
     "PBP": 578,
     "Aontú": 301,
@@ -6995,10 +7046,11 @@
    "candidates": [
     {
      "candidate": "Donnelly, Gary",
-     "party": "Independent",
+     "party": "Sinn Féin",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 1868
+     "party_source": "assumed",
+     "first_pref": 1868,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "Hutton, Aisling",

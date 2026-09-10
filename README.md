@@ -645,6 +645,98 @@ for d in *.deb; do dpkg-deb -x "$d" ../sysroot; done
 `smoke_test.sh` wires up `LD_LIBRARY_PATH` and `FONTCONFIG_FILE` for these.
 Without the fonts, text renders as zero-width glyphs and screenshots look blank.
 
+## Voting modelling assumptions
+
+Some candidates stand under a label that does not reflect who they actually
+represent. Where that materially distorts party totals, this project counts
+them as the party they function as, rather than the one on the ballot paper.
+
+These are **modelling choices, not data corrections**, so they are applied
+visibly and never destructively:
+
+* the returning officer's own wording is always preserved verbatim — in
+  `description` for 2024, `party_raw` for 2023;
+* the label actually printed on the ballot is kept in `party_as_declared`;
+* every candidate carries `party_source`, so any assumption can be found,
+  audited, or reversed:
+
+| `party_source` | meaning |
+|---|---|
+| `source` | the party as declared on the ballot paper |
+| `assumed` | reassigned by an assumption below; declared label kept in `party_as_declared` |
+| `manual` | the sheet gave no party at all and one was assigned by hand |
+
+Every assumption also appears in the output: as a `flags` entry in the 2023
+JSON, and as `party_source: "assumed"` in both. Reversing one is a one-line
+edit — remove the entry from `ALIGNED` in `scripts/build_pc24_results.py`
+(2024) or `scripts/parse_council_2023.py` (2023) and re-run that script.
+
+### The test applied
+
+**"What single party would this person's voters strongly tend to vote for at
+Westminster level, if any?"** Council data exists here to be extrapolated
+upward, so the question is about where a candidate's support would go in a
+two-party-ish parliamentary contest, not about the candidate's own history. An
+independent with no such tendency stays Independent.
+
+### Current assumptions
+
+| Election | Candidate | DEA / constituency | Votes | Counted as |
+|---|---|---|---:|---|
+| 2024 Westminster | EASTON, ALEX | North Down | 20,913 | **DUP** |
+| 2023 council | BERRY, Paul | Cusher | 2,059 | **DUP** |
+| 2023 council | Donnelly, Gary | The Moor | 1,868 | **Sinn Féin** |
+| 2023 council | McCusker, Paul | Oldpark | 1,747 | **SDLP** |
+| 2023 council | IRVINE, Steven Gary | Newtownards | 1,463 | **DUP** |
+| 2023 council | IRVINE, Wesley Graham | Bangor Central | 1,369 | **DUP** |
+| 2023 council | MONTEITH, Barry | Dungannon | 1,180 | **Sinn Féin** |
+| 2023 council | McQUILLAN, Adrian | Bann | 701 | **DUP** |
+
+Alex Easton was elected; the 2023 dataset does not record who won a seat, so
+no such claim is made for the council seven — six of them polled between 86%
+and 152% of their DEA quota on first preferences, and McQuillan 53%.
+
+**Alex Easton, North Down** (2024). Elected as an Independent with 20,913 votes
+(48.30%). North Down is the only one of the 18 constituencies where *neither*
+the DUP nor the TUV stood, leaving him the de facto unionist standard-bearer
+against a single UUP challenger; he is also a former DUP MLA. Counting him as
+Independent understates the DUP by 2.7 points across NI and hands the
+Independent column a seat and 88.6% of its vote from one person.
+
+**The seven 2023 council independents** are the cases where the test above has
+a clear answer. Their effect on the NI-wide 2023 first preferences:
+
+| | as declared | as modelled |
+|---|---|---|
+| Sinn Féin | 230,793 (30.96%) | 233,841 (31.37%) |
+| DUP | 173,033 (23.21%) | 178,625 (23.96%) |
+| SDLP | 64,996 (8.72%) | 66,743 (8.95%) |
+| Independent | 34,396 (4.61%) | 24,009 (3.22%) |
+
+The 2024 effect: Independent 23,602 (3.03%, 1 seat) becomes 2,689 (0.34%, 0
+seats); DUP 172,058 (22.06%, 5 seats) becomes 192,971 (24.75%, 6 seats).
+
+### Deliberately not assumed
+
+The remaining eight 2024 Independents total 2,689 votes, none above 0.66% in
+its own seat, so no assumption about them would move anything meaningful.
+
+The other **49 council independents (24,009 votes, 3.22%)** are left as
+Independent by explicit decision, not by omission. The 19 largest were reviewed
+individually; the twelve not listed above have no single party their voters
+would strongly tend toward, several being prominent precisely for being
+non-party. The unreviewed tail is 37 candidates, none above 53% of a DEA quota.
+
+Note that the 2023 council independent vote is structurally unlike 2024's. At
+Westminster one candidate was 88.6% of the entire independent vote; at council
+level the largest is 5.4%, spread over 39 of the 80 DEAs, so there is no single
+decisive call and the residual 3.22% is genuine independent voting rather than
+one unresolved case.
+
+Sperrin's `Barr, Raymond` and `Gallagher, Paul` are a separate matter: EONI's
+workbook gives them no party at all, so they are `manual`, not `assumed`. That
+fills a blank rather than reassigning a declared label.
+
 ## Data
 
 | File | Contents |

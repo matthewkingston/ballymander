@@ -71,6 +71,21 @@ PARTIES = {
 }
 
 
+# --- voting modelling assumptions ------------------------------------------
+# Candidates counted as a party other than the one on the ballot paper, so that
+# party totals reflect functional alignment rather than the declared label.
+# Each entry is a deliberate modelling choice, not a data correction: the
+# sheet's own wording is always preserved in the candidate's `description`, and
+# the candidate is marked party_source="assumed". See "Voting modelling
+# assumptions" in README.md for the reasoning behind each one.
+ALIGNED = {
+    # Stood as an Independent, but North Down is the only constituency where
+    # neither the DUP nor the TUV put up a candidate; he took 48.3% as the
+    # de facto unionist standard-bearer. Counted as DUP.
+    ("North Down", "EASTON, ALEX"): ("DUP", "Democratic Unionist Party"),
+}
+
+
 # --- minimal xlsx reader (no third-party deps available) -------------------
 
 def _col_row(ref: str) -> tuple[int, int]:
@@ -173,16 +188,25 @@ def parse_sheet(rows: list[list]) -> dict:
             "name": name.strip(),               # as printed: "SURNAME, Forename"
             "party": short,
             "party_name": full,
+            "party_source": "source",
             "description": re.sub(r"\s+", " ", desc).strip(),
             "votes": int(nums[-1]),
         })
     candidates.sort(key=lambda c: -c["votes"])
 
+    constituency = str(labelled(rows, "Constituency")).strip()
+    for c in candidates:
+        aligned = ALIGNED.get((constituency, c["name"]))
+        if aligned:
+            c["party_as_declared"] = c["party"]
+            c["party"], c["party_name"] = aligned
+            c["party_source"] = "assumed"
+
     valid = labelled(rows, "Valid votes")
     for c in candidates:
         c["share"] = round(c["votes"] / valid, 5) if valid else None
     return {
-        "name": str(labelled(rows, "Constituency")).strip(),
+        "name": constituency,
         "elected": str(labelled(rows, "Candidate Elected")).strip(),
         "electorate": labelled(rows, "Eligible electorate"),
         "votes_polled": labelled(rows, "Votes polled"),
@@ -275,6 +299,13 @@ def main() -> None:
             "party": (
                 "Short label normalised from the sheet's own description, which is kept "
                 "verbatim (whitespace collapsed) in each candidate's `description`."
+            ),
+            "party_source": (
+                "'source' where the party is the one on the ballot paper. 'assumed' "
+                "where a voting modelling assumption counts the candidate as a "
+                "different party; the declared label is then kept in "
+                "`party_as_declared` and the sheet wording in `description`. See "
+                "\"Voting modelling assumptions\" in README.md."
             ),
             "share": "Candidate votes as a fraction of valid_votes in that constituency.",
         },
