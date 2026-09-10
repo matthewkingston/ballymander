@@ -8,7 +8,8 @@
   "party": "Short label normalised from the sheet's own description, which is kept verbatim in each candidate's `party_raw`. Labels and `party_names` match data/pc24_results_2024.json exactly for all 12 parties common to both, so the two elections join on `party`. IRSP, PUP, Socialist Party and Workers Party stood at council level only.",
   "party_source": "'source' where the party comes from the sheet's own description; 'assumed' where a voting modelling assumption counts the candidate as a different party, with the declared label kept in `party_as_declared`; 'manual' where the sheet gives no party at all and one was assigned by hand. Both non-source cases are listed in `flags`. See \"Voting modelling assumptions\" in README.md.",
   "verification": "Each DEA's first preferences are summed and compared with the Total Valid Votes printed on the same sheet; all 80 reconcile (`reconciled_to_stated_total`).",
-  "candidate_names": "As printed on the result sheet, usually 'Surname, Forename'."
+  "candidate_names": "As printed on the result sheet, usually 'Surname, Forename'.",
+  "electorate_source": "'source' where the sheet prints an eligible electorate; 'derived' for the seven Mid Ulster DEAs whose sheets omit it, recovered from % Poll and the valid vote (see `flags`). Tested against the 66 DEAs printing both, the recovery is within 1% for 63 and within 2% for 65."
  },
  "dea_count": 80,
  "candidate_count": 807,
@@ -112,6 +113,55 @@
    "source": "local-council-elections-2023-result-sheets-belfast.xlsx",
    "issue": "party assigned by voting modelling assumption",
    "detail": "McCusker, Paul: Independent -> SDLP"
+  },
+  {
+   "level": "info",
+   "dea": "Carntogher",
+   "source": "local-council-elections-2023-result-sheet-carntogher.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=8830 / (1-0.01234) / 69.92% -> 12786"
+  },
+  {
+   "level": "info",
+   "dea": "Clogher Valley",
+   "source": "local-council-elections-2023-result-sheet-clogher-valley.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=10731 / (1-0.01234) / 68.4% -> 15885"
+  },
+  {
+   "level": "info",
+   "dea": "Cookstown",
+   "source": "local-council-elections-2023-result-sheet-cookstown.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=10288 / (1-0.01234) / 60.75% -> 17146"
+  },
+  {
+   "level": "info",
+   "dea": "Dungannon",
+   "source": "local-council-elections-2023-result-sheet-dungannon.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=9610 / (1-0.01234) / 60.1% -> 16190"
+  },
+  {
+   "level": "info",
+   "dea": "Magherafelt",
+   "source": "local-council-elections-2023-result-sheet-magherafelt.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=8257 / (1-0.01234) / 60.51% -> 13816"
+  },
+  {
+   "level": "info",
+   "dea": "Moyola",
+   "source": "local-council-elections-2023-result-sheet-moyola.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=9156 / (1-0.01234) / 68.37% -> 13559"
+  },
+  {
+   "level": "info",
+   "dea": "Torrent",
+   "source": "local-council-elections-2023-result-sheet-torrent_1.pdf",
+   "issue": "electorate not printed on sheet; derived from % Poll",
+   "detail": "valid=10633 / (1-0.01234) / 65.63% -> 16404"
   }
  ],
  "deas": [
@@ -125,6 +175,8 @@
    "valid_votes": 8016,
    "invalid_votes": 55,
    "quota": null,
+   "poll_pct": 52.141611215194786,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8016,
    "party_first_prefs": {
@@ -197,6 +249,8 @@
    "valid_votes": 7126,
    "invalid_votes": 89,
    "quota": null,
+   "poll_pct": 43.328128753302906,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7126,
    "party_first_prefs": {
@@ -298,6 +352,8 @@
    "valid_votes": 9184,
    "invalid_votes": 111,
    "quota": null,
+   "poll_pct": 48.921052631578945,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9184,
    "party_first_prefs": {
@@ -400,6 +456,8 @@
    "valid_votes": 13584,
    "invalid_votes": 205,
    "quota": 1941,
+   "poll_pct": 60.48,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 13584,
    "party_first_prefs": {
@@ -493,6 +551,8 @@
    "valid_votes": 9740,
    "invalid_votes": 189,
    "quota": null,
+   "poll_pct": 51.87836355086473,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9740,
    "party_first_prefs": {
@@ -578,6 +638,8 @@
    "valid_votes": 7184,
    "invalid_votes": 64,
    "quota": null,
+   "poll_pct": 51.21899512401951,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7184,
    "party_first_prefs": {
@@ -665,6 +727,8 @@
    "valid_votes": 7296,
    "invalid_votes": 70,
    "quota": 913,
+   "poll_pct": 45.55,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7296,
    "party_first_prefs": {
@@ -752,6 +816,8 @@
    "valid_votes": 9971,
    "invalid_votes": 119,
    "quota": 1247,
+   "poll_pct": 55.69,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9971,
    "party_first_prefs": {
@@ -853,6 +919,8 @@
    "valid_votes": 10229,
    "invalid_votes": 147,
    "quota": null,
+   "poll_pct": 55.51,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10229,
    "party_first_prefs": {
@@ -946,6 +1014,8 @@
    "valid_votes": 13671,
    "invalid_votes": 141,
    "quota": 1709,
+   "poll_pct": 54.16,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 13671,
    "party_first_prefs": {
@@ -1039,6 +1109,8 @@
    "valid_votes": 8450,
    "invalid_votes": 105,
    "quota": null,
+   "poll_pct": 44.15255986787779,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8450,
    "party_first_prefs": {
@@ -1148,6 +1220,8 @@
    "valid_votes": 8496,
    "invalid_votes": 94,
    "quota": null,
+   "poll_pct": 47.54787999557179,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8496,
    "party_first_prefs": {
@@ -1241,6 +1315,8 @@
    "valid_votes": 6505,
    "invalid_votes": 83,
    "quota": null,
+   "poll_pct": 45.478392931105894,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6505,
    "party_first_prefs": {
@@ -1343,6 +1419,8 @@
    "valid_votes": 7917,
    "invalid_votes": 70,
    "quota": 1320,
+   "poll_pct": 59.84,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7917,
    "party_first_prefs": {
@@ -1453,6 +1531,8 @@
    "valid_votes": 8780,
    "invalid_votes": 82,
    "quota": 1255,
+   "poll_pct": 58.31,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8780,
    "party_first_prefs": {
@@ -1539,6 +1619,8 @@
    "valid_votes": 7853,
    "invalid_votes": 50,
    "quota": 1309,
+   "poll_pct": 59.35,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7853,
    "party_first_prefs": {
@@ -1626,6 +1708,8 @@
    "valid_votes": 15971,
    "invalid_votes": 309,
    "quota": null,
+   "poll_pct": 59.98,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 15971,
    "party_first_prefs": {
@@ -1742,6 +1826,8 @@
    "valid_votes": 10593,
    "invalid_votes": 162,
    "quota": null,
+   "poll_pct": 46.66,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10593,
    "party_first_prefs": {
@@ -1868,6 +1954,8 @@
    "valid_votes": 9463,
    "invalid_votes": 89,
    "quota": 1183,
+   "poll_pct": 53.64,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9463,
    "party_first_prefs": {
@@ -1948,11 +2036,13 @@
    "source_file": "local-council-elections-2023-result-sheet-carntogher.pdf",
    "source_format": "pdf_text",
    "seats": 5,
-   "electorate": null,
+   "electorate": 12786,
    "votes_polled": null,
    "valid_votes": 8830,
    "invalid_votes": null,
    "quota": 1472,
+   "poll_pct": 69.92,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8830,
    "party_first_prefs": {
@@ -2031,6 +2121,8 @@
    "valid_votes": 6254,
    "invalid_votes": 71,
    "quota": 1043,
+   "poll_pct": 45.55,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6254,
    "party_first_prefs": {
@@ -2117,6 +2209,8 @@
    "valid_votes": 12300,
    "invalid_votes": 179,
    "quota": null,
+   "poll_pct": 53.23,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 12300,
    "party_first_prefs": {
@@ -2212,6 +2306,8 @@
    "valid_votes": 7867,
    "invalid_votes": 90,
    "quota": null,
+   "poll_pct": 48.84891644668181,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7867,
    "party_first_prefs": {
@@ -2297,6 +2393,8 @@
    "valid_votes": 10185,
    "invalid_votes": 95,
    "quota": null,
+   "poll_pct": 56.73289183222958,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10185,
    "party_first_prefs": {
@@ -2405,6 +2503,8 @@
    "valid_votes": 8811,
    "invalid_votes": 97,
    "quota": 1102,
+   "poll_pct": 50.56,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8811,
    "party_first_prefs": {
@@ -2516,11 +2616,13 @@
    "source_file": "local-council-elections-2023-result-sheet-clogher-valley.pdf",
    "source_format": "pdf_text",
    "seats": 6,
-   "electorate": null,
+   "electorate": 15885,
    "votes_polled": null,
    "valid_votes": 10731,
    "invalid_votes": null,
    "quota": 1534,
+   "poll_pct": 68.4,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10731,
    "party_first_prefs": {
@@ -2599,6 +2701,8 @@
    "valid_votes": 5877,
    "invalid_votes": 60,
    "quota": 980,
+   "poll_pct": 46.39,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 5877,
    "party_first_prefs": {
@@ -2685,6 +2789,8 @@
    "valid_votes": 7392,
    "invalid_votes": 97,
    "quota": 1057,
+   "poll_pct": 44.38,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7392,
    "party_first_prefs": {
@@ -2788,6 +2894,8 @@
    "valid_votes": 13962,
    "invalid_votes": 255,
    "quota": null,
+   "poll_pct": 57.009383270510874,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 13962,
    "party_first_prefs": {
@@ -2904,6 +3012,8 @@
    "valid_votes": 7286,
    "invalid_votes": 95,
    "quota": null,
+   "poll_pct": 48.84197988353626,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7286,
    "party_first_prefs": {
@@ -2985,11 +3095,13 @@
    "source_file": "local-council-elections-2023-result-sheet-cookstown.pdf",
    "source_format": "pdf_text",
    "seats": 7,
-   "electorate": null,
+   "electorate": 17146,
    "votes_polled": null,
    "valid_votes": 10288,
    "invalid_votes": null,
    "quota": 1287,
+   "poll_pct": 60.75,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10288,
    "party_first_prefs": {
@@ -3091,6 +3203,8 @@
    "valid_votes": 12023,
    "invalid_votes": 252,
    "quota": null,
+   "poll_pct": 51.62,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 12023,
    "party_first_prefs": {
@@ -3217,6 +3331,8 @@
    "valid_votes": 10757,
    "invalid_votes": 172,
    "quota": 1793,
+   "poll_pct": 53.45,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10757,
    "party_first_prefs": {
@@ -3295,6 +3411,8 @@
    "valid_votes": 13118,
    "invalid_votes": 140,
    "quota": 1875,
+   "poll_pct": 62.21,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 13118,
    "party_first_prefs": {
@@ -3424,6 +3542,8 @@
    "valid_votes": 12278,
    "invalid_votes": 92,
    "quota": 2047,
+   "poll_pct": 63.9,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 12278,
    "party_first_prefs": {
@@ -3511,6 +3631,8 @@
    "valid_votes": 8549,
    "invalid_votes": 111,
    "quota": null,
+   "poll_pct": 63.34113516676418,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8549,
    "party_first_prefs": {
@@ -3606,6 +3728,8 @@
    "valid_votes": 8173,
    "invalid_votes": 113,
    "quota": 1363,
+   "poll_pct": 52.81,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8173,
    "party_first_prefs": {
@@ -3707,6 +3831,8 @@
    "valid_votes": 6852,
    "invalid_votes": 62,
    "quota": null,
+   "poll_pct": 54.17221656350388,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6852,
    "party_first_prefs": {
@@ -3785,6 +3911,8 @@
    "valid_votes": 7179,
    "invalid_votes": 72,
    "quota": null,
+   "poll_pct": 54.584462511291775,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7179,
    "party_first_prefs": {
@@ -3865,11 +3993,13 @@
    "source_file": "local-council-elections-2023-result-sheet-dungannon.pdf",
    "source_format": "pdf_text",
    "seats": 6,
-   "electorate": null,
+   "electorate": 16190,
    "votes_polled": null,
    "valid_votes": 9610,
    "invalid_votes": null,
    "quota": 1373,
+   "poll_pct": 60.1,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9610,
    "party_first_prefs": {
@@ -3981,6 +4111,8 @@
    "valid_votes": 7454,
    "invalid_votes": 69,
    "quota": null,
+   "poll_pct": 56.56390977443609,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7454,
    "party_first_prefs": {
@@ -4068,6 +4200,8 @@
    "valid_votes": 7676,
    "invalid_votes": 99,
    "quota": 1097,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7676,
    "party_first_prefs": {
@@ -4169,6 +4303,8 @@
    "valid_votes": 8478,
    "invalid_votes": 110,
    "quota": null,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8478,
    "party_first_prefs": {
@@ -4255,6 +4391,8 @@
    "valid_votes": 7100,
    "invalid_votes": 93,
    "quota": null,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7100,
    "party_first_prefs": {
@@ -4341,6 +4479,8 @@
    "valid_votes": 7586,
    "invalid_votes": 66,
    "quota": null,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7586,
    "party_first_prefs": {
@@ -4420,6 +4560,8 @@
    "valid_votes": 8095,
    "invalid_votes": 93,
    "quota": null,
+   "poll_pct": 56.34461877236444,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8095,
    "party_first_prefs": {
@@ -4514,6 +4656,8 @@
    "valid_votes": 7163,
    "invalid_votes": 136,
    "quota": null,
+   "poll_pct": 54.5842058031708,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7163,
    "party_first_prefs": {
@@ -4592,6 +4736,8 @@
    "valid_votes": 8765,
    "invalid_votes": 129,
    "quota": null,
+   "poll_pct": 54.08330799635147,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8765,
    "party_first_prefs": {
@@ -4701,6 +4847,8 @@
    "valid_votes": 7728,
    "invalid_votes": 87,
    "quota": null,
+   "poll_pct": 48.92631315344644,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7728,
    "party_first_prefs": {
@@ -4787,6 +4935,8 @@
    "valid_votes": 8381,
    "invalid_votes": 68,
    "quota": null,
+   "poll_pct": 52.951867635998994,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8381,
    "party_first_prefs": {
@@ -4866,6 +5016,8 @@
    "valid_votes": 6486,
    "invalid_votes": 59,
    "quota": 1082,
+   "poll_pct": 49.5,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6486,
    "party_first_prefs": {
@@ -4944,6 +5096,8 @@
    "valid_votes": 10000,
    "invalid_votes": 69,
    "quota": 1667,
+   "poll_pct": 54.76,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10000,
    "party_first_prefs": {
@@ -5030,6 +5184,8 @@
    "valid_votes": 6405,
    "invalid_votes": 108,
    "quota": 1068,
+   "poll_pct": 47.39,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6405,
    "party_first_prefs": {
@@ -5108,6 +5264,8 @@
    "valid_votes": 6031,
    "invalid_votes": 50,
    "quota": 1006,
+   "poll_pct": 52.35,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6031,
    "party_first_prefs": {
@@ -5202,6 +5360,8 @@
    "valid_votes": 8444,
    "invalid_votes": 89,
    "quota": null,
+   "poll_pct": 51.15707434052757,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8444,
    "party_first_prefs": {
@@ -5288,6 +5448,8 @@
    "valid_votes": 7496,
    "invalid_votes": 99,
    "quota": null,
+   "poll_pct": 45.106307162370825,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7496,
    "party_first_prefs": {
@@ -5381,6 +5543,8 @@
    "valid_votes": 11975,
    "invalid_votes": 116,
    "quota": null,
+   "poll_pct": 56.26861504095309,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 11975,
    "party_first_prefs": {
@@ -5483,6 +5647,8 @@
    "valid_votes": 14078,
    "invalid_votes": 221,
    "quota": 1760,
+   "poll_pct": 53.34,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 14078,
    "party_first_prefs": {
@@ -5568,6 +5734,8 @@
    "valid_votes": 7118,
    "invalid_votes": 85,
    "quota": null,
+   "poll_pct": 49.491548715129866,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7118,
    "party_first_prefs": {
@@ -5658,11 +5826,13 @@
    "source_file": "local-council-elections-2023-result-sheet-magherafelt.pdf",
    "source_format": "pdf_text",
    "seats": 5,
-   "electorate": null,
+   "electorate": 13816,
    "votes_polled": null,
    "valid_votes": 8257,
    "invalid_votes": null,
    "quota": 1377,
+   "poll_pct": 60.51,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8257,
    "party_first_prefs": {
@@ -5742,6 +5912,8 @@
    "valid_votes": 8542,
    "invalid_votes": 119,
    "quota": 1221,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8542,
    "party_first_prefs": {
@@ -5823,11 +5995,13 @@
    "source_file": "local-council-elections-2023-result-sheet-moyola.pdf",
    "source_format": "pdf_text",
    "seats": 5,
-   "electorate": null,
+   "electorate": 13559,
    "votes_polled": null,
    "valid_votes": 9156,
    "invalid_votes": null,
    "quota": 1527,
+   "poll_pct": 68.37,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9156,
    "party_first_prefs": {
@@ -5915,6 +6089,8 @@
    "valid_votes": 10451,
    "invalid_votes": 172,
    "quota": 1494,
+   "poll_pct": 53.38,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10451,
    "party_first_prefs": {
@@ -6016,6 +6192,8 @@
    "valid_votes": 9285,
    "invalid_votes": 167,
    "quota": null,
+   "poll_pct": 43.511485522257516,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9285,
    "party_first_prefs": {
@@ -6117,6 +6295,8 @@
    "valid_votes": 12366,
    "invalid_votes": 193,
    "quota": null,
+   "poll_pct": 52.61,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 12366,
    "party_first_prefs": {
@@ -6234,6 +6414,8 @@
    "valid_votes": 6636,
    "invalid_votes": 103,
    "quota": null,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 6636,
    "party_first_prefs": {
@@ -6328,6 +6510,8 @@
    "valid_votes": 14295,
    "invalid_votes": 84,
    "quota": null,
+   "poll_pct": 54.64,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 14295,
    "party_first_prefs": {
@@ -6444,6 +6628,8 @@
    "valid_votes": 12202,
    "invalid_votes": 214,
    "quota": 1744,
+   "poll_pct": 55.63,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 12202,
    "party_first_prefs": {
@@ -6537,6 +6723,8 @@
    "valid_votes": 8034,
    "invalid_votes": 81,
    "quota": 1340,
+   "poll_pct": 51.15,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8034,
    "party_first_prefs": {
@@ -6623,6 +6811,8 @@
    "valid_votes": 8911,
    "invalid_votes": 92,
    "quota": 1486,
+   "poll_pct": 56.99,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8911,
    "party_first_prefs": {
@@ -6717,6 +6907,8 @@
    "valid_votes": 14691,
    "invalid_votes": 266,
    "quota": 1837,
+   "poll_pct": 65.79,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 14691,
    "party_first_prefs": {
@@ -6832,6 +7024,8 @@
    "valid_votes": 11812,
    "invalid_votes": 183,
    "quota": null,
+   "poll_pct": 62.659980149401875,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 11812,
    "party_first_prefs": {
@@ -6955,6 +7149,8 @@
    "valid_votes": 7699,
    "invalid_votes": 100,
    "quota": 1284,
+   "poll_pct": 59.18,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7699,
    "party_first_prefs": {
@@ -7034,6 +7230,8 @@
    "valid_votes": 7397,
    "invalid_votes": 201,
    "quota": null,
+   "poll_pct": 56.6888010146982,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7397,
    "party_first_prefs": {
@@ -7120,6 +7318,8 @@
    "valid_votes": 13369,
    "invalid_votes": 179,
    "quota": 1672,
+   "poll_pct": 60.95,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 13369,
    "party_first_prefs": {
@@ -7221,6 +7421,8 @@
    "valid_votes": 7802,
    "invalid_votes": 74,
    "quota": null,
+   "poll_pct": 50.711480265275895,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 7802,
    "party_first_prefs": {
@@ -7314,6 +7516,8 @@
    "valid_votes": 9954,
    "invalid_votes": 209,
    "quota": null,
+   "poll_pct": 42.309999999999995,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 9954,
    "party_first_prefs": {
@@ -7403,11 +7607,13 @@
    "source_file": "local-council-elections-2023-result-sheet-torrent_1.pdf",
    "source_format": "pdf_text",
    "seats": 6,
-   "electorate": null,
+   "electorate": 16404,
    "votes_polled": null,
    "valid_votes": 10633,
    "invalid_votes": null,
    "quota": 1520,
+   "poll_pct": 65.63,
+   "electorate_source": "derived",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10633,
    "party_first_prefs": {
@@ -7501,6 +7707,8 @@
    "valid_votes": 10913,
    "invalid_votes": 202,
    "quota": null,
+   "poll_pct": 52.32804481898216,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 10913,
    "party_first_prefs": {
@@ -7594,6 +7802,8 @@
    "valid_votes": 8301,
    "invalid_votes": 112,
    "quota": null,
+   "poll_pct": null,
+   "electorate_source": "source",
    "reconciled_to_stated_total": true,
    "first_prefs_total": 8301,
    "party_first_prefs": {

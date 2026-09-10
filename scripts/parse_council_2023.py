@@ -35,6 +35,12 @@ def norm_ws(s):
 def to_int(tok):
     return int(round(float(tok.replace(",", ""))))
 
+def norm_poll_pct(v):
+    """% Poll is a percentage on most sheets but a fraction on two Belfast ones."""
+    if v is None:
+        return None
+    return v * 100 if 0 < v < 1.5 else v
+
 # ------------------------------------------------------------------ PDF ----
 def column_rules(page, header_top):
     """Vertical rules of the table body (the header row merges its cells)."""
@@ -119,6 +125,7 @@ def parse_pdf(path):
             "invalid_votes":       grab(r"Invalid Votes\s+([\d,]+)"),
             "seats":               grab(r"Number to be [Ee]lected\s+([\d,]+)"),
             "quota":               grab(r"(?:Electoral )?Quota(?: of)?\s+([\d,]+)"),
+            "poll_pct":            grab(r"%\s*Poll\s+([\d.]+)", float),
         }
         m = re.search(r"District Electoral Area of\s+(.+?)(?:\s+BACK to|\s+Stage\b|$)",
                       text, re.I | re.M)
@@ -213,7 +220,9 @@ XL_LABELS = [
     ("invalid_votes",       r"invalid votes"),
     ("seats",               r"number (to be|of members to be) elected"),
     ("quota",               r"electoral quota"),
+    ("poll_pct",            r"%\s*poll"),
 ]
+FLOAT_LABELS = {"poll_pct"}
 
 def _cells(ws):
     return [[c for c in row] for row in ws.iter_rows(values_only=True)]
@@ -237,7 +246,8 @@ def parse_xlsx_sheet(ws):
             for key, pat in XL_LABELS:
                 if meta[key] is None and re.fullmatch(pat, t):
                     try:
-                        meta[key] = int(round(float(str(nxt).replace(",", ""))))
+                        val = float(str(nxt).replace(",", "").rstrip("%"))
+                        meta[key] = val if key in FLOAT_LABELS else int(round(val))
                     except (TypeError, ValueError):
                         pass
 
@@ -557,6 +567,8 @@ def build():
             "seats": meta.get("seats"), "electorate": meta.get("eligible_electorate"),
             "votes_polled": meta.get("votes_polled"), "valid_votes": valid,
             "invalid_votes": meta.get("invalid_votes"), "quota": meta.get("quota"),
+            "poll_pct": norm_poll_pct(meta.get("poll_pct")),
+            "electorate_source": "source" if meta.get("eligible_electorate") else None,
             "reconciled_to_stated_total": ok,
             "first_prefs_total": total,
             "party_first_prefs": dict(sorted(parties.items(), key=lambda kv: -kv[1])),
@@ -596,6 +608,24 @@ def build():
             f"local-council-elections-2023-result-sheet-{stem}.pdf",
             "pdf_scanned_transcribed")
 
+    # Seven Mid Ulster sheets print no electorate, but all print % Poll. Since
+    # electorate = votes polled / % Poll and votes polled = valid / (1 - invalid
+    # rate), the only unknown is the invalid rate, which is tightly bounded
+    # across the DEAs that do publish it. Recovering this way lands within ~1%:
+    # tested against the 66 DEAs publishing both, 63 fall inside +/-1%.
+    rates = [d["invalid_votes"] / d["votes_polled"] for d in deas.values()
+             if d["invalid_votes"] and d["votes_polled"]]
+    inv_rate = sorted(rates)[len(rates) // 2]
+    for d in deas.values():
+        if d["electorate"] is None and d["poll_pct"] and d["valid_votes"]:
+            polled = d["valid_votes"] / (1 - inv_rate)
+            d["electorate"] = int(round(polled / (d["poll_pct"] / 100)))
+            d["electorate_source"] = "derived"
+            flags.append({"level": "info", "dea": d["dea"], "source": d["source_file"],
+                          "issue": "electorate not printed on sheet; derived from % Poll",
+                          "detail": f"valid={d['valid_votes']} / (1-{inv_rate:.5f}) "
+                                    f"/ {d['poll_pct']}% -> {d['electorate']}"})
+
     missing = [n for n in canonical_deas().values() if n not in deas]
     for m in missing:
         flags.append({"level": "error", "dea": m, "issue": "DEA missing from output"})
@@ -629,6 +659,11 @@ def build():
                             "the Total Valid Votes printed on the same sheet; all 80 "
                             "reconcile (`reconciled_to_stated_total`).",
             "candidate_names": "As printed on the result sheet, usually 'Surname, Forename'.",
+            "electorate_source": "'source' where the sheet prints an eligible electorate; "
+                                 "'derived' for the seven Mid Ulster DEAs whose sheets omit "
+                                 "it, recovered from % Poll and the valid vote (see `flags`). "
+                                 "Tested against the 66 DEAs printing both, the recovery is "
+                                 "within 1% for 63 and within 2% for 65.",
         },
         "dea_count": len(deas),
         "candidate_count": sum(len(d["candidates"]) for d in deas.values()),

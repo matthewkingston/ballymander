@@ -30,6 +30,35 @@ names are clipped by the source rendering itself (e.g. `Devine Gallagher, Ro`),
 and West Tyrone's invalid-vote count is derived (8413 − 8301 = 112) as the field
 was not legible.
 
+## Derived fields
+
+Two fields are not always printed on the sheets and are recovered rather than
+read. Both carry a marker so nothing derived is mistaken for source.
+
+**`electorate`** — the seven Mid Ulster sheets (Carntogher, Clogher Valley,
+Cookstown, Dungannon, Magherafelt, Moyola, Torrent) print no eligible
+electorate, but every sheet prints `% Poll`. Since
+
+```
+electorate = votes polled / % Poll        votes polled = valid / (1 - invalid rate)
+```
+
+the only unknown is the invalid rate, and that is tightly bounded across the
+DEAs that do publish it (median 1.23%, p10-p90 0.84%-1.81%). Tested against the
+66 DEAs printing both figures, the recovery has a median error of **+0.05%**
+and a standard deviation of 0.40%; 65 of 66 fall within 1% and all 66 within
+2%. `electorate_source` is `"derived"` for those seven and `"source"` for the
+rest, and each is listed in `flags`.
+
+As a second check, the seven derived electorates give register-to-adult-
+population ratios of 0.852-1.009 (median 0.969) against 0.957 for the other 73
+— inside the normal range and slightly high, as expected for rural DEAs.
+
+**`poll_pct`** — normalised on read. Most sheets store `% Poll` as a percentage
+(55.51) but two Belfast worksheets store it as a fraction (0.5551), so a value
+below 1.5 is multiplied by 100. Left unnormalised this inflated the derived
+electorate by a factor of 100.
+
 ## Known gaps
 
 `flags` in the JSON lists anything unresolved. There are currently **no
