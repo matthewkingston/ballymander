@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Map every 2021 Data Zone to one 2024 UK parliamentary constituency.
+"""Map every 2021 Data Zone to one UK parliamentary constituency.
+
+Handles both boundary vintages: the 2024 Westminster set (default) and the 2008
+set the NI Assembly still uses. Pick with --vintage.
 
 Standalone: nothing in the build pipeline calls this, and it writes only its own
 two outputs. Run it again if either source boundary file is replaced.
@@ -42,8 +45,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 DZ_GEO = "DZ2021.geojson"
-PC_GEO = "osni_open_data_largescale_boundaries_parliamentary_constituencies_2023.geojson"
-PC_CENSUS = "ni-census21-people-parlcon24-6af9c0bf.json"   # optional, for validation
 DZ_CENSUS = "ni-census21-people-dz21-96e78665.json"        # optional, for validation
 
 GRID = "EPSG:29903"          # Irish Grid; metres
@@ -55,6 +56,33 @@ RESULTS_SHEET = {
     "N05000009": "LV",  "N05000010": "MU",  "N05000011": "NYA", "N05000012": "NA",
     "N05000013": "ND",  "N05000014": "SA",  "N05000015": "SD",  "N05000016": "ST",
     "N05000017": "UB",  "N05000018": "WT",
+}
+
+# Two constituency vintages share this method. 2024 is the Westminster set from
+# the 2023 review; 2008 is the older set, still used by the NI Assembly, whose
+# OSNI file names its code field PC_ID rather than PC_Code.
+VINTAGES = {
+    "2024": {
+        "pc_geo": "osni_open_data_largescale_boundaries_"
+                  "parliamentary_constituencies_2023.geojson",
+        "code_field": "PC_Code",
+        "csv": "dz21_to_pc24.csv",
+        "json": "pc24_reference.json",
+        "target": "UK Parliamentary Constituency 2024 (PARLCON24 / OSNI 2023 review)",
+        "census": "ni-census21-people-parlcon24-6af9c0bf.json",
+        "results_sheet": RESULTS_SHEET,
+    },
+    "2008": {
+        "pc_geo": "osni_open_data_largescale_boundaries_"
+                  "parliamentary_constituencies_2008.geojson",
+        "code_field": "PC_ID",
+        "csv": "dz21_to_pc08.csv",
+        "json": "pc08_reference.json",
+        "target": "UK Parliamentary Constituency 2008 -- the boundaries the NI "
+                  "Assembly still uses, and those of the 2022 Assembly election",
+        "census": None,          # NISRA publishes no 2008-constituency census table
+        "results_sheet": {},
+    },
 }
 
 SPLIT_THRESHOLD = 0.95       # below this a DZ is flagged as genuinely split
@@ -76,7 +104,7 @@ def census_1d(path: Path) -> dict[str, tuple[str, int]]:
     return {c["code"]: (c["label"], v) for c, v in zip(cats, table["values"])}
 
 
-def overlaps(data: Path, tmp: Path):
+def overlaps(data: Path, tmp: Path, pc_geo: str, code_field: str):
     """Intersect every DZ with every constituency.
 
     Returns ({dz: {pc_code: area_m2}}, {dz: dz_name}, [constituency properties]).
@@ -84,8 +112,8 @@ def overlaps(data: Path, tmp: Path):
     dz_proj, pc_proj = tmp / "dz.json", tmp / "pc.json"
     mapshaper([str(data / DZ_GEO), "-proj", GRID,
                "-filter-fields", "DZ2021_cd,DZ2021_nm", "-o", str(dz_proj)])
-    mapshaper([str(data / PC_GEO), "-proj", GRID,
-               "-each", "pc_nm=PC_NAME, pc_cd=PC_Code",
+    mapshaper([str(data / pc_geo), "-proj", GRID,
+               "-each", f"pc_nm=PC_NAME, pc_cd={code_field}",
                "-filter-fields", "pc_nm,pc_cd", "-o", str(pc_proj)])
 
     pc_features = json.loads(pc_proj.read_text())["features"]
@@ -119,17 +147,21 @@ def main() -> None:
                     help="directory holding the source boundary files (default: data/)")
     ap.add_argument("--out", type=Path, default=ROOT / "data",
                     help="directory to write the lookup and reference into")
+    ap.add_argument("--vintage", choices=sorted(VINTAGES), default="2024",
+                    help="constituency boundary set to map onto (default: 2024)")
     ap.add_argument("--keep-temp", action="store_true")
     args = ap.parse_args()
+    cfg = VINTAGES[args.vintage]
+    pc_census = cfg["census"]
 
-    for f in (DZ_GEO, PC_GEO):
+    for f in (DZ_GEO, cfg["pc_geo"]):
         if not (args.data / f).exists():
             sys.exit(f"missing {args.data / f}")
 
     tmp = Path(tempfile.mkdtemp(prefix="dz2pc-"))
     try:
         print(f"==> intersecting DZs with constituencies on {GRID}")
-        area, dz_names, pcs = overlaps(args.data, tmp)
+        area, dz_names, pcs = overlaps(args.data, tmp, cfg["pc_geo"], cfg["code_field"])
     finally:
         if args.keep_temp:
             print(f"    temp kept at {tmp}")
@@ -138,7 +170,8 @@ def main() -> None:
 
     pc_name = {p["pc_cd"]: p["pc_nm"] for p in pcs}
     # OSNI names are uppercase; prefer NISRA's proper-case labels for display.
-    census = census_1d(args.data / PC_CENSUS) if (args.data / PC_CENSUS).exists() else {}
+    census = (census_1d(args.data / pc_census)
+              if pc_census and (args.data / pc_census).exists() else {})
     display = {c: census.get(c, (n.title(), None))[0].strip() for c, n in pc_name.items()}
 
     # --- assign ----------------------------------------------------------
@@ -169,11 +202,12 @@ def main() -> None:
             })
 
     # --- validate against NISRA's own constituency counts -----------------
-    accuracy = {"note": f"{PC_CENSUS} not present; assignment not validated"}
+    accuracy = {"note": f"{pc_census or 'no constituency census table'} not available; "
+                        "assignment not validated against published populations"}
     per_pc_pop: dict[str, int] = {}
-    if (args.data / PC_CENSUS).exists() and (args.data / DZ_CENSUS).exists():
+    if pc_census and (args.data / pc_census).exists() and (args.data / DZ_CENSUS).exists():
         dz_pop = {k: v[1] for k, v in census_1d(args.data / DZ_CENSUS).items()}
-        pc_pop = census_1d(args.data / PC_CENSUS)
+        pc_pop = census_1d(args.data / pc_census)
         assigned = collections.Counter()
         for r in rows:
             assigned[r["pc_code"]] += dz_pop.get(r["code"], 0)
@@ -181,7 +215,7 @@ def main() -> None:
         errs = [(c, assigned[c] - v) for c, (_, v) in pc_pop.items()]
         total_pop = sum(v for _, v in pc_pop.values())
         accuracy = {
-            "validated_against": PC_CENSUS,
+            "validated_against": pc_census,
             "sum_abs_error_people": sum(abs(d) for _, d in errs),
             "sum_abs_error_pct": round(100 * sum(abs(d) for _, d in errs) / total_pop, 4),
             "worst": sorted(
@@ -195,15 +229,15 @@ def main() -> None:
     reference = {
         "generated": dt.date.today().isoformat(),
         "unit": "Census 2021 Data Zone (DZ2021)",
-        "target": "UK Parliamentary Constituency 2024 (PARLCON24 / OSNI 2023 review)",
+        "target": cfg["target"],
         "method": (
             "Each DZ assigned whole to the constituency holding the largest share of "
             f"its area, measured on {GRID}. The two geographies do not nest; DZs with "
             f"less than {SPLIT_THRESHOLD:.0%} of their area in the assigned constituency "
             "are listed under split_dzs."
         ),
-        "sources": {"data_zones": DZ_GEO, "constituencies": PC_GEO,
-                    "validation": PC_CENSUS},
+        "sources": {"data_zones": DZ_GEO, "constituencies": cfg["pc_geo"],
+                    "validation": pc_census},
         "counts": {"data_zones": len(rows), "constituencies": len(pcs),
                    "split_data_zones": len(split)},
         "accuracy": accuracy,
@@ -212,7 +246,7 @@ def main() -> None:
                 "code": c,
                 "name": display[c],
                 "osni_name": pc_name[c],
-                "results_sheet": RESULTS_SHEET.get(c),
+                "results_sheet": cfg["results_sheet"].get(c),
                 "dz_count": dz_counts[c],
                 "census_population": census.get(c, (None, None))[1],
                 "assigned_population": per_pc_pop.get(c),
@@ -224,7 +258,7 @@ def main() -> None:
     }
 
     args.out.mkdir(parents=True, exist_ok=True)
-    csv_path, json_path = args.out / "dz21_to_pc24.csv", args.out / "pc24_reference.json"
+    csv_path, json_path = args.out / cfg["csv"], args.out / cfg["json"]
     with csv_path.open("w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=["code", "pc_code", "pc_name", "share", "split"])
         w.writeheader()
