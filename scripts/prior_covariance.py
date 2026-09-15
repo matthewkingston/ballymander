@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Estimate how prior v1's errors covary between parties, at DEA scale.
+"""Estimate how prior v2's errors covary between parties, at DEA scale.
 
 This is the uncertainty used to weight the prior against election evidence, not
 a final confidence interval. Steps (reasons in docs/voting-model.md):
 
  1. Out-of-sample predictions: refit the prior with each council left out and
-    predict that council's DEAs, masked to the parties that stood.
+    predict that council's DEAs, put through each DEA's ballot with the
+    transfer matrix.
  2. Variation matrix: for each pair of parties, the variance over DEAs where both
     stood of (predicted - actual) log(share_p / share_q). Pairwise log-ratios
     need no common set of parties, so the missing-candidate pattern can't
@@ -13,16 +14,16 @@ a final confidence interval. Steps (reasons in docs/voting-model.md):
  3. clr covariance  S = -1/2 H T H,  H = I - 11'/K.
  4. Shrink each correlation towards a bloc target -- the overlap-weighted mean
     correlation of its pair type (six types: within each bloc, and each pair of
-    blocs) -- by lambda = k / (k + n), n = DEAs where both stood. k = 20 for
-    nationalist-other pairs, 200 for all others.
+    blocs) -- by lambda = k / (k + n), n = DEAs where both stood. k = 10 for
+    nationalist-other pairs, 60 for all others.
  5. Clip any negative eigenvalue to zero.
 
 Scaling to larger areas is Method B: variance x (population ratio)^beta, with
-beta = -0.4 measured on prior v1. It's recorded in the output, not applied.
+beta = -0.35 measured on prior v2. It's recorded in the output, not applied.
 
 Reads   the prior inputs (see fit_prior.py)
-Writes  data/model/prior_v1_oos_dea.json
-        data/model/prior_v1_covariance.json
+Writes  data/model/prior_v2_oos_dea.json
+        data/model/prior_v2_covariance.json
 """
 from __future__ import annotations
 
@@ -34,9 +35,9 @@ from fit_prior import BLOC_PENALTY, TAU, WITHIN_BLOC_PENALTY
 from prior_model import BLOC_INDEX, BLOCS, FLOOR, K, MODEL, PARTIES, ROOT, Data
 
 BLOC_NAMES = list(BLOCS)
-K_SHRINK = {"nationalist-other": 20.0}
-K_SHRINK_DEFAULT = 200.0
-BETA = -0.4
+K_SHRINK = {"nationalist-other": 10.0}
+K_SHRINK_DEFAULT = 60.0
+BETA = -0.35
 MIN_OVERLAP = 4
 
 
@@ -55,7 +56,7 @@ def out_of_sample(d: Data) -> np.ndarray:
         Xte, _ = d.prepare(trz, tez)
         theta = d.fit(Xtr, trz, tr, BLOC_PENALTY, WITHIN_BLOC_PENALTY)
         theta = d.steepen(theta, Xtr, trz, tr, TAU)
-        P[te] = d.to_dea(d.predict(theta, Xte, d.M[d.dea_of_dz[tez]]), tez, te)
+        P[te] = d.on_ballot(d.to_dea(d.predict(theta, Xte), tez, te), te)
     return P
 
 
@@ -107,14 +108,14 @@ def main() -> None:
     print("bloc targets: " + "  ".join(f"{t} {v:+.2f}" for t, v in targets.items()))
     print("eigenvalues clipped to zero: " + (", ".join(f"{x:+.5f}" for x in clipped) or "none"))
 
-    (MODEL / "prior_v1_oos_dea.json").write_text(json.dumps({
-        "description": "prior v1 predictions for each DEA with its council left out of the fit, "
-                       "masked to the parties that stood; Y is the actual share",
+    (MODEL / "prior_v2_oos_dea.json").write_text(json.dumps({
+        "description": "prior v2 predictions for each DEA with its council left out of the fit, "
+                       "put through the DEA's ballot with transfer matrix v0; Y is the actual share",
         "parties": PARTIES, "deas": d.dea_names, "council": d.council.tolist(),
         "P_oos": np.round(P, 6).tolist(), "Y": np.round(d.Y, 6).tolist(), "stood": d.M.tolist(),
     }, ensure_ascii=False) + "\n")
-    (MODEL / "prior_v1_covariance.json").write_text(json.dumps({
-        "version": "prior v1",
+    (MODEL / "prior_v2_covariance.json").write_text(json.dumps({
+        "version": "prior v2",
         "parties": PARTIES,
         "scale": "DEA (2023 council first preferences, out of sample by council)",
         "representation": "clr (centred log-ratio) of party shares",
@@ -131,7 +132,7 @@ def main() -> None:
         "beta": BETA,
         "scaling": "variance for a region = cov * (region population / DEA population)^beta",
     }, indent=1, ensure_ascii=False) + "\n")
-    for f in ("prior_v1_oos_dea.json", "prior_v1_covariance.json"):
+    for f in ("prior_v2_oos_dea.json", "prior_v2_covariance.json"):
         print(f"wrote {(MODEL / f).relative_to(ROOT)}")
 
 

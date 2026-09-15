@@ -1,25 +1,30 @@
 #!/usr/bin/env python3
-"""Fit prior v1: demographic estimate of party shares for every Data Zone.
+"""Fit prior v2: demographic estimate of party shares for every Data Zone.
 
-A joint masked multinomial logit over the nine modelled parties, fitted at Data
-Zone level against 2023 council first preferences summed to DEAs (see
+A joint multinomial logit over the nine modelled parties, fitted at Data
+Zone level against 2023 council first preferences summed to DEAs, through
+each DEA's ballot via transfer matrix v0 (see
 prior_model.py and docs/voting-model.md). The settled choices are constants
 here, not re-derived on each run:
 
-  penalties   bloc means 0.1, within-bloc deviations 10  (CV-min, leave one
+  penalties   bloc means 0.1, within-bloc deviations 3.16  (CV-min, leave one
               council out, over bloc [0.001, 0.01, 0.1, 1] x within
               [0.1, 0.316, 1, 3.16, 10])
-  tau         1.2: slopes scaled up, intercepts re-fitted, to undo the ridge's
-              compression of the most segregated areas
+  tau         1.1: slopes scaled up, intercepts re-fitted, to undo the ridge's
+              compression of the most segregated areas (chosen by judgement
+              against the most segregated real DEAs)
 
---cv re-runs that penalty curve and prints it (about two minutes).
+--cv re-runs that penalty curve and prints it (several minutes).
 
 Shares written per DZ are unmasked -- every party present -- because the prior
 describes voters, not a ballot paper. Who stood where is applied downstream.
 
-Reads   data/model/dz21_features.csv, data/council_elections_23/…, data/dz21_electorate.json
-Writes  data/model/prior_v1_model.json
-        data/model/prior_v1_dz.csv
+Both were re-tuned for prior v2, when the transfer matrix replaced masking.
+
+Reads   data/model/dz21_features.csv, data/model/transfer_matrix_v0.json,
+        data/council_elections_23/…, data/dz21_electorate.json
+Writes  data/model/prior_v2_model.json
+        data/model/prior_v2_dz.csv
 """
 from __future__ import annotations
 
@@ -32,8 +37,8 @@ import numpy as np
 from prior_model import BLOCS, K, MODEL, PARTIES, ROOT, Data
 
 BLOC_PENALTY = 0.1
-WITHIN_BLOC_PENALTY = 10.0
-TAU = 1.2
+WITHIN_BLOC_PENALTY = 3.16
+TAU = 1.1
 GRID_BLOC = [0.001, 0.01, 0.1, 1.0]
 GRID_WITHIN = [0.1, 0.316, 1.0, 3.16, 10.0]
 
@@ -47,11 +52,9 @@ def cv_curve(d: Data) -> None:
         trz, tez = d.dzs_in(tr), d.dzs_in(te)
         Xtr, _ = d.prepare(trz, trz)
         Xte, _ = d.prepare(trz, tez)
-        init = None
         for c, (ab, aw) in enumerate(combos):
-            theta = d.fit(Xtr, trz, tr, ab, aw, init)
-            init = theta
-            P = d.to_dea(d.predict(theta, Xte, d.M[d.dea_of_dz[tez]]), tez, te)
+            theta = d.fit(Xtr, trz, tr, ab, aw)     # cold start: warm starts stall short of the optimum
+            P = d.on_ballot(d.to_dea(d.predict(theta, Xte), tez, te), te)
             scores[c, j] = d.kl(P, te)
     mean = 1000 * scores.mean(1)
     print("CV KL per vote (millinats), leave one council out; rows within-bloc, columns bloc penalty")
@@ -80,13 +83,14 @@ def main() -> None:
 
     MODEL.mkdir(parents=True, exist_ok=True)
     model = {
-        "version": "prior v1",
+        "version": "prior v2",
         "parties": PARTIES,
         "blocs": BLOCS,
         "features": d.features,
         "bloc_penalty": BLOC_PENALTY,
         "within_bloc_penalty": WITHIN_BLOC_PENALTY,
         "tau": TAU,
+        "ballot_mapping": "transfer_matrix_v0.json, absent party's row renormalised over the parties standing",
         "intercepts": theta[:K].tolist(),
         "coef": theta[K:].reshape(K, p).tolist(),
         "clip_lo": lo.tolist(),
@@ -95,16 +99,16 @@ def main() -> None:
         "standardise_sd": sd.tolist(),
         "apply": "x -> clip(x, clip_lo, clip_hi) -> (x - mean) / sd -> softmax(intercepts + coef @ x)",
     }
-    (MODEL / "prior_v1_model.json").write_text(json.dumps(model, indent=1, ensure_ascii=False) + "\n")
-    with (MODEL / "prior_v1_dz.csv").open("w", newline="") as fh:
+    (MODEL / "prior_v2_model.json").write_text(json.dumps(model, indent=1, ensure_ascii=False) + "\n")
+    with (MODEL / "prior_v2_dz.csv").open("w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["code"] + PARTIES)
         for code, row in zip(d.codes, shares):
             w.writerow([code] + [f"{x:.6f}" for x in row])
 
-    P = d.to_dea(d.predict(theta, X, d.M[d.dea_of_dz]), allz, alld)
+    P = d.on_ballot(d.to_dea(shares, allz, alld), alld)
     print(f"in-sample KL per vote {1000 * d.kl(P, alld):.1f} millinats over {len(alld)} DEAs")
-    for f in ("prior_v1_model.json", "prior_v1_dz.csv"):
+    for f in ("prior_v2_model.json", "prior_v2_dz.csv"):
         print(f"wrote {(MODEL / f).relative_to(ROOT)}")
 
 

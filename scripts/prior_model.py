@@ -9,6 +9,13 @@ ridge penalty. It predicts shares for every Data Zone from that DZ's own
 features and is fitted by summing those predictions up to DEA totals and
 scoring them against the 2023 council first preferences -- fitting at the
 level it is applied at, so the slope isn't flattened by aggregation.
+
+DZ shares are unmasked: every party's voters, whether or not it stood. Before
+scoring, each DEA's shares are put through the ballot that DEA actually had: a
+party that stood keeps its voters, and an absent party's voters go to the
+parties that stood in proportion to its row of transfer matrix v0,
+renormalised over them. (Renormalising directly, not cascading through other
+absent parties, is how the matrix was estimated from STV counts.)
 """
 from __future__ import annotations
 
@@ -28,6 +35,7 @@ FEATURES_CSV = MODEL / "dz21_features.csv"
 COUNCIL = DATA / "council_elections_23" / "council_elections_2023.json"
 ELECTORATE = DATA / "dz21_electorate.json"
 DEA_CODES = DATA / "ni-census21-people-dea14-40874f41.json"
+TRANSFERS = MODEL / "transfer_matrix_v0.json"
 
 # Independents and the micro-parties (PUP, Conservative, IRSP, Workers Party,
 # CCLA, Socialist Party) are transparent: dropped from both sides.
@@ -85,6 +93,20 @@ class Data:
         self.Y, self.M, self.N = np.array(Y), np.array(M), np.array(N, float)
         self.W = self.N / self.N.mean()
 
+        # G[d][a][b]: share of party a's voters counted for party b on DEA d's ballot
+        tm = json.loads(TRANSFERS.read_text())["matrix"]
+        self.G = np.zeros((len(self.dea_names), K, K))
+        for d, stood in enumerate(self.M):
+            for a in range(K):
+                if stood[a]:
+                    self.G[d, a, a] = 1.0
+                else:
+                    row = np.array([tm[PARTIES[a]].get(PARTIES[b], 0.0) if stood[b] else 0.0
+                                    for b in range(K)])
+                    if row.sum() <= 0:
+                        raise ValueError(f"{self.dea_names[d]}: {PARTIES[a]} has no transfer destination")
+                    self.G[d, a] = row / row.sum()
+
         codes = {norm(c["label"]): c["code"]
                  for c in json.loads(DEA_CODES.read_text())["table"]["dimensions"][0]["categories"]}
         self.council = np.array([codes[k][5:7] for k in keys])   # N1000 LL DD
@@ -114,28 +136,28 @@ class Data:
     def objective(self, Xs, dz_idx, deas, a_b, a_w, fixed_B=None):
         """Loss for a fit on training DZs `dz_idx`, scored on training DEAs `deas`."""
         p = Xs.shape[1]
-        Md = self.M[self.dea_of_dz[dz_idx]]
         wd = self.wdz[dz_idx]
         remap = -np.ones(len(self.dea_names), int)
         remap[deas] = np.arange(len(deas))
         ri = remap[self.dea_of_dz[dz_idx]]
-        Yt, Mt, Wt, nd = self.Y[deas], self.M[deas], self.W[deas], len(deas)
+        Yt, Mt, Wt, Gt, nd = self.Y[deas], self.M[deas], self.W[deas], self.G[deas], len(deas)
         counts = np.bincount(BLOC_INDEX, minlength=N_BLOCS)
 
         def f(theta):
             b = theta[:K]
             B = fixed_B if fixed_B is not None else theta[K:].reshape(K, p)
             L = b[None, :] + Xs @ B.T
-            L = np.where(Md, L, -1e30)
             L -= L.max(1, keepdims=True)
             pz = np.exp(L)
             pz /= pz.sum(1, keepdims=True)
             Pd = np.zeros((nd, K))
             np.add.at(Pd, ri, wd[:, None] * pz)
-            Pc = np.where(Mt, np.maximum(Pd, 1e-300), 1.0)
+            Po = np.einsum("da,dab->db", Pd, Gt)             # onto each DEA's ballot
+            Pc = np.where(Mt, np.maximum(Po, 1e-300), 1.0)
             loss = -(Wt[:, None] * Yt * np.log(Pc)).sum()
-            gp = np.where(Mt, -(Wt[:, None] * Yt) / Pc, 0.0)[ri] * wd[:, None]
-            deta = np.where(Md, pz * (gp - (gp * pz).sum(1, keepdims=True)), 0.0)
+            g_obs = np.where(Mt, -(Wt[:, None] * Yt) / Pc, 0.0)
+            gp = np.einsum("db,dab->da", g_obs, Gt)[ri] * wd[:, None]
+            deta = pz * (gp - (gp * pz).sum(1, keepdims=True))
             gb = deta.sum(0) + 2 * EPS * b
             loss += EPS * (b ** 2).sum()
             if fixed_B is not None:
@@ -160,11 +182,10 @@ class Data:
         return r.x
 
     @staticmethod
-    def predict(theta, Xs, mask=None):
+    def predict(theta, Xs):
+        """Unmasked shares: every party's voters."""
         p = Xs.shape[1]
         L = theta[:K][None, :] + Xs @ theta[K:].reshape(K, p).T
-        if mask is not None:
-            L = np.where(mask, L, -1e30)
         L -= L.max(1, keepdims=True)
         E = np.exp(L)
         return E / E.sum(1, keepdims=True)
@@ -175,6 +196,10 @@ class Data:
         Pd = np.zeros((len(deas), K))
         np.add.at(Pd, remap[self.dea_of_dz[dz_idx]], self.wdz[dz_idx][:, None] * pz)
         return Pd
+
+    def on_ballot(self, Pd, deas):
+        """DEA voter shares -> shares counted for the parties that stood."""
+        return np.einsum("da,dab->db", Pd, self.G[deas])
 
     def kl(self, P, deas):
         Yt, Mt, Wt = self.Y[deas], self.M[deas], self.W[deas]
