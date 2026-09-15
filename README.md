@@ -684,6 +684,9 @@ independent with no such tendency stays Independent.
 | Election | Candidate | DEA / constituency | Votes | Counted as |
 |---|---|---|---:|---|
 | 2024 Westminster | EASTON, ALEX | North Down | 20,913 | **DUP** |
+| 2022 Assembly | EASTON, Alex | North Down | 9,568 | **DUP** |
+| 2022 Assembly | SUGDEN, Claire Elizabeth | East Londonderry | 3,981 | **UUP** |
+| 2022 Assembly | QUIGLEY, Stephanie | East Londonderry | 1,503 | **SDLP** |
 | 2023 council | BERRY, Paul | Cusher | 2,059 | **DUP** |
 | 2023 council | Donnelly, Gary | The Moor | 1,868 | **Sinn Féin** |
 | 2023 council | McCusker, Paul | Oldpark | 1,747 | **SDLP** |
@@ -692,16 +695,18 @@ independent with no such tendency stays Independent.
 | 2023 council | MONTEITH, Barry | Dungannon | 1,180 | **Sinn Féin** |
 | 2023 council | McQUILLAN, Adrian | Bann | 701 | **DUP** |
 
-Alex Easton was elected; the 2023 dataset does not record who won a seat, so
-no such claim is made for the council seven — six of them polled between 86%
-and 152% of their DEA quota on first preferences, and McQuillan 53%.
+Alex Easton was elected in 2024; the 2023 dataset does not record who won a
+seat, so no such claim is made for the council seven -- six of them polled
+between 86% and 152% of their DEA quota on first preferences, and McQuillan 53%.
 
 **Alex Easton, North Down** (2024). Elected as an Independent with 20,913 votes
 (48.30%). North Down is the only one of the 18 constituencies where *neither*
 the DUP nor the TUV stood, leaving him the de facto unionist standard-bearer
 against a single UUP challenger; he is also a former DUP MLA. Counting him as
 Independent understates the DUP by 2.7 points across NI and hands the
-Independent column a seat and 88.6% of its vote from one person.
+Independent column a seat and 88.6% of its vote from one person. He stood as an
+Independent in 2022 as well, taking 9,568 first preferences (138% of quota, the
+only independent in that election to reach one), and is counted the same way.
 
 **The seven 2023 council independents** are the cases where the test above has
 a clear answer. Their effect on the NI-wide 2023 first preferences:
@@ -714,7 +719,9 @@ a clear answer. Their effect on the NI-wide 2023 first preferences:
 | Independent | 34,396 (4.61%) | 24,009 (3.22%) |
 
 The 2024 effect: Independent 23,602 (3.03%, 1 seat) becomes 2,689 (0.34%, 0
-seats); DUP 172,058 (22.06%, 5 seats) becomes 192,971 (24.75%, 6 seats).
+seats); DUP 172,058 (22.06%, 5 seats) becomes 192,971 (24.75%, 6 seats). The
+2022 effect: Independent 25,315 (2.93%) becomes 10,263 (1.19%); DUP 21.33% ->
+22.44%, UUP 11.17% -> 11.63%, SDLP 9.07% -> 9.24%.
 
 ### Deliberately not assumed
 
@@ -726,6 +733,13 @@ Independent by explicit decision, not by omission. The 19 largest were reviewed
 individually; the twelve not listed above have no single party their voters
 would strongly tend toward, several being prominent precisely for being
 non-party. The unreviewed tail is 37 candidates, none above 53% of a DEA quota.
+
+The other **21 Assembly independents (10,263 votes, 1.19%)** are a weaker
+statement: only the three largest were reviewed, and the rest were **not
+examined individually**. None of them reached even a quarter of a quota, the
+largest being Gavin Malone (Newry and Armagh, 3,157, 32% of quota) -- so the
+exposure is small, but this is an unfinished sweep rather than a set of
+decisions.
 
 Note that the 2023 council independent vote is structurally unlike 2024's. At
 Westminster one candidate was 88.6% of the entire independent vote; at council

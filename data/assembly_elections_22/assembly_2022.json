@@ -6,7 +6,7 @@
  "keyed_by": "constituency name, as PC_NAME in the 2008 boundaries geojson",
  "notes": {
   "party": "Short label normalised from the sheet's own description, kept verbatim in `party_raw`. Labels match council_elections_2023.json and pc24_results_2024.json, so the three join on `party`. Resume NI and Heritage stood only in 2022.",
-  "party_source": "'source' throughout: no voting modelling assumption has been applied to this dataset. See \"Voting modelling assumptions\" in README.md for the ones applied elsewhere.",
+  "party_source": "'source' where the party is the one on the ballot paper; 'assumed' where a voting modelling assumption counts the candidate as a different party, with the declared label kept in `party_as_declared`. Only the three largest independents were reviewed; the other 21 are left as Independent without individual review. See \"Voting modelling assumptions\" in README.md.",
   "verification": "Each constituency's first preferences are summed and compared with the Total Valid Votes printed on the same sheet."
  },
  "constituency_count": 18,
@@ -34,14 +34,14 @@
  },
  "ni_party_first_prefs": {
   "Sinn Féin": 250385,
-  "DUP": 184002,
+  "DUP": 193570,
   "Alliance": 116681,
-  "UUP": 96390,
-  "SDLP": 78237,
+  "UUP": 100371,
+  "SDLP": 79740,
   "TUV": 65788,
-  "Independent": 25315,
   "Green": 16433,
   "Aontú": 12777,
+  "Independent": 10263,
   "PBP": 9798,
   "PUP": 2665,
   "IRSP": 1869,
@@ -52,7 +52,29 @@
   "Heritage": 128,
   "Resume NI": 13
  },
- "flags": [],
+ "flags": [
+  {
+   "level": "info",
+   "constituency": "East Londonderry",
+   "source": "ni-assembly-election-2022-result-sheet-east-londonderry.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "QUIGLEY, Stephanie: Independent -> SDLP"
+  },
+  {
+   "level": "info",
+   "constituency": "East Londonderry",
+   "source": "ni-assembly-election-2022-result-sheet-east-londonderry.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "SUGDEN, Claire Elizabeth: Independent -> UUP"
+  },
+  {
+   "level": "info",
+   "constituency": "North Down",
+   "source": "ni-assembly-election-results-north-down.xlsx",
+   "issue": "party assigned by voting modelling assumption",
+   "detail": "EASTON, Alex: Independent -> DUP"
+  }
+ ],
  "constituencies": [
   {
    "constituency": "Belfast East",
@@ -683,15 +705,15 @@
    "party_first_prefs": {
     "DUP": 11937,
     "Sinn Féin": 11368,
-    "Independent": 5747,
-    "SDLP": 3664,
+    "UUP": 6606,
+    "SDLP": 5167,
     "Alliance": 3338,
     "TUV": 2959,
-    "UUP": 2625,
     "Aontú": 1095,
     "PUP": 933,
     "Green": 347,
-    "PBP": 347
+    "PBP": 347,
+    "Independent": 263
    },
    "candidates": [
     {
@@ -724,10 +746,11 @@
     },
     {
      "candidate": "SUGDEN, Claire Elizabeth",
-     "party": "Independent",
+     "party": "UUP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 3981
+     "party_source": "assumed",
+     "first_pref": 3981,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "HUNTER, Cara",
@@ -759,10 +782,11 @@
     },
     {
      "candidate": "QUIGLEY, Stephanie",
-     "party": "Independent",
+     "party": "SDLP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 1503
+     "party_source": "assumed",
+     "first_pref": 1503,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "BROLLY, Gemma",
@@ -1537,23 +1561,24 @@
    "reconciled_to_stated_total": true,
    "first_prefs_total": 41743,
    "party_first_prefs": {
+    "DUP": 17862,
     "Alliance": 12062,
-    "Independent": 10244,
-    "DUP": 8294,
     "UUP": 5167,
     "Green": 2734,
     "TUV": 1574,
     "SDLP": 727,
     "Sinn Féin": 687,
+    "Independent": 676,
     "Conservative": 254
    },
    "candidates": [
     {
      "candidate": "EASTON, Alex",
-     "party": "Independent",
+     "party": "DUP",
      "party_raw": "Independent",
-     "party_source": "source",
-     "first_pref": 9568
+     "party_source": "assumed",
+     "first_pref": 9568,
+     "party_as_declared": "Independent"
     },
     {
      "candidate": "MUIR, Andrew",

@@ -43,6 +43,18 @@ EXTRA_MAP = {
     "heritage party - pro-freedom. pro-family. pro-life.": "Heritage",
 }
 
+# --- voting modelling assumptions ------------------------------------------
+# Independents counted as the party their voters would strongly tend to back at
+# Westminster level. Deliberate modelling choices, not data corrections: the
+# sheet's wording stays in `party_raw`, the declared label moves to
+# `party_as_declared`, and party_source becomes "assumed". Only the three
+# largest were reviewed; see "Voting modelling assumptions" in README.md.
+ALIGNED = {
+    ("North Down",       "EASTON, Alex"):             "DUP",
+    ("East Londonderry", "SUGDEN, Claire Elizabeth"): "UUP",
+    ("East Londonderry", "QUIGLEY, Stephanie"):       "SDLP",
+}
+
 LABELS = [
     ("electorate",    r"eligible electorate"),
     ("votes_polled",  r"(total )?votes polled"),
@@ -171,9 +183,17 @@ def build():
                               "issue": "unrecognised party description",
                               "detail": r["party_raw"], "candidate": r["candidate"],
                               "first_pref": r["first_pref"]})
-            cands.append({"candidate": r["candidate"], "party": party,
-                          "party_raw": r["party_raw"], "party_source": "source",
-                          "first_pref": r["first_pref"]})
+            row = {"candidate": r["candidate"], "party": party,
+                   "party_raw": r["party_raw"], "party_source": "source",
+                   "first_pref": r["first_pref"]}
+            aligned = ALIGNED.get((name, r["candidate"]))
+            if aligned:
+                row["party_as_declared"] = party
+                row["party"], row["party_source"] = aligned, "assumed"
+                flags.append({"level": "info", "constituency": name, "source": src,
+                              "issue": "party assigned by voting modelling assumption",
+                              "detail": f"{r['candidate']}: {party} -> {aligned}"})
+            cands.append(row)
         total = sum(c["first_pref"] for c in cands)
         ok = meta["valid_votes"] is not None and total == meta["valid_votes"]
         if not ok:
@@ -214,9 +234,13 @@ def build():
                      "verbatim in `party_raw`. Labels match council_elections_2023.json "
                      "and pc24_results_2024.json, so the three join on `party`. Resume NI "
                      "and Heritage stood only in 2022.",
-            "party_source": "'source' throughout: no voting modelling assumption has been "
-                            "applied to this dataset. See \"Voting modelling assumptions\" "
-                            "in README.md for the ones applied elsewhere.",
+            "party_source": "'source' where the party is the one on the ballot paper; "
+                            "'assumed' where a voting modelling assumption counts the "
+                            "candidate as a different party, with the declared label kept "
+                            "in `party_as_declared`. Only the three largest independents "
+                            "were reviewed; the other 21 are left as Independent without "
+                            "individual review. See \"Voting modelling assumptions\" in "
+                            "README.md.",
             "verification": "Each constituency's first preferences are summed and compared "
                             "with the Total Valid Votes printed on the same sheet.",
         },
