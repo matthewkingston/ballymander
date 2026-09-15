@@ -751,6 +751,14 @@ Sperrin's `Barr, Raymond` and `Gallagher, Paul` are a separate matter: EONI's
 workbook gives them no party at all, so they are `manual`, not `assumed`. That
 fills a blank rather than reassigning a declared label.
 
+## Voting model
+
+Work towards a voting mode (party voters per Data Zone, simulated elections in
+drawn constituencies) is documented in
+[`docs/voting-model.md`](docs/voting-model.md): the demographic prior, its
+uncertainty, the evidence behind each choice, and the questions still open.
+Outputs are in `data/model/`; the scripts need `pip install -r requirements.txt`.
+
 ## Data
 
 | File | Contents |
@@ -762,6 +770,9 @@ fills a blank rather than reassigning a declared label.
 | `data/ni-census21-...age_syoa...json` | single year of age per DZ × 101 categories |
 | `data/ni-census21-...sexual_orientation...json` | sexual orientation per DZ × 4 categories |
 | `data/ni-census21-...social_grade...json` | social grade per DZ × 5 categories |
+| `data/ni-census21-...nat_id_basic...json` | national identity per DZ × 8 categories |
+| `data/ni-census21-...sdz21+religion_belong_to_dvo_1000...json` | detailed religion per SDZ × 32 categories |
+| `data/model/` | voting model features and prior outputs ([docs](docs/voting-model.md)) |
 
 Hierarchy is a clean tree: DZ → SDZ → DEA → LGD. Source `.geojson` files are
 gitignored (large); the census JSON is small enough to keep.

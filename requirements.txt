@@ -1,0 +1,6 @@
+# Python dependencies for the data scripts. The map build itself needs none of
+# these (see scripts/setup_tools.sh); install with  pip install -r requirements.txt
+numpy==2.5.3           # voting model: scripts/fit_prior.py, prior_covariance.py
+scipy==1.18.1          # voting model: optimiser
+pdfplumber==0.11.10    # election ingest: scripts/parse_council_2023.py
+openpyxl==3.1.5        # election ingest: parse_council_2023.py, parse_assembly_2022.py
