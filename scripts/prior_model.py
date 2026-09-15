@@ -57,6 +57,30 @@ for _g, (_name, _members) in enumerate(BLOCS.items()):
 N_BLOCS = len(BLOCS)
 
 
+def load_transfers() -> dict:
+    return json.loads(TRANSFERS.read_text())["matrix"]
+
+
+def ballot_matrix(stood, transfers) -> np.ndarray:
+    """G[a][b]: share of party a's voters counted for party b, given who stood.
+
+    A party that stood keeps its voters; an absent party's voters go to the
+    parties that stood in proportion to its transfer-matrix row, renormalised
+    over them (directly, not cascading through other absent parties).
+    """
+    G = np.zeros((K, K))
+    for a in range(K):
+        if stood[a]:
+            G[a, a] = 1.0
+        else:
+            row = np.array([transfers[PARTIES[a]].get(PARTIES[b], 0.0) if stood[b] else 0.0
+                            for b in range(K)])
+            if row.sum() <= 0:
+                raise ValueError(f"{PARTIES[a]} has no transfer destination among those standing")
+            G[a] = row / row.sum()
+    return G
+
+
 def norm(s: str) -> str:
     return re.sub(r"[^a-z]", "", s.lower().replace("&", " and "))
 
@@ -94,18 +118,8 @@ class Data:
         self.W = self.N / self.N.mean()
 
         # G[d][a][b]: share of party a's voters counted for party b on DEA d's ballot
-        tm = json.loads(TRANSFERS.read_text())["matrix"]
-        self.G = np.zeros((len(self.dea_names), K, K))
-        for d, stood in enumerate(self.M):
-            for a in range(K):
-                if stood[a]:
-                    self.G[d, a, a] = 1.0
-                else:
-                    row = np.array([tm[PARTIES[a]].get(PARTIES[b], 0.0) if stood[b] else 0.0
-                                    for b in range(K)])
-                    if row.sum() <= 0:
-                        raise ValueError(f"{self.dea_names[d]}: {PARTIES[a]} has no transfer destination")
-                    self.G[d, a] = row / row.sum()
+        tm = load_transfers()
+        self.G = np.array([ballot_matrix(stood, tm) for stood in self.M])
 
         codes = {norm(c["label"]): c["code"]
                  for c in json.loads(DEA_CODES.read_text())["table"]["dimensions"][0]["categories"]}

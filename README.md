@@ -756,8 +756,9 @@ fills a blank rather than reassigning a declared label.
 Work towards a voting mode (party voters per Data Zone, simulated elections in
 drawn constituencies) is documented in
 [`docs/voting-model.md`](docs/voting-model.md): the demographic prior, its
-uncertainty, the transfer matrix built from STV transfers, the evidence behind
-each choice, and the questions still open.
+uncertainty, the transfer matrix built from STV transfers, the fit of all three
+elections into voter shares per DZ, the evidence behind each choice, and the
+questions still open.
 Outputs are in `data/model/`; the scripts need `pip install -r requirements.txt`.
 
 ## Data
