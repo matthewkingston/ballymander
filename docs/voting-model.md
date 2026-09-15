@@ -461,6 +461,10 @@ Example: Airport DEA had no TUV candidate.
 * Combined with the South Antrim Assembly result (TUV 9.6%), the estimate is
   4.9%.
 
+On real boundaries it gets 12 of 18 Westminster 2024 winners right, and 11 with
+Westminster left out of the combination. See
+[Seat-count sanity check](#seat-count-sanity-check).
+
 **Checks:**
 * With the council layer alone and no spread term, every DZ's combined shift
   equals its DEA's own fitted shift (to 1e-6). This confirms prior and data
@@ -572,6 +576,74 @@ Weighted partial correlations, with drop-top-N and jackknife checks.
   * For comparison, fully independent errors would give −1: errors are
     strongly spatially clustered.
 
+### Seat-count sanity check
+
+Does voters v0 reproduce real results on real boundaries? This is a
+plausibility check, not a score to chase.
+* Three estimates are compared: prior v2 alone; voters v0 with every layer; and
+  voters v0 with the checked election left out of the combination.
+* Only the left-out version is a genuine check, and even that uses a prior
+  fitted on council results.
+* Each constituency's DZ voter shares are summed by electorate and put through
+  that seat's actual ballot with the transfer matrix.
+* Independents and micro-parties are transparent (Easton counted as DUP,
+  Sugden as UUP).
+
+**Westminster 2024** (FPTP, 18 seats; winner = the party with the largest
+share):
+
+| Estimate | Winners right | Seats | Share RMS |
+|---|---:|---|---:|
+| Actual | – | SF 7, DUP 6, SDLP 2, All 1, TUV 1, UUP 1 | – |
+| Prior v2 | 10/18 | SF 9, DUP 6, All 3 | 6.6 pts |
+| Voters v0 without Westminster | 11/18 | SF 9, DUP 7, All 2 | 5.4 pts |
+| Voters v0, all layers | 12/18 | SF 9, DUP 7, All 1, SDLP 1 | 4.7 pts |
+
+Seats still missed with all layers:
+
+| Seat | Model | Actual | Likely cause |
+|---|---|---|---|
+| North Antrim | DUP 29.5 v SF 20.6 | TUV 28.4 v DUP 27.3 | candidate (Allister) |
+| South Antrim | DUP 26.4 v SF 20.5 | UUP 38.0 v DUP 20.5 | candidate (Swann) |
+| Foyle | SF 42.6 v SDLP 26.9 | SDLP 42.5 v SF 31.2 | candidate (Eastwood) |
+| Belfast East | All 36.5 v DUP 34.4 | DUP 46.8 v All 40.5 | unionist tactical consolidation |
+| Lagan Valley | DUP 31.8 v All 30.3 | All 37.9 v DUP 31.9 | local circumstances |
+| East Londonderry | SF 28.1 v DUP 27.1 | DUP 28.0 v SF 27.6 | a 0.4-point margin |
+
+* Leaving Westminster out also loses **Belfast South & Mid Down** (actual SDLP
+  49.1 v All 20.3). The SDLP's tactical landslide isn't in the council or
+  Assembly results.
+* The consistent lean is too many SF seats and too few for smaller parties with
+  strong local candidates. These are the effects Westminster's large floor
+  (0.55) already concedes the model can't see.
+
+**Assembly 2022** (90 seats):
+* STV simulation is deferred, so each constituency's 5 seats are allocated by
+  Droop quota with largest remainders on party first-preference shares. The
+  same proxy on the actual first preferences is the fair comparison, because it
+  separates model error from proxy error.
+* Real winners were read from the count sheets for this check only. Three
+  sheets never mark their final seat "Elected"; those seats went to the
+  candidate with the highest running total, which matches the published
+  result.
+
+| | Seats | Seats differing from the proxy on actual votes | Share RMS |
+|---|---|---:|---:|
+| Real result | SF 27, DUP 26, All 17, UUP 10, SDLP 8, PBP 1, TUV 1 | – | – |
+| Proxy on actual first preferences | SF 29, DUP 25, All 14, UUP 10, SDLP 8, TUV 3, Grn 1 | – | – |
+| Prior v2 | SF 34, DUP 25, All 11, UUP 11, SDLP 8, TUV 1 | 13 | 3.7 pts |
+| Voters v0 without Assembly | SF 30, DUP 28, All 14, UUP 10, SDLP 6, TUV 2 | 8 | 2.7 pts |
+| Voters v0, all layers | SF 31, DUP 28, All 12, UUP 10, SDLP 7, TUV 2 | 6 | 2.0 pts |
+
+* The proxy itself misses a few seats: it gives Alliance 3 too few, because
+  real counts reward Alliance on transfers.
+* Against the proxy, voters v0 leans slightly to DUP (28 v 25) and away from
+  Alliance and SDLP.
+
+**Overall:** every step improves on the prior: Westminster winners 10 → 11 → 12,
+Assembly seat differences 13 → 8 → 6. What remains is mostly named candidates
+and tactical voting, which the model deliberately doesn't represent.
+
 ## Assumptions and caveats
 
 * **Intention is fixed across election types.** This is known to be faulty: for
@@ -653,8 +725,6 @@ Weighted partial correlations, with drop-top-N and jackknife checks.
   one small area. On real data it gave negative and absurd implied TUV shares
   (−1.4% North Down, 29.7% Strangford). Claude recommends dropping it; not
   formally decided.
-* **Sanity checks, not scores to chase** (Claude's proposal): on real boundaries, does the model
-  reproduce the 2024 Westminster 18-seat result and the 2022 Assembly result?
 
 ## Deferred past v0
 
