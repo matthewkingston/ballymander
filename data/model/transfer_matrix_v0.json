@@ -1,0 +1,419 @@
+{
+ "version": "transfer matrix v0",
+ "meaning": "matrix[from][to]: share of a party's transferring voters who go to each other party when all eight are standing. Where only some stand, renormalise the row over those standing. Non-transferable votes are excluded.",
+ "parties": [
+  "Sinn Féin",
+  "DUP",
+  "Alliance",
+  "UUP",
+  "SDLP",
+  "TUV",
+  "Green",
+  "PBP",
+  "Aontú"
+ ],
+ "blocs": {
+  "nationalist": [
+   "Sinn Féin",
+   "SDLP",
+   "PBP",
+   "Aontú"
+  ],
+  "unionist": [
+   "DUP",
+   "UUP",
+   "TUV"
+  ],
+  "other": [
+   "Alliance",
+   "Green"
+  ]
+ },
+ "settings": {
+  "max_other_party_share": 0.25,
+  "running_mate_continuing": "excluded",
+  "event_weighting": "each event counts once",
+  "k_pseudo_events": 5.0,
+  "hand_set_targets": {
+   "Alliance -> Green": 0.35,
+   "Green -> Alliance": 0.35
+  }
+ },
+ "matrix": {
+  "Sinn Féin": {
+   "DUP": 0.0014,
+   "Alliance": 0.1569,
+   "UUP": 0.0073,
+   "SDLP": 0.5341,
+   "TUV": 0.0018,
+   "Green": 0.0931,
+   "PBP": 0.0896,
+   "Aontú": 0.1157
+  },
+  "DUP": {
+   "Sinn Féin": 0.0019,
+   "Alliance": 0.0412,
+   "UUP": 0.5473,
+   "SDLP": 0.0157,
+   "TUV": 0.3486,
+   "Green": 0.032,
+   "PBP": 0.0089,
+   "Aontú": 0.0044
+  },
+  "Alliance": {
+   "Sinn Féin": 0.0748,
+   "DUP": 0.0195,
+   "UUP": 0.1117,
+   "SDLP": 0.2786,
+   "TUV": 0.0109,
+   "Green": 0.317,
+   "PBP": 0.1484,
+   "Aontú": 0.039
+  },
+  "UUP": {
+   "Sinn Féin": 0.0037,
+   "DUP": 0.4389,
+   "Alliance": 0.184,
+   "SDLP": 0.0549,
+   "TUV": 0.2402,
+   "Green": 0.056,
+   "PBP": 0.0164,
+   "Aontú": 0.006
+  },
+  "SDLP": {
+   "Sinn Féin": 0.1921,
+   "DUP": 0.0095,
+   "Alliance": 0.3073,
+   "UUP": 0.0294,
+   "TUV": 0.0055,
+   "Green": 0.1871,
+   "PBP": 0.1063,
+   "Aontú": 0.1628
+  },
+  "TUV": {
+   "Sinn Féin": 0.0037,
+   "DUP": 0.6162,
+   "Alliance": 0.0321,
+   "UUP": 0.294,
+   "SDLP": 0.0159,
+   "Green": 0.0255,
+   "PBP": 0.0091,
+   "Aontú": 0.0036
+  },
+  "Green": {
+   "Sinn Féin": 0.1001,
+   "DUP": 0.0163,
+   "Alliance": 0.3459,
+   "UUP": 0.0453,
+   "SDLP": 0.1967,
+   "TUV": 0.0128,
+   "PBP": 0.2466,
+   "Aontú": 0.0364
+  },
+  "PBP": {
+   "Sinn Féin": 0.1106,
+   "DUP": 0.0149,
+   "Alliance": 0.1976,
+   "UUP": 0.0189,
+   "SDLP": 0.3211,
+   "TUV": 0.0105,
+   "Green": 0.2211,
+   "Aontú": 0.1054
+  },
+  "Aontú": {
+   "Sinn Féin": 0.2702,
+   "DUP": 0.0366,
+   "Alliance": 0.0924,
+   "UUP": 0.0112,
+   "SDLP": 0.3488,
+   "TUV": 0.0163,
+   "Green": 0.1135,
+   "PBP": 0.1109
+  }
+ },
+ "unshrunk": {
+  "Sinn Féin": {
+   "DUP": 0.0012,
+   "Alliance": 0.1549,
+   "UUP": 0.0064,
+   "SDLP": 0.546,
+   "TUV": 0.0016,
+   "Green": 0.0832,
+   "PBP": 0.089,
+   "Aontú": 0.1177
+  },
+  "DUP": {
+   "Sinn Féin": 0.0011,
+   "Alliance": 0.024,
+   "UUP": 0.5636,
+   "SDLP": 0.0088,
+   "TUV": 0.3755,
+   "Green": 0.0223,
+   "PBP": 0.0015,
+   "Aontú": 0.0031
+  },
+  "Alliance": {
+   "Sinn Féin": 0.0813,
+   "DUP": 0.0214,
+   "UUP": 0.1262,
+   "SDLP": 0.3158,
+   "TUV": 0.0117,
+   "Green": 0.2584,
+   "PBP": 0.142,
+   "Aontú": 0.0433
+  },
+  "UUP": {
+   "Sinn Féin": 0.0037,
+   "DUP": 0.4003,
+   "Alliance": 0.1907,
+   "SDLP": 0.0575,
+   "TUV": 0.231,
+   "Green": 0.0657,
+   "PBP": 0.0433,
+   "Aontú": 0.0079
+  },
+  "SDLP": {
+   "Sinn Féin": 0.2379,
+   "DUP": 0.0118,
+   "Alliance": 0.4146,
+   "UUP": 0.0384,
+   "TUV": 0.0067,
+   "Green": 0.2346,
+   "PBP": 0.056
+  },
+  "TUV": {
+   "Sinn Féin": 0.004,
+   "DUP": 0.6424,
+   "Alliance": 0.0232,
+   "UUP": 0.2833,
+   "SDLP": 0.0128,
+   "Green": 0.0221,
+   "PBP": 0.0091,
+   "Aontú": 0.0031
+  },
+  "Green": {
+   "Sinn Féin": 0.097,
+   "DUP": 0.0148,
+   "Alliance": 0.3158,
+   "UUP": 0.034,
+   "SDLP": 0.1687,
+   "TUV": 0.0127,
+   "PBP": 0.3227,
+   "Aontú": 0.0342
+  },
+  "PBP": {
+   "Sinn Féin": 0.096,
+   "DUP": 0.0196,
+   "Alliance": 0.2297,
+   "UUP": 0.0223,
+   "SDLP": 0.2373,
+   "TUV": 0.0176,
+   "Green": 0.3775
+  },
+  "Aontú": {
+   "Sinn Féin": 0.3732,
+   "DUP": 0.0455,
+   "Alliance": 0.0689,
+   "UUP": 0.0098,
+   "SDLP": 0.3022,
+   "TUV": 0.0222,
+   "Green": 0.0598,
+   "PBP": 0.1184
+  }
+ },
+ "bloc_targets": {
+  "Sinn Féin": {
+   "DUP": 0.0077,
+   "Alliance": 0.1697,
+   "UUP": 0.0156,
+   "SDLP": 0.467,
+   "TUV": 0.0048,
+   "Green": 0.1309,
+   "PBP": 0.0925,
+   "Aontú": 0.1118
+  },
+  "DUP": {
+   "Sinn Féin": 0.0039,
+   "Alliance": 0.1148,
+   "UUP": 0.4773,
+   "SDLP": 0.0368,
+   "TUV": 0.3038,
+   "Green": 0.045,
+   "PBP": 0.0127,
+   "Aontú": 0.0055
+  },
+  "Alliance": {
+   "Sinn Féin": 0.0815,
+   "DUP": 0.0167,
+   "UUP": 0.0796,
+   "SDLP": 0.2394,
+   "TUV": 0.0101,
+   "Green": 0.35,
+   "PBP": 0.1852,
+   "Aontú": 0.0375
+  },
+  "UUP": {
+   "Sinn Féin": 0.0033,
+   "DUP": 0.5647,
+   "Alliance": 0.0956,
+   "SDLP": 0.0307,
+   "TUV": 0.253,
+   "Green": 0.0375,
+   "PBP": 0.0106,
+   "Aontú": 0.0046
+  },
+  "SDLP": {
+   "Sinn Féin": 0.224,
+   "DUP": 0.0112,
+   "Alliance": 0.2471,
+   "UUP": 0.0227,
+   "TUV": 0.007,
+   "Green": 0.1905,
+   "PBP": 0.1346,
+   "Aontú": 0.1628
+  },
+  "TUV": {
+   "Sinn Féin": 0.0029,
+   "DUP": 0.4934,
+   "Alliance": 0.0835,
+   "UUP": 0.3473,
+   "SDLP": 0.0268,
+   "Green": 0.0328,
+   "PBP": 0.0093,
+   "Aontú": 0.004
+  },
+  "Green": {
+   "Sinn Féin": 0.0815,
+   "DUP": 0.0167,
+   "Alliance": 0.35,
+   "UUP": 0.0796,
+   "SDLP": 0.2394,
+   "TUV": 0.0101,
+   "PBP": 0.1852,
+   "Aontú": 0.0375
+  },
+  "PBP": {
+   "Sinn Féin": 0.1449,
+   "DUP": 0.0072,
+   "Alliance": 0.1599,
+   "UUP": 0.0147,
+   "SDLP": 0.44,
+   "TUV": 0.0045,
+   "Green": 0.1233,
+   "Aontú": 0.1054
+  },
+  "Aontú": {
+   "Sinn Féin": 0.1476,
+   "DUP": 0.0074,
+   "Alliance": 0.1629,
+   "UUP": 0.015,
+   "SDLP": 0.4482,
+   "TUV": 0.0046,
+   "Green": 0.1256,
+   "PBP": 0.0887
+  }
+ },
+ "clean_events": {
+  "Sinn Féin": 48,
+  "DUP": 18,
+  "Alliance": 28,
+  "UUP": 32,
+  "SDLP": 24,
+  "TUV": 35,
+  "Green": 18,
+  "PBP": 7,
+  "Aontú": 11
+ },
+ "events_with_destination_available": {
+  "Sinn Féin": {
+   "DUP": 38,
+   "Alliance": 44,
+   "UUP": 39,
+   "SDLP": 39,
+   "TUV": 29,
+   "Green": 16,
+   "PBP": 13,
+   "Aontú": 19
+  },
+  "DUP": {
+   "Sinn Féin": 9,
+   "Alliance": 14,
+   "UUP": 14,
+   "SDLP": 11,
+   "TUV": 7,
+   "Green": 8,
+   "PBP": 2,
+   "Aontú": 3
+  },
+  "Alliance": {
+   "Sinn Féin": 16,
+   "DUP": 19,
+   "UUP": 18,
+   "SDLP": 20,
+   "TUV": 10,
+   "Green": 3,
+   "PBP": 6,
+   "Aontú": 7
+  },
+  "UUP": {
+   "Sinn Féin": 12,
+   "DUP": 26,
+   "Alliance": 27,
+   "SDLP": 16,
+   "TUV": 17,
+   "Green": 5,
+   "PBP": 1,
+   "Aontú": 2
+  },
+  "SDLP": {
+   "Sinn Féin": 17,
+   "DUP": 16,
+   "Alliance": 16,
+   "UUP": 20,
+   "TUV": 10,
+   "Green": 5,
+   "PBP": 2,
+   "Aontú": 0
+  },
+  "TUV": {
+   "Sinn Féin": 14,
+   "DUP": 32,
+   "Alliance": 23,
+   "UUP": 25,
+   "SDLP": 20,
+   "Green": 9,
+   "PBP": 4,
+   "Aontú": 3
+  },
+  "Green": {
+   "Sinn Féin": 13,
+   "DUP": 11,
+   "Alliance": 18,
+   "UUP": 14,
+   "SDLP": 12,
+   "TUV": 7,
+   "PBP": 4,
+   "Aontú": 6
+  },
+  "PBP": {
+   "Sinn Féin": 4,
+   "DUP": 7,
+   "Alliance": 7,
+   "UUP": 7,
+   "SDLP": 5,
+   "TUV": 4,
+   "Green": 4,
+   "Aontú": 0
+  },
+  "Aontú": {
+   "Sinn Féin": 6,
+   "DUP": 10,
+   "Alliance": 10,
+   "UUP": 9,
+   "SDLP": 10,
+   "TUV": 7,
+   "Green": 1,
+   "PBP": 3
+  }
+ }
+}
