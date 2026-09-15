@@ -249,8 +249,7 @@ minimum-viable-product mindset: data-based, but simple.
 * **At most 25% of what's passed on came from other parties' voters.**
   First preferences and transfers from a running mate count as the party's own.
   For a surplus, only the last parcel received is examined, as in NI counts,
-  so the test applies to that parcel. *Implementation choice:* that surplus
-  rule.
+  so the test applies to that parcel.
 * Result: 221 clean events from 506 single-source events.
 
   | From | SF | TUV | UUP | Alliance | SDLP | DUP | Green | Aontú | PBP |
@@ -279,8 +278,7 @@ minimum-viable-product mindset: data-based, but simple.
     target; well-observed pairs follow their data.
   * Targets: the same fit pooled over every source party in the bloc, with the
     party itself left out and the rest renormalised. For example, SDLP's target
-    uses the pooled SF, SDLP, PBP and Aontú events. *Implementation choice:*
-    this pooled construction.
+    uses the pooled SF, SDLP, PBP and Aontú events.
   * **No all-party fallback.** Targets are bloc expectations, so DUP voters'
     behaviour must not inform Alliance→Green.
   * **Alliance→Green and Green→Alliance targets are hand-set at 35%**, as a
