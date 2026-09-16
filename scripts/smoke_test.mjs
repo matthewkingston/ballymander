@@ -377,6 +377,43 @@ election.stv = await page.evaluate(() => {
   };
 });
 
+// The party editor: exclude a party, merge two, and put them back.
+await page.click('#party-editor .demo-toggle');
+const editorPick = (names) => page.evaluate((want) => {
+  for (const row of document.querySelectorAll('.pe-row')) {
+    const box = row.querySelector('input');
+    if (want.includes(row.querySelector('.pe-name').textContent) !== box.checked) box.click();
+  }
+}, names);
+const editorPress = (label) => page.evaluate((l) => {
+  [...document.querySelectorAll('.pe-action')].find((b) => b.textContent === l).click();
+}, label);
+const editorState = () => page.evaluate(() => ({
+  rows: [...document.querySelectorAll('.pe-row')].map((r) =>
+    r.querySelector('.pe-name').textContent + (r.classList.contains('is-out') ? '(out)' : '')),
+  buttons: [...document.querySelectorAll('.pe-action')]
+    .map((b) => `${b.textContent}:${b.disabled ? 'off' : 'on'}`),
+  selected: [...document.querySelectorAll('.pe-row input')].filter((b) => b.checked).length,
+  votes: window.__model.parties.map((q) => Math.round(Array.from(
+    { length: window.__model.N }, (_, r) => q.rSum[r]).reduce((a, b) => a + b, 0))),
+  selector: [...document.getElementById('ctl-party-p').options].map((o) => o.text),
+}));
+election.editor = { start: await editorState() };
+await editorPick(['TUV']);
+election.editor.onePicked = (await editorState()).buttons;
+await editorPress('Exclude');
+election.editor.excluded = await editorState();
+await editorPick(['DUP', 'UUP']);
+election.editor.twoPicked = (await editorState()).buttons;
+await editorPress('Merge');
+election.editor.merged = await editorState();
+await editorPick(['DUP-UUP']);
+election.editor.mergedPicked = (await editorState()).buttons;
+await editorPress('Unmerge');
+await editorPick(['TUV']);
+await editorPress('Include');
+election.editor.restored = await editorState();
+
 // One region's election in detail: a pie under first past the post, the count
 // stage by stage under STV, and the map choosing which region.
 election.region = {};
@@ -555,6 +592,39 @@ if (!election || !election.lockedDuringRun.regions || election.lockedDuringRun.t
 }
 if (!election || !election.unlockedAfterStop) {
   problems.push('region count stayed locked after the run stopped');
+}
+// The editor: what the buttons allow, and that the votes follow.
+const ed = election && election.editor;
+if (!ed || ed.start.rows.length !== 9 || ed.start.buttons.some((b) => !b.endsWith(':off'))) {
+  problems.push('party editor did not start with nine parties and nothing to do');
+}
+if (!ed || ed.onePicked[0] !== 'Include:on' || ed.onePicked[2] !== 'Merge:off') {
+  problems.push('one selected party should allow include/exclude but not merge');
+}
+if (!ed || !ed.excluded.rows.includes('TUV(out)') || ed.excluded.selected !== 0) {
+  problems.push('excluding a party did not take, or left it selected');
+}
+if (!ed || ed.excluded.votes[5] !== 0 || !(ed.excluded.votes[1] > ed.start.votes[1])) {
+  problems.push("an excluded party's votes did not move on");
+}
+if (!ed || ed.twoPicked[2] !== 'Merge:on') problems.push('two selected parties should allow a merge');
+if (!ed || ed.merged.rows[0] !== 'DUP-UUP' || ed.merged.rows.includes('DUP')
+    || ed.merged.rows.includes('UUP')) {
+  problems.push('a merger should head the list and take its parties out of it');
+}
+if (!ed || ed.merged.votes[3] !== 0
+    || ed.merged.votes[1] !== ed.excluded.votes[1] + ed.excluded.votes[3]) {
+  problems.push('a merger did not gather its parties\' votes');
+}
+if (!ed || !ed.merged.selector.includes('DUP-UUP')) {
+  problems.push('the gerrymander target did not follow the merger');
+}
+if (!ed || ed.mergedPicked[2] !== 'Unmerge:on') {
+  problems.push('one merged party selected should offer Unmerge');
+}
+if (!ed || ed.restored.rows.length !== 9
+    || ed.restored.votes.some((v, i) => Math.abs(v - ed.start.votes[i]) > 1)) {
+  problems.push('unmerging and including did not restore the ballot');
 }
 if (!election || !election.region.stv.stages || !election.region.stv.full
     || election.region.stv.pieShown || !election.region.stv.overallHidden) {

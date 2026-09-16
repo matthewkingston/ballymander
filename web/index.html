@@ -65,6 +65,10 @@
          gerrymander controls. Built by app.js from web/data/dz_voters.json. -->
     <div id="party-block" hidden></div>
 
+    <!-- Which parties are on the ballot, and which have merged. Built by
+         app.js; its state outlives a run. -->
+    <div id="party-editor" hidden></div>
+
     <div class="ctl-grid ctl-more">
       <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
       <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">

@@ -611,6 +611,29 @@ Regions is fixed for the life of a run, since changing it means a different
 map; the election controls stay live, so a paused or stopped map can be
 re-counted under other rules.
 
+### The party editor
+
+Below the party controls, a collapsible **Party editor** decides who is on the
+ballot. Its state outlives a run, so a new map is drawn under the same ballot.
+
+Each row is a party — or a merger — with a tick or cross for whether it stands,
+and a checkbox to select it. Below the list:
+
+* **Include / Exclude** set every selected item to that status, whatever it was.
+* **Merge** (two or more selected) makes one item, named from the short party
+  names in the parties' own order — `SF-SDLP`, `All-SDLP-Gr`. It heads the list
+  and its parties leave. Mergers can themselves be merged.
+* **Unmerge** (exactly one merger selected) puts its parties back as they were,
+  including any that were excluded.
+
+Selections clear after each action, and the panel re-counts immediately, so
+this works mid-run or while paused.
+
+A merger stands if any of its parts did, and everything else — the gerrymander
+target, the statistic list, the pie, the tooltip — names it as the editor does.
+What an excluded party's voters do, and what a merger keeps, is described in
+[docs/voting-model.md](docs/voting-model.md#who-stands).
+
 ### One region's election
 
 The results panel switches between **Overall** and **Region**. Region shows a

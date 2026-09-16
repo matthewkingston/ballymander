@@ -62,6 +62,7 @@ const els = {
   recomValue: document.getElementById('ctl-recom-value'),
   demoBlocks: document.getElementById('demo-blocks'),
   partyBlock: document.getElementById('party-block'),
+  partyEditor: document.getElementById('party-editor'),
   modeDemographics: document.getElementById('mode-demographics'),
   modeElection: document.getElementById('mode-election'),
   electionType: document.getElementById('ctl-election-type'),
@@ -202,7 +203,8 @@ function rebuildBarOptions() {
   els.barsStat.textContent = '';
   for (const [key, stat] of Object.entries(BAR_STATS)) {
     if (stat.modes && !stat.modes.includes(uiMode)) continue;
-    const label = key.startsWith('party:') ? `${key.slice(6)} votes`
+    if (key.startsWith('party:') && entityHost(key.slice(6)) !== key.slice(6)) continue;
+    const label = key.startsWith('party:') ? `${entityLabel(key.slice(6))} votes`
       : key.startsWith('demo:')
         ? DEMOGRAPHICS.find((d) => d.key === key.slice(5)).label
         : { pop: 'Population', land: 'Land shape', people: 'People shape',
@@ -319,7 +321,8 @@ function buildPie(parties) {
     path.setAttribute('fill', PARTY_COLORS[party] || '#9aa7b4');
     path.addEventListener('mouseenter', () => {
       const seats = run.model ? run.model.partySeats(`party:${party}`) : 0;
-      els.pieCaption.textContent = `${party} — ${seats} ${seats === 1 ? 'seat' : 'seats'}`;
+      els.pieCaption.textContent =
+        `${entityLabel(party)} — ${seats} ${seats === 1 ? 'seat' : 'seats'}`;
     });
     path.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
     els.pieSvg.append(path);
@@ -356,6 +359,194 @@ function drawPie() {
   });
 }
 
+/* --- the party editor ---------------------------------------------------- */
+
+/* Short names for the merged parties' labels: DUP-UUP-TUV, All-SDLP-Gr. */
+const PARTY_SHORT = {
+  'Sinn Féin': 'SF', DUP: 'DUP', Alliance: 'All', UUP: 'UUP', SDLP: 'SDLP',
+  TUV: 'TUV', Green: 'Gr', PBP: 'PBP', 'Aontú': 'Ao',
+};
+
+/* What is on the ballot. An item is either one of the nine parties or a merger
+ * of several; merged items sit at the top of the list, newest first, and the
+ * parties inside them leave the list until they are unmerged.
+ *
+ * This outlives a run: the model keeps the mapping through start(), and the
+ * editor is not rebuilt, so a new map is drawn under the same ballot. */
+const ballot = { items: [], selected: new Set(), ui: null };
+
+const itemName = (item) => item.members.map((p) => PARTY_SHORT[p] || p).join('-');
+const itemHost = (item) => item.members[0];       // the slot that carries the votes
+
+/* Entities in the order the model knows them, for labelling everything else. */
+function entityFor(party) {
+  return ballot.items.find((item) => item.members.includes(party));
+}
+
+function entityLabel(party) {
+  const item = entityFor(party);
+  return item ? itemName(item) : party;
+}
+
+/* The party a slot's votes live in: itself, or its merger's host. */
+function entityHost(party) {
+  const item = entityFor(party);
+  return item ? itemHost(item) : party;
+}
+
+function ballotEntities() {
+  return ballot.items.map((item) => ({ item, host: itemHost(item), label: itemName(item) }));
+}
+
+function initBallot(parties) {
+  ballot.items = parties.map((party) => ({ members: [party], standing: true, prev: {} }));
+}
+
+/* Hand the model the ballot and refresh everything that reads it. */
+function applyBallot() {
+  if (!run.model || !election) return;
+  const standing = {};
+  const merge = {};
+  for (const item of ballot.items) {
+    const host = itemHost(item);
+    for (const party of item.members) {
+      standing[party] = item.standing;
+      if (item.members.length > 1) merge[party] = host;
+    }
+  }
+  run.model.setBallot({ standing, merge });
+  refreshPartyOptions();
+  rebuildBarOptions();
+  readout();
+  drawBars();
+  pieShown = '';
+  drawPie();
+  if (panelView === 'region') drawRegion();
+}
+
+/* The gerrymander target follows the ballot: one entry per entity, named as the
+ * editor names it. A party that has merged away is replaced by its host. */
+function refreshPartyOptions() {
+  if (!election) return;
+  const want = entityHost(election.party.value);
+  election.party.textContent = '';
+  for (const { host, label } of ballotEntities()) {
+    election.party.append(el('option', { value: host }, label));
+  }
+  election.party.value = ballotEntities().some((e) => e.host === want)
+    ? want : ballotEntities()[0].host;
+  election.toggleName.textContent = entityLabel(election.party.value);
+}
+
+/* Ticking a box must not rebuild the list: the checkboxes would be replaced
+ * mid-click and the next one would land on a detached node. Only the buttons
+ * change with the selection. */
+function updateEditorButtons() {
+  const ui = ballot.ui;
+  if (!ui) return;
+  const chosen = [...ballot.selected];
+  const merged = chosen.filter((item) => item.members.length > 1);
+  // Include and exclude work on any selection; merging needs two items, and
+  // unmerging exactly one merged item.
+  const unmerge = chosen.length === 1 && merged.length === 1;
+  ui.include.disabled = chosen.length === 0;
+  ui.exclude.disabled = chosen.length === 0;
+  ui.merge.disabled = !(chosen.length > 1 || unmerge);
+  ui.merge.textContent = unmerge ? 'Unmerge' : 'Merge';
+}
+
+function renderPartyEditor() {
+  const ui = ballot.ui;
+  if (!ui) return;
+  ui.list.textContent = '';
+  for (const item of ballot.items) {
+    const id = itemName(item);
+    const box = el('input', { type: 'checkbox', id: `pe-${id}` });
+    box.checked = ballot.selected.has(item);
+    box.addEventListener('change', () => {
+      if (box.checked) ballot.selected.add(item);
+      else ballot.selected.delete(item);
+      updateEditorButtons();
+    });
+    ui.list.append(el('li', { class: item.standing ? 'pe-row' : 'pe-row is-out' },
+      box,
+      el('label', { class: 'pe-name', for: `pe-${id}`, text: id }),
+      el('span', { class: 'pe-stands', title: item.standing ? 'stands' : 'stands aside',
+                   text: item.standing ? '\u2713' : '\u2715' })));
+  }
+  updateEditorButtons();
+}
+
+function editorAction(what) {
+  const chosen = ballot.items.filter((item) => ballot.selected.has(item));
+  if (!chosen.length) return;
+  if (what === 'include' || what === 'exclude') {
+    for (const item of chosen) item.standing = what === 'include';
+  } else if (chosen.length === 1 && chosen[0].members.length > 1) {
+    // Unmerge: the parties come back as they were before they merged.
+    const item = chosen[0];
+    const at = ballot.items.indexOf(item);
+    const restored = item.members.map((party) => ({
+      members: [party], standing: item.prev[party] !== false, prev: {},
+    }));
+    ballot.items.splice(at, 1, ...restored);
+    ballot.items.sort(byBallotOrder);
+  } else {
+    // Merge: one item at the top, holding every party of every item chosen.
+    const members = chosen.flatMap((item) => item.members)
+      .sort((a, b) => election.voters.parties.indexOf(a) - election.voters.parties.indexOf(b));
+    const prev = {};
+    for (const item of chosen) {
+      for (const party of item.members) {
+        prev[party] = item.prev[party] !== undefined ? item.prev[party] : item.standing;
+      }
+    }
+    // A merger stands if any of its parts did.
+    const standing = chosen.some((item) => item.standing);
+    ballot.items = ballot.items.filter((item) => !chosen.includes(item));
+    ballot.items.unshift({ members, standing, prev });
+  }
+  ballot.selected.clear();
+  renderPartyEditor();
+  applyBallot();
+}
+
+/* Merged items first, newest at the top; the rest in the parties' own order. */
+function byBallotOrder(a, b) {
+  const ma = a.members.length > 1;
+  const mb = b.members.length > 1;
+  if (ma !== mb) return ma ? -1 : 1;
+  if (ma) return 0;
+  const order = election.voters.parties;
+  return order.indexOf(a.members[0]) - order.indexOf(b.members[0]);
+}
+
+function buildPartyEditor(voters) {
+  initBallot(voters.parties);
+  const list = el('ul', { id: 'pe-list' });
+  const body = el('div', { id: 'pe-body', class: 'demo-body', hidden: true }, list);
+  const toggle = el('button', {
+    class: 'demo-toggle', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'pe-body',
+  }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }), ' Party editor');
+  const mk = (label) => el('button', { class: 'pe-action', type: 'button', disabled: true }, label);
+  const include = mk('Include');
+  const exclude = mk('Exclude');
+  const merge = mk('Merge');
+  body.append(el('div', { class: 'pe-actions' }, include, exclude, merge));
+  els.partyEditor.append(el('div', { class: 'demo-block' },
+    el('div', { class: 'ctl-grid' }, el('div', { class: 'ctl-head' }, toggle)), body));
+  toggle.addEventListener('click', () => {
+    const open = body.hidden;
+    body.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  include.addEventListener('click', () => editorAction('include'));
+  exclude.addEventListener('click', () => editorAction('exclude'));
+  merge.addEventListener('click', () => editorAction('merge'));
+  ballot.ui = { list, body, toggle, include, exclude, merge };
+  renderPartyEditor();
+}
+
 /* --- one region's election ----------------------------------------------- */
 
 const partyColour = (party) => PARTY_COLORS[party] || '#9aa7b4';
@@ -374,7 +565,7 @@ function regionCaption(text) {
 
 /* First past the post: the region's votes as a pie, hover for the figures. */
 function drawRegionPie(m, r) {
-  const parties = election.voters.parties;
+  const parties = election.voters.parties;   // slots; merged ones hold nothing
   const votes = m.regionVotes(r, new Float64Array(parties.length));
   const total = votes.reduce((a, b) => a + b, 0) || 1;
   els.regionPie.textContent = '';
@@ -386,13 +577,15 @@ function drawRegionPie(m, r) {
     path.setAttribute('fill', partyColour(party));
     path.setAttribute('d', wedgePath(from, to));
     path.addEventListener('mouseenter', () => regionCaption(
-      `${party} — ${nf.format(Math.round(votes[i]))} votes (${pct.format(votes[i] / total)})`));
+      `${entityLabel(party)} — ${nf.format(Math.round(votes[i]))} votes `
+      + `(${pct.format(votes[i] / total)})`));
     path.addEventListener('mouseleave', () => regionCaption(''));
     els.regionPie.append(path);
     from = to;
   });
   const winner = m.regionWinner(r);
-  els.regionSeats.textContent = winner ? `${winner.slice(6)} wins the seat` : '—';
+  els.regionSeats.textContent = winner
+    ? `${entityLabel(winner.slice(6))} wins the seat` : '—';
 }
 
 /* STV: one bar per stage of the count, parties always in the same order.
@@ -417,8 +610,8 @@ function drawRegionStages(m, r) {
       seg.style.background = partyColour(party);
       const seats = stage.seats[p];
       seg.addEventListener('mouseenter', () => regionCaption(
-        `${party} — ${nf.format(Math.round(held))} (${pct.format(held / scale)})`
-        + `, ${seats} ${seats === 1 ? 'seat' : 'seats'}`));
+        `${entityLabel(party)} — ${nf.format(Math.round(held))} `
+        + `(${pct.format(held / scale)}), ${seats} ${seats === 1 ? 'seat' : 'seats'}`));
       seg.addEventListener('mouseleave', () => regionCaption(''));
       bar.append(seg);
     });
@@ -432,12 +625,13 @@ function drawRegionStages(m, r) {
       bar.append(seg);
     }
     const what = stage.party < 0 ? 'first preferences'
-      : `${stage.kind} ${parties[stage.party]}`;
+      : `${stage.kind} ${entityLabel(parties[stage.party])}`;
     row.append(bar, el('span', { class: 'stage-what', text: what, title: what }));
     els.regionStages.append(row);
   });
   const last = stages[stages.length - 1];
-  const held = parties.map((party, p) => [party, last.seats[p]]).filter(([, n]) => n > 0)
+  const held = parties.map((party, p) => [entityLabel(party), last.seats[p]])
+    .filter(([, n]) => n > 0)
     .sort((a, b) => b[1] - a[1]);
   els.regionSeats.textContent = held.length
     ? `${held.map(([party, n]) => `${party} ${n}`).join(' · ')}  (quota `
@@ -614,6 +808,7 @@ function applyMode() {
   const demographics = uiMode === 'demographics';
   els.demoBlocks.hidden = !demographics;
   els.partyBlock.hidden = demographics || !election;
+  els.partyEditor.hidden = demographics || !election;
   els.modeDemographics.classList.toggle('is-active', demographics);
   els.modeElection.classList.toggle('is-active', !demographics);
   els.modeDemographics.setAttribute('aria-pressed', String(demographics));
@@ -827,7 +1022,7 @@ function showTooltip(point, props) {
   els.ttParty.hidden = !party;
   if (party) {
     const votes = Math.round(election.votes(props.code) * election.share(props.code));
-    election.tip.textContent = `${election.party.value} ${nf.format(votes)} `
+    election.tip.textContent = `${entityLabel(election.party.value)} ${nf.format(votes)} `
       + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(election.share(props.code))})`;
   }
 
@@ -852,8 +1047,10 @@ function showTooltip(point, props) {
       // The selected party is highlighted; if it misses the top five, the
       // fifth row gives way to it and carries its rank.
       const key = election.key();
-      const standings = election.voters.parties.map((name) => ({
-        name,
+      const standings = election.voters.parties
+        .filter((name) => entityHost(name) === name)
+        .map((name) => ({
+        name: entityLabel(name),
         key: `party:${name}`,
         votes: run.model.regionPartyVotes(`party:${name}`, region),
         share: run.model.regionPartyShare(`party:${name}`, region),
@@ -981,7 +1178,8 @@ function readout() {
     election.readout.textContent = !live || live.weight === 0
       || live.mode === 'gerrymander' ? seats
       : `${seats} · spread ${m.demoSpread(key).toFixed(3)}`;
-    election.row.querySelector('.run-party-label').textContent = election.party.value;
+    election.row.querySelector('.run-party-label').textContent =
+      entityLabel(election.party.value);
   }
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
@@ -1309,6 +1507,8 @@ async function main() {
   }
   if (voters) {
     election = buildPartyControls(voters);
+    buildPartyEditor(voters);
+    refreshPartyOptions();
     els.modeElection.disabled = false;
     const sync = () => {
       election.toggleName.textContent = election.party.value;
