@@ -384,8 +384,25 @@ const PARTY_SHORT = {
  * editor is not rebuilt, so a new map is drawn under the same ballot. */
 const ballot = { items: [], selected: new Set(), ui: null };
 
+/* Particular mergers have earned their own names. Keyed by the set, so the
+ * order they were merged in doesn't matter. */
+const MERGER_NAMES = [
+  [['DUP', 'UUP', 'TUV'], 'U Unity'],
+  [['Sinn Féin', 'SDLP'], 'N Unity'],
+  [['Alliance', 'Green', 'PBP'], 'Big Other'],
+  [['Sinn Féin', 'TUV'], 'Curveball'],
+  [['Green', 'PBP', 'Aontú'], 'Mighty Mites'],
+  [['Sinn Féin', 'DUP'], 'Best Friday'],
+  [['Sinn Féin', 'Green'], 'Super Green'],
+  [['Sinn Féin', 'SDLP', 'Aontú', 'PBP'], 'N Unity XL'],
+  [['Sinn Féin', 'DUP', 'Alliance', 'UUP', 'SDLP', 'TUV', 'Green', 'PBP', 'Aontú'], 'Imperium'],
+];
+const mergerKey = (members) => [...members].sort().join('|');
+const NAMED_MERGERS = new Map(MERGER_NAMES.map(([members, name]) => [mergerKey(members), name]));
+
 const itemName = (item) => (item.members.length === 1 ? item.members[0]
-  : item.members.map((p) => PARTY_SHORT[p] || p).join('-'));
+  : NAMED_MERGERS.get(mergerKey(item.members))
+    || item.members.map((p) => PARTY_SHORT[p] || p).join('-'));
 const itemHost = (item) => item.members[0];       // the slot that carries the votes
 
 /* Entities in the order the model knows them, for labelling everything else. */

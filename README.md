@@ -641,7 +641,9 @@ one is struck through. Below the list:
 * **Include / Exclude** set every selected item to that status, whatever it was.
 * **Merge** (two or more selected) makes one item, named from the short party
   names in the parties' own order — `SF-SDLP`, `All-SDLP-Gr`. It heads the list
-  and its parties leave. Mergers can themselves be merged.
+  and its parties leave. Mergers can themselves be merged. A few particular
+  combinations have their own names instead: DUP+UUP+TUV is *U Unity*, all nine
+  together are *Imperium*, and there are others to find.
 * **Unmerge** (exactly one merger selected) puts its parties back as they were,
   including any that were excluded.
 
