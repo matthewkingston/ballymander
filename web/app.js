@@ -64,6 +64,9 @@ const els = {
   partyBlock: document.getElementById('party-block'),
   modeDemographics: document.getElementById('mode-demographics'),
   modeElection: document.getElementById('mode-election'),
+  pie: document.getElementById('pie'),
+  pieSvg: document.getElementById('pie-svg'),
+  pieCaption: document.getElementById('pie-caption'),
   ttParty: document.querySelector('.tt-party'),
   ttRegionParty: document.querySelector('.tt-region-party'),
   go: document.getElementById('ctl-go'),
@@ -99,6 +102,20 @@ const run = {
   shadow: null,
   colors: [],
   bars: [],               // one {row, fill, value} per region, never reordered
+};
+
+/* Party colours for the seats pie. Roughly the parties' own, and distinct
+ * enough from each other to read at this size. */
+const PARTY_COLORS = {
+  'Sinn Féin': '#186a3b',
+  SDLP: '#c8102e',
+  DUP: '#e8801a',
+  UUP: '#7fb3e3',
+  TUV: '#1b2f6b',
+  Alliance: '#f2c313',
+  Green: '#7ac143',
+  'Aontú': '#6b3fa0',
+  PBP: '#ef5a7a',
 };
 
 /* Which set of variables steers the run: 'demographics' or 'election'. The
@@ -261,6 +278,59 @@ function buildDemoControls() {
   }
 }
 
+/* --- seats pie ----------------------------------------------------------- */
+
+/* One wedge per party, sized by regions won. Drawn once and then only its
+ * paths are rewritten, so hovering a wedge is never interrupted by a redraw.
+ * No labels: the caption names whatever is under the pointer. */
+const SVG_NS = 'http://www.w3.org/2000/svg';
+let pieWedges = [];
+let pieShown = '';
+
+function buildPie(parties) {
+  els.pieSvg.textContent = '';
+  pieWedges = parties.map((party) => {
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('fill', PARTY_COLORS[party] || '#9aa7b4');
+    path.addEventListener('mouseenter', () => {
+      const seats = run.model ? run.model.partySeats(`party:${party}`) : 0;
+      els.pieCaption.textContent = `${party} — ${seats} ${seats === 1 ? 'seat' : 'seats'}`;
+    });
+    path.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
+    els.pieSvg.append(path);
+    return { party, path, seats: 0 };
+  });
+}
+
+/* A wedge from `from` to `to` radians, clockwise from twelve o'clock. A single
+ * party holding every seat has no arc to draw, so it gets a full circle. */
+function wedgePath(from, to) {
+  if (to - from >= Math.PI * 2 - 1e-9) {
+    return 'M 0 -1 A 1 1 0 1 1 0 1 A 1 1 0 1 1 0 -1 Z';
+  }
+  const x = (a) => Math.sin(a).toFixed(5);
+  const y = (a) => (-Math.cos(a)).toFixed(5);
+  return `M 0 0 L ${x(from)} ${y(from)} `
+    + `A 1 1 0 ${to - from > Math.PI ? 1 : 0} 1 ${x(to)} ${y(to)} Z`;
+}
+
+function drawPie() {
+  const m = run.model;
+  if (!election || !pieWedges.length || !m || !m.N) return;
+  const seats = pieWedges.map((w) => m.partySeats(`party:${w.party}`));
+  const key = seats.join(',');
+  if (key === pieShown) return;      // nothing moved; leave the DOM alone
+  pieShown = key;
+  const total = seats.reduce((a, b) => a + b, 0) || 1;
+  let from = 0;
+  pieWedges.forEach((wedge, i) => {
+    const to = from + (seats[i] / total) * Math.PI * 2;
+    wedge.seats = seats[i];
+    wedge.path.setAttribute('d', seats[i] > 0 ? wedgePath(from, to) : '');
+    from = to;
+  });
+}
+
 /* --- the party block ----------------------------------------------------- */
 
 /* One block, not one per party: the party selector picks which of the nine the
@@ -316,9 +386,10 @@ function buildPartyControls(voters) {
     body));
 
   // Always the seats won, whatever the mode: it is the result the map is for.
+  // Last in the block, under the run's own figures.
   const readout = el('dd', { id: 'run-party', text: '\u2014' });
   const row = el('div', {}, el('dt', { class: 'run-party-label', text: 'Party' }), readout);
-  els.runScoreRow.before(row);
+  document.getElementById('run').append(row);
 
   const tip = el('div');
   const regionTip = el('div');
@@ -326,6 +397,7 @@ function buildPartyControls(voters) {
   els.ttRegionParty.append(regionTip);
 
   addPartyBarStats(voters.parties);
+  buildPie(voters.parties);
   return { voters, toggle, toggleName, body, modeLabel, wValue, w, party, mode, gerry,
            t, tValue, s: st, sValue, above, readout, row, tip, regionTip,
            key: () => `party:${party.value}`,
@@ -368,8 +440,9 @@ function applyMode() {
   els.modeElection.setAttribute('aria-pressed', String(!demographics));
   for (const u of demoUI) u.readout.parentElement.hidden = !demographics;
   if (election) election.row.hidden = demographics;
+  els.pie.hidden = demographics || !election || !run.model || run.phase === 'idle';
   rebuildBarOptions();
-  if (run.model) { readout(); drawBars(); }
+  if (run.model) { readout(); drawBars(); drawPie(); }
 }
 
 /* --- data ---------------------------------------------------------------- */
@@ -766,6 +839,7 @@ function tick(map) {
       if (now - run.lastBars >= BAR_INTERVAL) {
         run.lastBars = now;
         drawBars();
+        drawPie();
       }
     }
     run.raf = requestAnimationFrame(frame);
@@ -811,8 +885,11 @@ function start(map) {
   setButtons('running');
   els.results.hidden = false;
   els.resultsList.hidden = false;  // bars are live from the first build step
+  els.pie.hidden = uiMode !== 'election' || !election;
   buildBars(n);
   drawBars();
+  pieShown = '';
+  drawPie();
   readout();
   run.raf = requestAnimationFrame(tick(map));
 }
@@ -848,6 +925,7 @@ function stop(map, { silent = false } = {}) {
   paintRegions(map);
   readout();
   drawBars();
+  drawPie();
 }
 
 /* One row per region, built once per run. drawBars() afterwards only writes a
@@ -1016,6 +1094,7 @@ async function main() {
       sync();
       if (run.model) drawBars();
     });
+    els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
     sync();
     readouts.push([election.w, election.wValue], [election.t, election.tValue],
                   [election.s, election.sValue]);

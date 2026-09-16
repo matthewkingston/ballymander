@@ -285,6 +285,37 @@ const marked = await page.evaluate(() =>
   document.querySelectorAll('#bars .bar-row.is-win').length);
 election.marked = marked;
 
+// The seats pie: one wedge per party, drawn only where seats were won, and a
+// caption naming whatever is under the pointer.
+election.pie = await page.evaluate(() => {
+  const m = window.__model;
+  const paths = [...document.querySelectorAll('#pie-svg path')];
+  const seats = m.parties.map((q) => m.partySeats(q.key));
+  return {
+    shown: !document.getElementById('pie').hidden,
+    wedges: paths.length,
+    drawn: paths.filter((p) => (p.getAttribute('d') || '').length > 0).length,
+    withSeats: seats.filter((n) => n > 0).length,
+    total: seats.reduce((a, b) => a + b, 0),
+    regions: m.N,
+    lastRowIsParty: document.getElementById('run').lastElementChild
+      .querySelector('#run-party') !== null,
+  };
+});
+const biggest = await page.evaluate(() => {
+  const m = window.__model;
+  let best = 0;
+  m.parties.forEach((q, i) => {
+    if (m.partySeats(q.key) > m.partySeats(m.parties[best].key)) best = i;
+  });
+  const r = document.querySelectorAll('#pie-svg path')[best].getBoundingClientRect();
+  return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+});
+await page.mouse.move(biggest.x, biggest.y);
+await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
+election.pie.caption = await page.evaluate(() =>
+  document.getElementById('pie-caption').textContent.trim());
+
 await page.mouse.move(pt.x - 30, pt.y - 30);
 await page.mouse.move(pt.x, pt.y, { steps: 8 });
 await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
@@ -306,6 +337,7 @@ await page.click('#mode-demographics');
 election.backToDemographics = await page.evaluate(() => ({
   options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
   partyRowHidden: document.getElementById('run-party').parentElement.hidden,
+  pieHidden: document.getElementById('pie').hidden,
 }));
 election.electionOptions = electionOptions;
 
@@ -413,6 +445,23 @@ if (!election || !election.tip
   problems.push('tooltip rank number shown in the wrong case');
 }
 if (!election || !election.tip.demoHidden) problems.push('tooltip kept the demographic lines');
+if (!election || !election.pie.shown) problems.push('seats pie missing in election mode');
+if (!election || election.pie.wedges !== 9) problems.push('a party is missing from the pie');
+if (!election || election.pie.drawn !== election.pie.withSeats) {
+  problems.push('pie wedges do not match the parties holding seats');
+}
+if (!election || election.pie.total !== election.pie.regions) {
+  problems.push('pie seats do not add up to the regions');
+}
+if (!election || !/\u2014 \d+ seats?$/.test(election.pie.caption || '')) {
+  problems.push(`pie caption wrong on hover (${election && election.pie.caption})`);
+}
+if (!election || !election.pie.lastRowIsParty) {
+  problems.push('party readout is not last in the results block');
+}
+if (!election || !election.backToDemographics.pieHidden) {
+  problems.push('seats pie stayed in demographics mode');
+}
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
 if (problems.length) {

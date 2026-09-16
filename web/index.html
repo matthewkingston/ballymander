@@ -72,7 +72,7 @@
   <div id="results" hidden>
     <dl id="run">
       <div class="run-wide"><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
-      <div><dt>Max dev</dt><dd id="run-dev">&mdash;</dd></div>
+      <div><dt>Max pop dev</dt><dd id="run-dev">&mdash;</dd></div>
       <div><dt>Moves</dt><dd id="run-moves">&mdash;</dd></div>
       <div><dt>ReCom</dt><dd id="run-recom">&mdash;</dd></div>
       <div><dt>Land</dt><dd id="run-shape">&mdash;</dd></div>
@@ -81,6 +81,13 @@
       <div id="run-score-row"><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
       <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
     </dl>
+
+    <!-- Election mode: seats by party. Filled by app.js; the caption names the
+         segment under the pointer, so the chart itself needs no labels. -->
+    <div id="pie" hidden>
+      <svg id="pie-svg" viewBox="-1.05 -1.05 2.1 2.1" aria-label="Seats by party"></svg>
+      <div id="pie-caption">&nbsp;</div>
+    </div>
 
     <div id="results-list" hidden>
       <select id="bars-stat">

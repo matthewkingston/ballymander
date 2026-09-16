@@ -607,7 +607,9 @@ The switch at the top of the left panel chooses what the run is steered by.
 The hidden mode's terms are switched off rather than left steering unseen, and
 the results panel, the statistic selector and the tooltip all show only the
 active mode's figures. The bars show a party's votes per region and mark the
-regions it wins.
+regions it wins, a pie gives the seats every party took (hover a wedge to name
+it), and the tooltip lists a region's top five parties with the selected one
+highlighted.
 
 Gerrymander mode differs for a party: its threshold is a **winning margin**,
 the party's share minus the strongest rival's, because that is what takes a

@@ -377,6 +377,34 @@ html, body {
 #status[hidden] { display: none; }
 #status.error { color: #a8321a; border-color: #e3b6ab; }
 
+/* --- seats pie (election mode) ------------------------------------------ */
+#pie {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+#pie[hidden] { display: none; }
+#pie-svg {
+  width: 132px;
+  height: 132px;
+  overflow: visible;           /* the hover outline sits just outside a wedge */
+}
+#pie-svg path {
+  stroke: var(--panel-bg);
+  stroke-width: 0.012;
+  cursor: default;
+}
+#pie-svg path:hover { stroke: var(--ink); stroke-width: 0.03; }
+#pie-caption {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* --- hover tooltip ------------------------------------------------------ */
 #tooltip {
   position: absolute;
