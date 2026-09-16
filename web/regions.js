@@ -571,6 +571,20 @@ class RegionModel {
       }));
       voters.exhaustion.forEach((v, p) => { this._exhaustion[p] = v; });
     }
+    // Who stands, and who has merged with whom. `mergeHost[p]` is the party
+    // whose slot carries p's votes -- itself unless p has merged into another.
+    // Both are global: a party stands everywhere or nowhere.
+    this.standing = new Uint8Array(P).fill(1);
+    this.mergeHost = new Int32Array(P).map((_, p) => p);
+    this._baseShare = this.parties.map((q) => q.zValue.slice());
+    this._baseTransfers = this._transfers.slice();
+    this._baseExhaustion = this._exhaustion.slice();
+    this._nationalVotes = new Float64Array(P);
+    for (let p = 0; p < P; p++) {
+      let total = 0;
+      for (let z = 0; z < this.n; z++) total += this.parties[p].zValue[z] * this.parties[p].zN[z];
+      this._nationalVotes[p] = total;
+    }
     this._stvVotes = new Float64Array(P);
     this._stvSeats = new Int32Array(P);
     this._stvLive = new Uint8Array(P);
@@ -902,6 +916,134 @@ class RegionModel {
       if (v > best) best = v;
     }
     return best;
+  }
+
+  /* --- who stands --------------------------------------------------------
+   *
+   * The model estimates a party's voters; whether it is on the ballot is a
+   * separate question, applied here. Two things can happen to a party:
+   *
+   *   it doesn't stand   its voters abstain at that party's exhaustion rate --
+   *                      the share that had no further preference -- and the
+   *                      rest go to the parties that do stand, by its transfer
+   *                      row renormalised over them (directly, not cascading
+   *                      through other absent parties)
+   *   it merges          its votes move to the host's slot in full: a merger
+   *                      is taken to keep every voter, which is a modelling
+   *                      assumption and not a measured one
+   *
+   * Both are one matrix from true voters to ballot entities, applied once to
+   * the per-zone votes. Everything downstream -- the counts, the score terms,
+   * the readouts -- then works on the ballot as it stands, unchanged.
+   *
+   * `standing`: a party's own flag (a merged party follows its host).
+   * `merge`: host index per party, or a map of member -> host. */
+  setBallot({ standing = null, merge = null } = {}) {
+    const P = this.parties.length;
+    if (!P) return false;
+    const stand = new Uint8Array(P).fill(1);
+    const host = new Int32Array(P).map((_, p) => p);
+    if (merge) {
+      for (let p = 0; p < P; p++) {
+        const h = Array.isArray(merge) ? merge[p] : merge[this.parties[p].party];
+        if (h == null) continue;
+        const idx = typeof h === 'number' ? h
+          : this.parties.findIndex((q) => q.party === h);
+        if (idx >= 0) host[p] = idx;
+      }
+      for (let p = 0; p < P; p++) {           // one hop only: hosts host nobody
+        if (host[host[p]] !== host[p]) host[p] = host[host[p]];
+      }
+    }
+    if (standing) {
+      for (let p = 0; p < P; p++) {
+        const want = Array.isArray(standing) ? standing[p] : standing[this.parties[p].party];
+        stand[p] = want === false || want === 0 ? 0 : 1;
+      }
+    }
+    // A merged party is on the ballot exactly when its host is.
+    for (let p = 0; p < P; p++) if (host[p] !== p) stand[p] = stand[host[p]];
+    const same = this.standing.every((v, p) => v === stand[p])
+      && this.mergeHost.every((v, p) => v === host[p]);
+    if (same) return false;
+    this.standing = stand;
+    this.mergeHost = host;
+    this._applyBallot();
+    return true;
+  }
+
+  /* An entity is a slot that appears on the ballot: a party that stands and
+   * hosts itself, or the host of a merger. */
+  _isEntity(p) {
+    return this.standing[p] === 1 && this.mergeHost[p] === p;
+  }
+
+  _applyBallot() {
+    const P = this.parties.length;
+    // 1. votes: each party's share moves to its host, or is redistributed.
+    const map = new Float64Array(P * P);
+    for (let a = 0; a < P; a++) {
+      if (this.standing[a]) { map[a * P + this.mergeHost[a]] = 1; continue; }
+      const keep = 1 - this._baseExhaustion[a];          // the rest stay at home
+      let weight = 0;
+      const w = new Float64Array(P);
+      for (let b = 0; b < P; b++) {
+        if (!this._isEntity(b)) continue;
+        // A standing entity's pull is its members' pull put together.
+        for (let m = 0; m < P; m++) {
+          if (this.mergeHost[m] === b) w[b] += this._baseTransfers[a * P + m];
+        }
+        weight += w[b];
+      }
+      if (weight <= 0) continue;                          // nowhere to go: all abstain
+      for (let b = 0; b < P; b++) map[a * P + b] = (keep * w[b]) / weight;
+    }
+    for (let b = 0; b < P; b++) {
+      const term = this.parties[b];
+      for (let z = 0; z < this.n; z++) {
+        let v = 0;
+        for (let a = 0; a < P; a++) {
+          if (map[a * P + b] !== 0) v += this._baseShare[a][z] * map[a * P + b];
+        }
+        term.zValue[z] = v;
+      }
+      let sum = 0;
+      let count = 0;
+      for (let z = 0; z < this.n; z++) { sum += term.zValue[z] * term.zN[z]; count += term.zN[z]; }
+      term.mean = count ? sum / count : 0;
+    }
+    // 2. transfers and exhaustion for the entities, weighted by the votes each
+    //    member brings. Transfers inside a merged party are internal and go.
+    for (let a = 0; a < P; a++) {
+      let mass = 0;
+      const row = new Float64Array(P);
+      let leak = 0;
+      for (let m = 0; m < P; m++) {
+        if (this.mergeHost[m] !== a) continue;
+        const v = this._nationalVotes[m] || 1e-9;
+        mass += v;
+        leak += v * this._baseExhaustion[m];
+        for (let b = 0; b < P; b++) {
+          const to = this.mergeHost[b];
+          if (to === a || !this._isEntity(to)) continue;  // internal, or not standing
+          row[to] += v * this._baseTransfers[m * P + b];
+        }
+      }
+      let total = 0;
+      for (let b = 0; b < P; b++) total += row[b];
+      for (let b = 0; b < P; b++) this._transfers[a * P + b] = total > 0 ? row[b] / total : 0;
+      this._exhaustion[a] = mass > 0 ? leak / mass : 0;
+    }
+    // 3. the sums every term keeps, and the score built on them.
+    if (this.N > 0) {
+      this._resum();
+      for (const d of this.terms) {
+        d.raw = 0;
+        if (d.mode !== 'off') for (let r = 0; r < this.N; r++) d.raw += this._demoTerm(d, r);
+      }
+      this.bestScore = Infinity;
+      if (this.assigned >= this.n) this._recordBest();
+    }
   }
 
   /* Run the count over a set of party votes, and score it for one party:
@@ -1972,7 +2114,9 @@ class RegionModel {
 
   regionPartyShare(key, r) {
     const d = this.demoByKey[key];
-    return d ? this._demoValue(d, r) : 0;
+    if (!d) return 0;
+    const cast = this.regionVotesCast(r);
+    return cast > 0 ? d.rSum[r] / cast : 0;
   }
 
   /* Seats a region awards each party: one to the largest under first past the
@@ -2000,6 +2144,14 @@ class RegionModel {
   regionCount(r) {
     return stvStages(this._stvVotesFor(r, -1, 0, null).slice(), this.seatsPerRegion,
       this._transfers, this._exhaustion);
+  }
+
+  /* Votes cast in a region, which is less than the electorate's worth once a
+   * party's voters have stayed at home. */
+  regionVotesCast(r) {
+    let total = 0;
+    for (const q of this.parties) total += q.rSum.length ? q.rSum[r] : 0;
+    return total;
   }
 
   /* Every party's votes in one region, in the parties' own order. */

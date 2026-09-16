@@ -713,8 +713,31 @@ figure). With turnout flat, its value scales every region equally and so
 changes no winner. See "Demographics and Election modes" in
 [the README](../README.md#demographics-and-election-modes).
 
-All nine parties are assumed to stand in every drawn region, which keeps the
-deferred "who stands" question deferred.
+### Who stands
+
+The model estimates a party's *voters*; whether it is on the ballot is applied
+afterwards, in the region model. Two things can happen to a party, both of them
+one mapping from true voters to ballot entities, applied once to the per-zone
+votes (no user interface yet):
+
+* **Standing aside.** Its voters abstain at that party's exhaustion rate — the
+  share with no further preference — and the rest go to the parties that do
+  stand, by its transfer row renormalised over them. Directly, not cascading
+  through other absent parties, as in the prior.
+* **Merging.** Its votes move to the host party's slot in full. A merger is
+  taken to keep every voter; that is an assumption, not a measurement, and the
+  defections a real merger would cause are not modelled.
+
+Both are global: a party stands everywhere or nowhere. Per-region standing
+remains deferred.
+
+A merged party's own behaviour in a count is derived from its members: its
+transfer row is theirs averaged by votes with the now-internal flows removed
+and the rest renormalised, its column is theirs summed, and its exhaustion rate
+is theirs averaged. Note what the first of those means in practice — for a
+DUP + UUP + TUV merger the large flows between the three vanish, so where the
+merged party's voters go next rests on the small non-unionist tail of each
+party's row (Alliance 49%, Green 23%, SDLP 16%).
 
 ### The STV count
 
@@ -791,7 +814,15 @@ extreme modes still work on the party's share.
 
 ## Deferred past v0
 
-* Who stands in a simulated constituency (stand-asides, pacts, thresholds).
+* Who stands *per region* (pacts, local stand-asides, thresholds). Standing
+  aside and merging are built, but only NI-wide.
+* **Party compatibility from the transfer matrix** (owner's suggestion): rank
+  how close parties are by how freely their voters transfer, and use that to
+  put a number on abstention or defection after a merger — a merger of two
+  parties whose voters barely transfer to each other should leak more than one
+  of natural allies. Fun, and fundamentally non-rigorous: the matrix measures
+  lower preferences under STV, not whether someone would follow a party into a
+  merger.
 * Turnout modelling beyond flat.
 * A systematic election-type factor.
 * Area-varying prior uncertainty.

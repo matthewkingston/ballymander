@@ -1151,6 +1151,66 @@ check(stv.totalSeats === stv.N * 7 && stv.demoScore(PARTY) !== before,
 stv.setElection('fptp', 5, 2);
 check(stv.totalSeats === stv.N, 'first past the post returns one seat a region');
 
+/* --- who stands ---------------------------------------------------------- */
+/* A party can stand aside, or parties can merge. Both are one mapping from
+ * true voters to the ballot, applied to the zone votes. */
+console.log('\nthe ballot');
+const ballot = new RegionModel(graph, pops, geom, demo, voters);
+ballot.start(18, 3, { wPop: 1 });
+while (ballot.buildStep());
+for (let i = 0; i < 150000; i++) ballot.optimiseStep();
+const niVotes = (m) => voters.parties.map((p, i) =>
+  Array.from({ length: m.N }, (_, r) => m.parties[i].rSum[r]).reduce((a, b) => a + b, 0));
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+const baseVotes = niVotes(ballot);
+const idx = (p) => voters.parties.indexOf(p);
+
+ballot.setBallot({ standing: { TUV: false } });
+const asideVotes = niVotes(ballot);
+const leak = baseVotes[idx('TUV')] * voters.exhaustion[idx('TUV')];
+check(asideVotes[idx('TUV')] === 0, 'a party that stands aside has no votes');
+check(near(sum(baseVotes) - sum(asideVotes), leak, 1),
+  `its voters abstain at its exhaustion rate (${Math.round(leak).toLocaleString()} of `
+  + `${Math.round(baseVotes[idx('TUV')]).toLocaleString()})`);
+const moved = baseVotes[idx('TUV')] - leak;
+const toDup = asideVotes[idx('DUP')] - baseVotes[idx('DUP')];
+check(near(toDup / moved, voters.transfers[idx('TUV')][idx('DUP')], 0.002),
+  `the rest follow the transfer matrix (DUP ${(100 * toDup / moved).toFixed(1)}% vs `
+  + `${(100 * voters.transfers[idx('TUV')][idx('DUP')]).toFixed(1)}%)`);
+
+ballot.setBallot({ merge: { UUP: 'DUP', TUV: 'DUP' } });
+const mergedVotes = niVotes(ballot);
+const unionistBefore = ['DUP', 'UUP', 'TUV'].reduce((a, p) => a + baseVotes[idx(p)], 0);
+check(near(mergedVotes[idx('DUP')], unionistBefore, 1),
+  `a merger keeps every vote (${Math.round(mergedVotes[idx('DUP')]).toLocaleString()})`);
+check(mergedVotes[idx('UUP')] === 0 && mergedVotes[idx('TUV')] === 0,
+  'the parties that merged hold nothing themselves');
+check(near(sum(mergedVotes), sum(baseVotes), 1),
+  'merging changes no totals, since nobody stays at home');
+const P = voters.parties.length;
+const row = Array.from({ length: P }, (_, b) => ballot._transfers[idx('DUP') * P + b]);
+check(row[idx('DUP')] === 0 && row[idx('UUP')] === 0 && row[idx('TUV')] === 0,
+  "a merged party's transfers to itself are gone");
+check(near(sum(row), 1, 1e-9), 'and what is left renormalises to one');
+
+/* Seats are still dealt in full when the ballot is short. */
+ballot.setElection('stv', 5, 2);
+ballot.setBallot({ standing: { Green: false, PBP: false, 'Aontú': false, TUV: false } });
+const seatsOut2 = new Int32Array(P);
+let full = true;
+for (let r = 0; r < ballot.N; r++) {
+  if (sum([...ballot.regionSeats(r, seatsOut2)]) !== 5) full = false;
+}
+check(full, 'a short ballot still fills every seat');
+check(['Green', 'PBP', 'Aontú', 'TUV'].every((p) => ballot.partySeats(`party:${p}`) === 0),
+  'parties that stood aside win nothing');
+
+ballot.setBallot({});
+const restored = niVotes(ballot);
+check(restored.every((v, i) => near(v, baseVotes[i], 1e-6)),
+  'putting everyone back restores the votes exactly');
+ballot.setElection('fptp', 5, 2);
+
 /* N=18 seed 7 is a known slow case, kept in the suite deliberately: regions 8
  * and 17 come out of the build as a sealed pocket, touching only each other and
  * one other region whose adjacent zones are all articulation points, so nothing
