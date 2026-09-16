@@ -79,7 +79,8 @@ html, body {
 /* A control that cannot be changed right now -- the region count, once a run
    has started -- reads as greyed rather than merely inert. */
 .ctl-grid input:disabled { opacity: 0.45; cursor: not-allowed; }
-.ctl-grid input:disabled + label,
+/* Only the disabled control's own label: the next one along belongs to the
+   following row, which may well still be live. */
 .ctl-grid label:has(+ input:disabled) { opacity: 0.45; }
 
 /* --- region builder controls -------------------------------------------- */

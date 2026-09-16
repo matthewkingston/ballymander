@@ -899,7 +899,9 @@ function tick(map) {
 }
 
 function start(map) {
-  const n = Math.max(2, Math.min(500, Number(els.n.value) || 18));
+  // One region is allowed: everyone elected from a single seat-rich region is
+  // roughly a national list, and worth being able to look at.
+  const n = Math.max(1, Math.min(500, Number(els.n.value) || 18));
   els.n.value = n;
   stop(map, { silent: true });
   clearRegions(map);

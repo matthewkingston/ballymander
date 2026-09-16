@@ -603,7 +603,13 @@ The switch at the top of the left panel chooses what the run is steered by.
 * **Election** replaces those blocks with one party block — a party selector
   and the same weight, mode and gerrymander controls — and draws seats. Its own
   controls sit above Regions: **Election type** (first past the post or STV)
-  and, for STV, **Elected/Region**.
+  and, for STV, **Elected/Region**, which has no upper limit — one region
+  electing everybody is roughly a national list, and Regions goes down to 1 for
+  exactly that.
+
+Regions is fixed for the life of a run, since changing it means a different
+map; the election controls stay live, so a paused or stopped map can be
+re-counted under other rules.
 
 The hidden mode's terms are switched off rather than left steering unseen, and
 the results panel, the statistic selector and the tooltip all show only the

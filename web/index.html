@@ -34,9 +34,11 @@
         <option value="stv">STV</option>
       </select>
       <label for="ctl-n">Regions</label>
-      <input id="ctl-n" type="number" min="2" max="500" step="1" value="18">
+      <input id="ctl-n" type="number" min="1" max="500" step="1" value="18">
       <label for="ctl-seats" class="stv-only" hidden>Elected/Region</label>
-      <input id="ctl-seats" class="stv-only" type="number" min="1" max="9" step="1"
+      <!-- No upper bound: one region electing everyone is a legitimate thing to
+           look at, and is roughly what a national PR list would do. -->
+      <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
              value="5" hidden>
       <label for="ctl-seed">Seed</label>
       <input id="ctl-seed" type="number" min="0" step="1" value="1">
