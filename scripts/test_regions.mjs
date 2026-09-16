@@ -22,6 +22,8 @@ const feats = JSON.parse(
 const pops = Object.fromEntries(feats.map((f) => [f.properties.code, f.properties.pop]));
 const geom = zoneGeometry(feats);
 const demo = zoneDemographics(feats);
+const voters = JSON.parse(
+  fs.readFileSync(path.join(ROOT, 'web/data/dz_voters.json'), 'utf8'));
 
 const failures = [];
 function check(ok, msg) {
@@ -1018,6 +1020,73 @@ for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) 
       `N=${N} seed ${seed}: max deviation under 7% (${(m.maxDeviation * 100).toFixed(2)}%)`);
   }
 }
+
+/* --- election terms ------------------------------------------------------ */
+/* The nine parties ride the demographic machinery, so what needs checking is
+ * that their sums stay right through every kind of move, and that the
+ * gerrymander term -- the one that scores a winning margin rather than a share
+ * -- agrees with a from-scratch recompute after the optimiser has churned. */
+console.log('\nelection terms');
+const PARTY = `party:${voters.parties[1]}`;      // DUP: stands second in the file
+const votesTotal = Object.values(voters.zones)
+  .reduce((a, z) => a + z.e * voters.turnout, 0);
+
+const vote = new RegionModel(graph, pops, geom, demo, voters);
+check(vote.parties.length === voters.parties.length,
+  `one term per party (${vote.parties.length})`);
+vote.start(18, 3, { wPop: 1, demo: { [PARTY]: { weight: 1, mode: 'gerrymander',
+  threshold: 0, steepness: 0.02, above: true } } });
+while (vote.buildStep());
+for (let i = 0; i < 400000; i++) vote.optimiseStep();
+
+const regionVotes = (m) => Array.from({ length: m.N },
+  (_, r) => m.parties.reduce((a, q) => a + q.rSum[r], 0));
+const sumVotes = regionVotes(vote).reduce((a, b) => a + b, 0);
+check(near(sumVotes, votesTotal, votesTotal * 1e-9),
+  `every vote lands in exactly one region (${Math.round(sumVotes).toLocaleString()})`);
+
+/* Shares are a vote-weighted mean, so each region's must sum to one. */
+let worstShare = 0;
+for (let r = 0; r < vote.N; r++) {
+  const total = vote.parties.reduce((a, q) => a + vote.regionPartyShare(q.key, r), 0);
+  worstShare = Math.max(worstShare, Math.abs(total - 1));
+}
+check(worstShare < 1e-9, `region shares sum to one (worst off by ${worstShare.toExponential(1)})`);
+
+/* The incremental term against a full recompute from the assignment alone. */
+const mirror = new RegionModel(graph, pops, geom, demo, voters);
+mirror.start(18, 3, { wPop: 1, demo: { [PARTY]: { weight: 1, mode: 'gerrymander',
+  threshold: 0, steepness: 0.02, above: true } } });
+mirror.assign.set(vote.assign);
+mirror._resum();
+const liveTerm = vote.demoScore(PARTY);
+const fresh = mirror.demoScore(PARTY);
+check(near(liveTerm, fresh, 1e-6 * Math.max(1, Math.abs(fresh))),
+  `margin term survives ${vote.moves.toLocaleString()} moves and `
+  + `${vote.recombinations.toLocaleString()} recombinations `
+  + `(${liveTerm.toFixed(6)} vs ${fresh.toFixed(6)})`);
+
+/* Seats, margins and the winner are three views of the same sums. */
+let seats = 0;
+let agree = true;
+for (let r = 0; r < vote.N; r++) {
+  const winner = vote.regionWinner(r);
+  if (winner === PARTY) seats++;
+  if ((vote.partyMargin(PARTY, r) > 0) !== (winner === PARTY)) agree = false;
+}
+check(seats === vote.partySeats(PARTY) && seats === vote.demoSeats(PARTY),
+  `seats agree across the three readouts (${seats}/18)`);
+check(agree, 'a positive margin means winning the region');
+
+/* Gerrymandering for a party should win it more regions than ignoring it. */
+const idle = new RegionModel(graph, pops, geom, demo, voters);
+idle.start(18, 3, { wPop: 1 });
+while (idle.buildStep());
+for (let i = 0; i < 400000; i++) idle.optimiseStep();
+check(vote.partySeats(PARTY) >= idle.partySeats(PARTY),
+  `gerrymandering wins at least as many regions as not (${vote.partySeats(PARTY)} vs `
+  + `${idle.partySeats(PARTY)})`);
+check(regionsContiguous(vote) === null, 'election run keeps every region contiguous');
 
 /* N=18 seed 7 is a known slow case, kept in the suite deliberately: regions 8
  * and 17 come out of the build as a sealed pocket, touching only each other and

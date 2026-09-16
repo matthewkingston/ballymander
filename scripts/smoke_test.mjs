@@ -231,7 +231,82 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, painted, errors, failed, external }, null, 2));
+// --- election mode ------------------------------------------------------
+// Switch modes, gerrymander one party, and check the panel, the bars and the
+// tooltip all follow. The party terms ride the demographic machinery, so what
+// matters here is the wiring: that the right things show, and that what the
+// panel says matches what the model holds.
+await page.click('#mode-election');
+const electionOptions = await page.evaluate(() =>
+  [...document.querySelectorAll('#bars-stat option')].map((o) => o.value));
+await page.evaluate(() => {
+  const set = (id, v) => {
+    const e = document.getElementById(id);
+    e.value = v;
+    e.dispatchEvent(new Event('change', { bubbles: true }));
+    e.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  set('ctl-party-p', 'DUP');
+  set('ctl-party-mode', 'gerrymander');
+  set('ctl-party-w', '0.4');
+});
+await page.click('#ctl-go');
+await page.waitForFunction(() => window.__model.assigned === window.__model.n,
+  { timeout: 60000 });
+await page.evaluate(() => new Promise(r => setTimeout(r, 2500)));
+await page.click('#ctl-stop');
+await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+
+const election = await page.evaluate(() => {
+  const m = window.__model;
+  const sel = document.getElementById('bars-stat');
+  sel.value = 'party:DUP';
+  sel.dispatchEvent(new Event('change'));
+  const key = 'party:DUP';
+  const votes = Array.from({ length: m.N }, (_, r) => m.regionPartyVotes(key, r));
+  return {
+    options: [...sel.options].map((o) => o.value),
+    seats: m.partySeats(key),
+    shown: document.getElementById('run-party').textContent,
+    label: document.querySelector('.run-party-label').textContent,
+    mode: m.demoByKey[key].mode,
+    regions: m.N,
+    demoBlocksHidden: document.getElementById('demo-blocks').hidden,
+    partyBlockShown: !document.getElementById('party-block').hidden,
+    demoRowsHidden: [...document.querySelectorAll('[id^="run-demo-"]')]
+      .every((d) => d.parentElement.hidden),
+    demoWeightsOff: m.demographics.every((d) => d.weight === 0),
+    totalVotes: Math.round(votes.reduce((a, b) => a + b, 0)),
+    nationalVotes: Math.round(m.parties.reduce((a, q) =>
+      a + Array.from({ length: m.N }, (_, r) => q.rSum[r]).reduce((x, y) => x + y, 0), 0)),
+  };
+});
+const marked = await page.evaluate(() =>
+  document.querySelectorAll('#bars .bar-row.is-win').length);
+election.marked = marked;
+
+await page.mouse.move(pt.x - 30, pt.y - 30);
+await page.mouse.move(pt.x, pt.y, { steps: 8 });
+await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
+election.tip = await page.evaluate(() => {
+  const t = document.getElementById('tooltip');
+  if (!t || t.hidden) return null;
+  return {
+    party: t.querySelector('.tt-party')?.innerText.trim(),
+    region: t.querySelector('.tt-region-party')?.innerText.trim(),
+    demoHidden: t.querySelector('.tt-demo')?.innerText.trim() === '',
+  };
+});
+await page.screenshot({ path: `${OUT}/map-election.png` });
+
+await page.click('#mode-demographics');
+election.backToDemographics = await page.evaluate(() => ({
+  options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
+  partyRowHidden: document.getElementById('run-party').parentElement.hidden,
+}));
+election.electionOptions = electionOptions;
+
+console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to
@@ -291,6 +366,39 @@ if (!tip || tip.demo.length !== wantDemo) {
 if (!tip || tip.regionDemo.length !== wantDemo) {
   problems.push("a demographic is missing from the tooltip's region block");
 }
+if (!election || !election.demoBlocksHidden || !election.partyBlockShown) {
+  problems.push('mode switch did not swap the control blocks');
+}
+if (!election || !election.demoRowsHidden) problems.push('demographic readouts stayed in election mode');
+if (!election || !election.demoWeightsOff) problems.push('demographics kept steering in election mode');
+if (!election || election.mode !== 'gerrymander') problems.push('party mode did not take');
+if (!election || election.shown !== `${election.seats}/${election.regions} won`) {
+  problems.push('party readout does not match the model');
+}
+if (!election || election.label !== 'DUP') problems.push('party readout not labelled with the party');
+if (!election || election.marked !== election.seats) {
+  problems.push('bars marked as won do not match the seats');
+}
+if (!election || !election.electionOptions.includes('party:Sinn Féin')
+    || election.electionOptions.some((o) => o.startsWith('demo:'))) {
+  problems.push('statistic selector not filtered to the mode');
+}
+if (!election || !election.backToDemographics.options.includes('demo:rel')
+    || election.backToDemographics.options.some((o) => o.startsWith('party:'))) {
+  problems.push('statistic selector did not switch back');
+}
+if (!election || !election.backToDemographics.partyRowHidden) {
+  problems.push('party readout stayed in demographics mode');
+}
+// Votes are conserved: every voter lands in exactly one region.
+if (!election || Math.abs(election.nationalVotes - 789554) > 2) {
+  problems.push(`votes not conserved (${election && election.nationalVotes})`);
+}
+if (!election || !election.tip || !/votes/.test(election.tip.party || '')
+    || !/wins/.test(election.tip.region || '')) {
+  problems.push('tooltip missing the party lines');
+}
+if (!election || !election.tip.demoHidden) problems.push('tooltip kept the demographic lines');
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
 if (problems.length) {

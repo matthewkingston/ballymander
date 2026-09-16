@@ -16,6 +16,7 @@
 const CONFIG = {
   dataUrl: 'data/dz.geojson',
   graphUrl: 'data/dz_adjacency.json',
+  votersUrl: 'data/dz_voters.json',
   // Measured extent of DZ2021.geojson.
   bounds: [[-8.1775, 54.0227], [-5.4328, 55.3130]],
   colors: {
@@ -60,6 +61,11 @@ const els = {
   recom: document.getElementById('ctl-recom'),
   recomValue: document.getElementById('ctl-recom-value'),
   demoBlocks: document.getElementById('demo-blocks'),
+  partyBlock: document.getElementById('party-block'),
+  modeDemographics: document.getElementById('mode-demographics'),
+  modeElection: document.getElementById('mode-election'),
+  ttParty: document.querySelector('.tt-party'),
+  ttRegionParty: document.querySelector('.tt-region-party'),
   go: document.getElementById('ctl-go'),
   pause: document.getElementById('ctl-pause'),
   stop: document.getElementById('ctl-stop'),
@@ -95,6 +101,11 @@ const run = {
   bars: [],               // one {row, fill, value} per region, never reordered
 };
 
+/* Which set of variables steers the run: 'demographics' or 'election'. The
+ * hidden side's weights are forced to zero, so nothing steers unseen. */
+let uiMode = 'demographics';
+let election = null;      // set once web/data/dz_voters.json is loaded
+
 const BAR_ROW_H = 18;     // must match .bar-row height in style.css
 const BAR_INTERVAL = 200; // five redraws a second
 
@@ -125,7 +136,40 @@ for (const def of DEMOGRAPHICS) {
   BAR_STATS[`demo:${def.key}`] = {
     values: (m) => perRegion(m, (x, r) => x.regionDemo(def.key, r)),
     format: (v) => v.toFixed(def.decimals),
+    modes: ['demographics'],
   };
+}
+
+/* Votes rather than shares, because that is what a first-past-the-post result
+ * is counted in; `wins` marks the regions the party takes. */
+function addPartyBarStats(parties) {
+  for (const party of parties) {
+    const key = `party:${party}`;
+    BAR_STATS[key] = {
+      values: (m) => perRegion(m, (x, r) => x.regionPartyVotes(key, r)),
+      format: (v) => nf.format(Math.round(v)),
+      wins: (m, r) => m.regionWinner(r) === key,
+      modes: ['election'],
+    };
+  }
+}
+
+/* The statistic list depends on the mode: shared terms always, then either the
+ * demographics or the parties. Keeps the current choice if it still applies. */
+function rebuildBarOptions() {
+  const want = els.barsStat.value;
+  els.barsStat.textContent = '';
+  for (const [key, stat] of Object.entries(BAR_STATS)) {
+    if (stat.modes && !stat.modes.includes(uiMode)) continue;
+    const label = key.startsWith('party:') ? `${key.slice(6)} votes`
+      : key.startsWith('demo:')
+        ? DEMOGRAPHICS.find((d) => d.key === key.slice(5)).label
+        : { pop: 'Population', land: 'Land shape', people: 'People shape',
+            cut: 'Cut edges' }[key];
+    els.barsStat.append(el('option', { value: key }, label));
+  }
+  els.barsStat.value = BAR_STATS[want] && (!BAR_STATS[want].modes
+    || BAR_STATS[want].modes.includes(uiMode)) ? want : 'pop';
 }
 
 /* --- demographic controls ------------------------------------------------ */
@@ -217,7 +261,124 @@ function buildDemoControls() {
   }
 }
 
+/* --- the party block ----------------------------------------------------- */
+
+/* One block, not one per party: the party selector picks which of the nine the
+ * run is steering. Same controls as a demographic, except that in gerrymander
+ * mode the threshold is a winning margin -- the party's share minus the best
+ * other party's -- because that, not a fixed share, is what wins a seat under
+ * first past the post. */
+function buildPartyControls(voters) {
+  const id = (part) => `ctl-party-${part}`;
+  const wValue = el('span', { text: 'off' });
+  const modeLabel = el('span', { class: 'demo-mode-label', text: 'average' });
+  // The selected party names the block, so a collapsed block still says who
+  // the run is drawing for.
+  const toggleName = el('span', { text: 'Party' });
+  const toggle = el('button', {
+    class: 'demo-toggle', type: 'button', 'aria-expanded': 'false',
+    'aria-controls': 'party-body',
+  }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }), ' ', toggleName);
+  const w = el('input', {
+    id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
+    'data-weight': true, 'data-off': true,
+  });
+  const party = el('select', { id: id('p') },
+    ...voters.parties.map((p, i) => el('option', { value: p, selected: i === 0 }, p)));
+  const mode = el('select', { id: id('mode') },
+    ...['average', 'extreme', 'gerrymander'].map((v) =>
+      el('option', { value: v, selected: v === 'average' }, v)));
+
+  const tValue = el('span', { text: '0' });
+  const sValue = el('span', { text: '0.02' });
+  const t = el('input', {
+    id: id('t'), type: 'range', min: -0.3, max: 0.3, step: 0.005, value: 0,
+  });
+  const st = el('input', {
+    id: id('s'), type: 'range', min: 0.005, max: 0.15, step: 0.005, value: 0.02,
+  });
+  const above = el('input', { id: id('a'), type: 'checkbox', checked: true });
+
+  const gerry = el('div', { id: 'party-gerry', class: 'ctl-grid ctl-sub', hidden: true },
+    el('label', { for: id('t') }, 'Winning margin ', tValue), t,
+    el('label', { for: id('s') }, 'Steepness ', sValue), st,
+    el('label', { for: id('a'), text: 'Above margin' }), above);
+
+  const body = el('div', { id: 'party-body', class: 'demo-body', hidden: true },
+    el('div', { class: 'ctl-grid ctl-sub' },
+      el('label', { for: id('p'), text: 'Party' }), party,
+      el('label', { for: id('mode'), text: 'Mode' }), mode),
+    gerry);
+
+  els.partyBlock.append(el('div', { class: 'demo-block' },
+    el('div', { class: 'ctl-grid' },
+      el('div', { class: 'ctl-head' }, toggle, modeLabel, wValue), w),
+    body));
+
+  // Always the seats won, whatever the mode: it is the result the map is for.
+  const readout = el('dd', { id: 'run-party', text: '\u2014' });
+  const row = el('div', {}, el('dt', { class: 'run-party-label', text: 'Party' }), readout);
+  els.runScoreRow.before(row);
+
+  const tip = el('div');
+  const regionTip = el('div');
+  els.ttParty.append(tip);
+  els.ttRegionParty.append(regionTip);
+
+  addPartyBarStats(voters.parties);
+  return { voters, toggle, toggleName, body, modeLabel, wValue, w, party, mode, gerry,
+           t, tValue, s: st, sValue, above, readout, row, tip, regionTip,
+           key: () => `party:${party.value}`,
+           votes: (code) => {
+             const z = voters.zones[code];
+             return z ? z.e * voters.turnout : 0;
+           },
+           share: (code) => {
+             const z = voters.zones[code];
+             if (!z) return 0;
+             const i = voters.parties.indexOf(party.value);
+             const total = z.s.reduce((a, x) => a + x, 0) || 1;
+             return z.s[i] / total;
+           } };
+}
+
+/* Weights for every steered term, with the hidden mode's forced to zero. Both
+ * the live tick and start() go through this, so they cannot disagree. */
+function termWeights() {
+  const out = {};
+  for (const u of demoUI) {
+    out[u.def.key] = uiMode === 'demographics' ? weightOf(u.w) : 0;
+  }
+  if (election) {
+    for (const party of election.voters.parties) {
+      out[`party:${party}`] = uiMode === 'election' && `party:${party}` === election.key()
+        ? weightOf(election.w) : 0;
+    }
+  }
+  return out;
+}
+
+function applyMode() {
+  const demographics = uiMode === 'demographics';
+  els.demoBlocks.hidden = !demographics;
+  els.partyBlock.hidden = demographics || !election;
+  els.modeDemographics.classList.toggle('is-active', demographics);
+  els.modeElection.classList.toggle('is-active', !demographics);
+  els.modeDemographics.setAttribute('aria-pressed', String(demographics));
+  els.modeElection.setAttribute('aria-pressed', String(!demographics));
+  for (const u of demoUI) u.readout.parentElement.hidden = !demographics;
+  if (election) election.row.hidden = demographics;
+  rebuildBarOptions();
+  if (run.model) { readout(); drawBars(); }
+}
+
 /* --- data ---------------------------------------------------------------- */
+
+async function loadVoters() {
+  const res = await fetch(CONFIG.votersUrl);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} fetching ${CONFIG.votersUrl}`);
+  return res.json();
+}
 
 async function loadZones() {
   const res = await fetch(CONFIG.dataUrl);
@@ -389,7 +550,9 @@ function activeDemos() {
 function showTooltip(point, props) {
   els.ttName.textContent = props.name || props.code;
   els.ttPop.textContent = props.pop == null ? '—' : nf.format(props.pop);
-  const shown = new Set(activeDemos());
+  // Election mode reads the party lines, so the demographic ones fold away --
+  // the same filtering the results panel does.
+  const shown = uiMode === 'election' ? new Set() : new Set(activeDemos());
   for (const u of demoUI) {
     const v = props[u.def.field];
     const show = shown.has(u) && typeof v === 'number';
@@ -398,9 +561,18 @@ function showTooltip(point, props) {
     u.tip.hidden = !show;
   }
 
+  const party = election && uiMode === 'election';
+  els.ttParty.hidden = !party;
+  if (party) {
+    const votes = election.votes(props.code) * election.share(props.code);
+    election.tip.textContent = `${election.party.value.toLowerCase()} `
+      + `${nf.format(Math.round(votes))} votes (${pct.format(election.share(props.code))})`;
+  }
+
   const region = run.model && run.model.regionOf(props.code);
   if (region == null) {
     els.ttRegion.hidden = true;
+    els.ttRegionParty.hidden = true;
   } else {
     els.ttRegionName.textContent = `Region ${region + 1}`;
     els.ttRegionPop.textContent = nf.format(Math.round(run.model.regionPop[region]));
@@ -411,6 +583,15 @@ function showTooltip(point, props) {
           + `${run.model.regionDemo(u.def.key, region).toFixed(u.def.decimals)}`
         : '';
       u.regionTip.hidden = !show;
+    }
+    els.ttRegionParty.hidden = !party;
+    if (party) {
+      const key = election.key();
+      const winner = run.model.regionWinner(region);
+      election.regionTip.textContent = `${election.party.value.toLowerCase()} `
+        + `${nf.format(Math.round(run.model.regionPartyVotes(key, region)))} votes `
+        + `(${pct.format(run.model.regionPartyShare(key, region))}) — `
+        + `${winner === key ? 'wins' : `${winner.slice(6)} wins`}`;
     }
     els.ttRegion.hidden = false;
   }
@@ -494,6 +675,17 @@ function readout() {
       : live.mode === 'gerrymander' ? `${m.demoSeats(u.def.key)}/${m.N}`
         : m.demoSpread(u.def.key).toFixed(u.def.decimals);
   }
+  if (election) {
+    // Seats won always, since that is the outcome being drawn for; the spread
+    // comes too in the modes where it is what the term is steering.
+    const key = election.key();
+    const live = m.demoByKey[key];
+    const seats = `${m.partySeats(key)}/${m.N} won`;
+    election.readout.textContent = !live || live.weight === 0
+      || live.mode === 'gerrymander' ? seats
+      : `${seats} · spread ${m.demoSpread(key).toFixed(3)}`;
+    election.row.querySelector('.run-party-label').textContent = election.party.value;
+  }
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
 }
@@ -517,12 +709,25 @@ function tick(map) {
       run.model.temperature = t > 0 ? t : 1;
       // Modes first: turning one off zeroes that term's weight, and setWeights
       // then reapplies the rest against the right total.
-      const demoWeights = {};
       for (const u of demoUI) {
         run.model.setDemographic(u.def.key, u.mode.value, Number(u.t.value),
           Number(u.s.value), u.above.checked);
-        demoWeights[u.def.key] = weightOf(u.w);
       }
+      if (election) {
+        const chosen = election.key();
+        for (const party of election.voters.parties) {
+          const key = `party:${party}`;
+          if (key === chosen && uiMode === 'election') {
+            run.model.setDemographic(key, election.mode.value, Number(election.t.value),
+              Number(election.s.value), election.above.checked);
+          } else {
+            // Off, not just unweighted: a term left in gerrymander mode would
+            // still be recomputed on every move for nothing.
+            run.model.setDemographic(key, 'off', 0, 0.02, true);
+          }
+        }
+      }
+      const demoWeights = termWeights();
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
         weightOf(els.pshape), weightOf(els.cut), demoWeights);
       // Changes the move set rather than the score, so best-so-far stays
@@ -563,13 +768,22 @@ function start(map) {
     wShape: weightOf(els.shape),
     wPopShape: weightOf(els.pshape),
     wCut: weightOf(els.cut),
-    demo: Object.fromEntries(demoUI.map((u) => [u.def.key, {
-      weight: weightOf(u.w),
-      mode: u.mode.value,
-      threshold: Number(u.t.value),
-      steepness: Number(u.s.value),
-      above: u.above.checked,
-    }])),
+    demo: {
+      ...Object.fromEntries(demoUI.map((u) => [u.def.key, {
+        weight: termWeights()[u.def.key],
+        mode: u.mode.value,
+        threshold: Number(u.t.value),
+        steepness: Number(u.s.value),
+        above: u.above.checked,
+      }])),
+      ...(election ? { [election.key()]: {
+        weight: termWeights()[election.key()],
+        mode: election.mode.value,
+        threshold: Number(election.t.value),
+        steepness: Number(election.s.value),
+        above: election.above.checked,
+      } } : {}),
+    },
   });
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
@@ -677,6 +891,9 @@ function drawBars() {
     bar.row.style.transform = `translateY(${rank * BAR_ROW_H}px)`;
     bar.fill.style.width = `${((value[region] - min) / span) * 100}%`;
     bar.value.textContent = stat.format(value[region]);
+    // Won regions are marked rather than recoloured: the bar's colour is the
+    // region's own, and it has to stay readable against the map.
+    bar.row.classList.toggle('is-win', Boolean(stat.wins && stat.wins(m, region)));
   });
 
   // The labels report the actual extremes, not the padded domain -- the padding
@@ -689,8 +906,12 @@ function drawBars() {
 
 async function main() {
   const map = createMap();
+  // Registered before anything is awaited: 'load' fires once, and awaiting the
+  // voter file first would otherwise miss it and hang the boot.
+  const mapLoaded = new Promise((resolve) => map.on('load', resolve));
 
   buildDemoControls();
+  rebuildBarOptions();
 
   // Switching the statistic re-ranks immediately rather than waiting for the
   // next tick, so the panel responds even while paused or stopped.
@@ -725,6 +946,17 @@ async function main() {
     readouts.push([u.w, u.wValue], [u.t, u.tValue], [u.s, u.sValue]);
   }
 
+  els.modeDemographics.addEventListener('click', () => {
+    uiMode = 'demographics';
+    applyMode();
+  });
+  els.modeElection.addEventListener('click', () => {
+    if (!election) return;
+    uiMode = 'election';
+    applyMode();
+  });
+  els.modeElection.disabled = true;      // until the voter file is in
+
   for (const [input, out] of readouts) {
     const show = () => {
       if (input.dataset.weight !== undefined) {
@@ -739,11 +971,51 @@ async function main() {
     show();
   }
 
+  // The voter file is the election mode's only input; without it the mode
+  // stays unavailable and the demographics map works exactly as before.
+  let voters = null;
   try {
-    const [geojson] = await Promise.all([
-      loadZones(),
-      new Promise((resolve) => map.on('load', resolve)),
-    ]);
+    voters = await loadVoters();
+  } catch (err) {
+    console.warn('voter data unavailable, election mode off:', err.message);
+  }
+  if (voters) {
+    election = buildPartyControls(voters);
+    els.modeElection.disabled = false;
+    const sync = () => {
+      election.toggleName.textContent = election.party.value;
+      election.gerry.hidden = election.mode.value !== 'gerrymander';
+      election.modeLabel.textContent = election.mode.value;
+      election.modeLabel.classList.toggle('is-off', weightOf(election.w) === 0);
+      if (run.model && uiMode === 'election') readout();
+    };
+    election.toggle.addEventListener('click', () => {
+      const open = election.body.hidden;
+      election.body.hidden = !open;
+      election.toggle.setAttribute('aria-expanded', String(open));
+    });
+    election.mode.addEventListener('change', sync);
+    election.w.addEventListener('input', sync);
+    election.party.addEventListener('change', () => {
+      sync();
+      if (run.model) drawBars();
+    });
+    sync();
+    readouts.push([election.w, election.wValue], [election.t, election.tValue],
+                  [election.s, election.sValue]);
+    for (const [input, out] of readouts.slice(-3)) {
+      const show = () => {
+        out.textContent = input.dataset.weight !== undefined
+          ? formatWeight(weightOf(input)) : input.value;
+      };
+      input.addEventListener('input', show);
+      show();
+    }
+  }
+  applyMode();
+
+  try {
+    const [geojson] = await Promise.all([loadZones(), mapLoaded]);
 
     addZoneLayers(map, geojson);
     wireHover(map);
@@ -764,7 +1036,7 @@ async function main() {
         const pops = Object.fromEntries(
           geojson.features.map((f) => [f.properties.code, f.properties.pop]));
         run.model = new RegionModel(graph, pops, zoneGeometry(geojson.features),
-          zoneDemographics(geojson.features));
+          zoneDemographics(geojson.features), voters);
         run.shadow = new Int32Array(run.model.n).fill(-1);
         window.__model = run.model;
         els.go.disabled = false;

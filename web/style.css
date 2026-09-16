@@ -45,6 +45,37 @@ html, body {
   color: var(--ink-muted);
 }
 
+/* --- mode switch --------------------------------------------------------- */
+/* Two buttons acting as one control: which set of variables the run steers by.
+   The pressed one is filled, so the current mode reads at a glance. */
+.mode-switch {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 11px;
+  padding: 3px;
+  background: rgba(28, 37, 48, 0.05);
+  border-radius: 6px;
+}
+.mode-switch button {
+  flex: 1;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  color: var(--ink-muted);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.mode-switch button:hover:not(:disabled) { color: var(--ink); }
+.mode-switch button.is-active {
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 34, 48, 0.12);
+}
+.mode-switch button:disabled { opacity: 0.45; cursor: default; }
+
 /* --- region builder controls -------------------------------------------- */
 .ctl-grid {
   display: grid;
@@ -312,6 +343,10 @@ html, body {
   transition: opacity 90ms;
 }
 .bar-row:hover .bar-value { opacity: 1; }
+/* Election mode: the regions this party wins. A marker rather than a recolour,
+   because a bar's colour is its region's colour on the map. */
+.bar-row.is-win .bar-n { color: var(--accent); font-weight: 600; }
+.bar-row.is-win .bar-track { outline: 1px solid var(--accent); outline-offset: 1px; }
 
 #bars-axis {
   display: flex;

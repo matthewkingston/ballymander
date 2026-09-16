@@ -45,6 +45,12 @@ if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_adjacency.json ]; then
   python3 scripts/verify_adjacency.py
 fi
 
-# 5. serve
+# 5. app voter data for election mode (needs data/model/voters_v0_dz.csv)
+if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_voters.json ]; then
+  echo "==> voters"
+  python3 scripts/build_app_voters.py
+fi
+
+# 6. serve
 echo
 exec python3 scripts/serve.py "${SERVE_ARGS[@]}"

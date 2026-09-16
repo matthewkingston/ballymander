@@ -701,11 +701,23 @@ and tactical voting, which the model deliberately doesn't represent.
 * **One shift per region.** Within a DEA, DZs differ only by demographics. The
   spread term widens the uncertainty but doesn't change the point estimate.
 
+## In the app
+
+The map's **Election mode** draws first-past-the-post seats from
+`voters_v0_dz.csv`: `scripts/build_app_voters.py` writes the per-DZ electorate
+and voter shares to `web/data/dz_voters.json`, and votes are those shares times
+the electorate times a flat 57.2% turnout (the NI-wide 2024 Westminster
+figure). With turnout flat, its value scales every region equally and so
+changes no winner. See "Demographics and Election modes" in
+[the README](../README.md#demographics-and-election-modes).
+
+All nine parties are assumed to stand in every drawn region, which keeps the
+deferred "who stands" question deferred.
+
 ## Not built yet
 
-* **The app's voting mode**, loading `voters_v0_dz.csv`.
-* **Simulated elections in drawn constituencies.** Turning shares into voter
-  counts needs a turnout assumption; so far it is only "flat".
+* **STV simulation**, and everything else under
+  [Deferred past v0](#deferred-past-v0).
 
 ## Open questions and proposals
 

@@ -232,6 +232,64 @@ const DEMOGRAPHICS = [
  * exists to bring in. */
 const EXTREME_CAP = 5;
 
+/* --- the parties --------------------------------------------------------- */
+
+/* A party is scored exactly like a demographic: a vote-weighted mean per
+ * region, where the value is that party's share of the region's votes. Votes
+ * are the model's voter shares times each zone's electorate times a flat
+ * turnout, all fixed in web/data/dz_voters.json.
+ *
+ * Because every party shares one denominator -- the region's votes -- the
+ * party terms ride the same per-region sums as the demographics, and a term's
+ * own running sum IS that party's votes in the region.
+ *
+ * Gerrymander mode is the one place they differ. Under first past the post
+ * what matters is beating the strongest rival, not reaching a fixed share, so
+ * that mode scores the winning margin: this party's share minus the best other
+ * party's. That needs every party's sums at once, which is what the _partyBest
+ * helpers below are for. Average and extreme modes score the share, as a
+ * demographic does.
+ *
+ * vSpread and rSpread are measured over the 18 real 2024 constituencies by
+ * scripts/build_app_voters.py, the same quantities the demographics carry. */
+function partyTerms(voters) {
+  if (!voters || !voters.parties) return [];
+  return voters.parties.map((party, index) => {
+    const spread = (voters.spread && voters.spread[index]) || {};
+    return {
+      key: `party:${party}`,
+      label: party,
+      party,
+      partyIndex: index,
+      isParty: true,
+      vSpread: spread.vSpread || 0.05,
+      rSpread: spread.rSpread || 0.05,
+      // The gerrymander threshold is a margin, so zero means "just wins".
+      threshold: 0,
+      steepness: 0.02,
+      thresholdRange: [-0.3, 0.3, 0.005],
+      steepnessRange: [0.005, 0.15, 0.005],
+      decimals: 3,
+    };
+  });
+}
+
+/* { code: { votes, shares[] } } from the app's voter file. Shares are stored
+ * rounded, so they are renormalised here: every vote then belongs to exactly
+ * one party and a region's shares sum to one. */
+function zoneVoters(voters) {
+  if (!voters || !voters.zones) return null;
+  const out = {};
+  for (const [code, z] of Object.entries(voters.zones)) {
+    const total = z.s.reduce((a, x) => a + x, 0);
+    out[code] = {
+      votes: z.e * voters.turnout,
+      shares: total > 0 ? z.s.map((x) => x / total) : z.s,
+    };
+  }
+  return out;
+}
+
 /* { key: { code: {value, n} } } for every demographic present in the data. */
 function zoneDemographics(features) {
   const out = {};
@@ -258,8 +316,9 @@ class RegionModel {
    * zone code, the latter two from zoneGeometry() and zoneDemographics(). Both
    * are optional -- without geometry the shape terms are unavailable and their
    * weights forced to zero, and a demographic absent from the data simply has
-   * no term. */
-  constructor(graph, popByCode, geomByCode = null, demographicsByCode = null) {
+   * no term. `voters` is web/data/dz_voters.json, adding one term per party. */
+  constructor(graph, popByCode, geomByCode = null, demographicsByCode = null,
+              voters = null) {
     this.codes = [...graph.zones].sort();
     this.n = this.codes.length;
     this.index = new Map(this.codes.map((code, i) => [code, i]));
@@ -296,7 +355,7 @@ class RegionModel {
     // One term per demographic present in the data, each with its per-zone
     // values, its per-region running sums and its own recombination scratch.
     const demoByCode = demographicsByCode || {};
-    this.demographics = DEMOGRAPHICS.filter((def) => demoByCode[def.key]).map((def) => {
+    this.terms = DEMOGRAPHICS.filter((def) => demoByCode[def.key]).map((def) => {
       const rows = demoByCode[def.key];
       const term = {
         ...def,
@@ -321,7 +380,41 @@ class RegionModel {
       term.mean = count ? sum / count : 0;
       return term;
     });
-    this.demoByKey = Object.fromEntries(this.demographics.map((d) => [d.key, d]));
+    // Party terms, if the voter file is loaded. They join `demographics` so
+    // every per-region sum, aggregate and subtree total maintains them too;
+    // only their value function differs (see partyTerms).
+    const zVoters = zoneVoters(voters);
+    this.parties = !zVoters ? [] : partyTerms(voters).map((def) => {
+      const term = {
+        ...def,
+        def,
+        zValue: new Float64Array(this.n),
+        zN: new Float64Array(this.n),
+        rSum: new Float64Array(0),
+        rN: new Float64Array(0),
+        sSum: new Float64Array(this.n),
+        sN: new Float64Array(this.n),
+        cap: EXTREME_CAP * def.rSpread,
+      };
+      let sum = 0;
+      let count = 0;
+      for (let i = 0; i < this.n; i++) {
+        const row = zVoters[this.codes[i]] || { votes: 0, shares: [] };
+        term.zValue[i] = row.shares[def.partyIndex] || 0;
+        term.zN[i] = row.votes;
+        sum += term.zValue[i] * row.votes;
+        count += row.votes;
+      }
+      term.mean = count ? sum / count : 0;
+      return term;
+    });
+    // `terms` is everything the score can steer; `demographics` stays what it
+    // has always been, so callers iterating it never see a party.
+    this.terms = this.terms.concat(this.parties);
+    this.terms.forEach((d, k) => { d.slot = k; });
+    this.demographics = this.terms.filter((d) => !d.isParty);
+    this.demoByKey = Object.fromEntries(this.terms.map((d) => [d.key, d]));
+    this.hasElection = this.parties.length > 0;
 
     this.assign = new Int32Array(this.n);
     this.bestAssign = new Int32Array(this.n);
@@ -374,7 +467,7 @@ class RegionModel {
     this._agg = {
       area: 0, ax: 0, ay: 0, axx: 0, own: 0, pop: 0, px: 0, py: 0, pxx: 0,
     };
-    this._agg.demo = this.demographics.map(() => ({ sum: 0, n: 0 }));
+    this._agg.demo = this.terms.map(() => ({ sum: 0, n: 0 }));
 
     // Build steps between pocket sweeps. A sweep is one pass over the
     // unassigned zones, so this is about taste rather than cost. Set to
@@ -407,7 +500,7 @@ class RegionModel {
     this.wCut = 0;
     this.sigmaCut = 1;
     this.weightSum = 1;
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       d.raw = 0;              // SUM_r of the term, already signed
       d.weight = 0;
       d.mode = 'off';        // off | average | extreme | gerrymander
@@ -447,7 +540,7 @@ class RegionModel {
     this.N = N;
     this.target = this.totalPop / N;
     this.temperature = temperature;
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       const want = demo[d.key] || {};
       d.mode = want.mode || 'off';
       d.threshold = want.threshold ?? d.def.threshold;
@@ -490,7 +583,7 @@ class RegionModel {
     this.rPx = new Float64Array(N);
     this.rPy = new Float64Array(N);
     this.rPxx = new Float64Array(N);
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       d.rSum = new Float64Array(N);
       d.rN = new Float64Array(N);
     }
@@ -549,7 +642,7 @@ class RegionModel {
    * term this scales with N. Closed form, nothing measured at runtime. */
   _weightSum() {
     let total = this.wPop + this.wShape + this.wPopShape + this.wCut;
-    for (const d of this.demographics) total += d.weight;
+    for (const d of this.terms) total += d.weight;
     return total || 1;
   }
 
@@ -596,18 +689,85 @@ class RegionModel {
     return d.rN[r] ? d.rSum[r] / d.rN[r] : d.mean;
   }
 
-  _demoTerm(d, r) { return this._demoTermFrom(d, this._demoValue(d, r)); }
+  /* The best other party's share of a region, under the same hypothetical the
+   * caller is pricing. Only gerrymander mode needs these: the margin is what
+   * decides a first-past-the-post seat. */
+  _partyBest(r, skip) {
+    let best = 0;
+    for (const q of this.parties) {
+      if (q === skip) continue;
+      const v = this._demoValue(q, r);
+      if (v > best) best = v;
+    }
+    return best;
+  }
+
+  _partyBestWith(r, z, sign, skip) {
+    let best = 0;
+    for (const q of this.parties) {
+      if (q === skip) continue;
+      const n = q.rN[r] + sign * q.zN[z];
+      const v = n > 0 ? (q.rSum[r] + sign * q.zValue[z] * q.zN[z]) / n : q.mean;
+      if (v > best) best = v;
+    }
+    return best;
+  }
+
+  _partyBestWithAgg(r, g, sign, skip) {
+    let best = 0;
+    for (const q of this.parties) {
+      if (q === skip) continue;
+      const n = q.rN[r] + sign * g.demo[q.slot].n;
+      const v = n > 0 ? (q.rSum[r] + sign * g.demo[q.slot].sum) / n : q.mean;
+      if (v > best) best = v;
+    }
+    return best;
+  }
+
+  /* One side of a candidate recombination cut: `piece` takes the subtree's own
+   * totals, otherwise the rest of the two regions. */
+  _partyBestSplit(c, skip, piece) {
+    let best = 0;
+    for (const q of this.parties) {
+      if (q === skip) continue;
+      const n = piece ? q.sN[c] : q.sN[0] - q.sN[c];
+      const sum = piece ? q.sSum[c] : q.sSum[0] - q.sSum[c];
+      const v = n > 0 ? sum / n : q.mean;
+      if (v > best) best = v;
+    }
+    return best;
+  }
+
+  /* What a term scores on: a share, or a winning margin for a party being
+   * gerrymandered. */
+  _demoTerm(d, r) {
+    const x = this._demoValue(d, r);
+    return this._demoTermFrom(d,
+      d.isParty && d.mode === 'gerrymander' ? x - this._partyBest(r, d) : x);
+  }
 
   _demoTermWith(d, r, z, sign) {
     const n = d.rN[r] + sign * d.zN[z];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
-    return this._demoTermFrom(d, (d.rSum[r] + sign * d.zValue[z] * d.zN[z]) / n);
+    const x = (d.rSum[r] + sign * d.zValue[z] * d.zN[z]) / n;
+    return this._demoTermFrom(d,
+      d.isParty && d.mode === 'gerrymander' ? x - this._partyBestWith(r, z, sign, d) : x);
   }
 
   _demoTermWithAgg(d, r, g, sign, slot) {
     const n = d.rN[r] + sign * g.demo[slot].n;
     if (n <= 0) return this._demoTermFrom(d, d.mean);
-    return this._demoTermFrom(d, (d.rSum[r] + sign * g.demo[slot].sum) / n);
+    const x = (d.rSum[r] + sign * g.demo[slot].sum) / n;
+    return this._demoTermFrom(d,
+      d.isParty && d.mode === 'gerrymander' ? x - this._partyBestWithAgg(r, g, sign, d) : x);
+  }
+
+  _demoTermSplit(d, c, piece) {
+    const n = piece ? d.sN[c] : d.sN[0] - d.sN[c];
+    if (n <= 0) return this._demoTermFrom(d, d.mean);
+    const x = (piece ? d.sSum[c] : d.sSum[0] - d.sSum[c]) / n;
+    return this._demoTermFrom(d,
+      d.isParty && d.mode === 'gerrymander' ? x - this._partyBestSplit(c, d, piece) : x);
   }
 
   /* --- shape ------------------------------------------------------------- */
@@ -684,7 +844,7 @@ class RegionModel {
       this.shapeRaw -= this._penalty(r) - 1;
       this.popShapeRaw -= this._penaltyPop(r) - 1;
     }
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       if (d.mode !== 'off') d.raw -= this._demoTerm(d, r);
     }
     const a = sign * this.za[z];
@@ -700,7 +860,7 @@ class RegionModel {
     this.rPy[r] += p * this.zy[z];
     this.rPxx[r] += p * (this.zx[z] * this.zx[z] + this.zy[z] * this.zy[z]);
 
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       d.rSum[r] += sign * d.zValue[z] * d.zN[z];
       d.rN[r] += sign * d.zN[z];
     }
@@ -709,7 +869,7 @@ class RegionModel {
       this.shapeRaw += this._penalty(r) - 1;
       this.popShapeRaw += this._penaltyPop(r) - 1;
     }
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       if (d.mode !== 'off') d.raw += this._demoTerm(d, r);
     }
   }
@@ -792,7 +952,7 @@ class RegionModel {
     const cutting = this.wCut > 0;
     const penNow = shaped ? this._penalty(region) : 0;
     const penPopNow = peopled ? this._penaltyPop(region) : 0;
-    const demoNow = this.demographics.map(
+    const demoNow = this.terms.map(
       (d) => (d.weight > 0 ? this._demoTerm(d, region) : 0));
     let pick = -1;
     let pickDelta = Infinity;
@@ -808,8 +968,8 @@ class RegionModel {
         delta += (this.wPopShape * (this._penaltyPopWith(region, z, 1) - penPopNow))
           / this.sigmaPopShape;
       }
-      for (let k = 0; k < this.demographics.length; k++) {
-        const d = this.demographics[k];
+      for (let k = 0; k < this.terms.length; k++) {
+        const d = this.terms[k];
         if (d.weight <= 0) continue;
         delta += (d.weight * (this._demoTermWith(d, region, z, 1) - demoNow[k]))
           / d.sigma;
@@ -904,7 +1064,7 @@ class RegionModel {
     const leaving = shaped ? this._penaltyWithAgg(from, g, -1) - this._penalty(from) : 0;
     const leavingPop = peopled
       ? this._penaltyPopWithAgg(from, g, -1) - this._penaltyPop(from) : 0;
-    const leavingDemo = this.demographics.map(
+    const leavingDemo = this.terms.map(
       (d, k) => (d.weight > 0
         ? this._demoTermWithAgg(d, from, g, -1, k) - this._demoTerm(d, from) : 0));
     for (const w of this.nbr[z]) {
@@ -922,8 +1082,8 @@ class RegionModel {
         const joining = this._penaltyPopWithAgg(r, g, 1) - this._penaltyPop(r);
         delta += (this.wPopShape * (leavingPop + joining)) / this.sigmaPopShape;
       }
-      for (let k = 0; k < this.demographics.length; k++) {
-        const d = this.demographics[k];
+      for (let k = 0; k < this.terms.length; k++) {
+        const d = this.terms[k];
         if (d.weight <= 0) continue;
         const joining = this._demoTermWithAgg(d, r, g, 1, k) - this._demoTerm(d, r);
         delta += (d.weight * (leavingDemo[k] + joining)) / d.sigma;
@@ -1121,8 +1281,8 @@ class RegionModel {
       g.area += a; g.ax += a * x; g.ay += a * y; g.axx += a * rr;
       g.own += this.zOwn[z];
       g.pop += pop; g.px += pop * x; g.py += pop * y; g.pxx += pop * rr;
-      for (let k = 0; k < this.demographics.length; k++) {
-        const d = this.demographics[k];
+      for (let k = 0; k < this.terms.length; k++) {
+        const d = this.terms[k];
         g.demo[k].sum += d.zValue[z] * d.zN[z];
         g.demo[k].n += d.zN[z];
       }
@@ -1295,7 +1455,7 @@ class RegionModel {
       this._sPx[i] = this.pop[g] * this.zx[g];
       this._sPy[i] = this.pop[g] * this.zy[g];
       this._sPxx[i] = this.pop[g] * rr;
-      for (const d of this.demographics) {
+      for (const d of this.terms) {
         d.sSum[i] = d.zValue[g] * d.zN[g];
         d.sN[i] = d.zN[g];
       }
@@ -1325,7 +1485,7 @@ class RegionModel {
       this._sPx[q] += this._sPx[u];
       this._sPy[q] += this._sPy[u];
       this._sPxx[q] += this._sPxx[u];
-      for (const d of this.demographics) {
+      for (const d of this.terms) {
         d.sSum[q] += d.sSum[u];
         d.sN[q] += d.sN[u];
       }
@@ -1354,7 +1514,7 @@ class RegionModel {
     const oldPop = devA * devA + devB * devB;
     const oldShape = this._penalty(a) + this._penalty(b) - 2;
     const oldPeople = this._penaltyPop(a) + this._penaltyPop(b) - 2;
-    const oldDemo = this.demographics.map(
+    const oldDemo = this.terms.map(
       (d) => this._demoTerm(d, a) + this._demoTerm(d, b));
 
     const totPop = this._sPop[0];
@@ -1383,13 +1543,10 @@ class RegionModel {
             this._sPxx[0] - this._sPxx[c], this._sArea[0] - this._sArea[c]) - 2;
         delta += (this.wPopShape * (nw - oldPeople)) / this.sigmaPopShape;
       }
-      for (let k = 0; k < this.demographics.length; k++) {
-        const d = this.demographics[k];
+      for (let k = 0; k < this.terms.length; k++) {
+        const d = this.terms[k];
         if (d.weight <= 0) continue;
-        const n1 = d.sN[c];
-        const n2 = d.sN[0] - n1;
-        const nw = this._demoTermFrom(d, n1 > 0 ? d.sSum[c] / n1 : d.mean)
-          + this._demoTermFrom(d, n2 > 0 ? (d.sSum[0] - d.sSum[c]) / n2 : d.mean);
+        const nw = this._demoTermSplit(d, c, true) + this._demoTermSplit(d, c, false);
         delta += (d.weight * (nw - oldDemo[k])) / d.sigma;
       }
       if (this.wCut > 0) {
@@ -1494,7 +1651,7 @@ class RegionModel {
     this.rawScore = total;
     this.shapeRaw = shape;
     this.popShapeRaw = popShape;
-    for (const d of this.demographics) {
+    for (const d of this.terms) {
       let raw = 0;
       for (let r = 0; r < this.N; r++) raw += this._demoTerm(d, r);
       d.raw = raw;
@@ -1515,7 +1672,7 @@ class RegionModel {
     this.rPx.fill(0);
     this.rPy.fill(0);
     this.rPxx.fill(0);
-    for (const d of this.demographics) { d.rSum.fill(0); d.rN.fill(0); }
+    for (const d of this.terms) { d.rSum.fill(0); d.rN.fill(0); }
     for (let z = 0; z < this.n; z++) {
       const r = this.assign[z];
       if (r < 0) continue;
@@ -1530,7 +1687,7 @@ class RegionModel {
       this.rPx[r] += this.pop[z] * this.zx[z];
       this.rPy[r] += this.pop[z] * this.zy[z];
       this.rPxx[r] += this.pop[z] * rr;
-      for (const d of this.demographics) {
+      for (const d of this.terms) {
         d.rSum[r] += d.zValue[z] * d.zN[z];
         d.rN[r] += d.zN[z];
       }
@@ -1560,7 +1717,7 @@ class RegionModel {
       + this.wShape * this.scoreShape
       + this.wPopShape * this.scorePopShape
       + this.wCut * this.scoreCut
-      + this.demographics.reduce((a, d) => a + d.weight * (d.raw / d.sigma), 0))
+      + this.terms.reduce((a, d) => a + d.weight * (d.raw / d.sigma), 0))
       / this.weightSum;
   }
 
@@ -1588,10 +1745,49 @@ class RegionModel {
     return Math.sqrt(v / this.N);
   }
 
+  /* --- election readouts --------------------------------------------------
+   * A party's votes in a region are its term's own running sum. */
+  regionPartyVotes(key, r) {
+    const d = this.demoByKey[key];
+    return d && d.rSum.length ? d.rSum[r] : 0;
+  }
+
+  regionPartyShare(key, r) {
+    const d = this.demoByKey[key];
+    return d ? this._demoValue(d, r) : 0;
+  }
+
+  /* First past the post: the party with most votes. Ties go to the earlier
+   * party, which is the order in the voter file. */
+  regionWinner(r) {
+    let best = null;
+    let bestVotes = -1;
+    for (const q of this.parties) {
+      const v = q.rSum.length ? q.rSum[r] : 0;
+      if (v > bestVotes) { bestVotes = v; best = q; }
+    }
+    return best ? best.key : null;
+  }
+
+  /* Regions this party wins, and its margin over the best rival. */
+  partySeats(key) {
+    if (!this.demoByKey[key]) return 0;
+    let seats = 0;
+    for (let r = 0; r < this.N; r++) if (this.regionWinner(r) === key) seats++;
+    return seats;
+  }
+
+  partyMargin(key, r) {
+    const d = this.demoByKey[key];
+    if (!d) return 0;
+    return this._demoValue(d, r) - this._partyBest(r, d);
+  }
+
   /* Regions on the wanted side of the threshold. */
   demoSeats(key) {
     const d = this.demoByKey[key];
     if (!d) return 0;
+    if (d.isParty) return this.partySeats(key);
     let seats = 0;
     for (let r = 0; r < this.N; r++) {
       const x = this._demoValue(d, r);
@@ -1631,20 +1827,20 @@ class RegionModel {
     const l = this.hasGeometry ? Math.max(0, wShape) : 0;
     const q = this.hasGeometry ? Math.max(0, wPopShape) : 0;
     const c = Math.max(0, wCut);
-    const wanted = this.demographics.map((d) => {
+    const wanted = this.terms.map((d) => {
       const w = demoWeights && demoWeights[d.key] !== undefined
         ? demoWeights[d.key] : d.weight;
       return d.mode === 'off' ? 0 : Math.max(0, w);
     });
     let changed = p !== this.wPop || l !== this.wShape || q !== this.wPopShape
       || c !== this.wCut;
-    this.demographics.forEach((d, k) => { if (wanted[k] !== d.weight) changed = true; });
+    this.terms.forEach((d, k) => { if (wanted[k] !== d.weight) changed = true; });
     if (!changed) return false;
     this.wPop = p;
     this.wShape = l;
     this.wPopShape = q;
     this.wCut = c;
-    this.demographics.forEach((d, k) => { d.weight = wanted[k]; });
+    this.terms.forEach((d, k) => { d.weight = wanted[k]; });
     this.weightSum = this._weightSum();
     this.bestScore = Infinity;
     // A partial map cannot be compared against a complete one; the build phase
@@ -1722,7 +1918,7 @@ class RegionModel {
       penalty: this._penalty(r),
       penaltyPop: this._penaltyPop(r),
       demo: Object.fromEntries(
-        this.demographics.map((d) => [d.key, this._demoValue(d, r)])),
+        this.terms.map((d) => [d.key, this._demoValue(d, r)])),
     }));
   }
 }

@@ -11,6 +11,15 @@
   <div id="map"></div>
 
   <div id="panel">
+    <!-- Which set of variables the run is steered by. Election mode swaps the
+         demographic blocks for the party block; the hidden side is switched
+         off, never left steering unseen. -->
+    <div class="mode-switch" role="group" aria-label="Mode">
+      <button id="mode-demographics" type="button" class="is-active" aria-pressed="true">
+        Demographics</button>
+      <button id="mode-election" type="button" aria-pressed="false">Election</button>
+    </div>
+
     <div class="ctl-buttons">
       <button id="ctl-go" type="button" disabled>GO</button>
       <button id="ctl-pause" type="button" disabled>PAUSE</button>
@@ -40,6 +49,10 @@
     <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new
          demographic is its data plus one entry there, and needs no markup. -->
     <div id="demo-blocks"></div>
+
+    <!-- Election mode's single block: party selector, weight, mode and the
+         gerrymander controls. Built by app.js from web/data/dz_voters.json. -->
+    <div id="party-block" hidden></div>
 
     <div class="ctl-grid ctl-more">
       <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
@@ -92,12 +105,14 @@
     <div class="tt-name"></div>
     <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
     <div class="tt-demo"></div>
+    <div class="tt-party"></div>
     <div class="tt-region" hidden>
       <div class="tt-region-name"></div>
       <div class="tt-region-pop">
         <span class="tt-region-pop-value"></span> <span class="tt-unit">people</span>
       </div>
       <div class="tt-region-demo"></div>
+      <div class="tt-region-party"></div>
     </div>
   </div>
 

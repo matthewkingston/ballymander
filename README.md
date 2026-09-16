@@ -594,6 +594,39 @@ DOM. `window.__map` is exposed as a console handle, with `window.__graph` and
 `window.__model` beside it. The graph loads off the critical path — nothing on screen depends on it, so a
 failure to fetch it warns to the console and leaves the map working.
 
+### Demographics and Election modes
+
+The switch at the top of the left panel chooses what the run is steered by.
+
+* **Demographics** is the original map: religion, age, orientation and social
+  grade, each with a weight and an average / extreme / gerrymander mode.
+* **Election** replaces those blocks with one party block — a party selector
+  and the same weight, mode and gerrymander controls — and draws
+  first-past-the-post seats.
+
+The hidden mode's terms are switched off rather than left steering unseen, and
+the results panel, the statistic selector and the tooltip all show only the
+active mode's figures. The bars show a party's votes per region and mark the
+regions it wins.
+
+Gerrymander mode differs for a party: its threshold is a **winning margin**,
+the party's share minus the strongest rival's, because that is what takes a
+seat. Zero means "just wins". Average and extreme modes work on the party's
+share, as a demographic does.
+
+Election mode needs `web/data/dz_voters.json`, built by
+`scripts/build_app_voters.py` from the voting model's estimates
+([docs/voting-model.md](docs/voting-model.md)) and produced by `./run.sh`. It
+holds each Data Zone's electorate and the nine parties' voter shares; votes are
+those shares times the electorate times a flat 57.2% turnout, the NI-wide
+figure at the 2024 Westminster election. Without the file the app runs exactly
+as before and the Election button stays disabled.
+
+In the model the parties are ordinary score terms (`regions.js`), so a party's
+votes in a region are its term's own running sum and every party shares one
+denominator. `scripts/test_regions.mjs` checks the margin term against a
+from-scratch recompute after the optimiser has churned.
+
 ## Verification
 
 ```bash
