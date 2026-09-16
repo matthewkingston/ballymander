@@ -255,14 +255,14 @@ await page.waitForFunction(() => window.__model.assigned === window.__model.n,
   { timeout: 60000 });
 await page.evaluate(() => new Promise(r => setTimeout(r, 2500)));
 // The region count is fixed for the life of a run; the election controls are not.
-election.lockedDuringRun = await page.evaluate(() => ({
+const lockedDuringRun = await page.evaluate(() => ({
   regions: document.getElementById('ctl-n').disabled,
   type: document.getElementById('ctl-election-type').disabled,
   seats: document.getElementById('ctl-seats').disabled,
 }));
 await page.click('#ctl-stop');
 await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
-election.unlockedAfterStop = await page.evaluate(() =>
+const unlockedAfterStop = await page.evaluate(() =>
   !document.getElementById('ctl-n').disabled);
 
 const election = await page.evaluate(() => {
@@ -292,6 +292,8 @@ const election = await page.evaluate(() => {
 const marked = await page.evaluate(() =>
   document.querySelectorAll('#bars .bar-row.is-win').length);
 election.marked = marked;
+election.lockedDuringRun = lockedDuringRun;
+election.unlockedAfterStop = unlockedAfterStop;
 
 // The seats pie: one wedge per party, drawn only where seats were won, and a
 // caption naming whatever is under the pointer.
