@@ -386,8 +386,17 @@ const ballot = { items: [], selected: new Set(), ui: null };
 
 /* Particular mergers have earned their own names. Keyed by the set, so the
  * order they were merged in doesn't matter. */
+const ALL_PARTIES = Object.keys(PARTY_SHORT);
+const except = (...out) => ALL_PARTIES.filter((p) => !out.includes(p));
+
 const MERGER_NAMES = [
   [['DUP', 'UUP', 'TUV'], 'U Unity'],
+  [['DUP', 'UUP'], 'U Unity Lite'],
+  [['UUP', 'SDLP'], 'The Old Guard'],
+  [except('PBP'), 'Profit'],
+  [except('Green'), 'Magenta'],
+  [except('Alliance'), 'Division'],
+  [except('Sinn Féin'), 'Iad Féin'],
   [['Sinn Féin', 'SDLP'], 'N Unity'],
   [['Alliance', 'Green', 'PBP'], 'Big Other'],
   [['Sinn Féin', 'TUV'], 'Curveball'],

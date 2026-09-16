@@ -452,7 +452,9 @@ await editorPick(['DUP', 'UUP']);
 election.editor.twoPicked = (await editorState()).buttons;
 await editorPress('Merge');
 election.editor.merged = await editorState();
-await editorPick(['DUP-UUP']);
+// Whatever the merger ended up called -- some combinations have their own name.
+const mergedName = election.editor.merged.rows[0];
+await editorPick([mergedName]);
 election.editor.mergedPicked = (await editorState()).buttons;
 await editorPress('Unmerge');
 await editorPick(['TUV']);
@@ -653,7 +655,7 @@ if (!ed || ed.excluded.votes[5] !== 0 || !(ed.excluded.votes[1] > ed.start.votes
   problems.push("an excluded party's votes did not move on");
 }
 if (!ed || ed.twoPicked[2] !== 'Merge:on') problems.push('two selected parties should allow a merge');
-if (!ed || ed.merged.rows[0] !== 'DUP-UUP' || ed.merged.rows.includes('DUP')
+if (!ed || ed.merged.rows.length !== 8 || ed.merged.rows.includes('DUP')
     || ed.merged.rows.includes('UUP')) {
   problems.push('a merger should head the list and take its parties out of it');
 }
@@ -661,7 +663,8 @@ if (!ed || ed.merged.votes[3] !== 0
     || ed.merged.votes[1] !== ed.excluded.votes[1] + ed.excluded.votes[3]) {
   problems.push('a merger did not gather its parties\' votes');
 }
-if (!ed || !ed.merged.selector.includes('DUP-UUP')) {
+if (!ed || !ed.merged.selector.includes(ed.merged.rows[0])
+    || ed.merged.selector.includes('UUP')) {
   problems.push('the gerrymander target did not follow the merger');
 }
 if (!ed || ed.mergedPicked[2] !== 'Unmerge:on') {
