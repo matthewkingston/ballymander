@@ -231,7 +231,8 @@ function buildDemoControls() {
 
     const mode = el('select', { id: id('mode') },
       ...['average', 'extreme', 'gerrymander'].map((v) =>
-        el('option', { value: v, selected: v === 'average' }, v)));
+        el('option', { value: v, selected: v === 'average' },
+          v[0].toUpperCase() + v.slice(1))));
 
     // The threshold and steepness sliders carry the term's own units and
     // range -- 0-1 for religion, years for age -- straight from its definition.
@@ -362,7 +363,8 @@ function buildPartyControls(voters) {
     ...voters.parties.map((p, i) => el('option', { value: p, selected: i === 0 }, p)));
   const mode = el('select', { id: id('mode') },
     ...['average', 'extreme', 'gerrymander'].map((v) =>
-      el('option', { value: v, selected: v === 'average' }, v)));
+      el('option', { value: v, selected: v === 'average' },
+        v[0].toUpperCase() + v.slice(1))));
 
   const tValue = el('span', { text: '0' });
   const sValue = el('span', { text: '0.02' });
@@ -518,9 +520,8 @@ function createMap() {
   });
 
   map.touchZoomRotate.disableRotation();
-  // Bottom-right, stacked above the scale: the results panel owns the top right.
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-  map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: 'metric' }), 'bottom-right');
+  // Top right, held clear of the results panel by style.css.
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
   return map;
 }
 

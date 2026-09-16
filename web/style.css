@@ -498,3 +498,6 @@ html, body {
 
 /* MapLibre chrome */
 .maplibregl-ctrl-group { box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10) !important; }
+/* The zoom buttons sit at the top right, left of the results panel: 236px of
+   panel plus its 16px offset, and a gap. */
+.maplibregl-ctrl-top-right { right: 258px; top: 6px; }
