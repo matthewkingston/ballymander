@@ -81,6 +81,14 @@
   </div>
 
   <div id="results" hidden>
+    <!-- Election mode: the whole map, or one region's count in detail. -->
+    <div class="view-switch" role="group" aria-label="View" hidden>
+      <button id="view-overall" type="button" class="is-active" aria-pressed="true">
+        Overall</button>
+      <button id="view-region" type="button" aria-pressed="false">Region</button>
+    </div>
+
+    <div id="overall">
     <dl id="run">
       <div class="run-wide"><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
       <div><dt>Max pop dev</dt><dd id="run-dev">&mdash;</dd></div>
@@ -114,6 +122,17 @@
         <span id="bars-min"></span>
         <span id="bars-max"></span>
       </div>
+    </div>
+    </div>
+
+    <!-- One region's election. Click the map to choose which. -->
+    <div id="region-view" hidden>
+      <div id="region-title">&mdash;</div>
+      <div id="region-seats">&mdash;</div>
+      <svg id="region-pie" viewBox="-1.05 -1.05 2.1 2.1" aria-label="Votes by party" hidden></svg>
+      <div id="region-stages" hidden></div>
+      <div id="region-caption">&nbsp;</div>
+      <p id="region-hint">Click a zone on the map to show its region.</p>
     </div>
   </div>
 

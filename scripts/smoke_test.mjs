@@ -377,11 +377,53 @@ election.stv = await page.evaluate(() => {
   };
 });
 
+// One region's election in detail: a pie under first past the post, the count
+// stage by stage under STV, and the map choosing which region.
+election.region = {};
+await page.click('#view-region');
+election.region.stv = await page.evaluate(() => ({
+  title: document.getElementById('region-title').textContent,
+  seats: document.getElementById('region-seats').textContent,
+  stages: document.querySelectorAll('#region-stages .stage-row').length,
+  full: [...document.querySelectorAll('#region-stages .stage-row')].every((row) =>
+    Math.abs([...row.querySelectorAll('.stage-seg')]
+      .reduce((a, seg) => a + parseFloat(seg.style.width), 0) - 100) < 0.5),
+  pieShown: !document.getElementById('region-pie').hasAttribute('hidden'),
+  overallHidden: document.getElementById('overall').hidden,
+}));
+await page.evaluate(() => {
+  const e = document.getElementById('ctl-election-type');
+  e.value = 'fptp';
+  e.dispatchEvent(new Event('change', { bubbles: true }));
+});
+await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
+election.region.fptp = await page.evaluate(() => ({
+  wedges: document.querySelectorAll('#region-pie path').length,
+  seats: document.getElementById('region-seats').textContent,
+  stagesShown: !document.getElementById('region-stages').hasAttribute('hidden'),
+}));
+// clicking the map picks the region, and it is remembered
+const first = await page.evaluate(() => document.getElementById('region-title').textContent);
+await page.mouse.click(pt.x, pt.y);
+await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
+election.region.afterClick = await page.evaluate(() => ({
+  title: document.getElementById('region-title').textContent,
+  matchesModel: document.getElementById('region-title').textContent
+    === `Region ${window.__shownRegionForTest + 1}`,
+}));
+election.region.first = first;
+await page.click('#view-overall');
+await page.click('#view-region');
+election.region.remembered = await page.evaluate(() =>
+  document.getElementById('region-title').textContent);
+
 await page.click('#mode-demographics');
 election.backToDemographics = await page.evaluate(() => ({
   options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
   partyRowHidden: document.getElementById('run-party').parentElement.hidden,
   pieHidden: document.getElementById('pie').hidden,
+  viewSwitchHidden: document.querySelector('.view-switch').hidden,
+  overallShown: !document.getElementById('overall').hidden,
 }));
 election.electionOptions = electionOptions;
 
@@ -513,6 +555,25 @@ if (!election || !election.lockedDuringRun.regions || election.lockedDuringRun.t
 }
 if (!election || !election.unlockedAfterStop) {
   problems.push('region count stayed locked after the run stopped');
+}
+if (!election || !election.region.stv.stages || !election.region.stv.full
+    || election.region.stv.pieShown || !election.region.stv.overallHidden) {
+  problems.push('STV region view missing its stage bars');
+}
+if (!election || !/\d/.test(election.region.stv.seats)
+    || !/quota/.test(election.region.stv.seats)) {
+  problems.push('STV region view missing its seat line');
+}
+if (!election || election.region.fptp.wedges !== 9 || election.region.fptp.stagesShown
+    || !/wins the seat/.test(election.region.fptp.seats)) {
+  problems.push('FPTP region view missing its pie');
+}
+if (!election || election.region.remembered !== election.region.afterClick.title) {
+  problems.push('region view forgot which region was shown');
+}
+if (!election || !election.backToDemographics.viewSwitchHidden
+    || !election.backToDemographics.overallShown) {
+  problems.push('region view stayed available in demographics mode');
 }
 if (!election || !election.stv.controls.seats || election.stv.controls.margin
     || !election.stv.controls.bonus

@@ -66,6 +66,17 @@ const els = {
   modeElection: document.getElementById('mode-election'),
   electionType: document.getElementById('ctl-election-type'),
   seats: document.getElementById('ctl-seats'),
+  viewSwitch: document.querySelector('.view-switch'),
+  viewOverall: document.getElementById('view-overall'),
+  viewRegion: document.getElementById('view-region'),
+  overall: document.getElementById('overall'),
+  regionView: document.getElementById('region-view'),
+  regionTitle: document.getElementById('region-title'),
+  regionSeats: document.getElementById('region-seats'),
+  regionPie: document.getElementById('region-pie'),
+  regionStages: document.getElementById('region-stages'),
+  regionCaption: document.getElementById('region-caption'),
+  regionHint: document.getElementById('region-hint'),
   pie: document.getElementById('pie'),
   pieSvg: document.getElementById('pie-svg'),
   pieCaption: document.getElementById('pie-caption'),
@@ -123,7 +134,15 @@ const PARTY_COLORS = {
 /* Which set of variables steers the run: 'demographics' or 'election'. The
  * hidden side's weights are forced to zero, so nothing steers unseen. */
 let uiMode = 'demographics';
+/* Which half of the results panel is showing: the whole map, or one region's
+ * election in detail. */
+let panelView = 'overall';
 let election = null;      // set once web/data/dz_voters.json is loaded
+
+/* The region being shown in detail. Kept for the life of a run, so clicking
+ * around the map and coming back lands where you left off; a new run starts at
+ * the first region. */
+let shownRegion = 0;
 
 const BAR_ROW_H = 18;     // must match .bar-row height in style.css
 const BAR_INTERVAL = 200; // five redraws a second
@@ -337,6 +356,130 @@ function drawPie() {
   });
 }
 
+/* --- one region's election ----------------------------------------------- */
+
+const partyColour = (party) => PARTY_COLORS[party] || '#9aa7b4';
+
+/* `hidden` is an HTML element property: assigning it on an SVG element sets a
+ * JS property that never reaches the attribute, so the [hidden] rule keeps the
+ * thing invisible. Toggle the attribute itself. */
+function show(node, visible) {
+  if (visible) node.removeAttribute('hidden');
+  else node.setAttribute('hidden', '');
+}
+
+function regionCaption(text) {
+  els.regionCaption.textContent = text || '\u00a0';
+}
+
+/* First past the post: the region's votes as a pie, hover for the figures. */
+function drawRegionPie(m, r) {
+  const parties = election.voters.parties;
+  const votes = m.regionVotes(r, new Float64Array(parties.length));
+  const total = votes.reduce((a, b) => a + b, 0) || 1;
+  els.regionPie.textContent = '';
+  let from = 0;
+  parties.forEach((party, i) => {
+    if (votes[i] <= 0) return;
+    const to = from + (votes[i] / total) * Math.PI * 2;
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('fill', partyColour(party));
+    path.setAttribute('d', wedgePath(from, to));
+    path.addEventListener('mouseenter', () => regionCaption(
+      `${party} — ${nf.format(Math.round(votes[i]))} votes (${pct.format(votes[i] / total)})`));
+    path.addEventListener('mouseleave', () => regionCaption(''));
+    els.regionPie.append(path);
+    from = to;
+  });
+  const winner = m.regionWinner(r);
+  els.regionSeats.textContent = winner ? `${winner.slice(6)} wins the seat` : '—';
+}
+
+/* STV: one bar per stage of the count, parties always in the same order.
+ * A party's block is what it holds at that point -- the quotas it has already
+ * used to win seats, plus whatever is still live -- so seats stay visible
+ * rather than vanishing from the chart. Votes that have exhausted make up the
+ * grey tail, which is why every bar is the same width. */
+function drawRegionStages(m, r) {
+  const parties = election.voters.parties;
+  const { quota, total, stages } = m.regionCount(r);
+  els.regionStages.textContent = '';
+  const scale = total || 1;
+  stages.forEach((stage, i) => {
+    const row = el('div', { class: 'stage-row' },
+      el('span', { class: 'stage-n', text: i === 0 ? '1st' : String(i) }));
+    const bar = el('div', { class: 'stage-bar' });
+    parties.forEach((party, p) => {
+      const held = stage.locked[p] + stage.live[p];
+      if (held <= 0) return;
+      const seg = el('div', { class: 'stage-seg' });
+      seg.style.width = `${(held / scale) * 100}%`;
+      seg.style.background = partyColour(party);
+      const seats = stage.seats[p];
+      seg.addEventListener('mouseenter', () => regionCaption(
+        `${party} — ${nf.format(Math.round(held))} (${pct.format(held / scale)})`
+        + `, ${seats} ${seats === 1 ? 'seat' : 'seats'}`));
+      seg.addEventListener('mouseleave', () => regionCaption(''));
+      bar.append(seg);
+    });
+    if (stage.exhausted > 0) {
+      const seg = el('div', { class: 'stage-seg is-exhausted' });
+      seg.style.width = `${(stage.exhausted / scale) * 100}%`;
+      seg.addEventListener('mouseenter', () => regionCaption(
+        `non-transferable — ${nf.format(Math.round(stage.exhausted))} `
+        + `(${pct.format(stage.exhausted / scale)})`));
+      seg.addEventListener('mouseleave', () => regionCaption(''));
+      bar.append(seg);
+    }
+    const what = stage.party < 0 ? 'first preferences'
+      : `${stage.kind} ${parties[stage.party]}`;
+    row.append(bar, el('span', { class: 'stage-what', text: what, title: what }));
+    els.regionStages.append(row);
+  });
+  const last = stages[stages.length - 1];
+  const held = parties.map((party, p) => [party, last.seats[p]]).filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1]);
+  els.regionSeats.textContent = held.length
+    ? `${held.map(([party, n]) => `${party} ${n}`).join(' · ')}  (quota `
+      + `${nf.format(Math.round(quota))})`
+    : '—';
+}
+
+function drawRegion() {
+  const m = run.model;
+  const live = m && run.phase !== 'idle' && m.N > 0;
+  show(els.regionHint, !live);
+  show(els.regionPie, false);
+  show(els.regionStages, false);
+  if (!live || !election) {
+    els.regionTitle.textContent = '—';
+    els.regionSeats.textContent = '—';
+    regionCaption('');
+    return;
+  }
+  if (shownRegion >= m.N) shownRegion = 0;
+  els.regionTitle.textContent = `Region ${shownRegion + 1}`;
+  if (m.electionType === 'stv') {
+    show(els.regionStages, true);
+    drawRegionStages(m, shownRegion);
+  } else {
+    show(els.regionPie, true);
+    drawRegionPie(m, shownRegion);
+  }
+}
+
+function applyView() {
+  const region = panelView === 'region' && uiMode === 'election' && election;
+  els.overall.hidden = Boolean(region);
+  els.regionView.hidden = !region;
+  els.viewOverall.classList.toggle('is-active', !region);
+  els.viewRegion.classList.toggle('is-active', Boolean(region));
+  els.viewOverall.setAttribute('aria-pressed', String(!region));
+  els.viewRegion.setAttribute('aria-pressed', String(Boolean(region)));
+  if (region) drawRegion();
+  else if (run.model) { drawBars(); drawPie(); }
+}
+
 /* --- the party block ----------------------------------------------------- */
 
 /* One block, not one per party: the party selector picks which of the nine the
@@ -478,6 +621,8 @@ function applyMode() {
   for (const u of demoUI) u.readout.parentElement.hidden = !demographics;
   if (election) election.row.hidden = demographics;
   els.pie.hidden = demographics || !election || !run.model || run.phase === 'idle';
+  els.viewSwitch.hidden = demographics || !election;
+  if (demographics) panelView = 'overall';
   applyElectionType();
   rebuildBarOptions();
   // Re-count before redrawing: the map may have been drawn in the other mode,
@@ -486,6 +631,7 @@ function applyMode() {
     run.model.setElection(demographics ? 'fptp' : election.type(),
       election.seatsPer(), Number(election.bonus.value));
   }
+  applyView();
   if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
 }
 
@@ -766,6 +912,18 @@ function wireHover(map) {
     showTooltip(e.point, f.properties);
   });
 
+  // Clicking a zone chooses the region shown in detail. Only while that view
+  // is open, so a click means nothing else in the app.
+  map.on('click', 'dz-fill', (e) => {
+    if (panelView !== 'region' || uiMode !== 'election' || !run.model) return;
+    const f = e.features && e.features[0];
+    const region = f && run.model.regionOf(f.properties.code);
+    if (region == null) return;
+    shownRegion = region;
+    window.__shownRegionForTest = region;    // handle for scripts/smoke_test.mjs
+    drawRegion();
+  });
+
   map.on('mouseleave', 'dz-fill', () => {
     clear();
     map.getCanvas().style.cursor = '';
@@ -890,8 +1048,8 @@ function tick(map) {
       // rate: below 5 frames/s they follow it rather than outpacing it.
       if (now - run.lastBars >= BAR_INTERVAL) {
         run.lastBars = now;
-        drawBars();
-        drawPie();
+        if (panelView === 'region') drawRegion();
+        else { drawBars(); drawPie(); }
       }
     }
     run.raf = requestAnimationFrame(frame);
@@ -944,11 +1102,13 @@ function start(map) {
   els.results.hidden = false;
   els.resultsList.hidden = false;  // bars are live from the first build step
   els.pie.hidden = uiMode !== 'election' || !election;
+  shownRegion = 0;                 // a new map, so back to the first region
   buildBars(n);
   drawBars();
   pieShown = '';
   drawPie();
   readout();
+  applyView();
   run.raf = requestAnimationFrame(tick(map));
 }
 
@@ -984,6 +1144,7 @@ function stop(map, { silent = false } = {}) {
   readout();
   drawBars();
   drawPie();
+  if (panelView === 'region') drawRegion();
 }
 
 /* One row per region, built once per run. drawBars() afterwards only writes a
@@ -1106,6 +1267,13 @@ async function main() {
     readouts.push([u.w, u.wValue], [u.t, u.tValue], [u.s, u.sValue]);
   }
 
+  els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });
+  els.viewRegion.addEventListener('click', () => {
+    if (!election || uiMode !== 'election') return;
+    panelView = 'region';
+    applyView();
+  });
+
   els.modeDemographics.addEventListener('click', () => {
     uiMode = 'demographics';
     applyMode();
@@ -1163,6 +1331,7 @@ async function main() {
       drawBars();
       pieShown = '';
       drawPie();
+      if (panelView === 'region') drawRegion();
     };
     els.electionType.addEventListener('change', () => { applyElectionType(); recount(); });
     els.seats.addEventListener('change', recount);

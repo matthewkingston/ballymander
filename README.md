@@ -611,6 +611,26 @@ Regions is fixed for the life of a run, since changing it means a different
 map; the election controls stay live, so a paused or stopped map can be
 re-counted under other rules.
 
+### One region's election
+
+The results panel switches between **Overall** and **Region**. Region shows a
+single region's election in detail, and the map picks it: click any zone while
+that view is open. The choice is remembered for the run and starts at region 1.
+
+* **First past the post:** the region's votes as a pie, hover for each party's
+  votes and share.
+* **STV:** one bar per stage of the count, parties always in the same order. A
+  party's block is what it holds at that point — the quotas it has already
+  spent on seats, plus whatever is still live — so seats stay in the chart
+  rather than vanishing. Exhausted ballots make up the hatched grey tail, which
+  is why every bar is the same width. Hovering a block gives that party's
+  votes, share and seats so far; the line above gives the final seats and the
+  quota.
+
+A party can be excluded after winning a seat: at party level its leftover pile
+is what remains once a quota is spent, and that pile can be the smallest left
+in the count.
+
 The hidden mode's terms are switched off rather than left steering unseen, and
 the results panel, the statistic selector and the tooltip all show only the
 active mode's figures. The bars show a party's votes per region and mark the

@@ -336,6 +336,83 @@ function stvCount(votes, seats, transfers, exhaustion, seatsOut, liveIn) {
   return quota;
 }
 
+/* The same count, keeping a record of every stage, for the app's region view.
+ * Deliberately a separate function: this one allocates, and the optimiser runs
+ * the other one millions of times.
+ *
+ * Each stage is the state *after* an election or an exclusion:
+ *   live      each party's pile still in the count
+ *   locked    votes a party has already used to win seats (seats x quota)
+ *   exhausted votes that have left the count, cumulatively
+ *   seats     seats held so far
+ * live + locked + exhausted sums to the votes cast, so every stage is a full
+ * bar and the shares stay comparable between stages. */
+function stvStages(votes, seats, transfers, exhaustion) {
+  const K = votes.length;
+  const live = votes.slice();
+  const held = new Int32Array(K);
+  const state = new Uint8Array(K);           // 1 while still in the count
+  let total = 0;
+  for (let p = 0; p < K; p++) {
+    state[p] = live[p] > 0 ? 1 : 0;
+    total += live[p];
+  }
+  const quota = seats > 0 ? total / (seats + 1) : 0;
+  const stages = [];
+  let exhausted = 0;
+  const snapshot = (kind, party) => stages.push({
+    kind,
+    party,
+    live: Array.from(live),
+    locked: Array.from(held, (n) => n * quota),
+    seats: Array.from(held),
+    exhausted,
+  });
+  snapshot('first preferences', -1);
+  if (quota <= 0) return { quota, total, stages };
+  let left = seats;
+  let standing = 0;
+  for (let p = 0; p < K; p++) standing += state[p];
+  while (left > 0 && standing > 0 && stages.length < K + seats + 2) {
+    let top = -1;
+    for (let p = 0; p < K; p++) if (state[p] && (top < 0 || live[p] > live[top])) top = p;
+    if (live[top] >= quota) {
+      held[top]++;
+      live[top] -= quota;
+      left--;
+      if (live[top] <= 0) { live[top] = 0; state[top] = 0; standing--; }
+      snapshot('elected', top);
+      continue;
+    }
+    if (standing === 1) {
+      held[top] += left;
+      live[top] = Math.max(0, live[top] - left * quota);
+      left = 0;
+      snapshot('elected', top);
+      break;
+    }
+    let out = -1;
+    for (let p = 0; p < K; p++) if (state[p] && (out < 0 || live[p] < live[out])) out = p;
+    const pot = live[out];
+    const moving = pot * (1 - exhaustion[out]);
+    exhausted += pot - moving;
+    live[out] = 0;
+    state[out] = 0;
+    standing--;
+    let weight = 0;
+    for (let p = 0; p < K; p++) if (state[p]) weight += transfers[out * K + p];
+    if (weight > 0) {
+      for (let p = 0; p < K; p++) {
+        if (state[p]) live[p] += (moving * transfers[out * K + p]) / weight;
+      }
+    } else {
+      exhausted += moving;
+    }
+    snapshot('excluded', out);
+  }
+  return { quota, total, stages };
+}
+
 /* { code: { votes, shares[] } } from the app's voter file. Shares are stored
  * rounded, so they are renormalised here: every vote then belongs to exactly
  * one party and a region's shares sum to one. */
@@ -1916,6 +1993,20 @@ class RegionModel {
       if (v > best) { best = v; top = p; }
     }
     if (top >= 0) out[top] = 1;
+    return out;
+  }
+
+  /* The count over one region, stage by stage, for display. */
+  regionCount(r) {
+    return stvStages(this._stvVotesFor(r, -1, 0, null).slice(), this.seatsPerRegion,
+      this._transfers, this._exhaustion);
+  }
+
+  /* Every party's votes in one region, in the parties' own order. */
+  regionVotes(r, out) {
+    for (let p = 0; p < this.parties.length; p++) {
+      out[p] = this.parties[p].rSum.length ? this.parties[p].rSum[r] : 0;
+    }
     return out;
   }
 

@@ -394,6 +394,103 @@ html, body {
 #status[hidden] { display: none; }
 #status.error { color: #a8321a; border-color: #e3b6ab; }
 
+/* --- one region's election ---------------------------------------------- */
+.view-switch {
+  display: flex;
+  gap: 4px;
+  margin: -2px 0 10px;
+  padding: 3px;
+  background: rgba(28, 37, 48, 0.05);
+  border-radius: 6px;
+}
+.view-switch[hidden] { display: none; }
+.view-switch button {
+  flex: 1;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ink-muted);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.view-switch button.is-active {
+  color: var(--ink);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(20, 34, 48, 0.12);
+}
+#region-view[hidden], #region-stages[hidden], #region-pie[hidden] { display: none; }
+#region-title {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+#region-seats {
+  margin: 2px 0 9px;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+#region-pie { width: 150px; height: 150px; display: block; margin: 4px auto 0; }
+#region-pie path { stroke: var(--panel-bg); stroke-width: 0.012; }
+#region-pie path:hover { stroke: var(--ink); stroke-width: 0.03; }
+
+/* One row per stage of the count: number, the bar, and what happened. */
+.stage-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+}
+.stage-n {
+  width: 18px;
+  flex: none;
+  text-align: right;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+.stage-bar {
+  flex: 1;
+  display: flex;
+  height: 13px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #eef1f4;
+}
+.stage-seg { height: 100%; }
+.stage-seg.is-exhausted {
+  background: repeating-linear-gradient(135deg, #c9d2db 0 3px, #dde3e9 3px 6px);
+}
+.stage-seg:hover { filter: brightness(1.15); }
+.stage-what {
+  width: 66px;
+  flex: none;
+  font-size: 9.5px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#region-caption {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--rule);
+  font-size: 11px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#region-hint {
+  margin: 6px 0 0;
+  font-size: 10.5px;
+  color: var(--ink-muted);
+}
+#region-hint[hidden] { display: none; }
+
 /* --- seats pie (election mode) ------------------------------------------ */
 #pie {
   margin-top: 10px;
