@@ -616,8 +616,8 @@ re-counted under other rules.
 Below the party controls, a collapsible **Party editor** decides who is on the
 ballot. Its state outlives a run, so a new map is drawn under the same ballot.
 
-Each row is a party — or a merger — with a tick or cross for whether it stands,
-and a checkbox to select it. Below the list:
+Each row is a party — or a merger — with a checkbox to select it; an excluded
+one is struck through. Below the list:
 
 * **Include / Exclude** set every selected item to that status, whatever it was.
 * **Merge** (two or more selected) makes one item, named from the short party

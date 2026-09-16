@@ -361,7 +361,8 @@ function drawPie() {
 
 /* --- the party editor ---------------------------------------------------- */
 
-/* Short names for the merged parties' labels: DUP-UUP-TUV, All-SDLP-Gr. */
+/* Short names, used only when parties merge, where a full name per party would
+ * not fit: DUP-UUP-TUV, All-SDLP-Gr. Everywhere else a party keeps its name. */
 const PARTY_SHORT = {
   'Sinn Féin': 'SF', DUP: 'DUP', Alliance: 'All', UUP: 'UUP', SDLP: 'SDLP',
   TUV: 'TUV', Green: 'Gr', PBP: 'PBP', 'Aontú': 'Ao',
@@ -375,7 +376,8 @@ const PARTY_SHORT = {
  * editor is not rebuilt, so a new map is drawn under the same ballot. */
 const ballot = { items: [], selected: new Set(), ui: null };
 
-const itemName = (item) => item.members.map((p) => PARTY_SHORT[p] || p).join('-');
+const itemName = (item) => (item.members.length === 1 ? item.members[0]
+  : item.members.map((p) => PARTY_SHORT[p] || p).join('-'));
 const itemHost = (item) => item.members[0];       // the slot that carries the votes
 
 /* Entities in the order the model knows them, for labelling everything else. */
@@ -470,9 +472,8 @@ function renderPartyEditor() {
     });
     ui.list.append(el('li', { class: item.standing ? 'pe-row' : 'pe-row is-out' },
       box,
-      el('label', { class: 'pe-name', for: `pe-${id}`, text: id }),
-      el('span', { class: 'pe-stands', title: item.standing ? 'stands' : 'stands aside',
-                   text: item.standing ? '\u2713' : '\u2715' })));
+      el('label', { class: 'pe-name', for: `pe-${id}`, text: id,
+                    title: item.standing ? 'stands' : 'stands aside' })));
   }
   updateEditorButtons();
 }
@@ -1140,10 +1141,11 @@ function setButtons(state) {   // idle | running | paused
   els.pause.disabled = state === 'idle';
   els.stop.disabled = state === 'idle';
   els.pause.textContent = state === 'paused' ? 'RESUME' : 'PAUSE';
-  // The number of regions is fixed once a run starts: changing it mid-run
-  // would mean a different map, not a different reading of this one. The
-  // election controls stay live, so a paused map can be re-counted freely.
+  // The number of regions and the seed are fixed once a run starts: changing
+  // either mid-run would mean a different map, not a different reading of this
+  // one. The election controls stay live, so a paused map can be re-counted.
   els.n.disabled = state !== 'idle';
+  els.seed.disabled = state !== 'idle';
 }
 
 function readout() {

@@ -413,9 +413,7 @@ html, body {
   font-size: 11.5px;
   cursor: pointer;
 }
-.pe-stands { font-size: 11px; color: #3f8f5a; }
 .pe-row.is-out .pe-name { color: var(--ink-muted); text-decoration: line-through; }
-.pe-row.is-out .pe-stands { color: var(--accent); }
 .pe-actions { display: flex; gap: 5px; }
 .pe-action {
   flex: 1;
