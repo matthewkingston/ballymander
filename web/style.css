@@ -430,6 +430,21 @@ html, body {
   color: #ffc9a8;
 }
 
+/* Election mode: the region's standings, strongest first. The selected party
+   takes the same accent as the population figure. */
+.tt-party-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  color: #cfd8e2;
+}
+.tt-party-rank { width: 14px; text-align: right; color: #97a4b1; }
+.tt-party-name { flex: 1; }
+.tt-party-votes { margin-left: auto; }
+.tt-party-row.is-target { color: #ffc9a8; font-weight: 600; }
+
 .tt-region-demo div {
   margin-top: 1px;
   font-size: 11px;

@@ -291,9 +291,12 @@ await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
 election.tip = await page.evaluate(() => {
   const t = document.getElementById('tooltip');
   if (!t || t.hidden) return null;
+  const rows = [...t.querySelectorAll('.tt-party-row')];
   return {
     party: t.querySelector('.tt-party')?.innerText.trim(),
-    region: t.querySelector('.tt-region-party')?.innerText.trim(),
+    rows: rows.map((r) => r.innerText.replace(/\n/g, ' ')),
+    targets: rows.filter((r) => r.classList.contains('is-target')).length,
+    ranked: rows.filter((r) => r.querySelector('.tt-party-rank')).length,
     demoHidden: t.querySelector('.tt-demo')?.innerText.trim() === '',
   };
 });
@@ -394,9 +397,20 @@ if (!election || !election.backToDemographics.partyRowHidden) {
 if (!election || Math.abs(election.nationalVotes - 789554) > 2) {
   problems.push(`votes not conserved (${election && election.nationalVotes})`);
 }
-if (!election || !election.tip || !/votes/.test(election.tip.party || '')
-    || !/wins/.test(election.tip.region || '')) {
-  problems.push('tooltip missing the party lines');
+if (!election || !election.tip || !/votes?\b/.test(election.tip.party || '')) {
+  problems.push('tooltip missing the zone party line');
+}
+// The region's standings: five rows, strongest first, the selected party
+// highlighted -- and ranked only when it misses the top five.
+if (!election || !election.tip || election.tip.rows.length !== 5) {
+  problems.push('tooltip region standings not five rows');
+}
+if (!election || !election.tip || election.tip.targets !== 1) {
+  problems.push('tooltip did not highlight exactly one party');
+}
+if (!election || !election.tip
+    || election.tip.ranked !== (election.tip.rows.findIndex((r) => /DUP/.test(r)) === 4 ? 1 : 0)) {
+  problems.push('tooltip rank number shown in the wrong case');
 }
 if (!election || !election.tip.demoHidden) problems.push('tooltip kept the demographic lines');
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');

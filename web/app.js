@@ -564,9 +564,9 @@ function showTooltip(point, props) {
   const party = election && uiMode === 'election';
   els.ttParty.hidden = !party;
   if (party) {
-    const votes = election.votes(props.code) * election.share(props.code);
-    election.tip.textContent = `${election.party.value.toLowerCase()} `
-      + `${nf.format(Math.round(votes))} votes (${pct.format(election.share(props.code))})`;
+    const votes = Math.round(election.votes(props.code) * election.share(props.code));
+    election.tip.textContent = `${election.party.value} ${nf.format(votes)} `
+      + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(election.share(props.code))})`;
   }
 
   const region = run.model && run.model.regionOf(props.code);
@@ -586,12 +586,28 @@ function showTooltip(point, props) {
     }
     els.ttRegionParty.hidden = !party;
     if (party) {
+      // The region's result, strongest first, so the winner is the top row.
+      // The selected party is highlighted; if it misses the top five, the
+      // fifth row gives way to it and carries its rank.
       const key = election.key();
-      const winner = run.model.regionWinner(region);
-      election.regionTip.textContent = `${election.party.value.toLowerCase()} `
-        + `${nf.format(Math.round(run.model.regionPartyVotes(key, region)))} votes `
-        + `(${pct.format(run.model.regionPartyShare(key, region))}) — `
-        + `${winner === key ? 'wins' : `${winner.slice(6)} wins`}`;
+      const standings = election.voters.parties.map((name) => ({
+        name,
+        key: `party:${name}`,
+        votes: run.model.regionPartyVotes(`party:${name}`, region),
+        share: run.model.regionPartyShare(`party:${name}`, region),
+      })).sort((a, b) => b.votes - a.votes);
+      const rank = standings.findIndex((row) => row.key === key);
+      const rows = rank < 5 ? standings.slice(0, 5)
+        : [...standings.slice(0, 4), { ...standings[rank], rank: rank + 1 }];
+      election.regionTip.textContent = '';
+      for (const row of rows) {
+        election.regionTip.append(el('div', {
+          class: row.key === key ? 'tt-party-row is-target' : 'tt-party-row',
+        }, ...(row.rank ? [el('span', { class: 'tt-party-rank', text: `${row.rank}.` })] : []),
+           el('span', { class: 'tt-party-name', text: row.name }),
+           el('span', { class: 'tt-party-votes',
+             text: `${nf.format(Math.round(row.votes))} (${pct.format(row.share)})` })));
+      }
     }
     els.ttRegion.hidden = false;
   }
