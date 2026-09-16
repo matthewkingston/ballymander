@@ -1088,6 +1088,69 @@ check(vote.partySeats(PARTY) >= idle.partySeats(PARTY),
   + `${idle.partySeats(PARTY)})`);
 check(regionsContiguous(vote) === null, 'election run keeps every region contiguous');
 
+/* --- STV ----------------------------------------------------------------- */
+/* The party-level count, and the score built on it: seats won plus the
+ * leftover pile as a fraction of a quota. */
+console.log('\nSTV');
+const stv = new RegionModel(graph, pops, geom, demo, voters);
+stv.setElection('stv', 5, 2);
+stv.start(18, 3, { wPop: 1,
+  demo: { [PARTY]: { weight: 1, mode: 'gerrymander', above: true } } });
+while (stv.buildStep());
+for (let i = 0; i < 300000; i++) stv.optimiseStep();
+
+const seatsOut = new Int32Array(voters.parties.length);
+let everyRegionFull = true;
+let seatTotal = 0;
+for (let r = 0; r < stv.N; r++) {
+  const sum = [...stv.regionSeats(r, seatsOut)].reduce((a, b) => a + b, 0);
+  seatTotal += sum;
+  if (sum !== 5) everyRegionFull = false;
+}
+check(everyRegionFull && seatTotal === stv.totalSeats,
+  `every region fills its 5 seats (${seatTotal} of ${stv.totalSeats})`);
+check(voters.parties.reduce((a, p) => a + stv.partySeats(`party:${p}`), 0) === stv.totalSeats,
+  'every seat belongs to exactly one party');
+
+const stvMirror = new RegionModel(graph, pops, geom, demo, voters);
+stvMirror.setElection('stv', 5, 2);
+stvMirror.start(18, 3, { wPop: 1,
+  demo: { [PARTY]: { weight: 1, mode: 'gerrymander', above: true } } });
+stvMirror.assign.set(stv.assign);
+stvMirror._resum();
+check(near(stv.demoScore(PARTY), stvMirror.demoScore(PARTY),
+  1e-6 * Math.max(1, Math.abs(stvMirror.demoScore(PARTY)))),
+  `STV term survives ${stv.moves.toLocaleString()} moves and `
+  + `${stv.recombinations.toLocaleString()} recombinations `
+  + `(${stv.demoScore(PARTY).toFixed(4)} vs ${stvMirror.demoScore(PARTY).toFixed(4)})`);
+
+const stvIdle = new RegionModel(graph, pops, geom, demo, voters);
+stvIdle.setElection('stv', 5, 2);
+stvIdle.start(18, 3, { wPop: 1 });
+while (stvIdle.buildStep());
+for (let i = 0; i < 300000; i++) stvIdle.optimiseStep();
+check(stv.partySeats(PARTY) > stvIdle.partySeats(PARTY),
+  `gerrymandering under STV wins more seats than not (${stv.partySeats(PARTY)} vs `
+  + `${stvIdle.partySeats(PARTY)} of ${stv.totalSeats})`);
+check(regionsContiguous(stv) === null, 'STV run keeps every region contiguous');
+
+/* Seats are lumpy, so more votes need not mean more seats -- but a party that
+ * holds a quota outright must always be returned. */
+let quotaHonoured = true;
+for (let r = 0; r < stv.N; r++) {
+  const share = stv.regionPartyShare(PARTY, r);
+  if (share >= 1 / 6 && stv.regionPartySeats(PARTY, r) < 1) quotaHonoured = false;
+}
+check(quotaHonoured, 'a party holding a quota always takes a seat');
+
+/* Changing the seats per region is a different election, so the term rebuilds. */
+const before = stv.demoScore(PARTY);
+stv.setElection('stv', 7, 2);
+check(stv.totalSeats === stv.N * 7 && stv.demoScore(PARTY) !== before,
+  `seats per region changes the count (${stv.totalSeats} seats now)`);
+stv.setElection('fptp', 5, 2);
+check(stv.totalSeats === stv.N, 'first past the post returns one seat a region');
+
 /* N=18 seed 7 is a known slow case, kept in the suite deliberately: regions 8
  * and 17 come out of the build as a sealed pocket, touching only each other and
  * one other region whose adjacent zones are all articulation points, so nothing

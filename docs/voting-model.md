@@ -618,10 +618,12 @@ Seats still missed with all layers:
   (0.55) already concedes the model can't see.
 
 **Assembly 2022** (90 seats):
-* STV simulation is deferred, so each constituency's 5 seats are allocated by
-  Droop quota with largest remainders on party first-preference shares. The
-  same proxy on the actual first preferences is the fair comparison, because it
-  separates model error from proxy error.
+* This check predates [the STV count](#the-stv-count), so each constituency's 5
+  seats are allocated by Droop quota with largest remainders on party
+  first-preference shares. The same proxy on the actual first preferences is
+  the fair comparison, because it separates model error from proxy error.
+  (Largest remainder is the weakest of the rules measured there, so these
+  figures understate the model rather than flatter it.)
 * Real winners were read from the count sheets for this check only. Three
   sheets never mark their final seat "Elected"; those seats went to the
   candidate with the highest running total, which matches the published
@@ -703,8 +705,8 @@ and tactical voting, which the model deliberately doesn't represent.
 
 ## In the app
 
-The map's **Election mode** draws first-past-the-post seats from
-`voters_v0_dz.csv`: `scripts/build_app_voters.py` writes the per-DZ electorate
+The map's **Election mode** draws seats from `voters_v0_dz.csv`, under first
+past the post or STV: `scripts/build_app_voters.py` writes the per-DZ electorate
 and voter shares to `web/data/dz_voters.json`, and votes are those shares times
 the electorate times a flat 57.2% turnout (the NI-wide 2024 Westminster
 figure). With turnout flat, its value scales every region equally and so
@@ -714,10 +716,59 @@ changes no winner. See "Demographics and Election modes" in
 All nine parties are assumed to stand in every drawn region, which keeps the
 deferred "who stands" question deferred.
 
+### The STV count
+
+Simulating a real count would need each party's candidates and every voter's
+ranking, neither of which we have. Instead every party is **one entity holding
+all its votes**:
+
+* **Quota** = votes / (seats + 1), fixed at the start as in a real count.
+* **Election:** a party at a quota takes a seat and keeps the remainder, which
+  is what a running mate would inherit.
+* **Exclusion:** with nobody at a quota, the weakest party goes out. Its pile
+  loses that party's **exhaustion** share — the voters with no further
+  preference — and the rest moves on by [transfer matrix
+  v0](#transfer-matrix-v0), renormalised over the parties still in.
+* **Endgame:** one party left takes the seats that remain.
+
+Exhaustion rates come from the same clean transfer events the matrix was
+fitted on: SF 12%, UUP 11%, Green 10%, PBP 13%, DUP and SDLP 15%, Alliance
+17%, TUV 19%, Aontú 36%.
+
+**Why this method.** Four rules were measured against 91 real STV contests —
+the 2022 Assembly and the 73 council DEAs whose winners are readable — fed the
+real first preferences, so the comparison is of the seat rule alone:
+
+| Method | Seats wrong of 499 | Regions exactly right |
+|---|---:|---:|
+| Largest remainder (quota, then remainders) | 30 | 61/91 |
+| Bloc-pooled quota | 48 | 44/91 |
+| Party-level STV | 25 | 66/91 |
+| **Party-level STV + exhaustion** | **25** | **66/91** |
+
+The accuracy gap is modest; the bias is the reason to prefer the count. Largest
+remainder never lets a transfer happen, so it is systematically wrong — SF +12
+seats, SDLP −9. The party-level count's errors are scattered: within ±5 seats
+for every party, and ±3 once exhaustion is included. A systematic bias would
+show up as a fake advantage every time the lines move, which is exactly what
+this tool is for.
+
+What no party-level count can see is what the remaining 25 seats are mostly
+about: vote management, running mates and individual candidates.
+
+**Steering it.** In gerrymander mode the score for a region is
+
+  `seat bonus × seats won + leftover votes ÷ quota`
+
+both taken from the count. The staircase dominates, so a seat always beats
+vote-building, while the leftover pile gives the optimiser a gradient pointing
+at the next seat — including the transfers the party would pick up on the way,
+since that pile is the count's own. The seat bonus defaults to 2. Average and
+extreme modes still work on the party's share.
+
 ## Not built yet
 
-* **STV simulation**, and everything else under
-  [Deferred past v0](#deferred-past-v0).
+* Everything under [Deferred past v0](#deferred-past-v0).
 
 ## Open questions and proposals
 
@@ -742,6 +793,5 @@ deferred "who stands" question deferred.
 
 * Who stands in a simulated constituency (stand-asides, pacts, thresholds).
 * Turnout modelling beyond flat.
-* STV simulation (FPTP first).
 * A systematic election-type factor.
 * Area-varying prior uncertainty.

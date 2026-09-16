@@ -345,7 +345,17 @@ html, body {
 .bar-row:hover .bar-value { opacity: 1; }
 /* Election mode: the regions this party wins. A marker rather than a recolour,
    because a bar's colour is its region's colour on the map. */
+.bar-seats {
+  width: 12px;
+  flex: none;
+  text-align: right;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+.bar-seats[hidden] { display: none; }
 .bar-row.is-win .bar-n { color: var(--accent); font-weight: 600; }
+.bar-row.is-win .bar-seats { color: var(--accent); font-weight: 600; }
 .bar-row.is-win .bar-track { outline: 1px solid var(--accent); outline-offset: 1px; }
 
 #bars-axis {
@@ -471,6 +481,12 @@ html, body {
 .tt-party-rank { width: 14px; text-align: right; color: #97a4b1; }
 .tt-party-name { flex: 1; }
 .tt-party-votes { margin-left: auto; }
+.tt-party-seats {
+  width: 12px;
+  text-align: right;
+  color: #8fa0b0;                /* seats, when a region returns several */
+}
+.tt-party-row.is-target .tt-party-seats { color: inherit; }
 .tt-party-row.is-target { color: #ffc9a8; font-weight: 600; }
 
 .tt-region-demo div {

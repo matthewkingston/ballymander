@@ -274,6 +274,68 @@ function partyTerms(voters) {
   });
 }
 
+/* The STV count, at party level: every party is one entity holding all its
+ * votes. No candidates and no ballots, because we have neither -- what we do
+ * have is the transfer matrix and each party's exhaustion rate, which is where
+ * most of a real count's behaviour lives.
+ *
+ *   quota      total votes / (seats + 1), fixed at the start as in a real count
+ *   election   a party at a quota takes a seat and keeps the remainder, which
+ *              is what its running mate would inherit
+ *   exclusion  with nobody at a quota, the weakest party goes out; its pile
+ *              loses its exhaustion share and the rest moves on by the transfer
+ *              matrix, renormalised over the parties still in
+ *   endgame    one party left takes whatever seats remain
+ *
+ * Measured against 91 real STV contests (2022 Assembly, 2023 council), fed the
+ * real first preferences, this gets 95% of 499 seats right and has no
+ * systematic bias by party -- against 94% and a clear anti-transfer bias for
+ * plain quota-and-remainder. See docs/voting-model.md.
+ *
+ * Allocation-free: the optimiser runs this for every candidate move, so the
+ * scratch arrays are owned by the model and reused. */
+function stvCount(votes, seats, transfers, exhaustion, seatsOut, liveIn) {
+  const K = votes.length;
+  const live = liveIn;
+  let total = 0;
+  for (let p = 0; p < K; p++) {
+    seatsOut[p] = 0;
+    live[p] = votes[p] > 0 ? 1 : 0;
+    total += votes[p];
+  }
+  if (total <= 0 || seats <= 0) return 0;
+  const quota = total / (seats + 1);
+  let left = seats;
+  let standing = 0;
+  for (let p = 0; p < K; p++) standing += live[p];
+  while (left > 0 && standing > 0) {
+    let top = -1;
+    for (let p = 0; p < K; p++) if (live[p] && (top < 0 || votes[p] > votes[top])) top = p;
+    if (votes[top] >= quota) {
+      seatsOut[top]++;
+      votes[top] -= quota;
+      left--;
+      if (votes[top] <= 0) { live[top] = 0; standing--; }
+      continue;
+    }
+    if (standing === 1) { seatsOut[top] += left; votes[top] = 0; left = 0; break; }
+    let out = -1;
+    for (let p = 0; p < K; p++) if (live[p] && (out < 0 || votes[p] < votes[out])) out = p;
+    const pot = votes[out] * (1 - exhaustion[out]);
+    votes[out] = 0;
+    live[out] = 0;
+    standing--;
+    let weight = 0;
+    for (let p = 0; p < K; p++) if (live[p]) weight += transfers[out * K + p];
+    if (weight > 0) {
+      for (let p = 0; p < K; p++) {
+        if (live[p]) votes[p] += (pot * transfers[out * K + p]) / weight;
+      }
+    }
+  }
+  return quota;
+}
+
 /* { code: { votes, shares[] } } from the app's voter file. Shares are stored
  * rounded, so they are renormalised here: every vote then belongs to exactly
  * one party and a region's shares sum to one. */
@@ -415,6 +477,26 @@ class RegionModel {
     this.demographics = this.terms.filter((d) => !d.isParty);
     this.demoByKey = Object.fromEntries(this.terms.map((d) => [d.key, d]));
     this.hasElection = this.parties.length > 0;
+
+    // The election being simulated. 'fptp' is one seat to the largest party;
+    // 'stv' runs the count above, with `seatsPerRegion` seats in every region.
+    this.electionType = 'fptp';
+    this.seatsPerRegion = 5;
+    // How much a seat is worth against a quota of leftover votes in the
+    // gerrymander score -- above one, a seat always beats vote-building.
+    this.seatBonus = 2;
+    const P = this.parties.length;
+    this._transfers = new Float64Array(P * P);
+    this._exhaustion = new Float64Array(P);
+    if (P) {
+      voters.transfers.forEach((row, a) => row.forEach((v, b) => {
+        this._transfers[a * P + b] = v;
+      }));
+      voters.exhaustion.forEach((v, p) => { this._exhaustion[p] = v; });
+    }
+    this._stvVotes = new Float64Array(P);
+    this._stvSeats = new Int32Array(P);
+    this._stvLive = new Uint8Array(P);
 
     this.assign = new Int32Array(this.n);
     this.bestAssign = new Int32Array(this.n);
@@ -648,6 +730,13 @@ class RegionModel {
 
   _demoSigma(d, N) {
     const delta = (d.vSpread * N) / this.n;
+    if (this._isStv(d)) {
+      // The leftover pile is measured in quotas, so a move that shifts the
+      // party's share by `delta` shifts the term by (seats + 1) x delta. Seats
+      // themselves move rarely and in whole steps; scaling to those would make
+      // the term nearly always flat.
+      return Math.max(1e-9, delta * (this.seatsPerRegion + 1));
+    }
     if (d.mode === 'gerrymander') {
       // The logistic's steepest slope, at the threshold, is 1/(4s).
       return delta / (4 * Math.max(1e-6, d.steepness));
@@ -738,15 +827,65 @@ class RegionModel {
     return best;
   }
 
+  /* Run the count over a set of party votes, and score it for one party:
+   *   seat bonus x seats won  +  leftover votes as a fraction of a quota
+   * The staircase always outweighs the remainder, so a seat beats any amount
+   * of vote-building, while the remainder gives the optimiser a gradient
+   * pointing at the next seat -- including the transfers a party would pick up
+   * on the way, since the leftover pile is the count's own. */
+  _stvValue(votes, p) {
+    const quota = stvCount(votes, this.seatsPerRegion, this._transfers,
+      this._exhaustion, this._stvSeats, this._stvLive);
+    if (quota <= 0) return 0;
+    return this.seatBonus * this._stvSeats[p] + votes[p] / quota;
+  }
+
+  /* The region's party votes, with one zone's or one set's votes added or
+   * removed, into the scratch the count consumes. */
+  _stvVotesFor(r, z, sign, g) {
+    const v = this._stvVotes;
+    for (let i = 0; i < this.parties.length; i++) {
+      const q = this.parties[i];
+      v[i] = q.rSum[r]
+        + (z >= 0 ? sign * q.zValue[z] * q.zN[z] : 0)
+        + (g ? sign * g.demo[q.slot].sum : 0);
+      if (v[i] < 0) v[i] = 0;
+    }
+    return v;
+  }
+
+  _stvVotesSplit(c, piece) {
+    const v = this._stvVotes;
+    for (let i = 0; i < this.parties.length; i++) {
+      const q = this.parties[i];
+      v[i] = piece ? q.sSum[c] : q.sSum[0] - q.sSum[c];
+      if (v[i] < 0) v[i] = 0;
+    }
+    return v;
+  }
+
+  /* Lower is better everywhere in the score, so the value is negated when the
+   * aim is to win seats and kept as-is when the aim is to deny them. */
+  _stvTerm(d, votes) {
+    const v = this._stvValue(votes, d.partyIndex);
+    return d.above ? -v : v;
+  }
+
+  _isStv(d) {
+    return d.isParty && d.mode === 'gerrymander' && this.electionType === 'stv';
+  }
+
   /* What a term scores on: a share, or a winning margin for a party being
-   * gerrymandered. */
+   * gerrymandered -- or, under STV, the count itself. */
   _demoTerm(d, r) {
+    if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, -1, 0, null));
     const x = this._demoValue(d, r);
     return this._demoTermFrom(d,
       d.isParty && d.mode === 'gerrymander' ? x - this._partyBest(r, d) : x);
   }
 
   _demoTermWith(d, r, z, sign) {
+    if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, z, sign, null));
     const n = d.rN[r] + sign * d.zN[z];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (d.rSum[r] + sign * d.zValue[z] * d.zN[z]) / n;
@@ -755,6 +894,7 @@ class RegionModel {
   }
 
   _demoTermWithAgg(d, r, g, sign, slot) {
+    if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, -1, sign, g));
     const n = d.rN[r] + sign * g.demo[slot].n;
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (d.rSum[r] + sign * g.demo[slot].sum) / n;
@@ -763,6 +903,7 @@ class RegionModel {
   }
 
   _demoTermSplit(d, c, piece) {
+    if (this._isStv(d)) return this._stvTerm(d, this._stvVotesSplit(c, piece));
     const n = piece ? d.sN[c] : d.sN[0] - d.sN[c];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (piece ? d.sSum[c] : d.sSum[0] - d.sSum[c]) / n;
@@ -1757,6 +1898,37 @@ class RegionModel {
     return d ? this._demoValue(d, r) : 0;
   }
 
+  /* Seats a region awards each party: one to the largest under first past the
+   * post, or the count's result under STV. Written into `out`. */
+  regionSeats(r, out) {
+    const P = this.parties.length;
+    if (this.electionType === 'stv') {
+      stvCount(this._stvVotesFor(r, -1, 0, null), this.seatsPerRegion,
+        this._transfers, this._exhaustion, this._stvSeats, this._stvLive);
+      for (let p = 0; p < P; p++) out[p] = this._stvSeats[p];
+      return out;
+    }
+    let top = -1;
+    let best = -1;
+    for (let p = 0; p < P; p++) {
+      out[p] = 0;
+      const v = this.parties[p].rSum.length ? this.parties[p].rSum[r] : 0;
+      if (v > best) { best = v; top = p; }
+    }
+    if (top >= 0) out[top] = 1;
+    return out;
+  }
+
+  /* Seats one party takes in one region. */
+  regionPartySeats(key, r) {
+    const d = this.demoByKey[key];
+    if (!d || !d.isParty) return 0;
+    if (this.electionType !== 'stv') return this.regionWinner(r) === key ? 1 : 0;
+    stvCount(this._stvVotesFor(r, -1, 0, null), this.seatsPerRegion,
+      this._transfers, this._exhaustion, this._stvSeats, this._stvLive);
+    return this._stvSeats[d.partyIndex];
+  }
+
   /* First past the post: the party with most votes. Ties go to the earlier
    * party, which is the order in the voter file. */
   regionWinner(r) {
@@ -1773,8 +1945,38 @@ class RegionModel {
   partySeats(key) {
     if (!this.demoByKey[key]) return 0;
     let seats = 0;
-    for (let r = 0; r < this.N; r++) if (this.regionWinner(r) === key) seats++;
+    for (let r = 0; r < this.N; r++) seats += this.regionPartySeats(key, r);
     return seats;
+  }
+
+  /* Seats on the map altogether: one per region, or seats x regions. */
+  get totalSeats() {
+    return this.electionType === 'stv' ? this.N * this.seatsPerRegion : this.N;
+  }
+
+  /* Election type, seats per region and the seat bonus all change what the
+   * gerrymander term measures, so the running total is rebuilt and best-so-far
+   * goes with it -- as for any other change of objective. */
+  setElection(type, seatsPerRegion, seatBonus) {
+    const t = type === 'stv' ? 'stv' : 'fptp';
+    const s = Math.max(1, Math.round(seatsPerRegion));
+    const b = Math.max(1, seatBonus);
+    if (t === this.electionType && s === this.seatsPerRegion && b === this.seatBonus) {
+      return false;
+    }
+    this.electionType = t;
+    this.seatsPerRegion = s;
+    this.seatBonus = b;
+    for (const d of this.parties) {
+      d.sigma = this._demoSigma(d, this.N);
+      d.raw = 0;
+      if (d.mode !== 'off') {
+        for (let r = 0; r < this.N; r++) d.raw += this._demoTerm(d, r);
+      }
+    }
+    this.bestScore = Infinity;
+    if (this.assigned >= this.n) this._recordBest();
+    return true;
   }
 
   partyMargin(key, r) {

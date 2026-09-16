@@ -601,20 +601,33 @@ The switch at the top of the left panel chooses what the run is steered by.
 * **Demographics** is the original map: religion, age, orientation and social
   grade, each with a weight and an average / extreme / gerrymander mode.
 * **Election** replaces those blocks with one party block — a party selector
-  and the same weight, mode and gerrymander controls — and draws
-  first-past-the-post seats.
+  and the same weight, mode and gerrymander controls — and draws seats. Its own
+  controls sit above Regions: **Election type** (first past the post or STV)
+  and, for STV, **Elected/Region**.
 
 The hidden mode's terms are switched off rather than left steering unseen, and
 the results panel, the statistic selector and the tooltip all show only the
 active mode's figures. The bars show a party's votes per region and mark the
-regions it wins, a pie gives the seats every party took (hover a wedge to name
-it), and the tooltip lists a region's top five parties with the selected one
-highlighted.
+regions it wins — with the seat count alongside when a region returns several
+— a pie gives the seats every party took (hover a wedge to name it), and the
+tooltip lists a region's top five parties with the selected one highlighted.
 
-Gerrymander mode differs for a party: its threshold is a **winning margin**,
-the party's share minus the strongest rival's, because that is what takes a
-seat. Zero means "just wins". Average and extreme modes work on the party's
-share, as a demographic does.
+Gerrymander mode differs for a party, and differs again by election type.
+Under first past the post the threshold is a **winning margin**, the party's
+share minus the strongest rival's, because that is what takes the seat; zero
+means "just wins". Under STV there is nothing to put a threshold on — the aim
+is as many seats as possible — so the score is
+
+    seat bonus × seats won + leftover votes ÷ quota
+
+from the simulated count, and the controls become a **seat bonus** (how much a
+seat outweighs vote-building, default 2) and a direction: win seats, or deny
+them. Average and extreme modes work on the party's share in both.
+
+The STV count itself is party-level — no candidates, no rankings — using the
+transfer matrix and each party's exhaustion rate. It gets 95% of the seats
+right across 91 real contests; see
+[docs/voting-model.md](docs/voting-model.md#the-stv-count).
 
 Election mode needs `web/data/dz_voters.json`, built by
 `scripts/build_app_voters.py` from the voting model's estimates

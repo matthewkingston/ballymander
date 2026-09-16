@@ -333,6 +333,40 @@ election.tip = await page.evaluate(() => {
 });
 await page.screenshot({ path: `${OUT}/map-election.png` });
 
+// Switching to STV re-counts the regions already on the map, so this needs no
+// second run: the same lines, counted a different way.
+await page.evaluate(() => {
+  const set = (id, v) => { const e = document.getElementById(id); e.value = v;
+    e.dispatchEvent(new Event('change', { bubbles: true }));
+    e.dispatchEvent(new Event('input', { bubbles: true })); };
+  set('ctl-election-type', 'stv');
+  set('ctl-seats', '5');
+});
+await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+election.stv = await page.evaluate(() => {
+  const m = window.__model;
+  const out = new Int32Array(m.parties.length);
+  const perRegion = Array.from({ length: m.N },
+    (_, r) => [...m.regionSeats(r, out)].reduce((a, b) => a + b, 0));
+  return {
+    controls: {
+      seats: !document.getElementById('ctl-seats').hidden,
+      margin: !document.getElementById('ctl-party-t').hidden,
+      bonus: !document.getElementById('ctl-party-b').hidden,
+      direction: document.querySelector('label[for="ctl-party-a"]').textContent,
+    },
+    seatsPer: m.seatsPerRegion,
+    total: m.totalSeats,
+    regions: m.N,
+    perRegion,
+    allParties: m.parties.reduce((a, q) => a + m.partySeats(q.key), 0),
+    readout: document.getElementById('run-party').textContent,
+    dup: m.partySeats('party:DUP'),
+    barSeats: [...document.querySelectorAll('#bars .bar-seats')]
+      .filter((e) => !e.hidden).map((e) => Number(e.textContent)),
+  };
+});
+
 await page.click('#mode-demographics');
 election.backToDemographics = await page.evaluate(() => ({
   options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
@@ -461,6 +495,26 @@ if (!election || !election.pie.lastRowIsParty) {
 }
 if (!election || !election.backToDemographics.pieHidden) {
   problems.push('seats pie stayed in demographics mode');
+}
+// STV: the controls that apply, and a count that fills every region.
+if (!election || !election.stv.controls.seats || election.stv.controls.margin
+    || !election.stv.controls.bonus
+    || election.stv.controls.direction !== 'Win seats') {
+  problems.push('STV gerrymander controls wrong');
+}
+if (!election || election.stv.perRegion.some((n) => n !== election.stv.seatsPer)) {
+  problems.push('an STV region did not fill its seats');
+}
+if (!election || election.stv.total !== election.stv.regions * election.stv.seatsPer
+    || election.stv.allParties !== election.stv.total) {
+  problems.push('STV seats do not add up');
+}
+if (!election || election.stv.readout !== `${election.stv.dup}/${election.stv.total} won`) {
+  problems.push('party readout wrong under STV');
+}
+if (!election || election.stv.barSeats.length !== election.stv.regions
+    || election.stv.barSeats.reduce((a, b) => a + b, 0) !== election.stv.dup) {
+  problems.push('per-region seats on the bars do not match the total');
 }
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');

@@ -64,6 +64,8 @@ const els = {
   partyBlock: document.getElementById('party-block'),
   modeDemographics: document.getElementById('mode-demographics'),
   modeElection: document.getElementById('mode-election'),
+  electionType: document.getElementById('ctl-election-type'),
+  seats: document.getElementById('ctl-seats'),
   pie: document.getElementById('pie'),
   pieSvg: document.getElementById('pie-svg'),
   pieCaption: document.getElementById('pie-caption'),
@@ -165,7 +167,10 @@ function addPartyBarStats(parties) {
     BAR_STATS[key] = {
       values: (m) => perRegion(m, (x, r) => x.regionPartyVotes(key, r)),
       format: (v) => nf.format(Math.round(v)),
-      wins: (m, r) => m.regionWinner(r) === key,
+      // Under STV a region can return the party more than once, so the marker
+      // ("took a seat here") is joined by the count itself.
+      wins: (m, r) => m.regionPartySeats(key, r) > 0,
+      seats: (m, r) => m.regionPartySeats(key, r),
       modes: ['election'],
     };
   }
@@ -369,10 +374,19 @@ function buildPartyControls(voters) {
   });
   const above = el('input', { id: id('a'), type: 'checkbox', checked: true });
 
+  // Under STV the target is the count itself, so the margin and its steepness
+  // give way to the seat bonus: how much a seat is worth against a quota of
+  // leftover votes.
+  const bValue = el('span', { text: '2' });
+  const bonus = el('input', {
+    id: id('b'), type: 'range', min: 1, max: 5, step: 0.5, value: 2,
+  });
+  const marginLabel = el('label', { for: id('t') }, 'Winning margin ', tValue);
+  const steepLabel = el('label', { for: id('s') }, 'Steepness ', sValue);
+  const bonusLabel = el('label', { for: id('b') }, 'Seat bonus ', bValue);
+  const dirLabel = el('label', { for: id('a'), text: 'Above margin' });
   const gerry = el('div', { id: 'party-gerry', class: 'ctl-grid ctl-sub', hidden: true },
-    el('label', { for: id('t') }, 'Winning margin ', tValue), t,
-    el('label', { for: id('s') }, 'Steepness ', sValue), st,
-    el('label', { for: id('a'), text: 'Above margin' }), above);
+    marginLabel, t, steepLabel, st, bonusLabel, bonus, dirLabel, above);
 
   const body = el('div', { id: 'party-body', class: 'demo-body', hidden: true },
     el('div', { class: 'ctl-grid ctl-sub' },
@@ -400,6 +414,9 @@ function buildPartyControls(voters) {
   buildPie(voters.parties);
   return { voters, toggle, toggleName, body, modeLabel, wValue, w, party, mode, gerry,
            t, tValue, s: st, sValue, above, readout, row, tip, regionTip,
+           bonus, bValue, marginLabel, steepLabel, bonusLabel, dirLabel,
+           type: () => els.electionType.value,
+           seatsPer: () => Math.max(1, Number(els.seats.value) || 1),
            key: () => `party:${party.value}`,
            votes: (code) => {
              const z = voters.zones[code];
@@ -430,6 +447,24 @@ function termWeights() {
   return out;
 }
 
+/* Which of the gerrymander controls apply depends on the election being
+ * simulated, so this runs on a mode switch and on an election-type change. */
+function applyElectionType() {
+  if (!election) return;
+  const stv = uiMode === 'election' && election.type() === 'stv';
+  for (const node of document.querySelectorAll('.election-only')) {
+    node.hidden = uiMode !== 'election';
+  }
+  for (const node of document.querySelectorAll('.stv-only')) node.hidden = !stv;
+  election.marginLabel.hidden = stv;
+  election.t.hidden = stv;
+  election.steepLabel.hidden = stv;
+  election.s.hidden = stv;
+  election.bonusLabel.hidden = !stv;
+  election.bonus.hidden = !stv;
+  election.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
+}
+
 function applyMode() {
   const demographics = uiMode === 'demographics';
   els.demoBlocks.hidden = !demographics;
@@ -441,6 +476,7 @@ function applyMode() {
   for (const u of demoUI) u.readout.parentElement.hidden = !demographics;
   if (election) election.row.hidden = demographics;
   els.pie.hidden = demographics || !election || !run.model || run.phase === 'idle';
+  applyElectionType();
   rebuildBarOptions();
   if (run.model) { readout(); drawBars(); drawPie(); }
 }
@@ -668,6 +704,7 @@ function showTooltip(point, props) {
         key: `party:${name}`,
         votes: run.model.regionPartyVotes(`party:${name}`, region),
         share: run.model.regionPartyShare(`party:${name}`, region),
+        seats: run.model.regionPartySeats(`party:${name}`, region),
       })).sort((a, b) => b.votes - a.votes);
       const rank = standings.findIndex((row) => row.key === key);
       const rows = rank < 5 ? standings.slice(0, 5)
@@ -679,7 +716,9 @@ function showTooltip(point, props) {
         }, ...(row.rank ? [el('span', { class: 'tt-party-rank', text: `${row.rank}.` })] : []),
            el('span', { class: 'tt-party-name', text: row.name }),
            el('span', { class: 'tt-party-votes',
-             text: `${nf.format(Math.round(row.votes))} (${pct.format(row.share)})` })));
+             text: `${nf.format(Math.round(row.votes))} (${pct.format(row.share)})` }),
+           ...(run.model.electionType === 'stv'
+             ? [el('span', { class: 'tt-party-seats', text: `${row.seats}` })] : [])));
       }
     }
     els.ttRegion.hidden = false;
@@ -769,7 +808,7 @@ function readout() {
     // comes too in the modes where it is what the term is steering.
     const key = election.key();
     const live = m.demoByKey[key];
-    const seats = `${m.partySeats(key)}/${m.N} won`;
+    const seats = `${m.partySeats(key)}/${m.totalSeats} won`;
     election.readout.textContent = !live || live.weight === 0
       || live.mode === 'gerrymander' ? seats
       : `${seats} · spread ${m.demoSpread(key).toFixed(3)}`;
@@ -803,6 +842,8 @@ function tick(map) {
           Number(u.s.value), u.above.checked);
       }
       if (election) {
+        run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
+          election.seatsPer(), Number(election.bonus.value));
         const chosen = election.key();
         for (const party of election.voters.parties) {
           const key = `party:${party}`;
@@ -852,6 +893,10 @@ function start(map) {
   stop(map, { silent: true });
   clearRegions(map);
 
+  if (election) {
+    run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
+      election.seatsPer(), Number(election.bonus.value));
+  }
   run.model.start(n, Number(els.seed.value) || 0, {
     temperature: Number(els.temp.value) || 1,
     wPop: weightOf(els.popw),
@@ -951,9 +996,14 @@ function buildBars(n) {
     value.className = 'bar-value';
     track.append(fill, value);
 
-    row.append(label, track);
+    // Seats, when a region returns more than one member.
+    const seats = document.createElement('span');
+    seats.className = 'bar-seats';
+    seats.hidden = true;
+
+    row.append(label, track, seats);
     els.bars.appendChild(row);
-    return { row, fill, value };
+    return { row, fill, value, seats };
   });
 }
 
@@ -988,6 +1038,9 @@ function drawBars() {
     // Won regions are marked rather than recoloured: the bar's colour is the
     // region's own, and it has to stay readable against the map.
     bar.row.classList.toggle('is-win', Boolean(stat.wins && stat.wins(m, region)));
+    const perRegion = stat.seats && m.electionType === 'stv';
+    bar.seats.hidden = !perRegion;
+    if (perRegion) bar.seats.textContent = stat.seats(m, region);
   });
 
   // The labels report the actual extremes, not the padded domain -- the padding
@@ -1088,6 +1141,18 @@ async function main() {
       election.body.hidden = !open;
       election.toggle.setAttribute('aria-expanded', String(open));
     });
+    els.electionType.addEventListener('change', () => {
+      applyElectionType();
+      if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
+    });
+    els.seats.addEventListener('change', () => {
+      if (!run.model) return;
+      run.model.setElection(election.type(), election.seatsPer(), Number(election.bonus.value));
+      readout();
+      drawBars();
+      pieShown = '';
+      drawPie();
+    });
     election.mode.addEventListener('change', sync);
     election.w.addEventListener('input', sync);
     election.party.addEventListener('change', () => {
@@ -1097,8 +1162,8 @@ async function main() {
     els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
     sync();
     readouts.push([election.w, election.wValue], [election.t, election.tValue],
-                  [election.s, election.sValue]);
-    for (const [input, out] of readouts.slice(-3)) {
+                  [election.s, election.sValue], [election.bonus, election.bValue]);
+    for (const [input, out] of readouts.slice(-4)) {
       const show = () => {
         out.textContent = input.dataset.weight !== undefined
           ? formatWeight(weightOf(input)) : input.value;
