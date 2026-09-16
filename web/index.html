@@ -27,6 +27,15 @@
     </div>
 
     <div class="ctl-grid">
+      <!-- Boundaries that actually exist, as a starting point. Only offered
+           while stopped: once a run moves a zone the map is no longer real. -->
+      <label for="ctl-real" class="real-only">Real-life regions</label>
+      <select id="ctl-real" class="real-only">
+        <option value="none" selected>None</option>
+        <option value="westminster">Westminster</option>
+        <option value="assembly">Assembly</option>
+        <option value="council">Council</option>
+      </select>
       <!-- Election mode only, above Regions; the seat count only applies to STV. -->
       <label for="ctl-election-type" class="election-only" hidden>Election type</label>
       <select id="ctl-election-type" class="election-only" hidden>

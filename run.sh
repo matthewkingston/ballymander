@@ -51,6 +51,12 @@ if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_voters.json ]; then
   python3 scripts/build_app_voters.py
 fi
 
-# 6. serve
+# 6. real-life boundaries for the app
+if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_regions.json ]; then
+  echo "==> real regions"
+  python3 scripts/build_app_regions.py
+fi
+
+# 7. serve
 echo
 exec python3 scripts/serve.py "${SERVE_ARGS[@]}"

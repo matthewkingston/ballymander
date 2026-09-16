@@ -224,6 +224,51 @@ const tip = await page.evaluate(() => {
 
 await page.screenshot({ path: `${OUT}/map-hover.png` });
 
+// --- real boundaries ----------------------------------------------------
+// Loading a real map should look like a run that has just stopped, and GO
+// should carry on from it rather than starting again.
+const realSet = async (value) => page.evaluate((v) => {
+  const e = document.getElementById('ctl-real');
+  e.value = v;
+  e.dispatchEvent(new Event('change', { bubbles: true }));
+}, value);
+const realState = () => page.evaluate(() => {
+  const m = window.__model;
+  return {
+    N: m.N,
+    assigned: m.assigned,
+    painted: m.codes.filter((c) => {
+      const st = window.__map.getFeatureState({ source: 'dz', id: c });
+      return st && typeof st.region === 'number';
+    }).length,
+    regionsBox: document.getElementById('ctl-n').value,
+    regionsDisabled: document.getElementById('ctl-n').disabled,
+    selectorShown: !document.getElementById('ctl-real').hidden,
+    value: document.getElementById('ctl-real').value,
+    results: !document.getElementById('results').hidden,
+    bars: document.querySelectorAll('#bars .bar-row').length,
+  };
+});
+await realSet('westminster');
+await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+const realWestminster = await realState();
+await realSet('council');
+await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+const realCouncil = await realState();
+await realSet('westminster');
+await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
+await page.click('#ctl-go');
+await page.evaluate(() => new Promise(r => setTimeout(r, 1200)));
+const realRunning = await realState();
+await page.click('#ctl-stop');
+await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
+const realStopped = await realState();
+await realSet('none');
+await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
+const realCleared = await realState();
+const real = { westminster: realWestminster, council: realCouncil,
+               running: realRunning, stopped: realStopped, cleared: realCleared };
+
 // how much of the canvas is actually painted with zone colour?
 const painted = await page.evaluate(() => {
   const c = document.querySelector('#map canvas');
@@ -464,7 +509,7 @@ election.backToDemographics = await page.evaluate(() => ({
 }));
 election.electionOptions = electionOptions;
 
-console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, real, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to
@@ -663,6 +708,25 @@ if (!election || election.stv.readout !== `${election.stv.dup}/${election.stv.to
 if (!election || election.stv.barSeats.length !== election.stv.regions
     || election.stv.barSeats.reduce((a, b) => a + b, 0) !== election.stv.dup) {
   problems.push('per-region seats on the bars do not match the total');
+}
+if (!real || real.westminster.N !== 18 || real.westminster.assigned !== 3780
+    || real.westminster.painted !== 3780 || real.westminster.bars !== 18) {
+  problems.push('Westminster boundaries did not load onto the map');
+}
+if (!real || real.westminster.regionsBox !== '18' || !real.westminster.regionsDisabled) {
+  problems.push('the region count did not follow the real map');
+}
+if (!real || real.council.N !== 80 || real.council.painted !== 3780) {
+  problems.push('council boundaries did not load onto the map');
+}
+if (!real || real.running.selectorShown || real.running.value !== 'none') {
+  problems.push('the real-region selector stayed up once a run started');
+}
+if (!real || !real.stopped.selectorShown || real.stopped.regionsDisabled) {
+  problems.push('the selector did not come back when the run stopped');
+}
+if (!real || real.cleared.painted !== 0 || real.cleared.results) {
+  problems.push('choosing None did not clear the map');
 }
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');

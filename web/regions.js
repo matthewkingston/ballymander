@@ -704,8 +704,10 @@ class RegionModel {
     this.recombinations = 0;
   }
 
-  /* Seed N regions and prepare the build phase. */
-  start(N, seed, opts = {}) {
+  /* Everything a run needs before it has an assignment: N, the weights and
+   * their scales, the random source and the per-region arrays. Shared by
+   * start(), which then seeds and builds, and adopt(), which is handed a map. */
+  _prepare(N, seed, opts = {}) {
     const {
       temperature = 1, wPop = 1, wShape = 0, wPopShape = 0, wCut = 0, demo = {},
     } = opts;
@@ -762,6 +764,11 @@ class RegionModel {
     }
     this.openNbrs = Array.from({ length: N }, () => new Set());
 
+  }
+
+  /* Seed N regions and prepare the build phase. */
+  start(N, seed, opts = {}) {
+    this._prepare(N, seed, opts);
     const seeds = this._farthestPointSeeds(N);
     for (let r = 0; r < N; r++) this._place(seeds[r], r);
     // Open sets can only be filled once every seed is down, or an early seed
@@ -771,6 +778,29 @@ class RegionModel {
     }
     this._rescore();
     return seeds.map((z) => this.codes[z]);
+  }
+
+  /* Take a map that already exists -- real constituencies, say -- instead of
+   * building one. The build phase is over before it starts: every zone is
+   * assigned, so the optimiser can carry straight on from here.
+   *
+   * Real boundaries need not be connected in our adjacency graph (Belfast West
+   * has an outlying piece), and nothing here insists they are. The counts
+   * don't care; the optimiser will tidy it if it runs. */
+  adopt(assignment, opts = {}) {
+    let N = 0;
+    for (const r of assignment) if (r + 1 > N) N = r + 1;
+    if (!N || assignment.length !== this.n) return 0;
+    this._prepare(N, opts.seed || 0, opts);
+    this.assign.set(assignment);
+    this.assigned = this.n;
+    this._resum();
+    this.frontier = [];
+    this.frontierPos.fill(-1);
+    for (let z = 0; z < this.n; z++) this._touchFrontier(z);
+    this.bestScore = Infinity;
+    this._recordBest();
+    return N;
   }
 
   /* Pick seeds far apart: purely random seeds clump, and a region boxed in

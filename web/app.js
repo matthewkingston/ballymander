@@ -17,6 +17,7 @@ const CONFIG = {
   dataUrl: 'data/dz.geojson',
   graphUrl: 'data/dz_adjacency.json',
   votersUrl: 'data/dz_voters.json',
+  regionsUrl: 'data/dz_regions.json',
   // Measured extent of DZ2021.geojson.
   bounds: [[-8.1775, 54.0227], [-5.4328, 55.3130]],
   colors: {
@@ -65,6 +66,7 @@ const els = {
   partyEditor: document.getElementById('party-editor'),
   modeDemographics: document.getElementById('mode-demographics'),
   modeElection: document.getElementById('mode-election'),
+  real: document.getElementById('ctl-real'),
   electionType: document.getElementById('ctl-election-type'),
   seats: document.getElementById('ctl-seats'),
   viewSwitch: document.querySelector('.view-switch'),
@@ -144,6 +146,12 @@ let election = null;      // set once web/data/dz_voters.json is loaded
  * around the map and coming back lands where you left off; a new run starts at
  * the first region. */
 let shownRegion = 0;
+
+/* Real constituency boundaries, if their file loaded: one region index per
+ * zone for each set. Offered as a starting point, never as a running state --
+ * the selector goes away as soon as a run begins. */
+let realRegions = null;
+const realLoaded = () => Boolean(realRegions) && els.real.value !== 'none';
 
 const BAR_ROW_H = 18;     // must match .bar-row height in style.css
 const BAR_INTERVAL = 200; // five redraws a second
@@ -833,6 +841,14 @@ function applyMode() {
 
 /* --- data ---------------------------------------------------------------- */
 
+async function fetchRealRegions() {
+  const res = await fetch(CONFIG.regionsUrl);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} fetching ${CONFIG.regionsUrl}`);
+  const data = await res.json();
+  const at = new Map(data.codes.map((code, i) => [code, i]));
+  return { sets: data.sets, at };
+}
+
 async function loadVoters() {
   const res = await fetch(CONFIG.votersUrl);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} fetching ${CONFIG.votersUrl}`);
@@ -1134,6 +1150,79 @@ function wireHover(map) {
   map.getCanvas().addEventListener('mouseout', clear);
 }
 
+/* --- real boundaries ----------------------------------------------------- */
+
+/* The options the model needs whichever way a map arrives. */
+function runOptions() {
+  return {
+    temperature: Number(els.temp.value) || 1,
+    wPop: weightOf(els.popw),
+    wShape: weightOf(els.shape),
+    wPopShape: weightOf(els.pshape),
+    wCut: weightOf(els.cut),
+    demo: {
+      ...Object.fromEntries(demoUI.map((u) => [u.def.key, {
+        weight: termWeights()[u.def.key],
+        mode: u.mode.value,
+        threshold: Number(u.t.value),
+        steepness: Number(u.s.value),
+        above: u.above.checked,
+      }])),
+      ...(election ? { [election.key()]: {
+        weight: termWeights()[election.key()],
+        mode: election.mode.value,
+        threshold: Number(election.t.value),
+        steepness: Number(election.s.value),
+        above: election.above.checked,
+      } } : {}),
+    },
+  };
+}
+
+/* Put a real map on the screen as though a run had just stopped: every zone
+ * assigned, the panel showing its figures, and GO free to carry on from it. */
+function showRealRegions(map, key) {
+  if (!run.model || !realRegions || !realRegions.sets[key]) return 0;
+  const set = realRegions.sets[key];
+  const assignment = run.model.codes.map((code) => set.index[realRegions.at.get(code)]);
+  const n = run.model.adopt(assignment, runOptions());
+  if (!n) return 0;
+  els.n.value = n;
+  run.colors = palette(n);
+  map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
+  // Every zone belongs to a region here, so they can all be repainted without
+  // clearing first -- and they must be, because removeFeatureState lands after
+  // the setFeatureState calls below and would wipe some of them.
+  run.shadow.fill(-1);
+  paintRegions(map);
+  run.phase = 'done';
+  run.paused = false;
+  setButtons('idle');
+  els.results.hidden = false;
+  els.resultsList.hidden = false;
+  els.pie.hidden = uiMode !== 'election' || !election;
+  shownRegion = 0;
+  buildBars(n);
+  drawBars();
+  pieShown = '';
+  drawPie();
+  readout();
+  applyView();
+  return n;
+}
+
+function clearRealRegions(map) {
+  if (run.raf) cancelAnimationFrame(run.raf);
+  run.raf = 0;
+  run.phase = 'idle';
+  run.paused = false;
+  clearRegions(map);
+  els.results.hidden = true;
+  els.resultsList.hidden = true;
+  els.pie.hidden = true;
+  setButtons('idle');
+}
+
 /* --- the run ------------------------------------------------------------- */
 
 function setButtons(state) {   // idle | running | paused
@@ -1144,8 +1233,11 @@ function setButtons(state) {   // idle | running | paused
   // The number of regions and the seed are fixed once a run starts: changing
   // either mid-run would mean a different map, not a different reading of this
   // one. The election controls stay live, so a paused map can be re-counted.
-  els.n.disabled = state !== 'idle';
+  els.n.disabled = state !== 'idle' || realLoaded();
   els.seed.disabled = state !== 'idle';
+  // Real boundaries are a starting point, not a state: once a run is going the
+  // map is no longer the real one, so the selector goes away.
+  for (const node of document.querySelectorAll('.real-only')) node.hidden = state !== 'idle';
 }
 
 function readout() {
@@ -1257,6 +1349,26 @@ function tick(map) {
 }
 
 function start(map) {
+  // From a real map, the run carries on from it: the build phase is already
+  // done, so it goes straight to optimising. The selector then resets, since
+  // the boundaries stop being the real ones with the first move.
+  const fromReal = realLoaded();
+  if (fromReal) {
+    run.model.adopt(run.model.assign.slice(), runOptions());
+    els.real.value = 'none';
+    els.n.disabled = false;
+    run.phase = 'optimise';
+    run.paused = false;
+    run.lastDraw = 0;
+    run.lastBars = 0;
+    setButtons('running');
+    els.results.hidden = false;
+    els.resultsList.hidden = false;
+    els.pie.hidden = uiMode !== 'election' || !election;
+    readout();
+    run.raf = requestAnimationFrame(tick(map));
+    return;
+  }
   // One region is allowed: everyone elected from a single seat-rich region is
   // roughly a national list, and worth being able to look at.
   const n = Math.max(1, Math.min(500, Number(els.n.value) || 18));
@@ -1560,6 +1672,13 @@ async function main() {
   applyMode();
 
   try {
+    realRegions = await fetchRealRegions();
+  } catch (err) {
+    console.warn('real boundaries unavailable:', err.message);
+    for (const node of document.querySelectorAll('.real-only')) node.hidden = true;
+  }
+
+  try {
     const [geojson] = await Promise.all([loadZones(), mapLoaded]);
 
     addZoneLayers(map, geojson);
@@ -1585,6 +1704,13 @@ async function main() {
         run.shadow = new Int32Array(run.model.n).fill(-1);
         window.__model = run.model;
         els.go.disabled = false;
+        // Real boundaries can only be put up once the model exists, so this is
+        // wired here with the rest of the run controls.
+        els.real.addEventListener('change', () => {
+          if (els.real.value === 'none') clearRealRegions(map);
+          else if (!showRealRegions(map, els.real.value)) els.real.value = 'none';
+          els.n.disabled = realLoaded();
+        });
         els.go.addEventListener('click', () => start(map));
         els.pause.addEventListener('click', () => togglePause(map));
         els.stop.addEventListener('click', () => stop(map));

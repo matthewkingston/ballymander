@@ -611,6 +611,25 @@ Regions is fixed for the life of a run, since changing it means a different
 map; the election controls stay live, so a paused or stopped map can be
 re-counted under other rules.
 
+### Real-life regions
+
+The first control loads boundaries that actually exist, as a starting point:
+**Westminster** (the 18 constituencies of 2024), **Assembly** (the 18 of 2008,
+which it still uses) or **Council** (the 80 District Electoral Areas). The
+region count follows and is locked while one is loaded, and the map appears as
+though a run had just stopped — so the results panel, the party editor and the
+region view all work on it.
+
+The selector is only offered while stopped, and disappears once GO is pressed,
+because from the first move the map is no longer the real one. GO carries on
+from the loaded boundaries rather than starting a fresh build. Choosing None
+clears the map.
+
+Built by `scripts/build_app_regions.py` into `web/data/dz_regions.json`. Two
+real regions are not connected in our adjacency graph — Belfast West at
+Westminster, South Down at the Assembly — and they load exactly as drawn; the
+counts don't care, and a run tidies them.
+
 ### The party editor
 
 Below the party controls, a collapsible **Party editor** decides who is on the
