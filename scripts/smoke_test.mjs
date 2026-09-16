@@ -254,8 +254,16 @@ await page.click('#ctl-go');
 await page.waitForFunction(() => window.__model.assigned === window.__model.n,
   { timeout: 60000 });
 await page.evaluate(() => new Promise(r => setTimeout(r, 2500)));
+// The region count is fixed for the life of a run; the election controls are not.
+election.lockedDuringRun = await page.evaluate(() => ({
+  regions: document.getElementById('ctl-n').disabled,
+  type: document.getElementById('ctl-election-type').disabled,
+  seats: document.getElementById('ctl-seats').disabled,
+}));
 await page.click('#ctl-stop');
 await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
+election.unlockedAfterStop = await page.evaluate(() =>
+  !document.getElementById('ctl-n').disabled);
 
 const election = await page.evaluate(() => {
   const m = window.__model;
@@ -497,6 +505,13 @@ if (!election || !election.backToDemographics.pieHidden) {
   problems.push('seats pie stayed in demographics mode');
 }
 // STV: the controls that apply, and a count that fills every region.
+if (!election || !election.lockedDuringRun.regions || election.lockedDuringRun.type
+    || election.lockedDuringRun.seats) {
+  problems.push('region count not locked during a run, or election controls locked');
+}
+if (!election || !election.unlockedAfterStop) {
+  problems.push('region count stayed locked after the run stopped');
+}
 if (!election || !election.stv.controls.seats || election.stv.controls.margin
     || !election.stv.controls.bonus
     || election.stv.controls.direction !== 'Win seats') {

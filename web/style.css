@@ -76,6 +76,12 @@ html, body {
 }
 .mode-switch button:disabled { opacity: 0.45; cursor: default; }
 
+/* A control that cannot be changed right now -- the region count, once a run
+   has started -- reads as greyed rather than merely inert. */
+.ctl-grid input:disabled { opacity: 0.45; cursor: not-allowed; }
+.ctl-grid input:disabled + label,
+.ctl-grid label:has(+ input:disabled) { opacity: 0.45; }
+
 /* --- region builder controls -------------------------------------------- */
 .ctl-grid {
   display: grid;

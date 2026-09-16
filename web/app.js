@@ -480,7 +480,13 @@ function applyMode() {
   els.pie.hidden = demographics || !election || !run.model || run.phase === 'idle';
   applyElectionType();
   rebuildBarOptions();
-  if (run.model) { readout(); drawBars(); drawPie(); }
+  // Re-count before redrawing: the map may have been drawn in the other mode,
+  // and while paused or stopped nothing else will do it.
+  if (run.model && election) {
+    run.model.setElection(demographics ? 'fptp' : election.type(),
+      election.seatsPer(), Number(election.bonus.value));
+  }
+  if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
 }
 
 /* --- data ---------------------------------------------------------------- */
@@ -779,6 +785,10 @@ function setButtons(state) {   // idle | running | paused
   els.pause.disabled = state === 'idle';
   els.stop.disabled = state === 'idle';
   els.pause.textContent = state === 'paused' ? 'RESUME' : 'PAUSE';
+  // The number of regions is fixed once a run starts: changing it mid-run
+  // would mean a different map, not a different reading of this one. The
+  // election controls stay live, so a paused map can be re-counted freely.
+  els.n.disabled = state !== 'idle';
 }
 
 function readout() {
@@ -1142,23 +1152,24 @@ async function main() {
       election.body.hidden = !open;
       election.toggle.setAttribute('aria-expanded', String(open));
     });
-    els.electionType.addEventListener('change', () => {
-      applyElectionType();
-      if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
-    });
-    els.seats.addEventListener('change', () => {
+    // Both re-count the map as it stands, so the panel is right whether the run
+    // is going, paused or stopped.
+    const recount = () => {
       if (!run.model) return;
       run.model.setElection(election.type(), election.seatsPer(), Number(election.bonus.value));
       readout();
       drawBars();
       pieShown = '';
       drawPie();
-    });
+    };
+    els.electionType.addEventListener('change', () => { applyElectionType(); recount(); });
+    els.seats.addEventListener('change', recount);
+    election.bonus.addEventListener('change', recount);
     election.mode.addEventListener('change', sync);
     election.w.addEventListener('input', sync);
     election.party.addEventListener('change', () => {
       sync();
-      if (run.model) drawBars();
+      if (run.model) { readout(); drawBars(); }
     });
     els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
     sync();
