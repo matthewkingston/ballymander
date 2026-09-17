@@ -1,0 +1,42 @@
+{
+ "version": "turnout v0",
+ "features": [
+  "grade_DE",
+  "grade_AB",
+  "up_catholic"
+ ],
+ "chosen_by": "leave-one-region-out CV over 6 candidate sets",
+ "cv_rms_log_turnout": 0.0782,
+ "levels": {
+  "council": 0.5373,
+  "assembly": 0.6287,
+  "westminster": 0.5721
+ },
+ "coef": [
+  -0.7562,
+  -0.2643,
+  0.2563
+ ],
+ "centre": [
+  0.252425,
+  0.211264,
+  0.451216
+ ],
+ "clip_lo": [
+  -0.117093,
+  -0.117916,
+  -0.395339
+ ],
+ "clip_hi": [
+  0.739461,
+  0.635918,
+  1.382161
+ ],
+ "index_clip": [
+  0.7713,
+  1.301
+ ],
+ "index_clip_source": "the most and least eager region observed, level divided out",
+ "apply": "x -> clip -> exp((x - centre) @ coef), normalised to mean one by electorate",
+ "regions": 116
+}

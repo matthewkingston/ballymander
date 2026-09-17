@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Voters v0: estimate each Data Zone's party voters from prior v2 and three elections.
+"""Voters v1: estimate each Data Zone's party voters from prior v3 and three elections.
 
 Design (reasons in docs/voting-model.md, "Fitting"):
 
  1. Per region, per election layer -- council 2023 DEAs, Assembly 2022 (2008
     constituencies), Westminster 2024 (2024 constituencies) -- fit one
     log-ratio shift a_r, shared by every DZ in the region:
-        x_z  proportional to  p_z * exp(V a_r)          p_z = prior v2 DZ shares
+        x_z  proportional to  p_z * exp(V a_r)          p_z = prior v3 DZ shares
     prior term     a_r ~ N(0, Sigma_r),  Sigma_r = prior covariance x (pop_r / DEA pop)^beta
     data term      observed log-ratios of the parties that stood ~ N(prediction, Omega_r)
-                   prediction = electorate-weighted DZ sum, through the region's ballot
+                   prediction = votes-weighted DZ sum, through the region's ballot
                    (transfer matrix v0); Omega_r = floor_L^2 x (pop_r / constituency pop)^beta,
                    the same for every pair, plus counting noise
  2. Per-layer uncertainty from the curvature at the fit: C_r = (J' Omega^-1 J + Sigma_r^-1)^-1.
@@ -23,12 +23,12 @@ Design (reasons in docs/voting-model.md, "Fitting"):
 Coordinates: log-ratio shifts live in the 8-dimensional zero-sum space, with an
 orthonormal basis V (9 x 8). Independents and micro-parties are transparent.
 
-Reads   data/model/{prior_v2_dz.csv, prior_v2_covariance.json, transfer_matrix_v0.json},
+Reads   data/model/{prior_v3_dz.csv, prior_v3_covariance.json, transfer_matrix_v0.json},
         the three elections' first preferences, data/dz21_to_pc08.csv, data/dz21_to_pc24.csv,
         data/dz21_electorate.json, the census population table
-Writes  data/model/voters_v0_dz.csv          combined voter shares per DZ
-        data/model/voters_v0_uncertainty.json per-DZ log-ratio (clr) covariance
-        data/model/voters_v0_regions.json     per-region fits, for inspection
+Writes  data/model/voters_v1_dz.csv          combined voter shares per DZ
+        data/model/voters_v1_uncertainty.json per-DZ log-ratio (clr) covariance
+        data/model/voters_v1_regions.json     per-region fits, for inspection
 """
 from __future__ import annotations
 
@@ -74,7 +74,7 @@ def softmax_rows(L):
 # ------------------------------------------------------------------ inputs ----
 def load_inputs():
     d = Data()
-    with (MODEL / "prior_v2_dz.csv").open() as fh:
+    with (MODEL / "prior_v3_dz.csv").open() as fh:
         rows = list(csv.DictReader(fh))
     assert [r["code"] for r in rows] == d.codes
     prior = np.array([[float(r[p]) for p in PARTIES] for r in rows])
@@ -82,9 +82,10 @@ def load_inputs():
     electorate = dict(zip([c["code"] for c in el["dimensions"][0]["categories"]], el["values"]))
     pt = json.loads(POPULATION.read_text())["table"]
     population = dict(zip([c["code"] for c in pt["dimensions"][0]["categories"]], pt["values"]))
-    E = np.array([electorate[c] for c in d.codes], float)
+    # Votes cast, not electors: the same weighting the prior aggregates with.
+    E = np.array([electorate[c] for c in d.codes], float) * d.turnout
     pop = np.array([population[c] for c in d.codes], float)
-    cov = json.loads((MODEL / "prior_v2_covariance.json").read_text())
+    cov = json.loads((MODEL / "prior_v3_covariance.json").read_text())
     return d, prior, E, pop, np.array(cov["cov"]), cov["beta"]
 
 
@@ -241,19 +242,19 @@ def main() -> None:
         report[L["name"]] = {k: math.sqrt(np.mean(v)) for k, v in err.items()}
 
     # ---- outputs
-    with (MODEL / "voters_v0_dz.csv").open("w", newline="") as fh:
+    with (MODEL / "voters_v1_dz.csv").open("w", newline="") as fh:
         wr = csv.writer(fh)
         wr.writerow(["code"] + PARTIES)
         for code, row in zip(d.codes, shares):
             wr.writerow([code] + [f"{x:.6f}" for x in row])
     iu = np.triu_indices(K)
     clr_cov = np.einsum("ia,zab,jb->zij", Vb, Cz, Vb)
-    (MODEL / "voters_v0_uncertainty.json").write_text(json.dumps({
+    (MODEL / "voters_v1_uncertainty.json").write_text(json.dumps({
         "description": "per-DZ covariance of the log-ratio (clr) voter shares; upper triangle, row-major",
         "parties": PARTIES, "codes": d.codes,
         "clr_cov_upper": [[round(float(x), 5) for x in c[iu]] for c in clr_cov],
     }, ensure_ascii=False) + "\n")
-    (MODEL / "voters_v0_regions.json").write_text(json.dumps({
+    (MODEL / "voters_v1_regions.json").write_text(json.dumps({
         "settings": {"floors_pairwise_sd_constituency_scale": FLOORS, "beta": beta,
                      "spread_h": SPREAD_H, "spread_exponent": SPREAD_EXPONENT,
                      "dea_reference_population": round(dea_ref), "constituency_reference_population": round(const_ref)},
@@ -267,11 +268,11 @@ def main() -> None:
         print(f"  {L['name']:<18}{rr['prior']:>8.3f}{rr['layer fit']:>11.3f}{rr['combined']:>10.3f}   {FLOORS[L['name']]}")
     ni_prior = E @ prior / E.sum()
     ni_comb = E @ shares / E.sum()
-    print("NI-wide voter shares (electorate-weighted):")
+    print("NI-wide voter shares (vote-weighted):")
     print("  " + "  ".join(f"{p} {100 * a:.1f}->{100 * b:.1f}" for p, a, b in zip(PARTIES, ni_prior, ni_comb)))
     sd = np.sqrt(np.einsum("zii->zi", clr_cov))
     print("median log-ratio SD per party: " + "  ".join(f"{p} {s:.2f}" for p, s in zip(PARTIES, np.median(sd, 0))))
-    for f_ in ("voters_v0_dz.csv", "voters_v0_uncertainty.json", "voters_v0_regions.json"):
+    for f_ in ("voters_v1_dz.csv", "voters_v1_uncertainty.json", "voters_v1_regions.json"):
         print(f"wrote {(MODEL / f_).relative_to(ROOT)}")
 
 

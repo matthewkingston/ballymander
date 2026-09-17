@@ -1,0 +1,4314 @@
+{
+ "settings": {
+  "floors_pairwise_sd_constituency_scale": {
+   "council 2023": 0.3,
+   "assembly 2022": 0.2,
+   "westminster 2024": 0.55
+  },
+  "beta": -0.35,
+  "spread_h": 0.6,
+  "spread_exponent": 0.5,
+  "dea_reference_population": 23790,
+  "constituency_reference_population": 105732
+ },
+ "layers": {
+  "council 2023": [
+   {
+    "region": "Airport",
+    "votes": {
+     "Sinn Féin": 2909,
+     "DUP": 1827,
+     "Alliance": 1209,
+     "UUP": 1075,
+     "SDLP": 862,
+     "TUV": 0,
+     "Green": 134,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.31651,
+     "DUP": 0.20092,
+     "Alliance": 0.16267,
+     "UUP": 0.11957,
+     "SDLP": 0.1066,
+     "TUV": 0.03988,
+     "Green": 0.0146,
+     "PBP": 0.02286,
+     "Aontú": 0.01639
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.31696,
+     "DUP": 0.17349,
+     "Alliance": 0.16454,
+     "UUP": 0.13507,
+     "SDLP": 0.11192,
+     "TUV": 0.04895,
+     "Green": 0.01784,
+     "PBP": 0.01274,
+     "Aontú": 0.01848
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Antrim",
+    "votes": {
+     "Sinn Féin": 1270,
+     "DUP": 1964,
+     "Alliance": 1487,
+     "UUP": 1186,
+     "SDLP": 678,
+     "TUV": 453,
+     "Green": 88,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.16667,
+     "DUP": 0.27335,
+     "Alliance": 0.21646,
+     "UUP": 0.1564,
+     "SDLP": 0.09195,
+     "TUV": 0.05844,
+     "Green": 0.01266,
+     "PBP": 0.01439,
+     "Aontú": 0.00968
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.18062,
+     "DUP": 0.25871,
+     "Alliance": 0.20448,
+     "UUP": 0.17801,
+     "SDLP": 0.07874,
+     "TUV": 0.06172,
+     "Green": 0.01925,
+     "PBP": 0.00732,
+     "Aontú": 0.01117
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Ards Peninsula",
+    "votes": {
+     "Sinn Féin": 945,
+     "DUP": 4106,
+     "Alliance": 1266,
+     "UUP": 739,
+     "SDLP": 1279,
+     "TUV": 592,
+     "Green": 149,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.10959,
+     "DUP": 0.43827,
+     "Alliance": 0.15152,
+     "UUP": 0.09969,
+     "SDLP": 0.09866,
+     "TUV": 0.07158,
+     "Green": 0.01191,
+     "PBP": 0.00917,
+     "Aontú": 0.00962
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.10681,
+     "DUP": 0.39367,
+     "Alliance": 0.17718,
+     "UUP": 0.11786,
+     "SDLP": 0.08231,
+     "TUV": 0.08685,
+     "Green": 0.01364,
+     "PBP": 0.01159,
+     "Aontú": 0.0101
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Armagh",
+    "votes": {
+     "Sinn Féin": 6736,
+     "DUP": 1924,
+     "Alliance": 619,
+     "UUP": 1328,
+     "SDLP": 2620,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 357
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.51102,
+     "DUP": 0.11756,
+     "Alliance": 0.03735,
+     "UUP": 0.07756,
+     "SDLP": 0.16247,
+     "TUV": 0.0319,
+     "Green": 0.00485,
+     "PBP": 0.03336,
+     "Aontú": 0.02393
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.53176,
+     "DUP": 0.10874,
+     "Alliance": 0.05014,
+     "UUP": 0.06685,
+     "SDLP": 0.14931,
+     "TUV": 0.04283,
+     "Green": 0.00488,
+     "PBP": 0.02351,
+     "Aontú": 0.02196
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Ballyarnett",
+    "votes": {
+     "Sinn Féin": 4423,
+     "DUP": 0,
+     "Alliance": 436,
+     "UUP": 0,
+     "SDLP": 3267,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 727,
+     "Aontú": 887
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.54666,
+     "DUP": 0.01705,
+     "Alliance": 0.01142,
+     "UUP": 0.01079,
+     "SDLP": 0.27571,
+     "TUV": 0.00436,
+     "Green": 0.00189,
+     "PBP": 0.06359,
+     "Aontú": 0.06853
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.52232,
+     "DUP": 0.01697,
+     "Alliance": 0.01154,
+     "UUP": 0.01149,
+     "SDLP": 0.31725,
+     "TUV": 0.00307,
+     "Green": 0.00133,
+     "PBP": 0.0669,
+     "Aontú": 0.04914
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Ballyclare",
+    "votes": {
+     "Sinn Féin": 86,
+     "DUP": 2602,
+     "Alliance": 977,
+     "UUP": 1735,
+     "SDLP": 0,
+     "TUV": 747,
+     "Green": 109,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.01497,
+     "DUP": 0.40989,
+     "Alliance": 0.17267,
+     "UUP": 0.25961,
+     "SDLP": 0.00658,
+     "TUV": 0.11594,
+     "Green": 0.01708,
+     "PBP": 0.00181,
+     "Aontú": 0.00144
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.01795,
+     "DUP": 0.36725,
+     "Alliance": 0.1794,
+     "UUP": 0.29236,
+     "SDLP": 0.0074,
+     "TUV": 0.11757,
+     "Green": 0.01592,
+     "PBP": 0.0008,
+     "Aontú": 0.00136
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Ballymena",
+    "votes": {
+     "Sinn Féin": 926,
+     "DUP": 1685,
+     "Alliance": 897,
+     "UUP": 969,
+     "SDLP": 805,
+     "TUV": 991,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.15113,
+     "DUP": 0.2926,
+     "Alliance": 0.14287,
+     "UUP": 0.14654,
+     "SDLP": 0.08936,
+     "TUV": 0.1277,
+     "Green": 0.02068,
+     "PBP": 0.01579,
+     "Aontú": 0.01332
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.17242,
+     "DUP": 0.28216,
+     "Alliance": 0.16624,
+     "UUP": 0.1384,
+     "SDLP": 0.06796,
+     "TUV": 0.13134,
+     "Green": 0.01676,
+     "PBP": 0.01409,
+     "Aontú": 0.01061
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Ballymoney",
+    "votes": {
+     "Sinn Féin": 2514,
+     "DUP": 3448,
+     "Alliance": 880,
+     "UUP": 1693,
+     "SDLP": 286,
+     "TUV": 995,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.23307,
+     "DUP": 0.35498,
+     "Alliance": 0.07814,
+     "UUP": 0.1697,
+     "SDLP": 0.02259,
+     "TUV": 0.10861,
+     "Green": 0.01083,
+     "PBP": 0.01211,
+     "Aontú": 0.00997
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.22786,
+     "DUP": 0.30275,
+     "Alliance": 0.09399,
+     "UUP": 0.16518,
+     "SDLP": 0.0334,
+     "TUV": 0.1513,
+     "Green": 0.00633,
+     "PBP": 0.01079,
+     "Aontú": 0.00839
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Balmoral",
+    "votes": {
+     "Sinn Féin": 2464,
+     "DUP": 2330,
+     "Alliance": 2612,
+     "UUP": 551,
+     "SDLP": 1939,
+     "TUV": 0,
+     "Green": 333,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.21051,
+     "DUP": 0.20351,
+     "Alliance": 0.25362,
+     "UUP": 0.05657,
+     "SDLP": 0.17506,
+     "TUV": 0.02613,
+     "Green": 0.02915,
+     "PBP": 0.02701,
+     "Aontú": 0.01844
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.20916,
+     "DUP": 0.18018,
+     "Alliance": 0.23628,
+     "UUP": 0.06538,
+     "SDLP": 0.19737,
+     "TUV": 0.03811,
+     "Green": 0.03929,
+     "PBP": 0.016,
+     "Aontú": 0.01823
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Banbridge",
+    "votes": {
+     "Sinn Féin": 3345,
+     "DUP": 3043,
+     "Alliance": 1961,
+     "UUP": 3942,
+     "SDLP": 787,
+     "TUV": 593,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.22096,
+     "DUP": 0.25733,
+     "Alliance": 0.12969,
+     "UUP": 0.24931,
+     "SDLP": 0.04617,
+     "TUV": 0.05429,
+     "Green": 0.01538,
+     "PBP": 0.01467,
+     "Aontú": 0.0122
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.22114,
+     "DUP": 0.28111,
+     "Alliance": 0.16125,
+     "UUP": 0.17715,
+     "SDLP": 0.05812,
+     "TUV": 0.06937,
+     "Green": 0.01267,
+     "PBP": 0.01017,
+     "Aontú": 0.00902
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Bangor Central",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 2783,
+     "Alliance": 2429,
+     "UUP": 1230,
+     "SDLP": 0,
+     "TUV": 454,
+     "Green": 583,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.03608,
+     "DUP": 0.32167,
+     "Alliance": 0.35115,
+     "UUP": 0.14776,
+     "SDLP": 0.01845,
+     "TUV": 0.05528,
+     "Green": 0.06136,
+     "PBP": 0.00463,
+     "Aontú": 0.00361
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02559,
+     "DUP": 0.33848,
+     "Alliance": 0.37329,
+     "UUP": 0.13022,
+     "SDLP": 0.01544,
+     "TUV": 0.04539,
+     "Green": 0.06409,
+     "PBP": 0.0043,
+     "Aontú": 0.0032
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Bangor East and Donaghadee",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 1987,
+     "Alliance": 2030,
+     "UUP": 2904,
+     "SDLP": 0,
+     "TUV": 0,
+     "Green": 355,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.02431,
+     "DUP": 0.28026,
+     "Alliance": 0.26722,
+     "UUP": 0.3078,
+     "SDLP": 0.01209,
+     "TUV": 0.06953,
+     "Green": 0.03372,
+     "PBP": 0.00269,
+     "Aontú": 0.00238
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.01787,
+     "DUP": 0.36564,
+     "Alliance": 0.28164,
+     "UUP": 0.22525,
+     "SDLP": 0.01017,
+     "TUV": 0.05611,
+     "Green": 0.03847,
+     "PBP": 0.00264,
+     "Aontú": 0.0022
+    },
+    "observed_dims": 3
+   },
+   {
+    "region": "Bangor West",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 1673,
+     "Alliance": 1958,
+     "UUP": 867,
+     "SDLP": 297,
+     "TUV": 331,
+     "Green": 737,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.04448,
+     "DUP": 0.34041,
+     "Alliance": 0.28207,
+     "UUP": 0.15653,
+     "SDLP": 0.01314,
+     "TUV": 0.06202,
+     "Green": 0.09317,
+     "PBP": 0.00361,
+     "Aontú": 0.00456
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.03275,
+     "DUP": 0.37652,
+     "Alliance": 0.29998,
+     "UUP": 0.14845,
+     "SDLP": 0.01773,
+     "TUV": 0.05176,
+     "Green": 0.06457,
+     "PBP": 0.0041,
+     "Aontú": 0.00413
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Bann",
+    "votes": {
+     "Sinn Féin": 2139,
+     "DUP": 2606,
+     "Alliance": 573,
+     "UUP": 1542,
+     "SDLP": 173,
+     "TUV": 456,
+     "Green": 92,
+     "PBP": 0,
+     "Aontú": 336
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.26098,
+     "DUP": 0.33158,
+     "Alliance": 0.06596,
+     "UUP": 0.19238,
+     "SDLP": 0.02465,
+     "TUV": 0.06771,
+     "Green": 0.0111,
+     "PBP": 0.01652,
+     "Aontú": 0.02914
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.25325,
+     "DUP": 0.32232,
+     "Alliance": 0.0643,
+     "UUP": 0.17388,
+     "SDLP": 0.05783,
+     "TUV": 0.08815,
+     "Green": 0.00757,
+     "PBP": 0.00903,
+     "Aontú": 0.02368
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Bannside",
+    "votes": {
+     "Sinn Féin": 1292,
+     "DUP": 2094,
+     "Alliance": 768,
+     "UUP": 943,
+     "SDLP": 211,
+     "TUV": 3472,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.13111,
+     "DUP": 0.30617,
+     "Alliance": 0.07508,
+     "UUP": 0.12856,
+     "SDLP": 0.01781,
+     "TUV": 0.3152,
+     "Green": 0.00998,
+     "PBP": 0.00882,
+     "Aontú": 0.00727
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.13187,
+     "DUP": 0.29915,
+     "Alliance": 0.08627,
+     "UUP": 0.15009,
+     "SDLP": 0.0243,
+     "TUV": 0.28975,
+     "Green": 0.00543,
+     "PBP": 0.00744,
+     "Aontú": 0.00569
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Benbradagh",
+    "votes": {
+     "Sinn Féin": 4618,
+     "DUP": 1231,
+     "Alliance": 353,
+     "UUP": 600,
+     "SDLP": 441,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 494
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.59075,
+     "DUP": 0.12782,
+     "Alliance": 0.03325,
+     "UUP": 0.0693,
+     "SDLP": 0.04983,
+     "TUV": 0.034,
+     "Green": 0.00992,
+     "PBP": 0.0372,
+     "Aontú": 0.04792
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.5529,
+     "DUP": 0.11411,
+     "Alliance": 0.03607,
+     "UUP": 0.06721,
+     "SDLP": 0.12934,
+     "TUV": 0.03541,
+     "Green": 0.0038,
+     "PBP": 0.0188,
+     "Aontú": 0.04237
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Black Mountain",
+    "votes": {
+     "Sinn Féin": 11582,
+     "DUP": 0,
+     "Alliance": 166,
+     "UUP": 0,
+     "SDLP": 1685,
+     "TUV": 0,
+     "Green": 68,
+     "PBP": 1316,
+     "Aontú": 543
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.7254,
+     "DUP": 0.01131,
+     "Alliance": 0.00427,
+     "UUP": 0.00685,
+     "SDLP": 0.1208,
+     "TUV": 0.00303,
+     "Green": 0.00083,
+     "PBP": 0.08893,
+     "Aontú": 0.03858
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.73304,
+     "DUP": 0.01694,
+     "Alliance": 0.00627,
+     "UUP": 0.00458,
+     "SDLP": 0.0961,
+     "TUV": 0.00499,
+     "Green": 0.00225,
+     "PBP": 0.09381,
+     "Aontú": 0.04202
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Botanic",
+    "votes": {
+     "Sinn Féin": 2581,
+     "DUP": 2021,
+     "Alliance": 1814,
+     "UUP": 380,
+     "SDLP": 1881,
+     "TUV": 312,
+     "Green": 1006,
+     "PBP": 308,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.24029,
+     "DUP": 0.16063,
+     "Alliance": 0.20668,
+     "UUP": 0.03719,
+     "SDLP": 0.17471,
+     "TUV": 0.02436,
+     "Green": 0.10023,
+     "PBP": 0.02903,
+     "Aontú": 0.02688
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.22562,
+     "DUP": 0.1483,
+     "Alliance": 0.2232,
+     "UUP": 0.04037,
+     "SDLP": 0.20436,
+     "TUV": 0.02487,
+     "Green": 0.0877,
+     "PBP": 0.02327,
+     "Aontú": 0.02232
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Braid",
+    "votes": {
+     "Sinn Féin": 1302,
+     "DUP": 3342,
+     "Alliance": 1016,
+     "UUP": 1768,
+     "SDLP": 0,
+     "TUV": 2035,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.10405,
+     "DUP": 0.39265,
+     "Alliance": 0.07828,
+     "UUP": 0.18791,
+     "SDLP": 0.02384,
+     "TUV": 0.1895,
+     "Green": 0.00925,
+     "PBP": 0.0078,
+     "Aontú": 0.00673
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.10595,
+     "DUP": 0.3584,
+     "Alliance": 0.09161,
+     "UUP": 0.19995,
+     "SDLP": 0.02563,
+     "TUV": 0.20021,
+     "Green": 0.00578,
+     "PBP": 0.00725,
+     "Aontú": 0.00523
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Carntogher",
+    "votes": {
+     "Sinn Féin": 5781,
+     "DUP": 1209,
+     "Alliance": 0,
+     "UUP": 0,
+     "SDLP": 829,
+     "TUV": 530,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 481
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.63027,
+     "DUP": 0.10605,
+     "Alliance": 0.0141,
+     "UUP": 0.05927,
+     "SDLP": 0.06601,
+     "TUV": 0.0405,
+     "Green": 0.00291,
+     "PBP": 0.04162,
+     "Aontú": 0.03927
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.62401,
+     "DUP": 0.10701,
+     "Alliance": 0.0198,
+     "UUP": 0.04107,
+     "SDLP": 0.11508,
+     "TUV": 0.04724,
+     "Green": 0.00227,
+     "PBP": 0.00932,
+     "Aontú": 0.03419
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Carrick Castle",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 2453,
+     "Alliance": 1607,
+     "UUP": 1457,
+     "SDLP": 0,
+     "TUV": 437,
+     "Green": 136,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.02396,
+     "DUP": 0.41014,
+     "Alliance": 0.23417,
+     "UUP": 0.2261,
+     "SDLP": 0.01217,
+     "TUV": 0.0746,
+     "Green": 0.01425,
+     "PBP": 0.00275,
+     "Aontú": 0.00187
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02619,
+     "DUP": 0.38252,
+     "Alliance": 0.2302,
+     "UUP": 0.24383,
+     "SDLP": 0.0098,
+     "TUV": 0.08772,
+     "Green": 0.01461,
+     "PBP": 0.00324,
+     "Aontú": 0.00189
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Castle",
+    "votes": {
+     "Sinn Féin": 4547,
+     "DUP": 3446,
+     "Alliance": 1392,
+     "UUP": 553,
+     "SDLP": 1047,
+     "TUV": 0,
+     "Green": 979,
+     "PBP": 250,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.37716,
+     "DUP": 0.2346,
+     "Alliance": 0.10415,
+     "UUP": 0.0462,
+     "SDLP": 0.0851,
+     "TUV": 0.0336,
+     "Green": 0.0667,
+     "PBP": 0.02048,
+     "Aontú": 0.03199
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.3903,
+     "DUP": 0.21374,
+     "Alliance": 0.11066,
+     "UUP": 0.04942,
+     "SDLP": 0.08841,
+     "TUV": 0.04411,
+     "Green": 0.054,
+     "PBP": 0.02612,
+     "Aontú": 0.02326
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Castlereagh East",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 4006,
+     "Alliance": 2422,
+     "UUP": 710,
+     "SDLP": 0,
+     "TUV": 534,
+     "Green": 195,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.01766,
+     "DUP": 0.47974,
+     "Alliance": 0.28401,
+     "UUP": 0.11199,
+     "SDLP": 0.00912,
+     "TUV": 0.07519,
+     "Green": 0.01889,
+     "PBP": 0.00196,
+     "Aontú": 0.00144
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.01556,
+     "DUP": 0.44783,
+     "Alliance": 0.27855,
+     "UUP": 0.13083,
+     "SDLP": 0.00656,
+     "TUV": 0.09139,
+     "Green": 0.02419,
+     "PBP": 0.00353,
+     "Aontú": 0.00156
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Castlereagh South",
+    "votes": {
+     "Sinn Féin": 2201,
+     "DUP": 1533,
+     "Alliance": 3295,
+     "UUP": 760,
+     "SDLP": 1691,
+     "TUV": 0,
+     "Green": 656,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.20121,
+     "DUP": 0.1341,
+     "Alliance": 0.32292,
+     "UUP": 0.06955,
+     "SDLP": 0.14254,
+     "TUV": 0.02663,
+     "Green": 0.05582,
+     "PBP": 0.02605,
+     "Aontú": 0.02118
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.19881,
+     "DUP": 0.12112,
+     "Alliance": 0.31481,
+     "UUP": 0.06745,
+     "SDLP": 0.17126,
+     "TUV": 0.0343,
+     "Green": 0.05884,
+     "PBP": 0.01506,
+     "Aontú": 0.01834
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Causeway",
+    "votes": {
+     "Sinn Féin": 715,
+     "DUP": 3043,
+     "Alliance": 1392,
+     "UUP": 1401,
+     "SDLP": 450,
+     "TUV": 867,
+     "Green": 262,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.08286,
+     "DUP": 0.35429,
+     "Alliance": 0.19643,
+     "UUP": 0.17493,
+     "SDLP": 0.04605,
+     "TUV": 0.09793,
+     "Green": 0.03037,
+     "PBP": 0.00931,
+     "Aontú": 0.00783
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.08295,
+     "DUP": 0.33362,
+     "Alliance": 0.19663,
+     "UUP": 0.17538,
+     "SDLP": 0.06222,
+     "TUV": 0.10868,
+     "Green": 0.02566,
+     "PBP": 0.00526,
+     "Aontú": 0.00961
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Clogher Valley",
+    "votes": {
+     "Sinn Féin": 3841,
+     "DUP": 3224,
+     "Alliance": 0,
+     "UUP": 1260,
+     "SDLP": 1045,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.41144,
+     "DUP": 0.26243,
+     "Alliance": 0.03209,
+     "UUP": 0.1097,
+     "SDLP": 0.06482,
+     "TUV": 0.06563,
+     "Green": 0.00469,
+     "PBP": 0.02759,
+     "Aontú": 0.02159
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.44682,
+     "DUP": 0.22234,
+     "Alliance": 0.03479,
+     "UUP": 0.12397,
+     "SDLP": 0.08176,
+     "TUV": 0.06248,
+     "Green": 0.00533,
+     "PBP": 0.00503,
+     "Aontú": 0.01748
+    },
+    "observed_dims": 3
+   },
+   {
+    "region": "Coast Road",
+    "votes": {
+     "Sinn Féin": 1180,
+     "DUP": 1919,
+     "Alliance": 1542,
+     "UUP": 783,
+     "SDLP": 0,
+     "TUV": 340,
+     "Green": 113,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.17312,
+     "DUP": 0.3414,
+     "Alliance": 0.20369,
+     "UUP": 0.14529,
+     "SDLP": 0.04297,
+     "TUV": 0.06232,
+     "Green": 0.01121,
+     "PBP": 0.0118,
+     "Aontú": 0.00819
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.17222,
+     "DUP": 0.30409,
+     "Alliance": 0.18957,
+     "UUP": 0.18261,
+     "SDLP": 0.04243,
+     "TUV": 0.07458,
+     "Green": 0.01104,
+     "PBP": 0.0147,
+     "Aontú": 0.00877
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Coleraine",
+    "votes": {
+     "Sinn Féin": 858,
+     "DUP": 2485,
+     "Alliance": 947,
+     "UUP": 721,
+     "SDLP": 329,
+     "TUV": 339,
+     "Green": 0,
+     "PBP": 247,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.10258,
+     "DUP": 0.46211,
+     "Alliance": 0.14685,
+     "UUP": 0.1442,
+     "SDLP": 0.0365,
+     "TUV": 0.06507,
+     "Green": 0.01136,
+     "PBP": 0.02452,
+     "Aontú": 0.00681
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.10374,
+     "DUP": 0.43533,
+     "Alliance": 0.13934,
+     "UUP": 0.15928,
+     "SDLP": 0.04853,
+     "TUV": 0.08007,
+     "Green": 0.01349,
+     "PBP": 0.01059,
+     "Aontú": 0.00961
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Collin",
+    "votes": {
+     "Sinn Féin": 10003,
+     "DUP": 0,
+     "Alliance": 492,
+     "UUP": 0,
+     "SDLP": 903,
+     "TUV": 0,
+     "Green": 228,
+     "PBP": 1193,
+     "Aontú": 526
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.70584,
+     "DUP": 0.03494,
+     "Alliance": 0.02037,
+     "UUP": 0.01605,
+     "SDLP": 0.07752,
+     "TUV": 0.00694,
+     "Green": 0.0059,
+     "PBP": 0.09074,
+     "Aontú": 0.04169
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.68345,
+     "DUP": 0.04131,
+     "Alliance": 0.02711,
+     "UUP": 0.01091,
+     "SDLP": 0.08475,
+     "TUV": 0.00951,
+     "Green": 0.00797,
+     "PBP": 0.09266,
+     "Aontú": 0.04234
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Comber",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 2804,
+     "Alliance": 2100,
+     "UUP": 1407,
+     "SDLP": 0,
+     "TUV": 409,
+     "Green": 197,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.0234,
+     "DUP": 0.42013,
+     "Alliance": 0.2506,
+     "UUP": 0.20355,
+     "SDLP": 0.01139,
+     "TUV": 0.06982,
+     "Green": 0.01706,
+     "PBP": 0.00223,
+     "Aontú": 0.00183
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.01727,
+     "DUP": 0.4075,
+     "Alliance": 0.26404,
+     "UUP": 0.17925,
+     "SDLP": 0.01393,
+     "TUV": 0.09542,
+     "Green": 0.01833,
+     "PBP": 0.00233,
+     "Aontú": 0.00192
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Cookstown",
+    "votes": {
+     "Sinn Féin": 5143,
+     "DUP": 2017,
+     "Alliance": 424,
+     "UUP": 1228,
+     "SDLP": 769,
+     "TUV": 663,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.49728,
+     "DUP": 0.18824,
+     "Alliance": 0.03241,
+     "UUP": 0.10826,
+     "SDLP": 0.05676,
+     "TUV": 0.05716,
+     "Green": 0.00796,
+     "PBP": 0.02798,
+     "Aontú": 0.02396
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.484,
+     "DUP": 0.19644,
+     "Alliance": 0.04818,
+     "UUP": 0.08051,
+     "SDLP": 0.09631,
+     "TUV": 0.06007,
+     "Green": 0.00626,
+     "PBP": 0.00711,
+     "Aontú": 0.02113
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Court",
+    "votes": {
+     "Sinn Féin": 3438,
+     "DUP": 5421,
+     "Alliance": 329,
+     "UUP": 0,
+     "SDLP": 175,
+     "TUV": 963,
+     "Green": 108,
+     "PBP": 408,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.32721,
+     "DUP": 0.41816,
+     "Alliance": 0.02151,
+     "UUP": 0.08352,
+     "SDLP": 0.01755,
+     "TUV": 0.07302,
+     "Green": 0.00662,
+     "PBP": 0.03933,
+     "Aontú": 0.01308
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.30225,
+     "DUP": 0.42237,
+     "Alliance": 0.02967,
+     "UUP": 0.06406,
+     "SDLP": 0.02735,
+     "TUV": 0.09203,
+     "Green": 0.00853,
+     "PBP": 0.0386,
+     "Aontú": 0.01514
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Craigavon",
+    "votes": {
+     "Sinn Féin": 3861,
+     "DUP": 3241,
+     "Alliance": 1392,
+     "UUP": 1305,
+     "SDLP": 958,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.34845,
+     "DUP": 0.26087,
+     "Alliance": 0.09579,
+     "UUP": 0.10245,
+     "SDLP": 0.06734,
+     "TUV": 0.06299,
+     "Green": 0.014,
+     "PBP": 0.02815,
+     "Aontú": 0.01996
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.36263,
+     "DUP": 0.25427,
+     "Alliance": 0.1088,
+     "UUP": 0.09985,
+     "SDLP": 0.07306,
+     "TUV": 0.05862,
+     "Green": 0.00925,
+     "PBP": 0.02033,
+     "Aontú": 0.01318
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Crotlieve",
+    "votes": {
+     "Sinn Féin": 5992,
+     "DUP": 600,
+     "Alliance": 660,
+     "UUP": 448,
+     "SDLP": 2327,
+     "TUV": 0,
+     "Green": 96,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.60128,
+     "DUP": 0.04056,
+     "Alliance": 0.03832,
+     "UUP": 0.03033,
+     "SDLP": 0.22074,
+     "TUV": 0.01145,
+     "Green": 0.00322,
+     "PBP": 0.02684,
+     "Aontú": 0.02726
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.59964,
+     "DUP": 0.04121,
+     "Alliance": 0.0387,
+     "UUP": 0.0229,
+     "SDLP": 0.23736,
+     "TUV": 0.01544,
+     "Green": 0.00477,
+     "PBP": 0.01166,
+     "Aontú": 0.02833
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Cusher",
+    "votes": {
+     "Sinn Féin": 2177,
+     "DUP": 5351,
+     "Alliance": 594,
+     "UUP": 1541,
+     "SDLP": 578,
+     "TUV": 2037,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.16363,
+     "DUP": 0.4417,
+     "Alliance": 0.04086,
+     "UUP": 0.13994,
+     "SDLP": 0.03281,
+     "TUV": 0.15851,
+     "Green": 0.00338,
+     "PBP": 0.01083,
+     "Aontú": 0.00833
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.16959,
+     "DUP": 0.3878,
+     "Alliance": 0.0546,
+     "UUP": 0.15543,
+     "SDLP": 0.03569,
+     "TUV": 0.18138,
+     "Green": 0.00287,
+     "PBP": 0.00665,
+     "Aontú": 0.00599
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Derg",
+    "votes": {
+     "Sinn Féin": 3885,
+     "DUP": 1669,
+     "Alliance": 177,
+     "UUP": 1377,
+     "SDLP": 723,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 112,
+     "Aontú": 99
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48009,
+     "DUP": 0.17853,
+     "Alliance": 0.02399,
+     "UUP": 0.14453,
+     "SDLP": 0.09286,
+     "TUV": 0.04624,
+     "Green": 0.00311,
+     "PBP": 0.01561,
+     "Aontú": 0.01506
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.46265,
+     "DUP": 0.19024,
+     "Alliance": 0.03431,
+     "UUP": 0.10108,
+     "SDLP": 0.09975,
+     "TUV": 0.08108,
+     "Green": 0.00457,
+     "PBP": 0.01161,
+     "Aontú": 0.0147
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Downpatrick",
+    "votes": {
+     "Sinn Féin": 3551,
+     "DUP": 267,
+     "Alliance": 1124,
+     "UUP": 200,
+     "SDLP": 2510,
+     "TUV": 0,
+     "Green": 117,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.46085,
+     "DUP": 0.03487,
+     "Alliance": 0.11122,
+     "UUP": 0.02528,
+     "SDLP": 0.29333,
+     "TUV": 0.00804,
+     "Green": 0.00594,
+     "PBP": 0.03282,
+     "Aontú": 0.02764
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.49047,
+     "DUP": 0.03734,
+     "Alliance": 0.11738,
+     "UUP": 0.02279,
+     "SDLP": 0.2704,
+     "TUV": 0.01025,
+     "Green": 0.0122,
+     "PBP": 0.01082,
+     "Aontú": 0.02834
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Downshire East",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 2858,
+     "Alliance": 2078,
+     "UUP": 1208,
+     "SDLP": 312,
+     "TUV": 396,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.03139,
+     "DUP": 0.38714,
+     "Alliance": 0.28848,
+     "UUP": 0.17034,
+     "SDLP": 0.01531,
+     "TUV": 0.06594,
+     "Green": 0.03483,
+     "PBP": 0.00359,
+     "Aontú": 0.00297
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02507,
+     "DUP": 0.33437,
+     "Alliance": 0.34156,
+     "UUP": 0.1793,
+     "SDLP": 0.02824,
+     "TUV": 0.06889,
+     "Green": 0.01762,
+     "PBP": 0.00256,
+     "Aontú": 0.0024
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Downshire West",
+    "votes": {
+     "Sinn Féin": 302,
+     "DUP": 2885,
+     "Alliance": 2629,
+     "UUP": 1239,
+     "SDLP": 0,
+     "TUV": 0,
+     "Green": 124,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.03567,
+     "DUP": 0.34211,
+     "Alliance": 0.35876,
+     "UUP": 0.16224,
+     "SDLP": 0.02377,
+     "TUV": 0.054,
+     "Green": 0.01623,
+     "PBP": 0.00454,
+     "Aontú": 0.00268
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02867,
+     "DUP": 0.30731,
+     "Alliance": 0.37852,
+     "UUP": 0.18281,
+     "SDLP": 0.02779,
+     "TUV": 0.05423,
+     "Green": 0.01521,
+     "PBP": 0.003,
+     "Aontú": 0.00244
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Dungannon",
+    "votes": {
+     "Sinn Féin": 3918,
+     "DUP": 2752,
+     "Alliance": 471,
+     "UUP": 527,
+     "SDLP": 601,
+     "TUV": 299,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 146
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.45011,
+     "DUP": 0.28633,
+     "Alliance": 0.04207,
+     "UUP": 0.06795,
+     "SDLP": 0.06474,
+     "TUV": 0.03848,
+     "Green": 0.0068,
+     "PBP": 0.02749,
+     "Aontú": 0.01601
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.4746,
+     "DUP": 0.24026,
+     "Alliance": 0.04426,
+     "UUP": 0.08218,
+     "SDLP": 0.08276,
+     "TUV": 0.04362,
+     "Green": 0.00876,
+     "PBP": 0.00572,
+     "Aontú": 0.01784
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Dunsilly",
+    "votes": {
+     "Sinn Féin": 2604,
+     "DUP": 1682,
+     "Alliance": 913,
+     "UUP": 843,
+     "SDLP": 724,
+     "TUV": 445,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 243
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.33477,
+     "DUP": 0.23431,
+     "Alliance": 0.10612,
+     "UUP": 0.11415,
+     "SDLP": 0.08077,
+     "TUV": 0.06252,
+     "Green": 0.01428,
+     "PBP": 0.02774,
+     "Aontú": 0.02533
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.35483,
+     "DUP": 0.19639,
+     "Alliance": 0.10688,
+     "UUP": 0.13667,
+     "SDLP": 0.09357,
+     "TUV": 0.06636,
+     "Green": 0.01104,
+     "PBP": 0.01254,
+     "Aontú": 0.02172
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Enniskillen",
+    "votes": {
+     "Sinn Féin": 2650,
+     "DUP": 1466,
+     "Alliance": 779,
+     "UUP": 1229,
+     "SDLP": 539,
+     "TUV": 509,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.3858,
+     "DUP": 0.19013,
+     "Alliance": 0.0837,
+     "UUP": 0.14279,
+     "SDLP": 0.05833,
+     "TUV": 0.05736,
+     "Green": 0.02358,
+     "PBP": 0.03302,
+     "Aontú": 0.02528
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.40128,
+     "DUP": 0.17433,
+     "Alliance": 0.09612,
+     "UUP": 0.14184,
+     "SDLP": 0.09529,
+     "TUV": 0.04767,
+     "Green": 0.01994,
+     "PBP": 0.00514,
+     "Aontú": 0.0184
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Erne East",
+    "votes": {
+     "Sinn Féin": 4436,
+     "DUP": 1410,
+     "Alliance": 221,
+     "UUP": 1115,
+     "SDLP": 498,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.56083,
+     "DUP": 0.15398,
+     "Alliance": 0.02092,
+     "UUP": 0.12005,
+     "SDLP": 0.0508,
+     "TUV": 0.04065,
+     "Green": 0.0046,
+     "PBP": 0.0255,
+     "Aontú": 0.02267
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.56835,
+     "DUP": 0.14009,
+     "Alliance": 0.02803,
+     "UUP": 0.11977,
+     "SDLP": 0.07542,
+     "TUV": 0.04075,
+     "Green": 0.0046,
+     "PBP": 0.00485,
+     "Aontú": 0.01812
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Erne North",
+    "votes": {
+     "Sinn Féin": 2413,
+     "DUP": 1203,
+     "Alliance": 358,
+     "UUP": 1921,
+     "SDLP": 783,
+     "TUV": 422,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.32473,
+     "DUP": 0.19873,
+     "Alliance": 0.04317,
+     "UUP": 0.24356,
+     "SDLP": 0.08394,
+     "TUV": 0.05874,
+     "Green": 0.00531,
+     "PBP": 0.02281,
+     "Aontú": 0.01899
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.36026,
+     "DUP": 0.20046,
+     "Alliance": 0.0495,
+     "UUP": 0.22491,
+     "SDLP": 0.08244,
+     "TUV": 0.05597,
+     "Green": 0.00755,
+     "PBP": 0.00384,
+     "Aontú": 0.01507
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Erne West",
+    "votes": {
+     "Sinn Féin": 4111,
+     "DUP": 687,
+     "Alliance": 250,
+     "UUP": 1197,
+     "SDLP": 835,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.54746,
+     "DUP": 0.09844,
+     "Alliance": 0.03302,
+     "UUP": 0.14095,
+     "SDLP": 0.09428,
+     "TUV": 0.02737,
+     "Green": 0.00589,
+     "PBP": 0.02686,
+     "Aontú": 0.02574
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.57453,
+     "DUP": 0.09678,
+     "Alliance": 0.04344,
+     "UUP": 0.12241,
+     "SDLP": 0.10208,
+     "TUV": 0.02746,
+     "Green": 0.00767,
+     "PBP": 0.0051,
+     "Aontú": 0.02054
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Faughan",
+    "votes": {
+     "Sinn Féin": 2355,
+     "DUP": 1641,
+     "Alliance": 695,
+     "UUP": 1282,
+     "SDLP": 1533,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 310,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.34603,
+     "DUP": 0.1654,
+     "Alliance": 0.0745,
+     "UUP": 0.12867,
+     "SDLP": 0.17015,
+     "TUV": 0.04661,
+     "Green": 0.00761,
+     "PBP": 0.03321,
+     "Aontú": 0.02782
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.32966,
+     "DUP": 0.1718,
+     "Alliance": 0.07313,
+     "UUP": 0.12117,
+     "SDLP": 0.19346,
+     "TUV": 0.04471,
+     "Green": 0.00644,
+     "PBP": 0.03121,
+     "Aontú": 0.02843
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Foyleside",
+    "votes": {
+     "Sinn Féin": 2961,
+     "DUP": 0,
+     "Alliance": 266,
+     "UUP": 0,
+     "SDLP": 2534,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 979,
+     "Aontú": 423
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48722,
+     "DUP": 0.01677,
+     "Alliance": 0.01626,
+     "UUP": 0.01002,
+     "SDLP": 0.29797,
+     "TUV": 0.00404,
+     "Green": 0.0026,
+     "PBP": 0.11342,
+     "Aontú": 0.0517
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.46375,
+     "DUP": 0.01809,
+     "Alliance": 0.0185,
+     "UUP": 0.01149,
+     "SDLP": 0.35151,
+     "TUV": 0.00296,
+     "Green": 0.00257,
+     "PBP": 0.08691,
+     "Aontú": 0.04423
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Glengormley Urban",
+    "votes": {
+     "Sinn Féin": 3093,
+     "DUP": 2284,
+     "Alliance": 1407,
+     "UUP": 952,
+     "SDLP": 565,
+     "TUV": 0,
+     "Green": 313,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.32218,
+     "DUP": 0.2378,
+     "Alliance": 0.15414,
+     "UUP": 0.10513,
+     "SDLP": 0.06143,
+     "TUV": 0.04203,
+     "Green": 0.02935,
+     "PBP": 0.02773,
+     "Aontú": 0.02021
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.32804,
+     "DUP": 0.21407,
+     "Alliance": 0.16108,
+     "UUP": 0.11376,
+     "SDLP": 0.06411,
+     "TUV": 0.05054,
+     "Green": 0.03198,
+     "PBP": 0.01972,
+     "Aontú": 0.0167
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Holywood and Clandeboye",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 1531,
+     "Alliance": 3171,
+     "UUP": 989,
+     "SDLP": 539,
+     "TUV": 364,
+     "Green": 1134,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.04699,
+     "DUP": 0.22276,
+     "Alliance": 0.40183,
+     "UUP": 0.12849,
+     "SDLP": 0.02298,
+     "TUV": 0.04746,
+     "Green": 0.11944,
+     "PBP": 0.00469,
+     "Aontú": 0.00535
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.03336,
+     "DUP": 0.24844,
+     "Alliance": 0.43716,
+     "UUP": 0.11451,
+     "SDLP": 0.02443,
+     "TUV": 0.03759,
+     "Green": 0.09483,
+     "PBP": 0.00501,
+     "Aontú": 0.00467
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Killultagh",
+    "votes": {
+     "Sinn Féin": 1958,
+     "DUP": 2806,
+     "Alliance": 1862,
+     "UUP": 1313,
+     "SDLP": 364,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.23036,
+     "DUP": 0.28526,
+     "Alliance": 0.18469,
+     "UUP": 0.13911,
+     "SDLP": 0.03668,
+     "TUV": 0.05803,
+     "Green": 0.03259,
+     "PBP": 0.0192,
+     "Aontú": 0.01408
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.20552,
+     "DUP": 0.24938,
+     "Alliance": 0.22503,
+     "UUP": 0.16094,
+     "SDLP": 0.0732,
+     "TUV": 0.05029,
+     "Green": 0.01307,
+     "PBP": 0.01079,
+     "Aontú": 0.01178
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Knockagh",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 2075,
+     "Alliance": 1656,
+     "UUP": 1225,
+     "SDLP": 0,
+     "TUV": 348,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.01977,
+     "DUP": 0.40992,
+     "Alliance": 0.24597,
+     "UUP": 0.21572,
+     "SDLP": 0.00786,
+     "TUV": 0.06973,
+     "Green": 0.02751,
+     "PBP": 0.00188,
+     "Aontú": 0.00163
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02036,
+     "DUP": 0.37183,
+     "Alliance": 0.26388,
+     "UUP": 0.23103,
+     "SDLP": 0.00797,
+     "TUV": 0.08175,
+     "Green": 0.01932,
+     "PBP": 0.00236,
+     "Aontú": 0.00151
+    },
+    "observed_dims": 3
+   },
+   {
+    "region": "Lagan River",
+    "votes": {
+     "Sinn Féin": 502,
+     "DUP": 4903,
+     "Alliance": 1762,
+     "UUP": 1986,
+     "SDLP": 220,
+     "TUV": 627,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.04226,
+     "DUP": 0.47918,
+     "Alliance": 0.16681,
+     "UUP": 0.19964,
+     "SDLP": 0.01375,
+     "TUV": 0.07879,
+     "Green": 0.01418,
+     "PBP": 0.00273,
+     "Aontú": 0.00264
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.03815,
+     "DUP": 0.42969,
+     "Alliance": 0.20602,
+     "UUP": 0.20072,
+     "SDLP": 0.01704,
+     "TUV": 0.09423,
+     "Green": 0.00994,
+     "PBP": 0.0021,
+     "Aontú": 0.00211
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Larne Lough",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 2059,
+     "Alliance": 2085,
+     "UUP": 1619,
+     "SDLP": 0,
+     "TUV": 427,
+     "Green": 215,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.037,
+     "DUP": 0.34677,
+     "Alliance": 0.2615,
+     "UUP": 0.23842,
+     "SDLP": 0.01943,
+     "TUV": 0.07263,
+     "Green": 0.01738,
+     "PBP": 0.00392,
+     "Aontú": 0.00295
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.04051,
+     "DUP": 0.3269,
+     "Alliance": 0.25374,
+     "UUP": 0.25018,
+     "SDLP": 0.01644,
+     "TUV": 0.08743,
+     "Green": 0.01702,
+     "PBP": 0.00479,
+     "Aontú": 0.00299
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Limavady",
+    "votes": {
+     "Sinn Féin": 1800,
+     "DUP": 1984,
+     "Alliance": 547,
+     "UUP": 511,
+     "SDLP": 443,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 153
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.30679,
+     "DUP": 0.31126,
+     "Alliance": 0.09214,
+     "UUP": 0.10309,
+     "SDLP": 0.06725,
+     "TUV": 0.0597,
+     "Green": 0.01351,
+     "PBP": 0.02388,
+     "Aontú": 0.02237
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.30327,
+     "DUP": 0.26294,
+     "Alliance": 0.08724,
+     "UUP": 0.1194,
+     "SDLP": 0.1164,
+     "TUV": 0.06451,
+     "Green": 0.00827,
+     "PBP": 0.01264,
+     "Aontú": 0.02533
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Lisburn North",
+    "votes": {
+     "Sinn Féin": 1239,
+     "DUP": 2235,
+     "Alliance": 1993,
+     "UUP": 1152,
+     "SDLP": 935,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.13771,
+     "DUP": 0.28921,
+     "Alliance": 0.2369,
+     "UUP": 0.13814,
+     "SDLP": 0.08414,
+     "TUV": 0.0568,
+     "Green": 0.03061,
+     "PBP": 0.01429,
+     "Aontú": 0.0122
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.11819,
+     "DUP": 0.2718,
+     "Alliance": 0.27935,
+     "UUP": 0.14728,
+     "SDLP": 0.09375,
+     "TUV": 0.04769,
+     "Green": 0.01918,
+     "PBP": 0.01326,
+     "Aontú": 0.0095
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Lisburn South",
+    "votes": {
+     "Sinn Féin": 493,
+     "DUP": 2864,
+     "Alliance": 1785,
+     "UUP": 1495,
+     "SDLP": 472,
+     "TUV": 387,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.07078,
+     "DUP": 0.39717,
+     "Alliance": 0.20675,
+     "UUP": 0.19262,
+     "SDLP": 0.04755,
+     "TUV": 0.05739,
+     "Green": 0.01481,
+     "PBP": 0.00711,
+     "Aontú": 0.00581
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.06619,
+     "DUP": 0.37651,
+     "Alliance": 0.22517,
+     "UUP": 0.20172,
+     "SDLP": 0.04951,
+     "TUV": 0.05836,
+     "Green": 0.01117,
+     "PBP": 0.00631,
+     "Aontú": 0.00507
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Lisnasharragh",
+    "votes": {
+     "Sinn Féin": 1231,
+     "DUP": 3143,
+     "Alliance": 3476,
+     "UUP": 820,
+     "SDLP": 1580,
+     "TUV": 368,
+     "Green": 1157,
+     "PBP": 200,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.09959,
+     "DUP": 0.26628,
+     "Alliance": 0.3011,
+     "UUP": 0.07816,
+     "SDLP": 0.10767,
+     "TUV": 0.03357,
+     "Green": 0.08428,
+     "PBP": 0.01473,
+     "Aontú": 0.01461
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.09995,
+     "DUP": 0.24378,
+     "Alliance": 0.3238,
+     "UUP": 0.08047,
+     "SDLP": 0.11567,
+     "TUV": 0.03853,
+     "Green": 0.07305,
+     "PBP": 0.01254,
+     "Aontú": 0.01222
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Lurgan",
+    "votes": {
+     "Sinn Féin": 6841,
+     "DUP": 3265,
+     "Alliance": 1877,
+     "UUP": 1104,
+     "SDLP": 991,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48505,
+     "DUP": 0.19737,
+     "Alliance": 0.0777,
+     "UUP": 0.06596,
+     "SDLP": 0.0571,
+     "TUV": 0.04302,
+     "Green": 0.0116,
+     "PBP": 0.03802,
+     "Aontú": 0.02418
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.47208,
+     "DUP": 0.18775,
+     "Alliance": 0.09,
+     "UUP": 0.07259,
+     "SDLP": 0.08619,
+     "TUV": 0.03938,
+     "Green": 0.00592,
+     "PBP": 0.02922,
+     "Aontú": 0.01686
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Macedon",
+    "votes": {
+     "Sinn Féin": 1326,
+     "DUP": 2347,
+     "Alliance": 1085,
+     "UUP": 1138,
+     "SDLP": 0,
+     "TUV": 333,
+     "Green": 158,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.15401,
+     "DUP": 0.37259,
+     "Alliance": 0.17272,
+     "UUP": 0.17096,
+     "SDLP": 0.03727,
+     "TUV": 0.05429,
+     "Green": 0.01863,
+     "PBP": 0.01183,
+     "Aontú": 0.0077
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.15946,
+     "DUP": 0.37946,
+     "Alliance": 0.1805,
+     "UUP": 0.13929,
+     "SDLP": 0.02568,
+     "TUV": 0.069,
+     "Green": 0.03043,
+     "PBP": 0.00951,
+     "Aontú": 0.00667
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Magherafelt",
+    "votes": {
+     "Sinn Féin": 3607,
+     "DUP": 2110,
+     "Alliance": 478,
+     "UUP": 587,
+     "SDLP": 804,
+     "TUV": 671,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.41138,
+     "DUP": 0.2503,
+     "Alliance": 0.05017,
+     "UUP": 0.08042,
+     "SDLP": 0.07411,
+     "TUV": 0.07623,
+     "Green": 0.00864,
+     "PBP": 0.02638,
+     "Aontú": 0.02236
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.41466,
+     "DUP": 0.23376,
+     "Alliance": 0.06607,
+     "UUP": 0.07132,
+     "SDLP": 0.10115,
+     "TUV": 0.0785,
+     "Green": 0.00781,
+     "PBP": 0.00624,
+     "Aontú": 0.02048
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Mid Tyrone",
+    "votes": {
+     "Sinn Féin": 5361,
+     "DUP": 1057,
+     "Alliance": 311,
+     "UUP": 687,
+     "SDLP": 497,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.67263,
+     "DUP": 0.09478,
+     "Alliance": 0.02412,
+     "UUP": 0.06502,
+     "SDLP": 0.04971,
+     "TUV": 0.02502,
+     "Green": 0.00672,
+     "PBP": 0.03348,
+     "Aontú": 0.02853
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.62995,
+     "DUP": 0.09378,
+     "Alliance": 0.04224,
+     "UUP": 0.04703,
+     "SDLP": 0.11062,
+     "TUV": 0.03957,
+     "Green": 0.00555,
+     "PBP": 0.0123,
+     "Aontú": 0.01897
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Moyola",
+    "votes": {
+     "Sinn Féin": 5237,
+     "DUP": 1563,
+     "Alliance": 247,
+     "UUP": 592,
+     "SDLP": 651,
+     "TUV": 519,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 347
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.5516,
+     "DUP": 0.16748,
+     "Alliance": 0.02382,
+     "UUP": 0.07052,
+     "SDLP": 0.06347,
+     "TUV": 0.05639,
+     "Green": 0.00533,
+     "PBP": 0.02902,
+     "Aontú": 0.03237
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.54416,
+     "DUP": 0.15856,
+     "Alliance": 0.03679,
+     "UUP": 0.05927,
+     "SDLP": 0.09947,
+     "TUV": 0.06153,
+     "Green": 0.00423,
+     "PBP": 0.0075,
+     "Aontú": 0.0285
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Newry",
+    "votes": {
+     "Sinn Féin": 6809,
+     "DUP": 0,
+     "Alliance": 830,
+     "UUP": 285,
+     "SDLP": 1896,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 318
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.63811,
+     "DUP": 0.02851,
+     "Alliance": 0.02649,
+     "UUP": 0.0145,
+     "SDLP": 0.15309,
+     "TUV": 0.00741,
+     "Green": 0.0022,
+     "PBP": 0.10438,
+     "Aontú": 0.0253
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.64375,
+     "DUP": 0.0261,
+     "Alliance": 0.03354,
+     "UUP": 0.01476,
+     "SDLP": 0.18881,
+     "TUV": 0.00953,
+     "Green": 0.00237,
+     "PBP": 0.05508,
+     "Aontú": 0.02606
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Newtownards",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 4470,
+     "Alliance": 2183,
+     "UUP": 1257,
+     "SDLP": 0,
+     "TUV": 598,
+     "Green": 226,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.02674,
+     "DUP": 0.48028,
+     "Alliance": 0.23321,
+     "UUP": 0.15312,
+     "SDLP": 0.01196,
+     "TUV": 0.07287,
+     "Green": 0.01681,
+     "PBP": 0.00294,
+     "Aontú": 0.00207
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02033,
+     "DUP": 0.44573,
+     "Alliance": 0.2558,
+     "UUP": 0.15059,
+     "SDLP": 0.01435,
+     "TUV": 0.08995,
+     "Green": 0.01821,
+     "PBP": 0.00291,
+     "Aontú": 0.00215
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Oldpark",
+    "votes": {
+     "Sinn Féin": 6249,
+     "DUP": 2182,
+     "Alliance": 453,
+     "UUP": 0,
+     "SDLP": 1992,
+     "TUV": 595,
+     "Green": 149,
+     "PBP": 700,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.47196,
+     "DUP": 0.17073,
+     "Alliance": 0.03183,
+     "UUP": 0.06102,
+     "SDLP": 0.14066,
+     "TUV": 0.03445,
+     "Green": 0.00588,
+     "PBP": 0.05274,
+     "Aontú": 0.03073
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.52783,
+     "DUP": 0.17603,
+     "Alliance": 0.03616,
+     "UUP": 0.04791,
+     "SDLP": 0.09576,
+     "TUV": 0.04129,
+     "Green": 0.00973,
+     "PBP": 0.04105,
+     "Aontú": 0.02424
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Omagh",
+    "votes": {
+     "Sinn Féin": 3128,
+     "DUP": 1138,
+     "Alliance": 872,
+     "UUP": 489,
+     "SDLP": 385,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.56064,
+     "DUP": 0.13356,
+     "Alliance": 0.0736,
+     "UUP": 0.06127,
+     "SDLP": 0.0553,
+     "TUV": 0.02565,
+     "Green": 0.01658,
+     "PBP": 0.04346,
+     "Aontú": 0.02993
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.52758,
+     "DUP": 0.12265,
+     "Alliance": 0.08967,
+     "UUP": 0.04731,
+     "SDLP": 0.12947,
+     "TUV": 0.03776,
+     "Green": 0.01235,
+     "PBP": 0.0134,
+     "Aontú": 0.01981
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Ormiston",
+    "votes": {
+     "Sinn Féin": 174,
+     "DUP": 4039,
+     "Alliance": 6329,
+     "UUP": 1851,
+     "SDLP": 106,
+     "TUV": 680,
+     "Green": 999,
+     "PBP": 117,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.01595,
+     "DUP": 0.26438,
+     "Alliance": 0.45799,
+     "UUP": 0.12257,
+     "SDLP": 0.00814,
+     "TUV": 0.04709,
+     "Green": 0.07451,
+     "PBP": 0.00703,
+     "Aontú": 0.00234
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.01551,
+     "DUP": 0.26876,
+     "Alliance": 0.47462,
+     "UUP": 0.10864,
+     "SDLP": 0.00797,
+     "TUV": 0.04787,
+     "Green": 0.06842,
+     "PBP": 0.00602,
+     "Aontú": 0.00219
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Portadown",
+    "votes": {
+     "Sinn Féin": 2893,
+     "DUP": 5074,
+     "Alliance": 921,
+     "UUP": 1677,
+     "SDLP": 842,
+     "TUV": 795,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.20845,
+     "DUP": 0.43323,
+     "Alliance": 0.05965,
+     "UUP": 0.14326,
+     "SDLP": 0.0506,
+     "TUV": 0.07236,
+     "Green": 0.00625,
+     "PBP": 0.01534,
+     "Aontú": 0.01086
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.22584,
+     "DUP": 0.41331,
+     "Alliance": 0.06732,
+     "UUP": 0.14109,
+     "SDLP": 0.04622,
+     "TUV": 0.08132,
+     "Green": 0.00552,
+     "PBP": 0.01134,
+     "Aontú": 0.00806
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Rowallane",
+    "votes": {
+     "Sinn Féin": 866,
+     "DUP": 2745,
+     "Alliance": 1976,
+     "UUP": 1038,
+     "SDLP": 1319,
+     "TUV": 0,
+     "Green": 90,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.12112,
+     "DUP": 0.27981,
+     "Alliance": 0.25337,
+     "UUP": 0.12176,
+     "SDLP": 0.14522,
+     "TUV": 0.04907,
+     "Green": 0.00943,
+     "PBP": 0.01133,
+     "Aontú": 0.00889
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.12135,
+     "DUP": 0.27106,
+     "Alliance": 0.2636,
+     "UUP": 0.12091,
+     "SDLP": 0.11607,
+     "TUV": 0.07124,
+     "Green": 0.01589,
+     "PBP": 0.0098,
+     "Aontú": 0.01009
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Slieve Croob",
+    "votes": {
+     "Sinn Féin": 4238,
+     "DUP": 1723,
+     "Alliance": 1183,
+     "UUP": 383,
+     "SDLP": 1041,
+     "TUV": 0,
+     "Green": 98,
+     "PBP": 0,
+     "Aontú": 245
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48799,
+     "DUP": 0.13637,
+     "Alliance": 0.12195,
+     "UUP": 0.04284,
+     "SDLP": 0.12826,
+     "TUV": 0.0216,
+     "Green": 0.0091,
+     "PBP": 0.02649,
+     "Aontú": 0.0254
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.46102,
+     "DUP": 0.11583,
+     "Alliance": 0.14286,
+     "UUP": 0.04413,
+     "SDLP": 0.16067,
+     "TUV": 0.02975,
+     "Green": 0.01461,
+     "PBP": 0.00769,
+     "Aontú": 0.02344
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Slieve Gullion",
+    "votes": {
+     "Sinn Féin": 9978,
+     "DUP": 360,
+     "Alliance": 298,
+     "UUP": 1197,
+     "SDLP": 2350,
+     "TUV": 0,
+     "Green": 69,
+     "PBP": 0,
+     "Aontú": 439
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.64953,
+     "DUP": 0.03339,
+     "Alliance": 0.01257,
+     "UUP": 0.06404,
+     "SDLP": 0.16636,
+     "TUV": 0.01992,
+     "Green": 0.00105,
+     "PBP": 0.02343,
+     "Aontú": 0.02972
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.66052,
+     "DUP": 0.04034,
+     "Alliance": 0.01591,
+     "UUP": 0.04031,
+     "SDLP": 0.16108,
+     "TUV": 0.03091,
+     "Green": 0.00127,
+     "PBP": 0.02277,
+     "Aontú": 0.02688
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Sperrin",
+    "votes": {
+     "Sinn Féin": 4768,
+     "DUP": 2158,
+     "Alliance": 381,
+     "UUP": 489,
+     "SDLP": 1349,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 226,
+     "Aontú": 168
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.56406,
+     "DUP": 0.1395,
+     "Alliance": 0.03159,
+     "UUP": 0.04608,
+     "SDLP": 0.14432,
+     "TUV": 0.02638,
+     "Green": 0.00283,
+     "PBP": 0.02508,
+     "Aontú": 0.02016
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.56859,
+     "DUP": 0.11922,
+     "Alliance": 0.03131,
+     "UUP": 0.04459,
+     "SDLP": 0.15014,
+     "TUV": 0.04267,
+     "Green": 0.00354,
+     "PBP": 0.01854,
+     "Aontú": 0.02141
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "The Glens",
+    "votes": {
+     "Sinn Féin": 4517,
+     "DUP": 945,
+     "Alliance": 733,
+     "UUP": 587,
+     "SDLP": 652,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 265
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.55936,
+     "DUP": 0.11936,
+     "Alliance": 0.05682,
+     "UUP": 0.06891,
+     "SDLP": 0.07828,
+     "TUV": 0.03423,
+     "Green": 0.00775,
+     "PBP": 0.04622,
+     "Aontú": 0.02907
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.55458,
+     "DUP": 0.09845,
+     "Alliance": 0.05587,
+     "UUP": 0.06776,
+     "SDLP": 0.10093,
+     "TUV": 0.04914,
+     "Green": 0.00458,
+     "PBP": 0.04195,
+     "Aontú": 0.02673
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "The Moor",
+    "votes": {
+     "Sinn Féin": 5166,
+     "DUP": 0,
+     "Alliance": 146,
+     "UUP": 0,
+     "SDLP": 1206,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 578,
+     "Aontú": 301
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.68112,
+     "DUP": 0.02109,
+     "Alliance": 0.00529,
+     "UUP": 0.01152,
+     "SDLP": 0.15782,
+     "TUV": 0.005,
+     "Green": 0.00103,
+     "PBP": 0.07604,
+     "Aontú": 0.04111
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.58884,
+     "DUP": 0.02368,
+     "Alliance": 0.00752,
+     "UUP": 0.01391,
+     "SDLP": 0.24712,
+     "TUV": 0.0038,
+     "Green": 0.00092,
+     "PBP": 0.07463,
+     "Aontú": 0.03958
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "The Mournes",
+    "votes": {
+     "Sinn Féin": 5598,
+     "DUP": 3429,
+     "Alliance": 1105,
+     "UUP": 511,
+     "SDLP": 1727,
+     "TUV": 880,
+     "Green": 119,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.4283,
+     "DUP": 0.20808,
+     "Alliance": 0.07684,
+     "UUP": 0.04687,
+     "SDLP": 0.13545,
+     "TUV": 0.06025,
+     "Green": 0.00607,
+     "PBP": 0.02007,
+     "Aontú": 0.01807
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.40906,
+     "DUP": 0.19436,
+     "Alliance": 0.08653,
+     "UUP": 0.05475,
+     "SDLP": 0.1535,
+     "TUV": 0.06685,
+     "Green": 0.01005,
+     "PBP": 0.00691,
+     "Aontú": 0.018
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Three Mile Water",
+    "votes": {
+     "Sinn Féin": 325,
+     "DUP": 3360,
+     "Alliance": 2101,
+     "UUP": 1429,
+     "SDLP": 0,
+     "TUV": 425,
+     "Green": 162,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.03098,
+     "DUP": 0.38613,
+     "Alliance": 0.30355,
+     "UUP": 0.17735,
+     "SDLP": 0.01789,
+     "TUV": 0.05717,
+     "Green": 0.02117,
+     "PBP": 0.00355,
+     "Aontú": 0.00222
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.03169,
+     "DUP": 0.3365,
+     "Alliance": 0.31065,
+     "UUP": 0.20621,
+     "SDLP": 0.0144,
+     "TUV": 0.0698,
+     "Green": 0.02539,
+     "PBP": 0.00306,
+     "Aontú": 0.00231
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Titanic",
+    "votes": {
+     "Sinn Féin": 1284,
+     "DUP": 3562,
+     "Alliance": 2509,
+     "UUP": 968,
+     "SDLP": 129,
+     "TUV": 564,
+     "Green": 938,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.12466,
+     "DUP": 0.34999,
+     "Alliance": 0.24271,
+     "UUP": 0.09836,
+     "SDLP": 0.01349,
+     "TUV": 0.05425,
+     "Green": 0.09955,
+     "PBP": 0.00994,
+     "Aontú": 0.00707
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.10375,
+     "DUP": 0.36526,
+     "Alliance": 0.27252,
+     "UUP": 0.09145,
+     "SDLP": 0.01892,
+     "TUV": 0.05447,
+     "Green": 0.07043,
+     "PBP": 0.01622,
+     "Aontú": 0.00699
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Torrent",
+    "votes": {
+     "Sinn Féin": 5487,
+     "DUP": 1170,
+     "Alliance": 284,
+     "UUP": 714,
+     "SDLP": 961,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.64668,
+     "DUP": 0.09529,
+     "Alliance": 0.01617,
+     "UUP": 0.0595,
+     "SDLP": 0.08279,
+     "TUV": 0.02653,
+     "Green": 0.00319,
+     "PBP": 0.03832,
+     "Aontú": 0.03153
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.63756,
+     "DUP": 0.09463,
+     "Alliance": 0.02343,
+     "UUP": 0.04261,
+     "SDLP": 0.12469,
+     "TUV": 0.03396,
+     "Green": 0.00275,
+     "PBP": 0.01062,
+     "Aontú": 0.02975
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Waterside",
+    "votes": {
+     "Sinn Féin": 2968,
+     "DUP": 2487,
+     "Alliance": 748,
+     "UUP": 2245,
+     "SDLP": 2077,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 388,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.3072,
+     "DUP": 0.18991,
+     "Alliance": 0.0654,
+     "UUP": 0.15638,
+     "SDLP": 0.16957,
+     "TUV": 0.04495,
+     "Green": 0.00988,
+     "PBP": 0.03047,
+     "Aontú": 0.02624
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.26479,
+     "DUP": 0.21241,
+     "Alliance": 0.07724,
+     "UUP": 0.14532,
+     "SDLP": 0.20231,
+     "TUV": 0.03396,
+     "Green": 0.00791,
+     "PBP": 0.03394,
+     "Aontú": 0.02211
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "West Tyrone",
+    "votes": {
+     "Sinn Féin": 4650,
+     "DUP": 1619,
+     "Alliance": 457,
+     "UUP": 829,
+     "SDLP": 746,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.53974,
+     "DUP": 0.15684,
+     "Alliance": 0.04043,
+     "UUP": 0.0883,
+     "SDLP": 0.06839,
+     "TUV": 0.04224,
+     "Green": 0.00644,
+     "PBP": 0.03158,
+     "Aontú": 0.02606
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.51968,
+     "DUP": 0.14797,
+     "Alliance": 0.06097,
+     "UUP": 0.06789,
+     "SDLP": 0.10628,
+     "TUV": 0.06318,
+     "Green": 0.00697,
+     "PBP": 0.01028,
+     "Aontú": 0.01679
+    },
+    "observed_dims": 4
+   }
+  ],
+  "assembly 2022": [
+   {
+    "region": "Belfast East",
+    "votes": {
+     "Sinn Féin": 1369,
+     "DUP": 13886,
+     "Alliance": 14015,
+     "UUP": 6563,
+     "SDLP": 484,
+     "TUV": 3087,
+     "Green": 2302,
+     "PBP": 500,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.03738,
+     "DUP": 0.31613,
+     "Alliance": 0.34296,
+     "UUP": 0.14911,
+     "SDLP": 0.01147,
+     "TUV": 0.07016,
+     "Green": 0.05765,
+     "PBP": 0.01132,
+     "Aontú": 0.00381
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.03931,
+     "DUP": 0.35097,
+     "Alliance": 0.36135,
+     "UUP": 0.11094,
+     "SDLP": 0.0094,
+     "TUV": 0.05952,
+     "Green": 0.0568,
+     "PBP": 0.00844,
+     "Aontú": 0.00327
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Belfast North",
+    "votes": {
+     "Sinn Féin": 16327,
+     "DUP": 11173,
+     "Alliance": 4381,
+     "UUP": 2643,
+     "SDLP": 3604,
+     "TUV": 3335,
+     "Green": 1446,
+     "PBP": 1059,
+     "Aontú": 640
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.37317,
+     "DUP": 0.24591,
+     "Alliance": 0.09562,
+     "UUP": 0.0631,
+     "SDLP": 0.08251,
+     "TUV": 0.06846,
+     "Green": 0.0308,
+     "PBP": 0.02443,
+     "Aontú": 0.016
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.37866,
+     "DUP": 0.25618,
+     "Alliance": 0.0908,
+     "UUP": 0.07097,
+     "SDLP": 0.07299,
+     "TUV": 0.05452,
+     "Green": 0.03027,
+     "PBP": 0.02653,
+     "Aontú": 0.01908
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Belfast South",
+    "votes": {
+     "Sinn Féin": 9511,
+     "DUP": 7211,
+     "Alliance": 11704,
+     "UUP": 3061,
+     "SDLP": 7424,
+     "TUV": 1935,
+     "Green": 4058,
+     "PBP": 629,
+     "Aontú": 806
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.21211,
+     "DUP": 0.14087,
+     "Alliance": 0.26179,
+     "UUP": 0.06199,
+     "SDLP": 0.16542,
+     "TUV": 0.03599,
+     "Green": 0.089,
+     "PBP": 0.01456,
+     "Aontú": 0.01826
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.20236,
+     "DUP": 0.154,
+     "Alliance": 0.26383,
+     "UUP": 0.05475,
+     "SDLP": 0.18745,
+     "TUV": 0.03048,
+     "Green": 0.06935,
+     "PBP": 0.01828,
+     "Aontú": 0.01951
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Belfast West",
+    "votes": {
+     "Sinn Féin": 27805,
+     "DUP": 4166,
+     "Alliance": 907,
+     "UUP": 474,
+     "SDLP": 2528,
+     "TUV": 802,
+     "Green": 307,
+     "PBP": 3279,
+     "Aontú": 1753
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.65203,
+     "DUP": 0.10486,
+     "Alliance": 0.01924,
+     "UUP": 0.01349,
+     "SDLP": 0.06419,
+     "TUV": 0.0195,
+     "Green": 0.00684,
+     "PBP": 0.07714,
+     "Aontú": 0.04271
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.64518,
+     "DUP": 0.09717,
+     "Alliance": 0.01483,
+     "UUP": 0.01531,
+     "SDLP": 0.07874,
+     "TUV": 0.02122,
+     "Green": 0.00521,
+     "PBP": 0.08475,
+     "Aontú": 0.03759
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "East Antrim",
+    "votes": {
+     "Sinn Féin": 3675,
+     "DUP": 11918,
+     "Alliance": 9283,
+     "UUP": 9744,
+     "SDLP": 1200,
+     "TUV": 3661,
+     "Green": 754,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.09512,
+     "DUP": 0.29336,
+     "Alliance": 0.23919,
+     "UUP": 0.22536,
+     "SDLP": 0.0276,
+     "TUV": 0.08579,
+     "Green": 0.01849,
+     "PBP": 0.00958,
+     "Aontú": 0.00551
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.09443,
+     "DUP": 0.31481,
+     "Alliance": 0.25362,
+     "UUP": 0.20488,
+     "SDLP": 0.02501,
+     "TUV": 0.07444,
+     "Green": 0.01815,
+     "PBP": 0.00933,
+     "Aontú": 0.00532
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "East Londonderry",
+    "votes": {
+     "Sinn Féin": 11368,
+     "DUP": 11937,
+     "Alliance": 3338,
+     "UUP": 6606,
+     "SDLP": 5167,
+     "TUV": 2959,
+     "Green": 347,
+     "PBP": 347,
+     "Aontú": 1095
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.27523,
+     "DUP": 0.25144,
+     "Alliance": 0.09208,
+     "UUP": 0.14861,
+     "SDLP": 0.12542,
+     "TUV": 0.06424,
+     "Green": 0.00964,
+     "PBP": 0.0093,
+     "Aontú": 0.02404
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.28548,
+     "DUP": 0.27183,
+     "Alliance": 0.10621,
+     "UUP": 0.12714,
+     "SDLP": 0.09489,
+     "TUV": 0.06566,
+     "Green": 0.01213,
+     "PBP": 0.01276,
+     "Aontú": 0.02389
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Fermanagh and South Tyrone",
+    "votes": {
+     "Sinn Féin": 24008,
+     "DUP": 9527,
+     "Alliance": 2583,
+     "UUP": 8354,
+     "SDLP": 3836,
+     "TUV": 3091,
+     "Green": 335,
+     "PBP": 103,
+     "Aontú": 927
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48622,
+     "DUP": 0.16256,
+     "Alliance": 0.04912,
+     "UUP": 0.13859,
+     "SDLP": 0.08352,
+     "TUV": 0.05201,
+     "Green": 0.00739,
+     "PBP": 0.00275,
+     "Aontú": 0.01784
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.45995,
+     "DUP": 0.19056,
+     "Alliance": 0.04975,
+     "UUP": 0.13568,
+     "SDLP": 0.08404,
+     "TUV": 0.04878,
+     "Green": 0.00908,
+     "PBP": 0.00477,
+     "Aontú": 0.0174
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Foyle",
+    "votes": {
+     "Sinn Féin": 15384,
+     "DUP": 4101,
+     "Alliance": 2220,
+     "UUP": 3744,
+     "SDLP": 14460,
+     "TUV": 499,
+     "Green": 215,
+     "PBP": 2621,
+     "Aontú": 2000
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.38183,
+     "DUP": 0.09074,
+     "Alliance": 0.04491,
+     "UUP": 0.07656,
+     "SDLP": 0.29169,
+     "TUV": 0.01235,
+     "Green": 0.00439,
+     "PBP": 0.05537,
+     "Aontú": 0.04216
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.42365,
+     "DUP": 0.09308,
+     "Alliance": 0.03969,
+     "UUP": 0.0645,
+     "SDLP": 0.2645,
+     "TUV": 0.01587,
+     "Green": 0.00406,
+     "PBP": 0.05843,
+     "Aontú": 0.03622
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Lagan Valley",
+    "votes": {
+     "Sinn Féin": 2725,
+     "DUP": 17688,
+     "Alliance": 12394,
+     "UUP": 9849,
+     "SDLP": 3235,
+     "TUV": 3488,
+     "Green": 648,
+     "PBP": 271,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.06112,
+     "DUP": 0.32534,
+     "Alliance": 0.2672,
+     "UUP": 0.1864,
+     "SDLP": 0.0671,
+     "TUV": 0.06784,
+     "Green": 0.01435,
+     "PBP": 0.00548,
+     "Aontú": 0.00517
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.06375,
+     "DUP": 0.32669,
+     "Alliance": 0.29333,
+     "UUP": 0.18055,
+     "SDLP": 0.04851,
+     "TUV": 0.06035,
+     "Green": 0.01543,
+     "PBP": 0.00646,
+     "Aontú": 0.00494
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Mid Ulster",
+    "votes": {
+     "Sinn Féin": 27259,
+     "DUP": 8521,
+     "Alliance": 2138,
+     "UUP": 2191,
+     "SDLP": 5144,
+     "TUV": 3818,
+     "Green": 137,
+     "PBP": 179,
+     "Aontú": 1305
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.56407,
+     "DUP": 0.14317,
+     "Alliance": 0.03998,
+     "UUP": 0.04436,
+     "SDLP": 0.11426,
+     "TUV": 0.06157,
+     "Green": 0.0033,
+     "PBP": 0.00458,
+     "Aontú": 0.0247
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.54768,
+     "DUP": 0.1538,
+     "Alliance": 0.03775,
+     "UUP": 0.05816,
+     "SDLP": 0.10874,
+     "TUV": 0.05418,
+     "Green": 0.00455,
+     "PBP": 0.00831,
+     "Aontú": 0.02684
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Newry and Armagh",
+    "votes": {
+     "Sinn Féin": 27654,
+     "DUP": 7577,
+     "Alliance": 3345,
+     "UUP": 3864,
+     "SDLP": 6217,
+     "TUV": 5407,
+     "Green": 314,
+     "PBP": 0,
+     "Aontú": 1189
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.53685,
+     "DUP": 0.12307,
+     "Alliance": 0.0462,
+     "UUP": 0.06373,
+     "SDLP": 0.1142,
+     "TUV": 0.07683,
+     "Green": 0.0029,
+     "PBP": 0.01686,
+     "Aontú": 0.01936
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.50584,
+     "DUP": 0.13953,
+     "Alliance": 0.03886,
+     "UUP": 0.06977,
+     "SDLP": 0.13242,
+     "TUV": 0.06388,
+     "Green": 0.00286,
+     "PBP": 0.02657,
+     "Aontú": 0.02027
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "North Antrim",
+    "votes": {
+     "Sinn Féin": 9348,
+     "DUP": 12989,
+     "Alliance": 4810,
+     "UUP": 10386,
+     "SDLP": 1919,
+     "TUV": 10763,
+     "Green": 343,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.21911,
+     "DUP": 0.24903,
+     "Alliance": 0.09823,
+     "UUP": 0.18997,
+     "SDLP": 0.04114,
+     "TUV": 0.17771,
+     "Green": 0.00594,
+     "PBP": 0.01107,
+     "Aontú": 0.0078
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.20311,
+     "DUP": 0.29193,
+     "Alliance": 0.0995,
+     "UUP": 0.15745,
+     "SDLP": 0.04386,
+     "TUV": 0.17394,
+     "Green": 0.00774,
+     "PBP": 0.01293,
+     "Aontú": 0.00954
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "North Down",
+    "votes": {
+     "Sinn Féin": 687,
+     "DUP": 17862,
+     "Alliance": 12062,
+     "UUP": 5167,
+     "SDLP": 727,
+     "TUV": 1574,
+     "Green": 2734,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.02073,
+     "DUP": 0.39133,
+     "Alliance": 0.32634,
+     "UUP": 0.12769,
+     "SDLP": 0.01658,
+     "TUV": 0.04141,
+     "Green": 0.069,
+     "PBP": 0.00363,
+     "Aontú": 0.00329
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02642,
+     "DUP": 0.33994,
+     "Alliance": 0.34247,
+     "UUP": 0.1555,
+     "SDLP": 0.01637,
+     "TUV": 0.04882,
+     "Green": 0.06315,
+     "PBP": 0.00391,
+     "Aontú": 0.00341
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "South Antrim",
+    "votes": {
+     "Sinn Féin": 9185,
+     "DUP": 11842,
+     "Alliance": 7315,
+     "UUP": 8175,
+     "SDLP": 3139,
+     "TUV": 4371,
+     "Green": 539,
+     "PBP": 251,
+     "Aontú": 657
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.21961,
+     "DUP": 0.24327,
+     "Alliance": 0.16881,
+     "UUP": 0.16781,
+     "SDLP": 0.07926,
+     "TUV": 0.08584,
+     "Green": 0.01428,
+     "PBP": 0.00665,
+     "Aontú": 0.01447
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.21896,
+     "DUP": 0.25436,
+     "Alliance": 0.16368,
+     "UUP": 0.18406,
+     "SDLP": 0.07023,
+     "TUV": 0.07072,
+     "Green": 0.01656,
+     "PBP": 0.00843,
+     "Aontú": 0.013
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "South Down",
+    "votes": {
+     "Sinn Féin": 24344,
+     "DUP": 6497,
+     "Alliance": 6942,
+     "UUP": 2880,
+     "SDLP": 9088,
+     "TUV": 3273,
+     "Green": 412,
+     "PBP": 205,
+     "Aontú": 1177
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48682,
+     "DUP": 0.09465,
+     "Alliance": 0.10716,
+     "UUP": 0.04644,
+     "SDLP": 0.18525,
+     "TUV": 0.04583,
+     "Green": 0.00814,
+     "PBP": 0.00464,
+     "Aontú": 0.02108
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.46855,
+     "DUP": 0.1165,
+     "Alliance": 0.09318,
+     "UUP": 0.04695,
+     "SDLP": 0.19482,
+     "TUV": 0.03799,
+     "Green": 0.00992,
+     "PBP": 0.00892,
+     "Aontú": 0.02317
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "Strangford",
+    "votes": {
+     "Sinn Féin": 1607,
+     "DUP": 14618,
+     "Alliance": 9837,
+     "UUP": 6228,
+     "SDLP": 2440,
+     "TUV": 5186,
+     "Green": 831,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.04954,
+     "DUP": 0.3435,
+     "Alliance": 0.24663,
+     "UUP": 0.15289,
+     "SDLP": 0.05651,
+     "TUV": 0.11802,
+     "Green": 0.01854,
+     "PBP": 0.00791,
+     "Aontú": 0.00646
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.05929,
+     "DUP": 0.38387,
+     "Alliance": 0.2442,
+     "UUP": 0.1433,
+     "SDLP": 0.05137,
+     "TUV": 0.08867,
+     "Green": 0.01682,
+     "PBP": 0.00675,
+     "Aontú": 0.00573
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Upper Bann",
+    "votes": {
+     "Sinn Féin": 16502,
+     "DUP": 15417,
+     "Alliance": 6440,
+     "UUP": 8566,
+     "SDLP": 3645,
+     "TUV": 4373,
+     "Green": 459,
+     "PBP": 0,
+     "Aontú": 571
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.328,
+     "DUP": 0.24903,
+     "Alliance": 0.10954,
+     "UUP": 0.14027,
+     "SDLP": 0.06981,
+     "TUV": 0.07162,
+     "Green": 0.00663,
+     "PBP": 0.01542,
+     "Aontú": 0.00969
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.31454,
+     "DUP": 0.28851,
+     "Alliance": 0.11256,
+     "UUP": 0.12436,
+     "SDLP": 0.06317,
+     "TUV": 0.05859,
+     "Green": 0.00843,
+     "PBP": 0.01837,
+     "Aontú": 0.01147
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "West Tyrone",
+    "votes": {
+     "Sinn Féin": 21627,
+     "DUP": 6640,
+     "Alliance": 2967,
+     "UUP": 1876,
+     "SDLP": 5483,
+     "TUV": 4166,
+     "Green": 252,
+     "PBP": 354,
+     "Aontú": 657
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.53154,
+     "DUP": 0.1309,
+     "Alliance": 0.05927,
+     "UUP": 0.04369,
+     "SDLP": 0.13088,
+     "TUV": 0.0728,
+     "Green": 0.00583,
+     "PBP": 0.0091,
+     "Aontú": 0.01599
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.53902,
+     "DUP": 0.13717,
+     "Alliance": 0.05073,
+     "UUP": 0.06195,
+     "SDLP": 0.11849,
+     "TUV": 0.05498,
+     "Green": 0.00645,
+     "PBP": 0.01321,
+     "Aontú": 0.018
+    },
+    "observed_dims": 8
+   }
+  ],
+  "westminster 2024": [
+   {
+    "region": "Belfast East",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 19894,
+     "Alliance": 17218,
+     "UUP": 1818,
+     "SDLP": 619,
+     "TUV": 1918,
+     "Green": 1077,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.04614,
+     "DUP": 0.3587,
+     "Alliance": 0.38269,
+     "UUP": 0.08286,
+     "SDLP": 0.02155,
+     "TUV": 0.05331,
+     "Green": 0.04382,
+     "PBP": 0.0068,
+     "Aontú": 0.00412
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.0502,
+     "DUP": 0.3461,
+     "Alliance": 0.35133,
+     "UUP": 0.10515,
+     "SDLP": 0.01714,
+     "TUV": 0.05811,
+     "Green": 0.05869,
+     "PBP": 0.00898,
+     "Aontú": 0.0043
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Belfast North",
+    "votes": {
+     "Sinn Féin": 17674,
+     "DUP": 12062,
+     "Alliance": 4274,
+     "UUP": 0,
+     "SDLP": 1413,
+     "TUV": 2877,
+     "Green": 1206,
+     "PBP": 946,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.41012,
+     "DUP": 0.22877,
+     "Alliance": 0.08806,
+     "UUP": 0.08625,
+     "SDLP": 0.06047,
+     "TUV": 0.04362,
+     "Green": 0.02825,
+     "PBP": 0.02996,
+     "Aontú": 0.02449
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.39197,
+     "DUP": 0.23844,
+     "Alliance": 0.09652,
+     "UUP": 0.07014,
+     "SDLP": 0.07512,
+     "TUV": 0.04961,
+     "Green": 0.03108,
+     "PBP": 0.02729,
+     "Aontú": 0.01982
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Belfast South and Mid Down",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 6859,
+     "Alliance": 8839,
+     "UUP": 2653,
+     "SDLP": 21345,
+     "TUV": 2218,
+     "Green": 1577,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.16502,
+     "DUP": 0.14869,
+     "Alliance": 0.2749,
+     "UUP": 0.06539,
+     "SDLP": 0.22959,
+     "TUV": 0.03325,
+     "Green": 0.03822,
+     "PBP": 0.02621,
+     "Aontú": 0.01872
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.19015,
+     "DUP": 0.157,
+     "Alliance": 0.27409,
+     "UUP": 0.06176,
+     "SDLP": 0.18297,
+     "TUV": 0.03435,
+     "Green": 0.06389,
+     "PBP": 0.01734,
+     "Aontú": 0.01846
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Belfast West",
+    "votes": {
+     "Sinn Féin": 21009,
+     "DUP": 4304,
+     "Alliance": 1077,
+     "UUP": 461,
+     "SDLP": 4318,
+     "TUV": 2010,
+     "Green": 451,
+     "PBP": 5048,
+     "Aontú": 904
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.57315,
+     "DUP": 0.11977,
+     "Alliance": 0.02358,
+     "UUP": 0.02394,
+     "SDLP": 0.09869,
+     "TUV": 0.03255,
+     "Green": 0.00704,
+     "PBP": 0.08868,
+     "Aontú": 0.03261
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.6015,
+     "DUP": 0.12385,
+     "Alliance": 0.02452,
+     "UUP": 0.02238,
+     "SDLP": 0.07889,
+     "TUV": 0.02809,
+     "Green": 0.00647,
+     "PBP": 0.07907,
+     "Aontú": 0.03523
+    },
+    "observed_dims": 8
+   },
+   {
+    "region": "East Antrim",
+    "votes": {
+     "Sinn Féin": 2986,
+     "DUP": 11462,
+     "Alliance": 10156,
+     "UUP": 9476,
+     "SDLP": 892,
+     "TUV": 4135,
+     "Green": 568,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.09208,
+     "DUP": 0.32282,
+     "Alliance": 0.23755,
+     "UUP": 0.19665,
+     "SDLP": 0.02817,
+     "TUV": 0.08767,
+     "Green": 0.0205,
+     "PBP": 0.00873,
+     "Aontú": 0.00582
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.09507,
+     "DUP": 0.31492,
+     "Alliance": 0.24054,
+     "UUP": 0.2057,
+     "SDLP": 0.02614,
+     "TUV": 0.08616,
+     "Green": 0.01705,
+     "PBP": 0.00906,
+     "Aontú": 0.00536
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "East Londonderry",
+    "votes": {
+     "Sinn Féin": 11327,
+     "DUP": 11506,
+     "Alliance": 3734,
+     "UUP": 3412,
+     "SDLP": 5260,
+     "TUV": 4363,
+     "Green": 445,
+     "PBP": 0,
+     "Aontú": 1043
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.27212,
+     "DUP": 0.26259,
+     "Alliance": 0.12187,
+     "UUP": 0.115,
+     "SDLP": 0.1018,
+     "TUV": 0.07445,
+     "Green": 0.0121,
+     "PBP": 0.02074,
+     "Aontú": 0.01931
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.28727,
+     "DUP": 0.26536,
+     "Alliance": 0.10771,
+     "UUP": 0.12578,
+     "SDLP": 0.09986,
+     "TUV": 0.06395,
+     "Green": 0.01214,
+     "PBP": 0.01368,
+     "Aontú": 0.02425
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Fermanagh and South Tyrone",
+    "votes": {
+     "Sinn Féin": 24844,
+     "DUP": 0,
+     "Alliance": 2420,
+     "UUP": 20273,
+     "SDLP": 2386,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 529
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.48722,
+     "DUP": 0.20104,
+     "Alliance": 0.04192,
+     "UUP": 0.11521,
+     "SDLP": 0.06118,
+     "TUV": 0.04404,
+     "Green": 0.00738,
+     "PBP": 0.02519,
+     "Aontú": 0.01681
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.47933,
+     "DUP": 0.17525,
+     "Alliance": 0.04782,
+     "UUP": 0.13044,
+     "SDLP": 0.0885,
+     "TUV": 0.04617,
+     "Green": 0.00867,
+     "PBP": 0.00577,
+     "Aontú": 0.01805
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "Foyle",
+    "votes": {
+     "Sinn Féin": 11481,
+     "DUP": 3915,
+     "Alliance": 1268,
+     "UUP": 1422,
+     "SDLP": 15647,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 2444,
+     "Aontú": 662
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.44131,
+     "DUP": 0.09192,
+     "Alliance": 0.03385,
+     "UUP": 0.04446,
+     "SDLP": 0.28185,
+     "TUV": 0.01897,
+     "Green": 0.00281,
+     "PBP": 0.05912,
+     "Aontú": 0.02572
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.43033,
+     "DUP": 0.08894,
+     "Alliance": 0.03495,
+     "UUP": 0.0609,
+     "SDLP": 0.2698,
+     "TUV": 0.01447,
+     "Green": 0.00371,
+     "PBP": 0.06017,
+     "Aontú": 0.03674
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Lagan Valley",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 15659,
+     "Alliance": 18618,
+     "UUP": 11157,
+     "SDLP": 1028,
+     "TUV": 2186,
+     "Green": 433,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.0882,
+     "DUP": 0.30368,
+     "Alliance": 0.28507,
+     "UUP": 0.18413,
+     "SDLP": 0.04334,
+     "TUV": 0.06119,
+     "Green": 0.01645,
+     "PBP": 0.01123,
+     "Aontú": 0.00672
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.09409,
+     "DUP": 0.31578,
+     "Alliance": 0.27831,
+     "UUP": 0.17615,
+     "SDLP": 0.04949,
+     "TUV": 0.0587,
+     "Green": 0.01355,
+     "PBP": 0.00822,
+     "Aontú": 0.00571
+    },
+    "observed_dims": 5
+   },
+   {
+    "region": "Mid Ulster",
+    "votes": {
+     "Sinn Féin": 24085,
+     "DUP": 9162,
+     "Alliance": 2001,
+     "UUP": 2269,
+     "SDLP": 3722,
+     "TUV": 2978,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 1047
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.5185,
+     "DUP": 0.1834,
+     "Alliance": 0.03397,
+     "UUP": 0.06798,
+     "SDLP": 0.07908,
+     "TUV": 0.05512,
+     "Green": 0.00501,
+     "PBP": 0.03326,
+     "Aontú": 0.02369
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.52489,
+     "DUP": 0.16999,
+     "Alliance": 0.03983,
+     "UUP": 0.06349,
+     "SDLP": 0.10506,
+     "TUV": 0.0578,
+     "Green": 0.00483,
+     "PBP": 0.00799,
+     "Aontú": 0.02612
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Newry and Armagh",
+    "votes": {
+     "Sinn Féin": 22299,
+     "DUP": 5900,
+     "Alliance": 2692,
+     "UUP": 3175,
+     "SDLP": 6806,
+     "TUV": 4099,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 888
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.51928,
+     "DUP": 0.13763,
+     "Alliance": 0.03016,
+     "UUP": 0.0667,
+     "SDLP": 0.12061,
+     "TUV": 0.05967,
+     "Green": 0.00347,
+     "PBP": 0.04035,
+     "Aontú": 0.02213
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.51384,
+     "DUP": 0.13119,
+     "Alliance": 0.03784,
+     "UUP": 0.06522,
+     "SDLP": 0.13819,
+     "TUV": 0.06247,
+     "Green": 0.00283,
+     "PBP": 0.02754,
+     "Aontú": 0.02087
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "North Antrim",
+    "votes": {
+     "Sinn Féin": 7714,
+     "DUP": 11192,
+     "Alliance": 4488,
+     "UUP": 3901,
+     "SDLP": 1661,
+     "TUV": 11642,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 451
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.20649,
+     "DUP": 0.32945,
+     "Alliance": 0.09092,
+     "UUP": 0.12828,
+     "SDLP": 0.04047,
+     "TUV": 0.16518,
+     "Green": 0.01267,
+     "PBP": 0.01528,
+     "Aontú": 0.01125
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.21261,
+     "DUP": 0.28899,
+     "Alliance": 0.09872,
+     "UUP": 0.15222,
+     "SDLP": 0.04462,
+     "TUV": 0.17149,
+     "Green": 0.00788,
+     "PBP": 0.01357,
+     "Aontú": 0.00991
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "North Down",
+    "votes": {
+     "Sinn Féin": 0,
+     "DUP": 20913,
+     "Alliance": 13608,
+     "UUP": 6754,
+     "SDLP": 657,
+     "TUV": 0,
+     "Green": 1247,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.02938,
+     "DUP": 0.32895,
+     "Alliance": 0.38087,
+     "UUP": 0.14343,
+     "SDLP": 0.01584,
+     "TUV": 0.04952,
+     "Green": 0.04478,
+     "PBP": 0.00423,
+     "Aontú": 0.00299
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.02587,
+     "DUP": 0.33778,
+     "Alliance": 0.34599,
+     "UUP": 0.15507,
+     "SDLP": 0.01588,
+     "TUV": 0.04919,
+     "Green": 0.06293,
+     "PBP": 0.00396,
+     "Aontú": 0.00333
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "South Antrim",
+    "votes": {
+     "Sinn Féin": 8034,
+     "DUP": 8799,
+     "Alliance": 4574,
+     "UUP": 16311,
+     "SDLP": 1589,
+     "TUV": 2693,
+     "Green": 541,
+     "PBP": 0,
+     "Aontú": 367
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.21457,
+     "DUP": 0.25038,
+     "Alliance": 0.1475,
+     "UUP": 0.2205,
+     "SDLP": 0.05481,
+     "TUV": 0.06579,
+     "Green": 0.01779,
+     "PBP": 0.01724,
+     "Aontú": 0.01142
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.21286,
+     "DUP": 0.25958,
+     "Alliance": 0.16202,
+     "UUP": 0.18768,
+     "SDLP": 0.06922,
+     "TUV": 0.07183,
+     "Green": 0.01597,
+     "PBP": 0.0082,
+     "Aontú": 0.01265
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "South Down",
+    "votes": {
+     "Sinn Féin": 19698,
+     "DUP": 7349,
+     "Alliance": 3187,
+     "UUP": 1411,
+     "SDLP": 10418,
+     "TUV": 1893,
+     "Green": 444,
+     "PBP": 0,
+     "Aontú": 797
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.46354,
+     "DUP": 0.13318,
+     "Alliance": 0.06518,
+     "UUP": 0.04698,
+     "SDLP": 0.19175,
+     "TUV": 0.03973,
+     "Green": 0.00588,
+     "PBP": 0.03097,
+     "Aontú": 0.02278
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.47369,
+     "DUP": 0.12447,
+     "Alliance": 0.07978,
+     "UUP": 0.05122,
+     "SDLP": 0.18911,
+     "TUV": 0.0412,
+     "Green": 0.00875,
+     "PBP": 0.00916,
+     "Aontú": 0.02263
+    },
+    "observed_dims": 7
+   },
+   {
+    "region": "Strangford",
+    "votes": {
+     "Sinn Féin": 2793,
+     "DUP": 15559,
+     "Alliance": 10428,
+     "UUP": 3941,
+     "SDLP": 1783,
+     "TUV": 3143,
+     "Green": 703,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.12669,
+     "DUP": 0.35275,
+     "Alliance": 0.21995,
+     "UUP": 0.12927,
+     "SDLP": 0.05103,
+     "TUV": 0.07888,
+     "Green": 0.01901,
+     "PBP": 0.01273,
+     "Aontú": 0.0097
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.10931,
+     "DUP": 0.34635,
+     "Alliance": 0.23123,
+     "UUP": 0.12871,
+     "SDLP": 0.07361,
+     "TUV": 0.07859,
+     "Green": 0.0167,
+     "PBP": 0.00701,
+     "Aontú": 0.00849
+    },
+    "observed_dims": 6
+   },
+   {
+    "region": "Upper Bann",
+    "votes": {
+     "Sinn Féin": 14236,
+     "DUP": 21642,
+     "Alliance": 6322,
+     "UUP": 3662,
+     "SDLP": 1496,
+     "TUV": 0,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 0
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.30561,
+     "DUP": 0.34307,
+     "Alliance": 0.08991,
+     "UUP": 0.09989,
+     "SDLP": 0.04061,
+     "TUV": 0.06901,
+     "Green": 0.01472,
+     "PBP": 0.02175,
+     "Aontú": 0.01544
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.30258,
+     "DUP": 0.30711,
+     "Alliance": 0.10605,
+     "UUP": 0.12743,
+     "SDLP": 0.05842,
+     "TUV": 0.0626,
+     "Green": 0.00832,
+     "PBP": 0.01669,
+     "Aontú": 0.0108
+    },
+    "observed_dims": 4
+   },
+   {
+    "region": "West Tyrone",
+    "votes": {
+     "Sinn Féin": 22711,
+     "DUP": 6794,
+     "Alliance": 2287,
+     "UUP": 2683,
+     "SDLP": 5821,
+     "TUV": 2530,
+     "Green": 0,
+     "PBP": 0,
+     "Aontú": 778
+    },
+    "fitted_voter_shares": {
+     "Sinn Féin": 0.53247,
+     "DUP": 0.13851,
+     "Alliance": 0.03779,
+     "UUP": 0.07158,
+     "SDLP": 0.11485,
+     "TUV": 0.04333,
+     "Green": 0.00441,
+     "PBP": 0.03492,
+     "Aontú": 0.02214
+    },
+    "combined_voter_shares": {
+     "Sinn Féin": 0.54154,
+     "DUP": 0.13546,
+     "Alliance": 0.04949,
+     "UUP": 0.06288,
+     "SDLP": 0.11904,
+     "TUV": 0.05367,
+     "Green": 0.00623,
+     "PBP": 0.01331,
+     "Aontú": 0.01839
+    },
+    "observed_dims": 6
+   }
+  ]
+ }
+}

@@ -81,6 +81,20 @@ def ballot_matrix(stood, transfers) -> np.ndarray:
     return G
 
 
+def turnout_index(codes):
+    """Each Data Zone's turnout relative to the NI average, from turnout v0.
+
+    Flat ones if the file is not there yet, which is how scripts/fit_turnout.py
+    itself can run on a clean tree -- it is the one script upstream of this.
+    """
+    path = MODEL / "turnout_v0_dz.csv"
+    if not path.exists():
+        return np.ones(len(codes)), "flat (turnout v0 not built)"
+    with path.open() as fh:
+        by_code = {r["code"]: float(r["index"]) for r in csv.DictReader(fh)}
+    return np.array([by_code[c] for c in codes]), "turnout v0"
+
+
 def norm(s: str) -> str:
     return re.sub(r"[^a-z]", "", s.lower().replace("&", " and "))
 
@@ -130,8 +144,17 @@ class Data:
         electorate = dict(zip(label, el["values"]))
         self.dea_of_dz = np.array([kidx[dea_of_label(label[c])] for c in self.codes])
         e = np.array([electorate[c] for c in self.codes], float)
-        dea_e = np.bincount(self.dea_of_dz, weights=e, minlength=len(keys))
-        self.wdz = e / dea_e[self.dea_of_dz]       # turnout flat within a DEA
+        # A Data Zone counts for what it casts, not for who lives there: its
+        # electorate times its turnout index (turnout v0). The weights are
+        # normalised inside each DEA, so only turnout differences *within* a DEA
+        # move anything here -- differences between DEAs are already carried by
+        # fitting each DEA to its own totals.
+        t, self.turnout_source = turnout_index(self.codes)
+        v = e * t
+        dea_v = np.bincount(self.dea_of_dz, weights=v, minlength=len(keys))
+        self.wdz = v / dea_v[self.dea_of_dz]
+        self.electorate = e
+        self.turnout = t
         self.folds = sorted(set(self.council))
 
     def dzs_in(self, deas):

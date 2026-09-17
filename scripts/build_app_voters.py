@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Flatten voters v0 into the small JSON the app's election mode loads.
+"""Flatten voters v1 into the small JSON the app's election mode loads.
 
-Per Data Zone: its electorate and the nine parties' voter shares. Votes are
-shares x electorate x turnout, with turnout flat (see docs/voting-model.md);
-the app multiplies them out. Independents and micro-parties are transparent, so
+Per Data Zone: its electorate, the nine parties' voter shares, and its turnout
+index. Votes are shares x electorate x the election's turnout level x that
+index (turnout v0, scripts/fit_turnout.py); the app multiplies them out. The
+level belongs to the election -- an Assembly poll is busier than a council one
+-- and the index says how far above or below it a particular place sits. Independents and micro-parties are transparent, so
 every vote here belongs to one of the nine.
 
 Also carries what the app's STV count needs: transfer matrix v0, and each
@@ -24,7 +26,8 @@ scale its score term, measured the same way as the demographic ones:
 Both are measured over the 18 real 2024 constituencies, which is the size of
 region the app defaults to.
 
-Reads   data/model/voters_v0_dz.csv, data/model/standing_v0.json,
+Reads   data/model/voters_v1_dz.csv, data/model/standing_v0.json,
+        data/model/turnout_v0.json, data/model/turnout_v0_dz.csv,
         data/dz21_electorate.json, data/dz21_to_pc24.csv
 Writes  web/data/dz_voters.json
 """
@@ -36,17 +39,21 @@ import math
 import os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SHARES = os.path.join(ROOT, "data", "model", "voters_v0_dz.csv")
+SHARES = os.path.join(ROOT, "data", "model", "voters_v1_dz.csv")
 TRANSFERS = os.path.join(ROOT, "data", "model", "transfer_matrix_v0.json")
 EVENTS = os.path.join(ROOT, "data", "model", "transfer_events.json")
 STANDING = os.path.join(ROOT, "data", "model", "standing_v0.json")
+TURNOUT_MODEL = os.path.join(ROOT, "data", "model", "turnout_v0.json")
+TURNOUT_DZ = os.path.join(ROOT, "data", "model", "turnout_v0_dz.csv")
 ELECTORATE = os.path.join(ROOT, "data", "dz21_electorate.json")
 CONSTITUENCIES = os.path.join(ROOT, "data", "dz21_to_pc24.csv")
 OUT = os.path.join(ROOT, "web", "data", "dz_voters.json")
 
-# NI-wide valid-vote turnout at the 2024 Westminster election, the election the
-# app's first-past-the-post mode simulates.
-TURNOUT = 0.572
+# Which election each of the app's two modes is taken to be. First past the post
+# is Westminster. For STV the app's default shape -- 18 regions of 5 -- is the
+# Assembly exactly, so that is the level used; a council election is a quieter
+# affair (the levels are all in turnout_v0.json if this is ever revisited).
+LEVEL_FOR = {"fptp": "westminster", "stv": "assembly"}
 
 
 def exhaustion(parties):
@@ -75,16 +82,23 @@ def main() -> None:
     with open(CONSTITUENCIES) as fh:
         region = {r["code"]: r["pc_name"] for r in csv.DictReader(fh)}
 
+    with open(TURNOUT_MODEL) as fh:
+        turnout = json.load(fh)
+    levels = {mode: turnout["levels"][layer] for mode, layer in LEVEL_FOR.items()}
+    with open(TURNOUT_DZ) as fh:
+        index = {r["code"]: float(r["index"]) for r in csv.DictReader(fh)}
+
     zones = {}
     for r in rows:
         code = r["code"]
         zones[code] = {"e": int(round(electorate[code])),
+                       "t": round(index[code], 4),
                        "s": [round(float(r[p]), 5) for p in parties]}
 
     # Spread constants, measured over the real constituencies.
     totals = {}
     for code, z in zones.items():
-        votes = z["e"] * TURNOUT
+        votes = z["e"] * z["t"]
         t = totals.setdefault(region[code], {"votes": 0.0, "party": [0.0] * len(parties)})
         t["votes"] += votes
         for i, s in enumerate(z["s"]):
@@ -97,7 +111,7 @@ def main() -> None:
     for i in range(len(parties)):
         num = den = 0.0
         for code, z in zones.items():
-            votes = z["e"] * TURNOUT
+            votes = z["e"] * z["t"]
             gap = z["s"][i] - region_share[region[code]][i]
             num += votes * gap * gap
             den += votes
@@ -115,7 +129,9 @@ def main() -> None:
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as fh:
-        json.dump({"source": "data/model/voters_v0_dz.csv", "turnout": TURNOUT,
+        json.dump({"source": "data/model/voters_v1_dz.csv",
+                   # turnout level per election mode; a zone's own index is "t"
+                   "turnout": levels["fptp"], "levels": levels,
                    "parties": parties, "spread": spread,
                    # row-major, parties in the order above; a party's own column
                    # is zero, since a transfer to itself never leaves the party
@@ -131,8 +147,10 @@ def main() -> None:
                    "zones": zones},
                   fh, ensure_ascii=False, separators=(",", ":"))
         fh.write("\n")
-    print(f"wrote {os.path.relpath(OUT, ROOT)}: {len(zones):,} zones x {len(parties)} parties, "
-          f"turnout {TURNOUT:.1%}")
+    spread_t = sorted(z["t"] for z in zones.values())
+    print(f"wrote {os.path.relpath(OUT, ROOT)}: {len(zones):,} zones x {len(parties)} parties")
+    print(f"  turnout levels: " + ", ".join(f"{m} {100 * v:.1f}%" for m, v in levels.items())
+          + f"   index {spread_t[0]:.2f}-{spread_t[-1]:.2f}")
     for s in spread:
         print(f"  {s['party']:<10} national {100 * s['national']:>5.1f}%   "
               f"vSpread {s['vSpread']:.4f}   rSpread {s['rSpread']:.4f}   "

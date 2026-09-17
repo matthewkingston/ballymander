@@ -32,10 +32,11 @@ candidate values midway between neighbouring observations; where several tie,
 the median of the tied set is taken.
 
 Circularity, worth remembering when reading the accuracies: the shares come
-from voters v0, which was itself fitted with who-stood-where applied. This is
+from voters v1, which was itself fitted with who-stood-where applied. This is
 a description of the pattern, not an out-of-sample test of it.
 
-Reads   data/model/voters_v0_dz.csv, data/dz21_electorate.json,
+Reads   data/model/voters_v1_dz.csv, data/model/turnout_v0.json,
+        data/model/turnout_v0_dz.csv, data/dz21_electorate.json,
         data/dz21_to_pc08.csv, data/dz21_to_pc24.csv,
         data/council_elections_23/council_elections_2023.json,
         data/assembly_elections_22/assembly_2022.json,
@@ -53,9 +54,11 @@ import numpy as np
 
 from prior_model import DATA, MODEL, PARTIES, ROOT, Data
 
-# The app's flat turnout, as in build_app_voters.py: thresholds are in votes,
-# so they have to be in the same votes the app counts.
-TURNOUT = 0.572
+# Thresholds are in votes, so they must be in the same votes the app counts:
+# electorate x the election's own level x the zone's turnout index (turnout v0,
+# scripts/fit_turnout.py). Shares are weighted the same way -- by the votes a
+# zone casts, not by the electors living in it.
+TURNOUT = json.loads((MODEL / "turnout_v0.json").read_text())["levels"]
 
 # Absences that were pacts: (election, party, region).
 PACTS = [
@@ -78,7 +81,7 @@ def regions_of(d: Data, lookup: str) -> tuple[np.ndarray, dict[str, str]]:
             {key(r["pc_name"]): r["pc_name"] for r in rows})
 
 
-def observations(d: Data, shares: np.ndarray, electorate: np.ndarray):
+def observations(d: Data, shares: np.ndarray, electorate: np.ndarray, index: np.ndarray):
     """(election, party, region, share, votes, stood) over all three elections."""
     council = json.loads((DATA / "council_elections_23" / "council_elections_2023.json").read_text())
     assembly = json.loads((DATA / "assembly_elections_22" / "assembly_2022.json").read_text())
@@ -110,9 +113,9 @@ def observations(d: Data, shares: np.ndarray, electorate: np.ndarray):
             idx = np.where(regions == rkey)[0]
             if not len(idx):
                 continue
-            weight = electorate[idx]
+            weight = electorate[idx] * index[idx]          # votes, not electors
             share = (weight[:, None] * shares[idx]).sum(0) / weight.sum()
-            votes = share * weight.sum() * TURNOUT
+            votes = share * weight.sum() * TURNOUT[election]
             for k, party in enumerate(PARTIES):
                 out.append((election, party, names[rkey], share[k], votes[k],
                             first_prefs.get(party, 0) > 0))
@@ -132,20 +135,24 @@ def threshold(xs: np.ndarray, stood: np.ndarray) -> tuple[float, float]:
 
 def main() -> None:
     d = Data()
-    with (MODEL / "voters_v0_dz.csv").open() as fh:
+    with (MODEL / "voters_v1_dz.csv").open() as fh:
         shares = np.array([[float(r[p]) for p in PARTIES] for r in csv.DictReader(fh)])
     table = json.loads((DATA / "dz21_electorate.json").read_text())["table"]
     by_code = dict(zip([c["code"] for c in table["dimensions"][0]["categories"]], table["values"]))
     electorate = np.array([by_code[c] for c in d.codes], float)
 
-    rows = observations(d, shares, electorate)
+    with (MODEL / "turnout_v0_dz.csv").open() as fh:
+        by_zone = {r["code"]: float(r["index"]) for r in csv.DictReader(fh)}
+    index = np.array([by_zone[c] for c in d.codes])
+
+    rows = observations(d, shares, electorate, index)
     pacts = {(e, p, key(r)) for e, p, r in PACTS}
     kept = [o for o in rows if (o[0], o[1], key(o[2])) not in pacts]
 
     out = {
         "version": "standing v0",
         "parties": PARTIES,
-        "turnout": TURNOUT,
+        "turnout_levels": TURNOUT,
         "stv": {"unit": "votes", "fitted_on": "2023 council DEAs and 2022 Assembly constituencies",
                 "thresholds": {}, "accuracy": {}},
         "fptp": {"unit": "share", "fitted_on": "2024 Westminster constituencies",

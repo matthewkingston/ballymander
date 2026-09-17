@@ -548,13 +548,20 @@ function stvStages(votes, seats, transfers, exhaustion) {
 /* { code: { votes, shares[] } } from the app's voter file. Shares are stored
  * rounded, so they are renormalised here: every vote then belongs to exactly
  * one party and a region's shares sum to one. */
+/* Votes a zone casts, and how they split.
+ *
+ * A zone's weight is its electorate times its turnout index -- what it casts,
+ * not who lives there (turnout v0). The election's own level is left out here
+ * and applied by the model as `voteScale`, because it changes when the election
+ * type does and everything built on these weights is a share, which the level
+ * cannot move. */
 function zoneVoters(voters) {
   if (!voters || !voters.zones) return null;
   const out = {};
   for (const [code, z] of Object.entries(voters.zones)) {
     const total = z.s.reduce((a, x) => a + x, 0);
     out[code] = {
-      votes: z.e * voters.turnout,
+      votes: z.e * (z.t == null ? 1 : z.t),
       shares: total > 0 ? z.s.map((x) => x / total) : z.s,
     };
   }
@@ -686,6 +693,12 @@ class RegionModel {
     this.demographics = this.terms.filter((d) => !d.isParty);
     this.demoByKey = Object.fromEntries(this.terms.map((d) => [d.key, d]));
     this.hasElection = this.parties.length > 0;
+
+    // Turnout levels: an Assembly poll is busier than a Westminster one, so the
+    // votes a region casts depend on which election is being simulated. Only
+    // magnitudes move -- a level scales every party in a region alike.
+    this.turnoutLevels = (voters && voters.levels)
+      || { fptp: (voters && voters.turnout) || 1, stv: (voters && voters.turnout) || 1 };
 
     // The election being simulated. 'fptp' is one seat to the largest party;
     // 'stv' runs the count above, with `seatsPerRegion` seats in every region.
@@ -1258,22 +1271,26 @@ class RegionModel {
    * removed, into the scratch the count consumes. */
   _stvVotesFor(r, z, sign, g) {
     const v = this._stvVotes;
+    const scale = this.voteScale;
     for (let i = 0; i < this.parties.length; i++) {
       const q = this.parties[i];
       v[i] = q.rSum[r]
         + (z >= 0 ? sign * q.zValue[z] * q.zN[z] : 0)
         + (g ? sign * g.demo[q.slot].sum : 0);
       if (v[i] < 0) v[i] = 0;
+      v[i] *= scale;
     }
     return this._applyStanding(v);
   }
 
   _stvVotesSplit(c, piece) {
     const v = this._stvVotes;
+    const scale = this.voteScale;
     for (let i = 0; i < this.parties.length; i++) {
       const q = this.parties[i];
       v[i] = piece ? q.sSum[c] : q.sSum[0] - q.sSum[c];
       if (v[i] < 0) v[i] = 0;
+      v[i] *= scale;
     }
     return this._applyStanding(v);
   }
@@ -1284,6 +1301,13 @@ class RegionModel {
     const fptp = this.electionType !== 'stv';
     return standingVotes(v, fptp ? this._standFptp : this._standStv, fptp,
       this._transfers, this._exhaustion, this._standAdd, this._standMask);
+  }
+
+  /* The turnout level of the election being simulated. Every stored sum is in
+   * units of "electors x turnout index", so this turns them into ballots. */
+  get voteScale() {
+    const level = this.turnoutLevels[this.electionType];
+    return level == null ? 1 : level;
   }
 
   /* Whether the votes a region casts differ from the voters living in it. */
@@ -2346,7 +2370,7 @@ class RegionModel {
   regionPartyVotes(key, r) {
     const d = this.demoByKey[key];
     if (!d || !d.rSum.length) return 0;
-    if (!this._votesAsCast()) return d.rSum[r];
+    if (!this._votesAsCast()) return d.rSum[r] * this.voteScale;
     return this._castVotes(r, -1, 0, null)[d.partyIndex];
   }
 
@@ -2413,7 +2437,7 @@ class RegionModel {
     }
     let total = 0;
     for (const q of this.parties) total += q.rSum.length ? q.rSum[r] : 0;
-    return total;
+    return total * this.voteScale;
   }
 
   /* Every party's votes in one region, in the parties' own order. */
@@ -2423,8 +2447,9 @@ class RegionModel {
       for (let p = 0; p < this.parties.length; p++) out[p] = cast[p];
       return out;
     }
+    const scale = this.voteScale;
     for (let p = 0; p < this.parties.length; p++) {
-      out[p] = this.parties[p].rSum.length ? this.parties[p].rSum[r] : 0;
+      out[p] = this.parties[p].rSum.length ? this.parties[p].rSum[r] * scale : 0;
     }
     return out;
   }

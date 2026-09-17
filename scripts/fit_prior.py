@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fit prior v2: demographic estimate of party shares for every Data Zone.
+"""Fit prior v3: demographic estimate of party shares for every Data Zone.
 
 A joint multinomial logit over the nine modelled parties, fitted at Data
 Zone level against 2023 council first preferences summed to DEAs, through
@@ -19,12 +19,12 @@ here, not re-derived on each run:
 Shares written per DZ are unmasked -- every party present -- because the prior
 describes voters, not a ballot paper. Who stood where is applied downstream.
 
-Both were re-tuned for prior v2, when the transfer matrix replaced masking.
+Both were re-tuned for prior v3, when the transfer matrix replaced masking.
 
 Reads   data/model/dz21_features.csv, data/model/transfer_matrix_v0.json,
         data/council_elections_23/…, data/dz21_electorate.json
-Writes  data/model/prior_v2_model.json
-        data/model/prior_v2_dz.csv
+Writes  data/model/prior_v3_model.json
+        data/model/prior_v3_dz.csv
 """
 from __future__ import annotations
 
@@ -83,7 +83,7 @@ def main() -> None:
 
     MODEL.mkdir(parents=True, exist_ok=True)
     model = {
-        "version": "prior v2",
+        "version": "prior v3",
         "parties": PARTIES,
         "blocs": BLOCS,
         "features": d.features,
@@ -99,8 +99,8 @@ def main() -> None:
         "standardise_sd": sd.tolist(),
         "apply": "x -> clip(x, clip_lo, clip_hi) -> (x - mean) / sd -> softmax(intercepts + coef @ x)",
     }
-    (MODEL / "prior_v2_model.json").write_text(json.dumps(model, indent=1, ensure_ascii=False) + "\n")
-    with (MODEL / "prior_v2_dz.csv").open("w", newline="") as fh:
+    (MODEL / "prior_v3_model.json").write_text(json.dumps(model, indent=1, ensure_ascii=False) + "\n")
+    with (MODEL / "prior_v3_dz.csv").open("w", newline="") as fh:
         w = csv.writer(fh)
         w.writerow(["code"] + PARTIES)
         for code, row in zip(d.codes, shares):
@@ -108,7 +108,7 @@ def main() -> None:
 
     P = d.on_ballot(d.to_dea(shares, allz, alld), alld)
     print(f"in-sample KL per vote {1000 * d.kl(P, alld):.1f} millinats over {len(alld)} DEAs")
-    for f in ("prior_v2_model.json", "prior_v2_dz.csv"):
+    for f in ("prior_v3_model.json", "prior_v3_dz.csv"):
         print(f"wrote {(MODEL / f).relative_to(ROOT)}")
 
 

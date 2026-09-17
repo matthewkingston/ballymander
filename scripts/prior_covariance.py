@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Estimate how prior v2's errors covary between parties, at DEA scale.
+"""Estimate how prior v3's errors covary between parties, at DEA scale.
 
 This is the uncertainty used to weight the prior against election evidence, not
 a final confidence interval. Steps (reasons in docs/voting-model.md):
@@ -19,11 +19,11 @@ a final confidence interval. Steps (reasons in docs/voting-model.md):
  5. Clip any negative eigenvalue to zero.
 
 Scaling to larger areas is Method B: variance x (population ratio)^beta, with
-beta = -0.35 measured on prior v2. It's recorded in the output, not applied.
+beta = -0.35 measured on prior v3. It's recorded in the output, not applied.
 
 Reads   the prior inputs (see fit_prior.py)
-Writes  data/model/prior_v2_oos_dea.json
-        data/model/prior_v2_covariance.json
+Writes  data/model/prior_v3_oos_dea.json
+        data/model/prior_v3_covariance.json
 """
 from __future__ import annotations
 
@@ -108,14 +108,14 @@ def main() -> None:
     print("bloc targets: " + "  ".join(f"{t} {v:+.2f}" for t, v in targets.items()))
     print("eigenvalues clipped to zero: " + (", ".join(f"{x:+.5f}" for x in clipped) or "none"))
 
-    (MODEL / "prior_v2_oos_dea.json").write_text(json.dumps({
-        "description": "prior v2 predictions for each DEA with its council left out of the fit, "
+    (MODEL / "prior_v3_oos_dea.json").write_text(json.dumps({
+        "description": "prior v3 predictions for each DEA with its council left out of the fit, "
                        "put through the DEA's ballot with transfer matrix v0; Y is the actual share",
         "parties": PARTIES, "deas": d.dea_names, "council": d.council.tolist(),
         "P_oos": np.round(P, 6).tolist(), "Y": np.round(d.Y, 6).tolist(), "stood": d.M.tolist(),
     }, ensure_ascii=False) + "\n")
-    (MODEL / "prior_v2_covariance.json").write_text(json.dumps({
-        "version": "prior v2",
+    (MODEL / "prior_v3_covariance.json").write_text(json.dumps({
+        "version": "prior v3",
         "parties": PARTIES,
         "scale": "DEA (2023 council first preferences, out of sample by council)",
         "representation": "clr (centred log-ratio) of party shares",
@@ -132,7 +132,7 @@ def main() -> None:
         "beta": BETA,
         "scaling": "variance for a region = cov * (region population / DEA population)^beta",
     }, indent=1, ensure_ascii=False) + "\n")
-    for f in ("prior_v2_oos_dea.json", "prior_v2_covariance.json"):
+    for f in ("prior_v3_oos_dea.json", "prior_v3_covariance.json"):
         print(f"wrote {(MODEL / f).relative_to(ROOT)}")
 
 

@@ -1028,8 +1028,11 @@ for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) 
  * -- agrees with a from-scratch recompute after the optimiser has churned. */
 console.log('\nelection terms');
 const PARTY = `party:${voters.parties[1]}`;      // DUP: stands second in the file
+// Stored sums are in "electors x turnout index"; the election's own level turns
+// them into ballots, so the expected total carries the same level the model
+// will apply (turnout v0).
 const votesTotal = Object.values(voters.zones)
-  .reduce((a, z) => a + z.e * voters.turnout, 0);
+  .reduce((a, z) => a + z.e * (z.t == null ? 1 : z.t), 0);
 
 const vote = new RegionModel(graph, pops, geom, demo, voters);
 check(vote.parties.length === voters.parties.length,
@@ -1044,6 +1047,15 @@ const regionVotes = (m) => Array.from({ length: m.N },
 const sumVotes = regionVotes(vote).reduce((a, b) => a + b, 0);
 check(near(sumVotes, votesTotal, votesTotal * 1e-9),
   `every vote lands in exactly one region (${Math.round(sumVotes).toLocaleString()})`);
+// Standing off: with it on some voters deliberately stay at home, which is the
+// subject of its own section below.
+vote.setElection('fptp', 1, 2, vote.tactical, false);
+const ballots = Array.from({ length: vote.N }, (_, r) => vote.regionVotesCast(r))
+  .reduce((a, b) => a + b, 0);
+vote.setElection('fptp', 1, 2, vote.tactical, true);
+check(near(ballots, votesTotal * voters.levels.fptp, votesTotal * 1e-6),
+  `and is reported as ballots at the election's turnout level `
+  + `(${Math.round(ballots).toLocaleString()} at ${(100 * voters.levels.fptp).toFixed(1)}%)`);
 
 /* Shares are a vote-weighted mean, so each region's must sum to one. */
 let worstShare = 0;
@@ -1237,7 +1249,10 @@ if (threeWay !== undefined) {
 
 tac.setElection('stv', 5, 2, true, false);
 const stvCast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
-check(stvCast.every((v, r) => v.every((x, i) => near(x, plain[r][i], 1e-6))),
+// An STV poll is busier than a Westminster one, so the comparison is of shares:
+// what must not happen is any party's share moving.
+const asShares = (v) => { const t = total(v); return v.map((x) => (t > 0 ? x / t : 0)); };
+check(stvCast.every((v, r) => asShares(v).every((x, i) => near(x, asShares(plain[r])[i], 1e-9))),
   'nothing is squeezed under STV, where a lower preference is free');
 
 /* --- who stands ---------------------------------------------------------- */
@@ -1300,16 +1315,65 @@ check(restored.every((v, i) => near(v, baseVotes[i], 1e-6)),
   'putting everyone back restores the votes exactly');
 ballot.setElection('fptp', 5, 2);
 
-/* --- standing bars -------------------------------------------------- */
+/* --- turnout -------------------------------------------------------------- */
+/* A zone counts for the ballots it casts, not the electors living in it, and
+ * the level of the poll belongs to the election being simulated. */
+console.log('\nturnout');
+const turn = new RegionModel(graph, pops, geom, demo, voters);
+turn.start(18, 3, { wPop: 1 });
+while (turn.buildStep());
+for (let i = 0; i < 50000; i++) turn.optimiseStep();
+
+const zoneIndex = Object.values(voters.zones).map((z) => z.t);
+check(zoneIndex.every((t) => typeof t === 'number' && t > 0.5 && t < 1.6),
+  `every zone carries a turnout index (${Math.min(...zoneIndex).toFixed(2)}-`
+  + `${Math.max(...zoneIndex).toFixed(2)})`);
+const perElector = Object.entries(voters.zones)
+  .map(([code, z]) => [code, turn.index.get(code)])
+  .filter(([, i]) => i != null);
+const keenest = perElector.reduce((a, b) =>
+  (voters.zones[a[0]].t > voters.zones[b[0]].t ? a : b));
+const quietest = perElector.reduce((a, b) =>
+  (voters.zones[a[0]].t < voters.zones[b[0]].t ? a : b));
+const votesPerElector = (code) => {
+  const z = voters.zones[code];
+  const q = turn.parties[0];
+  const i = turn.index.get(code);
+  return turn.parties.reduce((a, p) => a + p.zN[i], 0) / turn.parties.length / z.e;
+};
+check(votesPerElector(keenest[0]) > votesPerElector(quietest[0]),
+  `a keener zone casts more votes per elector (${votesPerElector(keenest[0]).toFixed(2)} `
+  + `vs ${votesPerElector(quietest[0]).toFixed(2)})`);
+
+check(voters.levels.stv > voters.levels.fptp,
+  `an STV poll is busier than a Westminster one (${(100 * voters.levels.stv).toFixed(1)}% `
+  + `vs ${(100 * voters.levels.fptp).toFixed(1)}%)`);
+
+turn.setElection('fptp', 5, 2, false, false);
+const fptpVotes = Array.from({ length: turn.N }, (_, r) =>
+  voters.parties.map((p) => turn.regionPartyVotes(`party:${p}`, r)));
+const fptpWinners = Array.from({ length: turn.N }, (_, r) => turn.regionWinner(r));
+turn.setElection('stv', 5, 2, false, false);
+const stvVotes = Array.from({ length: turn.N }, (_, r) =>
+  voters.parties.map((p) => turn.regionPartyVotes(`party:${p}`, r)));
+const levelRatio = voters.levels.stv / voters.levels.fptp;
+check(fptpVotes.every((v, r) => v.every((x, i) => near(stvVotes[r][i], x * levelRatio, 1e-6 * x + 1e-9))),
+  `the level scales every party's votes alike (x${levelRatio.toFixed(3)})`);
+turn.setElection('fptp', 5, 2, false, false);
+check(Array.from({ length: turn.N }, (_, r) => turn.regionWinner(r))
+  .every((w, r) => w === fptpWinners[r]),
+  'and changes no winner, being a scale on the whole region');
+
+/* --- standing thresholds -------------------------------------------------- */
 /* A party contests a region only where it has the support to bother: a number
  * of voters under STV, a share of the region under first past the post. */
-console.log('\nstanding bars');
+console.log('\nstanding thresholds');
 const stand = new RegionModel(graph, pops, geom, demo, voters);
 stand.start(18, 3, { wPop: 1 });
 while (stand.buildStep());
 for (let i = 0; i < 150000; i++) stand.optimiseStep();
 
-const rawVotes = (m, r) => voters.parties.map((p, i) => m.parties[i].rSum[r]);
+const rawVotes = (m, r) => voters.parties.map((p, i) => m.parties[i].rSum[r] * m.voteScale);
 const standingIn = (m, r) => Array.from(m.regionStanding(r, new Uint8Array(P)));
 const castIn = (m, r) => Array.from(m.regionVotes(r, new Float64Array(P)));
 

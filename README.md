@@ -721,10 +721,15 @@ right across 91 real contests; see
 Election mode needs `web/data/dz_voters.json`, built by
 `scripts/build_app_voters.py` from the voting model's estimates
 ([docs/voting-model.md](docs/voting-model.md)) and produced by `./run.sh`. It
-holds each Data Zone's electorate and the nine parties' voter shares; votes are
-those shares times the electorate times a flat 57.2% turnout, the NI-wide
-figure at the 2024 Westminster election. Without the file the app runs exactly
-as before and the Election button stays disabled.
+holds each Data Zone's electorate, the nine parties' voter shares and its
+turnout index; votes are those shares times the electorate times that index
+times the turnout of whichever election is being simulated — 57.2% under first
+past the post, the NI-wide figure at the 2024 Westminster election, and 62.9%
+under STV, the 2022 Assembly's. The index is what makes an equal-population
+region not an equal-voter region: it runs from 0.77 to 1.28 and is fitted on
+social grade and community background against the measured turnout of 116 real
+regions. Without the file the app runs exactly as before and the Election button
+stays disabled.
 
 In the model the parties are ordinary score terms (`regions.js`), so a party's
 votes in a region are its term's own running sum and every party shares one

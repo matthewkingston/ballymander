@@ -11,30 +11,34 @@
   "PBP",
   "Aontú"
  ],
- "turnout": 0.572,
+ "turnout_levels": {
+  "council": 0.5373,
+  "assembly": 0.6287,
+  "westminster": 0.5721
+ },
  "stv": {
   "unit": "votes",
   "fitted_on": "2023 council DEAs and 2022 Assembly constituencies",
   "thresholds": {
-   "Sinn Féin": 390,
-   "DUP": 301,
+   "Sinn Féin": 328,
+   "DUP": 318,
    "Alliance": 0,
-   "UUP": 156,
-   "SDLP": 211,
-   "TUV": 478,
-   "Green": 110,
-   "PBP": 335,
-   "Aontú": 303
+   "UUP": 160,
+   "SDLP": 171,
+   "TUV": 476,
+   "Green": 104,
+   "PBP": 274,
+   "Aontú": 289
   },
   "accuracy": {
    "Sinn Féin": 0.959,
    "DUP": 0.99,
    "Alliance": 0.98,
    "UUP": 0.969,
-   "SDLP": 0.929,
-   "TUV": 0.837,
-   "Green": 0.857,
-   "PBP": 0.857,
+   "SDLP": 0.939,
+   "TUV": 0.816,
+   "Green": 0.847,
+   "PBP": 0.847,
    "Aontú": 0.857
   }
  },
@@ -42,15 +46,15 @@
   "unit": "share",
   "fitted_on": "2024 Westminster constituencies",
   "thresholds": {
-   "Sinn Féin": 0.0899,
+   "Sinn Féin": 0.0946,
    "DUP": 0.0,
    "Alliance": 0.0,
    "UUP": 0.0,
    "SDLP": 0.0,
-   "TUV": 0.0229,
-   "Green": 0.0094,
-   "PBP": 0.0271,
-   "Aontú": 0.0102
+   "TUV": 0.0213,
+   "Green": 0.0087,
+   "PBP": 0.0331,
+   "Aontú": 0.0105
   },
   "accuracy": {
    "Sinn Féin": 1.0,
@@ -59,8 +63,8 @@
    "UUP": 1.0,
    "SDLP": 1.0,
    "TUV": 0.833,
-   "Green": 0.889,
-   "PBP": 1.0,
+   "Green": 0.944,
+   "PBP": 0.944,
    "Aontú": 0.833
   }
  },

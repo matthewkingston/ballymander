@@ -794,9 +794,14 @@ function buildPartyControls(voters) {
            type: () => els.electionType.value,
            seatsPer: () => Math.max(1, Number(els.seats.value) || 1),
            key: () => `party:${party.value}`,
+           // A zone's ballots: its electorate, its turnout index, and the
+           // level of whichever election is being simulated.
            votes: (code) => {
              const z = voters.zones[code];
-             return z ? z.e * voters.turnout : 0;
+             if (!z) return 0;
+             const levels = voters.levels || {};
+             const level = levels[els.electionType.value] || voters.turnout;
+             return z.e * (z.t == null ? 1 : z.t) * level;
            },
            share: (code) => {
              const z = voters.zones[code];
