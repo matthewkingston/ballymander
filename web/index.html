@@ -11,18 +11,22 @@
   <div id="map"></div>
 
   <div id="panel">
-    <header class="brand">
-      <img src="img/ballymander.png" alt="" width="34" height="27">
-      <h1>Ballymander</h1>
-    </header>
-    <!-- Which set of variables the run is steered by. Election mode swaps the
+    <!-- The mark runs the full height of the name and the mode switch beside
+         it, which is what gives it room to read as the mural it is.
+         Which set of variables the run is steered by: election mode swaps the
          demographic blocks for the party block; the hidden side is switched
          off, never left steering unseen. -->
-    <div class="mode-switch" role="group" aria-label="Mode">
-      <button id="mode-demographics" type="button" class="is-active" aria-pressed="true">
-        Demographics</button>
-      <button id="mode-election" type="button" aria-pressed="false">Election</button>
-    </div>
+    <header class="brand">
+      <img src="img/ballymander.png" alt="" width="1218" height="962">
+      <div class="brand-side">
+        <h1>Ballymander</h1>
+        <div class="mode-switch" role="group" aria-label="Mode">
+          <button id="mode-demographics" type="button" class="is-active" aria-pressed="true">
+            Demographics</button>
+          <button id="mode-election" type="button" aria-pressed="false">Election</button>
+        </div>
+      </div>
+    </header>
 
     <div class="ctl-buttons">
       <button id="ctl-go" type="button" disabled>GO</button>

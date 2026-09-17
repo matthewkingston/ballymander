@@ -48,25 +48,36 @@ html, body {
 /* --- mode switch --------------------------------------------------------- */
 /* Two buttons acting as one control: which set of variables the run steers by.
    The pressed one is filled, so the current mode reads at a glance. */
-/* Name and mark, at the top of the panel. Small on purpose: the panel is 350px
-   and everything below it is the actual controls. */
+/* Name and mark at the top of the panel. The mark stands to the left of both
+   the name and the mode switch, tall enough for the mural on the gable to be
+   the thing you see rather than a smudge. */
 .brand {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: -2px 0 10px;
+  align-items: stretch;
+  gap: 11px;
+  margin: 0 0 11px;
 }
 .brand img {
   flex: none;
-  /* The mark is line art on transparency, so it needs no background of its
-     own; the height is what keeps it in proportion with the wordmark. */
-  height: 27px;
-  width: auto;
+  /* Line art on transparency, so it carries no background of its own. Sized by
+     width, with the height left to follow the drawing's own proportions. */
+  width: 74px;
+  height: auto;
+  align-self: center;
+}
+.brand-side {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
 }
 .brand h1 {
   margin: 0;
-  font-size: 16px;
+  font-size: 23px;
   font-weight: 600;
+  line-height: 1.1;
   letter-spacing: 0.01em;
   color: var(--ink);
 }
@@ -74,7 +85,6 @@ html, body {
 .mode-switch {
   display: flex;
   gap: 4px;
-  margin-bottom: 11px;
   padding: 3px;
   background: rgba(28, 37, 48, 0.05);
   border-radius: 6px;
