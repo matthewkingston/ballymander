@@ -420,6 +420,12 @@ with consequences, because it moves the balance between blocs in any region
 drawn. Within-region correlation against what was recorded is +0.76 at council,
 +0.78 at Assembly, +0.51 at Westminster.
 
+**The level follows region size under STV** (see [In the app](#in-the-app)):
+the same two anchors, log-linear between them and clamped outside, because 80
+small regions is a council election and 18 large ones is an Assembly election
+and nothing else in a drawn map says which is meant. First past the post has
+only Westminster to go on and keeps its single level.
+
 The index is held inside the range a real region has actually managed
 (0.77–1.30, the most and least eager region with its election's level divided
 out), which binds on 5.1% of zones; before clipping it reaches 0.66.
@@ -874,13 +880,30 @@ a zone's votes are
 
     electorate x turnout index x the level of the election being simulated
 
-with the level 57.2% under first past the post (Westminster 2024) and 62.9%
-under STV — the app's default STV shape, 18 regions of 5, being the Assembly
-exactly. A council election is a quieter 53.7%, which is the figure to reach for
-if this is ever made to follow the size of the regions drawn. The level scales a
-whole region alike and so changes no winner; the index does not, and is the
-reason an equal-population region is not an equal-voter one. See "Demographics
-and Election modes" in [the README](../README.md#demographics-and-election-modes).
+First past the post has one measured level and keeps it: 57.2%, Westminster
+2024. **Under STV the level follows how big the regions are**, because a council
+election and an Assembly election are both STV and poll 53.7% against 62.9% —
+and the size of a region is the only thing a drawn map can offer to tell them
+apart. It is log-linear between the two measured anchors (DEA-sized regions of
+about 17,300 electors, constituency-sized ones of about 76,300) and never
+outside them, so 18 regions polls at the Assembly's level, 80 at a council's,
+and 50 somewhere between:
+
+| Regions | Electors each | Level |
+|---:|---:|---:|
+| 18 or fewer | 76,700+ | 62.9% |
+| 30 | 46,000 | 59.6% |
+| 50 | 27,600 | 56.5% |
+| 80 or more | 17,300 or fewer | 53.7% |
+
+This is a **proxy, not a cause**: what really separates the two elections is how
+much they matter to people, and region size is merely what correlates with it
+and is visible to the app. Nothing between the anchors is evidence.
+
+The level scales a whole region alike and so changes no winner; the index does
+not, and is the reason an equal-population region is not an equal-voter one. See
+"Demographics and Election modes" in
+[the README](../README.md#demographics-and-election-modes).
 
 ### Tactical voting
 
@@ -1007,17 +1030,17 @@ is there to make the ballot look right, not to change who wins.
 
 | Loaded boundaries | Empty slots, model | Actually empty | Seats moved |
 |---|---:|---:|---|
-| Council 2023, 80 × 5 | 222 of 720 | 246 | none of 400 |
+| Council 2023, 80 × 5 | 255 of 720 | 246 | none of 400 |
 | Assembly 2022, 18 × 5 | 7 of 162 | 12 | none of 90 |
 | Westminster 2024, 18 × 1 | 34 of 162 | 40 | none of 18 |
 
-All three now under-count slightly, where before [turnout v0](#turnout-v0) the
-council figure over-counted (258 against 246). The cause is known and is the
-price of one STV level for every region size: the app polls STV at the
-Assembly's 62.9%, so a council-sized region is handed about 17% more ballots
-than such a region really casts, and its parties clear an absolute threshold
-more easily than they should. Making the level follow the size of the regions
-drawn would fix it.
+The council figure is the one that moves with turnout, and it is a good check on
+the level following region size: with one flat STV level it read 222 against the
+246 really empty, because a council-sized region was handed an Assembly-sized
+poll and its parties cleared an absolute threshold too easily. Polled at its own
+level it reads 255. The Assembly and Westminster rows under-count a little
+throughout, which is the small parties' rules being noisier than a single
+threshold can express.
 
 The three layers differ by a factor of twenty-five in how often a party sits a
 region out, and one set of thresholds gets all three about right — the strongest

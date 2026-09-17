@@ -1345,6 +1345,31 @@ check(votesPerElector(keenest[0]) > votesPerElector(quietest[0]),
   `a keener zone casts more votes per elector (${votesPerElector(keenest[0]).toFixed(2)} `
   + `vs ${votesPerElector(quietest[0]).toFixed(2)})`);
 
+/* Under STV the level follows how big the regions are, because that is the only
+ * way the app can tell a council election from an Assembly one. */
+turn.setElection('stv', 5, 2, false, false);
+const deaEnd = voters.stvScale.small;
+const constEnd = voters.stvScale.large;
+const atRegions = (n) => turn._levelFor(n);
+const asmN = Math.round(turn.totalElectors / constEnd.electorate);
+const councilN = Math.round(turn.totalElectors / deaEnd.electorate);
+check(near(atRegions(asmN), constEnd.level, 0.002),
+  `Assembly-sized regions poll like the Assembly (${asmN} regions, `
+  + `${(100 * atRegions(asmN)).toFixed(1)}%)`);
+check(near(atRegions(councilN), deaEnd.level, 0.002),
+  `DEA-sized regions poll like a council election (${councilN} regions, `
+  + `${(100 * atRegions(councilN)).toFixed(1)}%)`);
+const levelCurve = [12, 20, 30, 50, 80].map(atRegions);
+check(levelCurve.every((v, i) => i === 0 || v <= levelCurve[i - 1] + 1e-12),
+  `and the level falls as the regions get smaller (${levelCurve.map((v) =>
+    (100 * v).toFixed(1)).join('% > ')}%)`);
+check(atRegions(1) <= constEnd.level + 1e-12 && atRegions(500) >= deaEnd.level - 1e-12,
+  'never beyond the two elections actually measured');
+turn.setElection('fptp', 5, 2, false, false);
+check(near(turn._levelFor(80), voters.levels.fptp, 1e-12),
+  'first past the post has one measured level and keeps it');
+turn.setElection('stv', 5, 2, false, false);
+
 check(voters.levels.stv > voters.levels.fptp,
   `an STV poll is busier than a Westminster one (${(100 * voters.levels.stv).toFixed(1)}% `
   + `vs ${(100 * voters.levels.fptp).toFixed(1)}%)`);

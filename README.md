@@ -724,8 +724,10 @@ Election mode needs `web/data/dz_voters.json`, built by
 holds each Data Zone's electorate, the nine parties' voter shares and its
 turnout index; votes are those shares times the electorate times that index
 times the turnout of whichever election is being simulated — 57.2% under first
-past the post, the NI-wide figure at the 2024 Westminster election, and 62.9%
-under STV, the 2022 Assembly's. The index is what makes an equal-population
+past the post, the NI-wide figure at the 2024 Westminster election, and under
+STV a level that follows how big the regions are, from 62.9% at Assembly size
+(18 regions) down to 53.7% at council size (80), since that is the only way the
+app can tell which sort of election is meant. The index is what makes an equal-population
 region not an equal-voter region: it runs from 0.77 to 1.28 and is fitted on
 social grade and community background against the measured turnout of 116 real
 regions. Without the file the app runs exactly as before and the Election button

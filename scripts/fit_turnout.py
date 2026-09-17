@@ -170,6 +170,9 @@ def main() -> None:
     sd = np.where(sd > 0, sd, 1)
     beta = fit((X - mu) / sd, y, w, lay)
     levels = {layers[i]: float(np.exp(beta[i])) for i in range(3)}
+    # How big a region is in each election, so the app can tell a council-sized
+    # map from an Assembly-sized one and poll it accordingly.
+    sizes = {layers[i]: float(w[lay == i].mean()) for i in range(3)}
     coef = beta[3:] / sd                       # back to raw feature units
     lo = X.min(0) - MARGIN * (X.max(0) - X.min(0))
     hi = X.max(0) + MARGIN * (X.max(0) - X.min(0))
@@ -190,10 +193,12 @@ def main() -> None:
     print("\nfit against the regions measured:")
     for i, layer in enumerate(layers):
         sel = lay == i
+        _ = sizes
         pred = np.exp(beta[i] + ((X[sel] - mu) / sd) @ beta[3:])
         act = np.exp(y[sel])
         r = np.corrcoef(pred, act)[0, 1]
-        print(f"  {layer:<12}{sel.sum():>3} regions   level {100 * levels[layer]:5.1f}%   "
+        print(f"  {layer:<12}{sel.sum():>3} regions of {sizes[layer]:>6,.0f}   "
+              f"level {100 * levels[layer]:5.1f}%   "
               f"actual {100 * act.min():.1f}-{100 * act.max():.1f}%   correlation {r:+.2f}")
     print(f"\n  coefficients (per unit share): "
           + ", ".join(f"{n} {c:+.2f}" for n, c in zip(feature_names, coef)))
@@ -210,6 +215,7 @@ def main() -> None:
         "chosen_by": f"leave-one-region-out CV over {len(CANDIDATES)} candidate sets",
         "cv_rms_log_turnout": round(rms, 4),
         "levels": {k: round(v, 4) for k, v in levels.items()},
+        "region_electorate": {k: round(v) for k, v in sizes.items()},
         "coef": [round(float(c), 4) for c in coef],
         "centre": [round(float(v), 6) for v in mu],
         "clip_lo": [round(float(v), 6) for v in lo],

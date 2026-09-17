@@ -12,6 +12,11 @@
   "assembly": 0.6287,
   "westminster": 0.5721
  },
+ "region_electorate": {
+  "council": 17254,
+  "assembly": 76318,
+  "westminster": 75776
+ },
  "coef": [
   -0.7562,
   -0.2643,

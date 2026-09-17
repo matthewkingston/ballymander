@@ -699,6 +699,11 @@ class RegionModel {
     // magnitudes move -- a level scales every party in a region alike.
     this.turnoutLevels = (voters && voters.levels)
       || { fptp: (voters && voters.turnout) || 1, stv: (voters && voters.turnout) || 1 };
+    // Under STV the two anchors bracket what the app might be simulating: 80
+    // small regions is a council election, 18 large ones an Assembly election,
+    // and they poll nine points apart. See `_levelFor`.
+    this.stvScale = (voters && voters.stvScale) || null;
+    this.totalElectors = 0;
 
     // The election being simulated. 'fptp' is one seat to the largest party;
     // 'stv' runs the count above, with `seatsPerRegion` seats in every region.
@@ -749,6 +754,10 @@ class RegionModel {
     this._stvLive = new Uint8Array(P);
     this._standAdd = new Float64Array(P);
     this._standMask = new Uint8Array(P);
+    if (P) {
+      // zN is electors x turnout index, whose NI total is the electorate itself.
+      for (let z = 0; z < this.n; z++) this.totalElectors += this.parties[0].zN[z];
+    }
 
     this.assign = new Int32Array(this.n);
     this.bestAssign = new Int32Array(this.n);
@@ -1304,10 +1313,41 @@ class RegionModel {
   }
 
   /* The turnout level of the election being simulated. Every stored sum is in
-   * units of "electors x turnout index", so this turns them into ballots. */
+   * units of "electors x turnout index", so this turns them into ballots.
+   *
+   * Cached against the two things it depends on, because the counts ask for it
+   * in the optimiser's inner loop. */
   get voteScale() {
+    if (this._scaleN !== this.N || this._scaleType !== this.electionType) {
+      this._scaleN = this.N;
+      this._scaleType = this.electionType;
+      this._scaleValue = this._levelFor(this.N);
+    }
+    return this._scaleValue;
+  }
+
+  /* How busy a poll to expect, given how big the regions are.
+   *
+   * First past the post has one measured level and keeps it. STV does not: a
+   * council election and an Assembly election are both STV and poll 53.7%
+   * against 62.9%, and what separates them, as far as a drawn map can tell, is
+   * the size of a region. So the level is read off the map, log-linear between
+   * the two anchors and never outside them -- a proxy, not a cause, since what
+   * really differs is how much the election matters to people. */
+  _levelFor(N) {
     const level = this.turnoutLevels[this.electionType];
-    return level == null ? 1 : level;
+    const fallback = level == null ? 1 : level;
+    const s = this.stvScale;
+    if (this.electionType !== 'stv' || !s || !N || !this.totalElectors) return fallback;
+    const lo = s.small;
+    const hi = s.large;
+    if (!lo || !hi || !(lo.electorate > 0) || !(hi.electorate > 0)) return fallback;
+    const size = this.totalElectors / N;
+    const span = Math.log(hi.electorate) - Math.log(lo.electorate);
+    if (!span) return fallback;
+    const at = (Math.log(size) - Math.log(lo.electorate)) / span;
+    const held = Math.max(0, Math.min(1, at));       // never beyond what was measured
+    return Math.exp(Math.log(lo.level) + held * (Math.log(hi.level) - Math.log(lo.level)));
   }
 
   /* Whether the votes a region casts differ from the voters living in it. */

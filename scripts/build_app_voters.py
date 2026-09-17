@@ -85,6 +85,15 @@ def main() -> None:
     with open(TURNOUT_MODEL) as fh:
         turnout = json.load(fh)
     levels = {mode: turnout["levels"][layer] for mode, layer in LEVEL_FOR.items()}
+    # Under STV the app cannot know whether a map is meant as a council election
+    # or an Assembly one, and the two poll very differently. The size of the
+    # regions drawn is the only signal there is, so both measured anchors go to
+    # the app and it reads the level off the map (see docs/voting-model.md).
+    stv_scale = {
+        end: {"electorate": turnout["region_electorate"][layer],
+              "level": turnout["levels"][layer]}
+        for end, layer in (("small", "council"), ("large", "assembly"))
+    }
     with open(TURNOUT_DZ) as fh:
         index = {r["code"]: float(r["index"]) for r in csv.DictReader(fh)}
 
@@ -132,6 +141,7 @@ def main() -> None:
         json.dump({"source": "data/model/voters_v1_dz.csv",
                    # turnout level per election mode; a zone's own index is "t"
                    "turnout": levels["fptp"], "levels": levels,
+                   "stvScale": stv_scale,
                    "parties": parties, "spread": spread,
                    # row-major, parties in the order above; a party's own column
                    # is zero, since a transfer to itself never leaves the party
@@ -151,6 +161,10 @@ def main() -> None:
     print(f"wrote {os.path.relpath(OUT, ROOT)}: {len(zones):,} zones x {len(parties)} parties")
     print(f"  turnout levels: " + ", ".join(f"{m} {100 * v:.1f}%" for m, v in levels.items())
           + f"   index {spread_t[0]:.2f}-{spread_t[-1]:.2f}")
+    print(f"  STV level by region size: {100 * stv_scale['small']['level']:.1f}% at "
+          f"{stv_scale['small']['electorate']:,} electors, "
+          f"{100 * stv_scale['large']['level']:.1f}% at "
+          f"{stv_scale['large']['electorate']:,}")
     for s in spread:
         print(f"  {s['party']:<10} national {100 * s['national']:>5.1f}%   "
               f"vSpread {s['vSpread']:.4f}   rSpread {s['rSpread']:.4f}   "
