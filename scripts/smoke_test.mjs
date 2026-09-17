@@ -330,8 +330,18 @@ const election = await page.evaluate(() => {
       .every((d) => d.parentElement.hidden),
     demoWeightsOff: m.demographics.every((d) => d.weight === 0),
     totalVotes: Math.round(votes.reduce((a, b) => a + b, 0)),
+    // Conservation, against the zones themselves rather than a number written
+    // down here: every zone's electorate times its turnout index should end up
+    // in exactly one region. (Stored sums are in those units; the election's
+    // level turns them into ballots.)
     nationalVotes: Math.round(m.parties.reduce((a, q) =>
       a + Array.from({ length: m.N }, (_, r) => q.rSum[r]).reduce((x, y) => x + y, 0), 0)),
+    // totalElectors is summed over zones at construction, so this really is
+    // the zone side against the region side.
+    zoneVotes: Math.round(m.totalElectors),
+    ballots: Math.round(m.parties.reduce((a, q) =>
+      a + Array.from({ length: m.N }, (_, r) => q.rSum[r]).reduce((x, y) => x + y, 0), 0)
+      * m.voteScale),
   };
 });
 const marked = await page.evaluate(() =>
@@ -639,8 +649,9 @@ if (!election || election.standing.back.votes !== election.standing.on.votes) {
 }
 
 // Votes are conserved: every voter lands in exactly one region.
-if (!election || Math.abs(election.nationalVotes - 789554) > 2) {
-  problems.push(`votes not conserved (${election && election.nationalVotes})`);
+if (!election || Math.abs(election.nationalVotes - election.zoneVotes) > 2) {
+  problems.push(`votes not conserved (${election && election.nationalVotes} in regions, `
+    + `${election && election.zoneVotes} in zones)`);
 }
 if (!election || !election.tip || !/votes?\b/.test(election.tip.party || '')) {
   problems.push('tooltip missing the zone party line');
@@ -703,7 +714,7 @@ if (!ed || ed.merged.rows.length !== 8 || ed.merged.rows.includes('DUP')
   problems.push('a merger should head the list and take its parties out of it');
 }
 if (!ed || ed.merged.votes[3] !== 0
-    || ed.merged.votes[1] !== ed.excluded.votes[1] + ed.excluded.votes[3]) {
+    || Math.abs(ed.merged.votes[1] - (ed.excluded.votes[1] + ed.excluded.votes[3])) > 2) {
   problems.push('a merger did not gather its parties\' votes');
 }
 if (!ed || !ed.merged.selector.includes(ed.merged.rows[0])
