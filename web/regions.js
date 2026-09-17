@@ -336,6 +336,52 @@ function stvCount(votes, seats, transfers, exhaustion, seatsOut, liveIn) {
   return quota;
 }
 
+/* --- tactical voting -----------------------------------------------------
+ *
+ * Under first past the post, voters whose party cannot win a seat often back
+ * whichever of the leading two they can stomach. Measured against the same
+ * ground at other elections, parties outside the top two lose about a seventh
+ * of their vote where the race is tight and almost nothing where it is safe,
+ * and the effect is absent between two STV elections. See docs/voting-model.md.
+ *
+ *   keep(t) = 1 - SQUEEZE * exp(-t / SQUEEZE_SCALE)
+ *
+ * with t the gap between the top two in log votes: 0.86 in a dead heat, 0.92
+ * at a middling gap, 0.97 in a safe seat.
+ *
+ * Where the deserters go is the assumed part: they split between the top two by
+ * the transfer matrix, which is the right instrument in principle but is not
+ * confirmed by 18 seats of evidence. Nothing moves in a region where one party
+ * is unopposed, and nothing moves under STV, where a lower preference costs a
+ * voter nothing. */
+const SQUEEZE = 0.14;
+const SQUEEZE_SCALE = 0.5;
+
+function tacticalVotes(votes, transfers) {
+  const K = votes.length;
+  let a = -1;
+  let b = -1;
+  for (let p = 0; p < K; p++) {
+    if (votes[p] <= 0) continue;
+    if (a < 0 || votes[p] > votes[a]) { b = a; a = p; }
+    else if (b < 0 || votes[p] > votes[b]) b = p;
+  }
+  if (a < 0 || b < 0 || votes[b] <= 0) return votes;
+  const keep = 1 - SQUEEZE * Math.exp(-Math.log(votes[a] / votes[b]) / SQUEEZE_SCALE);
+  for (let p = 0; p < K; p++) {
+    if (p === a || p === b || votes[p] <= 0) continue;
+    const lost = votes[p] * (1 - keep);
+    votes[p] -= lost;
+    const wa = transfers[p * K + a];
+    const wb = transfers[p * K + b];
+    // With no preference between the two, the deserters follow their sizes.
+    const share = wa + wb > 0 ? wa / (wa + wb) : votes[a] / (votes[a] + votes[b]);
+    votes[a] += lost * share;
+    votes[b] += lost * (1 - share);
+  }
+  return votes;
+}
+
 /* The same count, keeping a record of every stage, for the app's region view.
  * Deliberately a separate function: this one allocates, and the optimiser runs
  * the other one millions of times.
@@ -559,6 +605,8 @@ class RegionModel {
     // 'stv' runs the count above, with `seatsPerRegion` seats in every region.
     this.electionType = 'fptp';
     this.seatsPerRegion = 5;
+    // Whether first-past-the-post voters desert an unwinnable party.
+    this.tactical = true;
     // How much a seat is worth against a quota of leftover votes in the
     // gerrymander score -- above one, a seat always beats vote-building.
     this.seatBonus = 2;
@@ -1124,10 +1172,30 @@ class RegionModel {
     return d.isParty && d.mode === 'gerrymander' && this.electionType === 'stv';
   }
 
+  /* First past the post with tactical voting: the margin has to be measured on
+   * the votes as cast, or the optimiser steers a different election from the
+   * one being reported. */
+  _isTacticalMargin(d) {
+    return d.isParty && d.mode === 'gerrymander' && this.electionType === 'fptp'
+      && this.tactical;
+  }
+
+  _marginTerm(d, votes) {
+    let total = 0;
+    let best = 0;
+    for (let p = 0; p < votes.length; p++) {
+      total += votes[p];
+      if (p !== d.partyIndex && votes[p] > best) best = votes[p];
+    }
+    if (total <= 0) return this._demoTermFrom(d, 0);
+    return this._demoTermFrom(d, (votes[d.partyIndex] - best) / total);
+  }
+
   /* What a term scores on: a share, or a winning margin for a party being
    * gerrymandered -- or, under STV, the count itself. */
   _demoTerm(d, r) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, -1, 0, null));
+    if (this._isTacticalMargin(d)) return this._marginTerm(d, this._castVotes(r, -1, 0, null));
     const x = this._demoValue(d, r);
     return this._demoTermFrom(d,
       d.isParty && d.mode === 'gerrymander' ? x - this._partyBest(r, d) : x);
@@ -1135,6 +1203,7 @@ class RegionModel {
 
   _demoTermWith(d, r, z, sign) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, z, sign, null));
+    if (this._isTacticalMargin(d)) return this._marginTerm(d, this._castVotes(r, z, sign, null));
     const n = d.rN[r] + sign * d.zN[z];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (d.rSum[r] + sign * d.zValue[z] * d.zN[z]) / n;
@@ -1144,6 +1213,7 @@ class RegionModel {
 
   _demoTermWithAgg(d, r, g, sign, slot) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, -1, sign, g));
+    if (this._isTacticalMargin(d)) return this._marginTerm(d, this._castVotes(r, -1, sign, g));
     const n = d.rN[r] + sign * g.demo[slot].n;
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (d.rSum[r] + sign * g.demo[slot].sum) / n;
@@ -1153,6 +1223,10 @@ class RegionModel {
 
   _demoTermSplit(d, c, piece) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesSplit(c, piece));
+    if (this._isTacticalMargin(d)) {
+      const v = this._stvVotesSplit(c, piece);
+      return this._marginTerm(d, tacticalVotes(v, this._transfers));
+    }
     const n = piece ? d.sN[c] : d.sN[0] - d.sN[c];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (piece ? d.sSum[c] : d.sSum[0] - d.sSum[c]) / n;
@@ -2139,7 +2213,9 @@ class RegionModel {
    * A party's votes in a region are its term's own running sum. */
   regionPartyVotes(key, r) {
     const d = this.demoByKey[key];
-    return d && d.rSum.length ? d.rSum[r] : 0;
+    if (!d || !d.rSum.length) return 0;
+    if (!this.tactical || this.electionType !== 'fptp') return d.rSum[r];
+    return this._castVotes(r, -1, 0, null)[d.partyIndex];
   }
 
   regionPartyShare(key, r) {
@@ -2159,12 +2235,12 @@ class RegionModel {
       for (let p = 0; p < P; p++) out[p] = this._stvSeats[p];
       return out;
     }
+    const cast = this._castVotes(r, -1, 0, null);
     let top = -1;
     let best = -1;
     for (let p = 0; p < P; p++) {
       out[p] = 0;
-      const v = this.parties[p].rSum.length ? this.parties[p].rSum[r] : 0;
-      if (v > best) { best = v; top = p; }
+      if (cast[p] > best) { best = cast[p]; top = p; }
     }
     if (top >= 0) out[top] = 1;
     return out;
@@ -2176,12 +2252,22 @@ class RegionModel {
       this._transfers, this._exhaustion);
   }
 
+  /* A region's votes as they would actually be cast: the model's voters, then
+   * the tactical switching first past the post provokes. The scratch array is
+   * the one the counts use, so callers must be done with it before the next
+   * call. */
+  _castVotes(r, z, sign, g) {
+    const v = this._stvVotesFor(r, z, sign, g);
+    if (this.tactical && this.electionType === 'fptp') tacticalVotes(v, this._transfers);
+    return v;
+  }
+
   /* Votes cast in a region, which is less than the electorate's worth once a
    * party's voters have stayed at home. */
   regionVotesCast(r) {
     let total = 0;
     for (const q of this.parties) total += q.rSum.length ? q.rSum[r] : 0;
-    return total;
+    return total;                      // tactical switching moves votes, not their number
   }
 
   /* Every party's votes in one region, in the parties' own order. */
@@ -2205,11 +2291,11 @@ class RegionModel {
   /* First past the post: the party with most votes. Ties go to the earlier
    * party, which is the order in the voter file. */
   regionWinner(r) {
+    const cast = this._castVotes(r, -1, 0, null);
     let best = null;
     let bestVotes = -1;
     for (const q of this.parties) {
-      const v = q.rSum.length ? q.rSum[r] : 0;
-      if (v > bestVotes) { bestVotes = v; best = q; }
+      if (cast[q.partyIndex] > bestVotes) { bestVotes = cast[q.partyIndex]; best = q; }
     }
     return best ? best.key : null;
   }
@@ -2230,16 +2316,19 @@ class RegionModel {
   /* Election type, seats per region and the seat bonus all change what the
    * gerrymander term measures, so the running total is rebuilt and best-so-far
    * goes with it -- as for any other change of objective. */
-  setElection(type, seatsPerRegion, seatBonus) {
+  setElection(type, seatsPerRegion, seatBonus, tactical = this.tactical) {
     const t = type === 'stv' ? 'stv' : 'fptp';
     const s = Math.max(1, Math.round(seatsPerRegion));
     const b = Math.max(1, seatBonus);
-    if (t === this.electionType && s === this.seatsPerRegion && b === this.seatBonus) {
+    const tac = Boolean(tactical);
+    if (t === this.electionType && s === this.seatsPerRegion && b === this.seatBonus
+        && tac === this.tactical) {
       return false;
     }
     this.electionType = t;
     this.seatsPerRegion = s;
     this.seatBonus = b;
+    this.tactical = tac;
     for (const d of this.parties) {
       d.sigma = this._demoSigma(d, this.N);
       d.raw = 0;

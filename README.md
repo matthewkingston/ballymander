@@ -682,6 +682,11 @@ regions it wins — with the seat count alongside when a region returns several
 — a pie gives the seats every party took (hover a wedge to name it), and the
 tooltip lists a region's top five parties with the selected one highlighted.
 
+Under first past the post, **Tactical voting** squeezes parties outside a
+seat's top two towards the leading pair, by how tight the race is — 14% of
+their vote in a dead heat, almost none in a safe seat. It can be switched off,
+and does not apply under STV.
+
 Gerrymander mode differs for a party, and differs again by election type.
 Under first past the post the threshold is a **winning margin**, the party's
 share minus the strongest rival's, because that is what takes the seat; zero

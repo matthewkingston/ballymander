@@ -1151,6 +1151,59 @@ check(stv.totalSeats === stv.N * 7 && stv.demoScore(PARTY) !== before,
 stv.setElection('fptp', 5, 2);
 check(stv.totalSeats === stv.N, 'first past the post returns one seat a region');
 
+/* --- tactical voting ----------------------------------------------------- */
+/* Third parties squeezed towards the leading two, by how tight the race is.
+ * Votes move; nobody stays at home. */
+console.log('\ntactical voting');
+const tac = new RegionModel(graph, pops, geom, demo, voters);
+tac.start(18, 3, { wPop: 1 });
+while (tac.buildStep());
+for (let i = 0; i < 150000; i++) tac.optimiseStep();
+
+const castOf = (m, r) => voters.parties.map((p) => m.regionPartyVotes(`party:${p}`, r));
+tac.setElection('fptp', 5, 2, false);
+const plain = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
+tac.setElection('fptp', 5, 2, true);
+const cast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
+
+const totals = (v) => v.reduce((a, b) => a + b, 0);
+check(plain.every((v, r) => near(totals(v), totals(cast[r]), 1e-6 * totals(v))),
+  'tactical switching moves votes without losing any');
+
+/* Where the race is tight the third parties give way; where it is safe they
+ * barely move. */
+const gap = (v) => {
+  const s = [...v].sort((a, b) => b - a);
+  return Math.log(s[0] / s[1]);
+};
+const squeeze = (r) => {
+  const order = [...plain[r].keys()].sort((a, b) => plain[r][b] - plain[r][a]);
+  const rest = order.slice(2).filter((k) => plain[r][k] > 0);
+  return rest.reduce((a, k) => a + cast[r][k], 0) / rest.reduce((a, k) => a + plain[r][k], 0);
+};
+const tightest = [...plain.keys()].sort((a, b) => gap(plain[a]) - gap(plain[b]))[0];
+const safest = [...plain.keys()].sort((a, b) => gap(plain[b]) - gap(plain[a]))[0];
+check(squeeze(tightest) < 0.95 && squeeze(tightest) > 0.8,
+  `the tightest region squeezes its third parties (x${squeeze(tightest).toFixed(2)}, `
+  + `gap ${gap(plain[tightest]).toFixed(2)})`);
+check(squeeze(safest) > 0.97,
+  `the safest barely does (x${squeeze(safest).toFixed(2)}, gap ${gap(plain[safest]).toFixed(2)})`);
+check(squeeze(tightest) < squeeze(safest), 'the tighter the race, the harder the squeeze');
+
+/* The leaders take what the others lose. */
+const leadersGain = [...plain.keys()].every((r) => {
+  const order = [...plain[r].keys()].sort((a, b) => plain[r][b] - plain[r][a]);
+  const before = plain[r][order[0]] + plain[r][order[1]];
+  const after = cast[r][order[0]] + cast[r][order[1]];
+  return after >= before - 1e-6;
+});
+check(leadersGain, 'the leading two never lose by it');
+
+tac.setElection('stv', 5, 2, true);
+const stvCast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
+check(stvCast.every((v, r) => v.every((x, i) => near(x, plain[r][i], 1e-6))),
+  'nothing is squeezed under STV, where a lower preference is free');
+
 /* --- who stands ---------------------------------------------------------- */
 /* A party can stand aside, or parties can merge. Both are one mapping from
  * true voters to the ballot, applied to the zone votes. */

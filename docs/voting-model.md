@@ -756,6 +756,35 @@ figure). With turnout flat, its value scales every region equally and so
 changes no winner. See "Demographics and Election modes" in
 [the README](../README.md#demographics-and-election-modes).
 
+### Tactical voting
+
+Under first past the post, voters whose party cannot win often back whichever of
+the leading two they can stomach. The model does that per region, so it follows
+the map: redraw a seat and who is viable changes, and the switching with it.
+
+    keep(t) = 1 − 0.14 × exp(−t / 0.5)
+
+where t is the gap between the top two in log votes. A party outside the top two
+keeps 86% of its vote in a dead heat, 92% at a middling gap and 97% in a safe
+seat; what it loses goes to the top two, split by the transfer matrix. Votes
+move, none are lost, and nothing happens under STV.
+
+* **Calibrated on the squeeze, not the gain.** Measured moves are ×0.86 for the
+  others in the tightest seats against ×0.96 in safe ones (see
+  [Campaign concentration](#campaign-concentration)). The top two's measured gain
+  is larger than conservation allows, because it also contains candidate surges
+  this doesn't model — so the leaders simply take what the others lose.
+* **The destination is assumed.** Splitting deserters by the transfer matrix is
+  right in principle but unconfirmed: across 18 seats the side the matrix
+  favours gained more in 6, which is a coin toss. The test cannot settle it
+  either way under candidate effects of up to ×2.4.
+* **It changes no winners on the real 2024 map** — 10 of 18 either way. It
+  shifts a couple of points in tight seats (Belfast East: Alliance 35.2% →
+  37.5%, DUP 34.3% → 36.1%, with UUP, TUV and Green giving way) and nothing in
+  safe ones. The seats the model misses are wrong by much more than this.
+
+It can be switched off in the app.
+
 ### Who stands
 
 The model estimates a party's *voters*; whether it is on the ballot is applied
@@ -880,7 +909,9 @@ extreme modes still work on the party's share.
     unpredictable from position, and already what the Westminster floor
     represents.
   * It would belong to first past the post: the STV comparison gives about
-    half the spread.
+    half the spread. The tactical half of the effect is now
+    [built](#tactical-voting); what is left for a strategy layer is the
+    campaign concentration.
   * Watch for best-response oscillation if parties re-optimise against each
     other every N steps; one greedy pass in random order avoids it.
   * Saving budget by standing aside is a separate question -- standing is

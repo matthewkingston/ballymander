@@ -67,6 +67,7 @@ const els = {
   modeDemographics: document.getElementById('mode-demographics'),
   modeElection: document.getElementById('mode-election'),
   real: document.getElementById('ctl-real'),
+  tactical: document.getElementById('ctl-tactical'),
   electionType: document.getElementById('ctl-election-type'),
   seats: document.getElementById('ctl-seats'),
   viewSwitch: document.querySelector('.view-switch'),
@@ -830,6 +831,11 @@ function applyElectionType() {
     node.hidden = uiMode !== 'election';
   }
   for (const node of document.querySelectorAll('.stv-only')) node.hidden = !stv;
+  // Tactical voting is a first-past-the-post affair; under STV a lower
+  // preference costs a voter nothing.
+  for (const node of document.querySelectorAll('.fptp-only')) {
+    node.hidden = uiMode !== 'election' || stv;
+  }
   election.marginLabel.hidden = stv;
   election.t.hidden = stv;
   election.steepLabel.hidden = stv;
@@ -859,7 +865,7 @@ function applyMode() {
   // and while paused or stopped nothing else will do it.
   if (run.model && election) {
     run.model.setElection(demographics ? 'fptp' : election.type(),
-      election.seatsPer(), Number(election.bonus.value));
+      election.seatsPer(), Number(election.bonus.value), els.tactical.checked);
   }
   applyView();
   if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
@@ -1330,7 +1336,7 @@ function tick(map) {
       }
       if (election) {
         run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
-          election.seatsPer(), Number(election.bonus.value));
+          election.seatsPer(), Number(election.bonus.value), els.tactical.checked);
         const chosen = election.key();
         for (const party of election.voters.parties) {
           const key = `party:${party}`;
@@ -1404,7 +1410,7 @@ function start(map) {
 
   if (election) {
     run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
-      election.seatsPer(), Number(election.bonus.value));
+      election.seatsPer(), Number(election.bonus.value), els.tactical.checked);
   }
   run.model.start(n, Number(els.seed.value) || 0, {
     temperature: Number(els.temp.value) || 1,
@@ -1666,7 +1672,8 @@ async function main() {
     // is going, paused or stopped.
     const recount = () => {
       if (!run.model) return;
-      run.model.setElection(election.type(), election.seatsPer(), Number(election.bonus.value));
+      run.model.setElection(election.type(), election.seatsPer(), Number(election.bonus.value),
+        els.tactical.checked);
       readout();
       drawBars();
       pieShown = '';
@@ -1675,6 +1682,7 @@ async function main() {
     };
     els.electionType.addEventListener('change', () => { applyElectionType(); recount(); });
     els.seats.addEventListener('change', recount);
+    els.tactical.addEventListener('change', recount);
     election.bonus.addEventListener('change', recount);
     election.mode.addEventListener('change', sync);
     election.w.addEventListener('input', sync);
