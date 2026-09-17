@@ -501,11 +501,20 @@ await page.evaluate(() => {
   e.dispatchEvent(new Event('change', { bubbles: true }));
 });
 await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
-election.region.fptp = await page.evaluate(() => ({
-  wedges: document.querySelectorAll('#region-pie path').length,
-  seats: document.getElementById('region-seats').textContent,
-  stagesShown: !document.getElementById('region-stages').hasAttribute('hidden'),
-}));
+election.region.fptp = await page.evaluate(() => {
+  // One wedge per party that stood here, which is not all nine: the standing
+  // rule keeps the parties with too little support locally off the ballot.
+  const m = window.__model;
+  const out = new Uint8Array(m.parties.length);
+  // Which region is on show, before any click has told the test directly.
+  const r = Number(document.getElementById('region-title').textContent.replace(/\D/g, '')) - 1;
+  return {
+    wedges: document.querySelectorAll('#region-pie path').length,
+    standing: [...m.regionStanding(r, out)].filter(Boolean).length,
+    seats: document.getElementById('region-seats').textContent,
+    stagesShown: !document.getElementById('region-stages').hasAttribute('hidden'),
+  };
+});
 // clicking the map picks the region, and it is remembered
 const first = await page.evaluate(() => document.getElementById('region-title').textContent);
 await page.mouse.click(pt.x, pt.y);
@@ -625,8 +634,8 @@ if (!election || !(election.standing.on.absent > 0) || election.standing.off.abs
 if (!election || !(election.standing.on.votes < election.standing.off.votes)) {
   problems.push('nobody stayed at home when their party did not stand');
 }
-if (!election || election.standing.back.votes !== election.standing.off.votes) {
-  problems.push('turning the standing rule off did not restore the votes');
+if (!election || election.standing.back.votes !== election.standing.on.votes) {
+  problems.push('toggling the standing rule did not restore the votes');
 }
 
 // Votes are conserved: every voter lands in exactly one region.
@@ -716,7 +725,8 @@ if (!election || !/\d/.test(election.region.stv.seats)
     || !/quota/.test(election.region.stv.seats)) {
   problems.push('STV region view missing its seat line');
 }
-if (!election || election.region.fptp.wedges !== 9 || election.region.fptp.stagesShown
+if (!election || election.region.fptp.wedges < 2 || election.region.fptp.stagesShown
+    || election.region.fptp.wedges !== election.region.fptp.standing
     || !/wins the seat/.test(election.region.fptp.seats)) {
   problems.push('FPTP region view missing its pie');
 }
