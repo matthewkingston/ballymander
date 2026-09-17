@@ -1,0 +1,85 @@
+{
+ "version": "standing v0",
+ "parties": [
+  "Sinn Féin",
+  "DUP",
+  "Alliance",
+  "UUP",
+  "SDLP",
+  "TUV",
+  "Green",
+  "PBP",
+  "Aontú"
+ ],
+ "turnout": 0.572,
+ "stv": {
+  "unit": "votes",
+  "fitted_on": "2023 council DEAs and 2022 Assembly constituencies",
+  "thresholds": {
+   "Sinn Féin": 390,
+   "DUP": 301,
+   "Alliance": 0,
+   "UUP": 156,
+   "SDLP": 211,
+   "TUV": 478,
+   "Green": 110,
+   "PBP": 335,
+   "Aontú": 303
+  },
+  "accuracy": {
+   "Sinn Féin": 0.959,
+   "DUP": 0.99,
+   "Alliance": 0.98,
+   "UUP": 0.969,
+   "SDLP": 0.929,
+   "TUV": 0.837,
+   "Green": 0.857,
+   "PBP": 0.857,
+   "Aontú": 0.857
+  }
+ },
+ "fptp": {
+  "unit": "share",
+  "fitted_on": "2024 Westminster constituencies",
+  "thresholds": {
+   "Sinn Féin": 0.0899,
+   "DUP": 0.0,
+   "Alliance": 0.0,
+   "UUP": 0.0,
+   "SDLP": 0.0,
+   "TUV": 0.0229,
+   "Green": 0.0094,
+   "PBP": 0.0271,
+   "Aontú": 0.0102
+  },
+  "accuracy": {
+   "Sinn Féin": 1.0,
+   "DUP": 1.0,
+   "Alliance": 1.0,
+   "UUP": 1.0,
+   "SDLP": 1.0,
+   "TUV": 0.833,
+   "Green": 0.889,
+   "PBP": 1.0,
+   "Aontú": 0.833
+  }
+ },
+ "pacts_excluded": [
+  {
+   "election": "westminster",
+   "party": "DUP",
+   "region": "Fermanagh and South Tyrone"
+  },
+  {
+   "election": "westminster",
+   "party": "UUP",
+   "region": "Belfast North"
+  },
+  {
+   "election": "westminster",
+   "party": "Sinn Féin",
+   "region": "Belfast South and Mid Down"
+  }
+ ],
+ "note": "an entity formed by merging parties takes their mean threshold, weighted by each one's NI-wide votes"
+}

@@ -45,8 +45,11 @@ if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_adjacency.json ]; then
   python3 scripts/verify_adjacency.py
 fi
 
-# 5. app voter data for election mode (needs data/model/voters_v0_dz.csv)
-if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_voters.json ]; then
+# 5. app voter data for election mode (needs data/model/voters_v0_dz.csv). Also
+#    rebuilt when the model has moved on under it, so a file from before a new
+#    block was added -- the standing thresholds, say -- is not served silently.
+if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_voters.json ] \
+   || [ data/model/standing_v0.json -nt web/data/dz_voters.json ]; then
   echo "==> voters"
   python3 scripts/build_app_voters.py
 fi

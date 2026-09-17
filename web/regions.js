@@ -410,6 +410,64 @@ function tacticalVotes(votes, transfers) {
   return votes;
 }
 
+/* --- who stands here ------------------------------------------------------
+ *
+ * A party contests a region only where it has the support to bother, which is
+ * a different question in each election and is measured as such (standing v0,
+ * scripts/fit_standing.py):
+ *
+ *   STV    a number of voters -- can you find a candidate and a branch to run
+ *          them. Absolute, not a share, because that is the one form that fits
+ *          council DEAs and Assembly constituencies, four and a half times
+ *          larger, with a single number per party.
+ *   FPTP   a share of the region -- the big parties skip seats they cannot
+ *          win, which is why their thresholds are the highest of the nine.
+ *
+ * A party left off the ballot loses its exhaustion share to abstention and the
+ * rest moves by the transfer matrix, renormalised over the parties standing --
+ * exactly what the party editor does globally, applied region by region. All
+ * absences are resolved against the votes as they came in, so nothing
+ * cascades: a party that stands somewhere never hands its votes on twice.
+ *
+ * If no party clears its threshold -- a tiny region -- the largest stands, so
+ * that every region holds an election. */
+function standingVotes(votes, thresholds, byShare, transfers, exhaustion, add, stands) {
+  const K = votes.length;
+  let total = 0;
+  for (let p = 0; p < K; p++) total += votes[p];
+  if (total <= 0) {
+    for (let p = 0; p < K; p++) stands[p] = 0;   // an empty region holds no election
+    return votes;
+  }
+  let absent = 0;
+  let live = 0;
+  let top = 0;
+  for (let p = 0; p < K; p++) {
+    if (votes[p] > votes[top]) top = p;
+    const need = byShare ? thresholds[p] * total : thresholds[p];
+    stands[p] = votes[p] > 0 && votes[p] >= need ? 1 : 0;
+    if (stands[p]) live++;
+    else if (votes[p] > 0) absent++;
+  }
+  if (!absent) return votes;
+  if (!live) { stands[top] = 1; live = 1; }   // a tiny region: the largest stands anyway
+  for (let p = 0; p < K; p++) add[p] = 0;
+  for (let a = 0; a < K; a++) {
+    if (stands[a] || votes[a] <= 0) continue;
+    const keep = 1 - exhaustion[a];        // the rest stay at home
+    let weight = 0;
+    for (let b = 0; b < K; b++) if (stands[b]) weight += transfers[a * K + b];
+    // No preference among those standing: the whole pile stays at home.
+    if (weight > 0) {
+      const moving = (votes[a] * keep) / weight;
+      for (let b = 0; b < K; b++) if (stands[b]) add[b] += moving * transfers[a * K + b];
+    }
+    votes[a] = 0;
+  }
+  for (let p = 0; p < K; p++) votes[p] += add[p];
+  return votes;
+}
+
 /* The same count, keeping a record of every stage, for the app's region view.
  * Deliberately a separate function: this one allocates, and the optimiser runs
  * the other one millions of times.
@@ -635,6 +693,8 @@ class RegionModel {
     this.seatsPerRegion = 5;
     // Whether first-past-the-post voters desert an unwinnable party.
     this.tactical = true;
+    // Whether a party has to clear its standing threshold to contest a region.
+    this.standingRule = true;
     // How much a seat is worth against a quota of leftover votes in the
     // gerrymander score -- above one, a seat always beats vote-building.
     this.seatBonus = 2;
@@ -647,6 +707,14 @@ class RegionModel {
       }));
       voters.exhaustion.forEach((v, p) => { this._exhaustion[p] = v; });
     }
+    // Standing thresholds, in votes under STV and in share under first past
+    // the post. Zero means the party always stands.
+    this._standStv = new Float64Array(P);
+    this._standFptp = new Float64Array(P);
+    if (P && voters.standing) {
+      (voters.standing.stv || []).forEach((v, p) => { this._standStv[p] = v; });
+      (voters.standing.fptp || []).forEach((v, p) => { this._standFptp[p] = v; });
+    }
     // Who stands, and who has merged with whom. `mergeHost[p]` is the party
     // whose slot carries p's votes -- itself unless p has merged into another.
     // Both are global: a party stands everywhere or nowhere.
@@ -655,6 +723,8 @@ class RegionModel {
     this._baseShare = this.parties.map((q) => q.zValue.slice());
     this._baseTransfers = this._transfers.slice();
     this._baseExhaustion = this._exhaustion.slice();
+    this._baseStandStv = this._standStv.slice();
+    this._baseStandFptp = this._standFptp.slice();
     this._nationalVotes = new Float64Array(P);
     for (let p = 0; p < P; p++) {
       let total = 0;
@@ -664,6 +734,8 @@ class RegionModel {
     this._stvVotes = new Float64Array(P);
     this._stvSeats = new Int32Array(P);
     this._stvLive = new Uint8Array(P);
+    this._standAdd = new Float64Array(P);
+    this._standMask = new Uint8Array(P);
 
     this.assign = new Int32Array(this.n);
     this.bestAssign = new Int32Array(this.n);
@@ -1140,6 +1212,23 @@ class RegionModel {
       for (let b = 0; b < P; b++) this._transfers[a * P + b] = total > 0 ? row[b] / total : 0;
       this._exhaustion[a] = mass > 0 ? leak / mass : 0;
     }
+    // 2b. standing thresholds for the entities. A merger's bar is its members'
+    //     put together -- their mean weighted by NI-wide votes -- so a small
+    //     party joining a big one inherits the big one's reach.
+    for (let a = 0; a < P; a++) {
+      let mass = 0;
+      let stv = 0;
+      let fptp = 0;
+      for (let m = 0; m < P; m++) {
+        if (this.mergeHost[m] !== a) continue;
+        const v = this._nationalVotes[m] || 1e-9;
+        mass += v;
+        stv += v * this._baseStandStv[m];
+        fptp += v * this._baseStandFptp[m];
+      }
+      this._standStv[a] = mass > 0 ? stv / mass : 0;
+      this._standFptp[a] = mass > 0 ? fptp / mass : 0;
+    }
     // 3. the sums every term keeps, and the score built on them.
     if (this.N > 0) {
       this._resum();
@@ -1176,7 +1265,7 @@ class RegionModel {
         + (g ? sign * g.demo[q.slot].sum : 0);
       if (v[i] < 0) v[i] = 0;
     }
-    return v;
+    return this._applyStanding(v);
   }
 
   _stvVotesSplit(c, piece) {
@@ -1186,7 +1275,20 @@ class RegionModel {
       v[i] = piece ? q.sSum[c] : q.sSum[0] - q.sSum[c];
       if (v[i] < 0) v[i] = 0;
     }
-    return v;
+    return this._applyStanding(v);
+  }
+
+  /* Drop the parties that would not contest this region, in place. */
+  _applyStanding(v) {
+    if (!this.standingRule || !this.parties.length) return v;
+    const fptp = this.electionType !== 'stv';
+    return standingVotes(v, fptp ? this._standFptp : this._standStv, fptp,
+      this._transfers, this._exhaustion, this._standAdd, this._standMask);
+  }
+
+  /* Whether the votes a region casts differ from the voters living in it. */
+  _votesAsCast() {
+    return this.standingRule || (this.tactical && this.electionType === 'fptp');
   }
 
   /* Lower is better everywhere in the score, so the value is negated when the
@@ -1200,12 +1302,14 @@ class RegionModel {
     return d.isParty && d.mode === 'gerrymander' && this.electionType === 'stv';
   }
 
-  /* First past the post with tactical voting: the margin has to be measured on
-   * the votes as cast, or the optimiser steers a different election from the
-   * one being reported. */
-  _isTacticalMargin(d) {
+  /* First past the post, once standing or tactical voting has moved votes
+   * about: the margin has to be measured on the votes as cast, or the
+   * optimiser steers a different election from the one being reported. Average
+   * and extreme modes stay on the underlying voters, which is the demographic
+   * quantity they are there to describe. */
+  _isCastMargin(d) {
     return d.isParty && d.mode === 'gerrymander' && this.electionType === 'fptp'
-      && this.tactical;
+      && this._votesAsCast();
   }
 
   _marginTerm(d, votes) {
@@ -1223,7 +1327,7 @@ class RegionModel {
    * gerrymandered -- or, under STV, the count itself. */
   _demoTerm(d, r) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, -1, 0, null));
-    if (this._isTacticalMargin(d)) return this._marginTerm(d, this._castVotes(r, -1, 0, null));
+    if (this._isCastMargin(d)) return this._marginTerm(d, this._castVotes(r, -1, 0, null));
     const x = this._demoValue(d, r);
     return this._demoTermFrom(d,
       d.isParty && d.mode === 'gerrymander' ? x - this._partyBest(r, d) : x);
@@ -1231,7 +1335,7 @@ class RegionModel {
 
   _demoTermWith(d, r, z, sign) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, z, sign, null));
-    if (this._isTacticalMargin(d)) return this._marginTerm(d, this._castVotes(r, z, sign, null));
+    if (this._isCastMargin(d)) return this._marginTerm(d, this._castVotes(r, z, sign, null));
     const n = d.rN[r] + sign * d.zN[z];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (d.rSum[r] + sign * d.zValue[z] * d.zN[z]) / n;
@@ -1241,7 +1345,7 @@ class RegionModel {
 
   _demoTermWithAgg(d, r, g, sign, slot) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesFor(r, -1, sign, g));
-    if (this._isTacticalMargin(d)) return this._marginTerm(d, this._castVotes(r, -1, sign, g));
+    if (this._isCastMargin(d)) return this._marginTerm(d, this._castVotes(r, -1, sign, g));
     const n = d.rN[r] + sign * g.demo[slot].n;
     if (n <= 0) return this._demoTermFrom(d, d.mean);
     const x = (d.rSum[r] + sign * g.demo[slot].sum) / n;
@@ -1251,9 +1355,9 @@ class RegionModel {
 
   _demoTermSplit(d, c, piece) {
     if (this._isStv(d)) return this._stvTerm(d, this._stvVotesSplit(c, piece));
-    if (this._isTacticalMargin(d)) {
-      const v = this._stvVotesSplit(c, piece);
-      return this._marginTerm(d, tacticalVotes(v, this._transfers));
+    if (this._isCastMargin(d)) {
+      const v = this._stvVotesSplit(c, piece);   // standing already applied
+      return this._marginTerm(d, this.tactical ? tacticalVotes(v, this._transfers) : v);
     }
     const n = piece ? d.sN[c] : d.sN[0] - d.sN[c];
     if (n <= 0) return this._demoTermFrom(d, d.mean);
@@ -2242,15 +2346,21 @@ class RegionModel {
   regionPartyVotes(key, r) {
     const d = this.demoByKey[key];
     if (!d || !d.rSum.length) return 0;
-    if (!this.tactical || this.electionType !== 'fptp') return d.rSum[r];
+    if (!this._votesAsCast()) return d.rSum[r];
     return this._castVotes(r, -1, 0, null)[d.partyIndex];
   }
 
   regionPartyShare(key, r) {
     const d = this.demoByKey[key];
     if (!d) return 0;
-    const cast = this.regionVotesCast(r);
-    return cast > 0 ? d.rSum[r] / cast : 0;
+    if (!this._votesAsCast()) {
+      const votes = this.regionVotesCast(r);
+      return votes > 0 ? d.rSum[r] / votes : 0;
+    }
+    const cast = this._castVotes(r, -1, 0, null);
+    let total = 0;
+    for (let p = 0; p < cast.length; p++) total += cast[p];
+    return total > 0 ? cast[d.partyIndex] / total : 0;
   }
 
   /* Seats a region awards each party: one to the largest under first past the
@@ -2291,17 +2401,45 @@ class RegionModel {
   }
 
   /* Votes cast in a region, which is less than the electorate's worth once a
-   * party's voters have stayed at home. */
+   * party's voters have stayed at home -- because the party they wanted has
+   * merged or been struck off, or, here, because it did not stand locally.
+   * Tactical switching moves votes rather than losing them. */
   regionVotesCast(r) {
+    if (this.standingRule) {
+      const cast = this._castVotes(r, -1, 0, null);
+      let total = 0;
+      for (let p = 0; p < cast.length; p++) total += cast[p];
+      return total;
+    }
     let total = 0;
     for (const q of this.parties) total += q.rSum.length ? q.rSum[r] : 0;
-    return total;                      // tactical switching moves votes, not their number
+    return total;
   }
 
   /* Every party's votes in one region, in the parties' own order. */
   regionVotes(r, out) {
+    if (this._votesAsCast()) {
+      const cast = this._castVotes(r, -1, 0, null);
+      for (let p = 0; p < this.parties.length; p++) out[p] = cast[p];
+      return out;
+    }
     for (let p = 0; p < this.parties.length; p++) {
       out[p] = this.parties[p].rSum.length ? this.parties[p].rSum[r] : 0;
+    }
+    return out;
+  }
+
+  /* Which parties put up a candidate in one region, in the parties' own order.
+   * Everyone who is on the ballot at all, unless the standing rule is on. */
+  regionStanding(r, out) {
+    const P = this.parties.length;
+    if (!this.standingRule) {
+      for (let p = 0; p < P; p++) out[p] = this._isEntity(p) ? 1 : 0;
+      return out;
+    }
+    this._stvVotesFor(r, -1, 0, null);         // fills _standMask as a side effect
+    for (let p = 0; p < P; p++) {
+      out[p] = this._isEntity(p) && this._standMask[p] ? 1 : 0;
     }
     return out;
   }
@@ -2344,19 +2482,22 @@ class RegionModel {
   /* Election type, seats per region and the seat bonus all change what the
    * gerrymander term measures, so the running total is rebuilt and best-so-far
    * goes with it -- as for any other change of objective. */
-  setElection(type, seatsPerRegion, seatBonus, tactical = this.tactical) {
+  setElection(type, seatsPerRegion, seatBonus, tactical = this.tactical,
+              standingRule = this.standingRule) {
     const t = type === 'stv' ? 'stv' : 'fptp';
     const s = Math.max(1, Math.round(seatsPerRegion));
     const b = Math.max(1, seatBonus);
     const tac = Boolean(tactical);
+    const rule = Boolean(standingRule);
     if (t === this.electionType && s === this.seatsPerRegion && b === this.seatBonus
-        && tac === this.tactical) {
+        && tac === this.tactical && rule === this.standingRule) {
       return false;
     }
     this.electionType = t;
     this.seatsPerRegion = s;
     this.seatBonus = b;
     this.tactical = tac;
+    this.standingRule = rule;
     for (const d of this.parties) {
       d.sigma = this._demoSigma(d, this.N);
       d.raw = 0;

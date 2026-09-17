@@ -68,6 +68,7 @@ const els = {
   modeElection: document.getElementById('mode-election'),
   real: document.getElementById('ctl-real'),
   tactical: document.getElementById('ctl-tactical'),
+  standing: document.getElementById('ctl-standing'),
   electionType: document.getElementById('ctl-election-type'),
   seats: document.getElementById('ctl-seats'),
   viewSwitch: document.querySelector('.view-switch'),
@@ -865,7 +866,8 @@ function applyMode() {
   // and while paused or stopped nothing else will do it.
   if (run.model && election) {
     run.model.setElection(demographics ? 'fptp' : election.type(),
-      election.seatsPer(), Number(election.bonus.value), els.tactical.checked);
+      election.seatsPer(), Number(election.bonus.value), els.tactical.checked,
+      els.standing.checked);
   }
   applyView();
   if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
@@ -1336,7 +1338,8 @@ function tick(map) {
       }
       if (election) {
         run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
-          election.seatsPer(), Number(election.bonus.value), els.tactical.checked);
+          election.seatsPer(), Number(election.bonus.value), els.tactical.checked,
+          els.standing.checked);
         const chosen = election.key();
         for (const party of election.voters.parties) {
           const key = `party:${party}`;
@@ -1410,7 +1413,8 @@ function start(map) {
 
   if (election) {
     run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
-      election.seatsPer(), Number(election.bonus.value), els.tactical.checked);
+      election.seatsPer(), Number(election.bonus.value), els.tactical.checked,
+      els.standing.checked);
   }
   run.model.start(n, Number(els.seed.value) || 0, {
     temperature: Number(els.temp.value) || 1,
@@ -1673,7 +1677,7 @@ async function main() {
     const recount = () => {
       if (!run.model) return;
       run.model.setElection(election.type(), election.seatsPer(), Number(election.bonus.value),
-        els.tactical.checked);
+        els.tactical.checked, els.standing.checked);
       readout();
       drawBars();
       pieShown = '';
@@ -1683,6 +1687,7 @@ async function main() {
     els.electionType.addEventListener('change', () => { applyElectionType(); recount(); });
     els.seats.addEventListener('change', recount);
     els.tactical.addEventListener('change', recount);
+    els.standing.addEventListener('change', recount);
     election.bonus.addEventListener('change', recount);
     election.mode.addEventListener('change', sync);
     election.w.addEventListener('input', sync);

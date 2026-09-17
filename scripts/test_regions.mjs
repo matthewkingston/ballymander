@@ -1160,10 +1160,13 @@ tac.start(18, 3, { wPop: 1 });
 while (tac.buildStep());
 for (let i = 0; i < 150000; i++) tac.optimiseStep();
 
+// The standing rule is off throughout: it moves votes for its own reasons,
+// and by different thresholds in each election, so leaving it on would muddy
+// every comparison below.
 const castOf = (m, r) => voters.parties.map((p) => m.regionPartyVotes(`party:${p}`, r));
-tac.setElection('fptp', 5, 2, false);
+tac.setElection('fptp', 5, 2, false, false);
 const plain = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
-tac.setElection('fptp', 5, 2, true);
+tac.setElection('fptp', 5, 2, true, false);
 const cast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
 const total = (v) => v.reduce((a, b) => a + b, 0);
 
@@ -1232,7 +1235,7 @@ if (threeWay !== undefined) {
   check(true, 'no three-way seat in this map to test');
 }
 
-tac.setElection('stv', 5, 2, true);
+tac.setElection('stv', 5, 2, true, false);
 const stvCast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
 check(stvCast.every((v, r) => v.every((x, i) => near(x, plain[r][i], 1e-6))),
   'nothing is squeezed under STV, where a lower preference is free');
@@ -1296,6 +1299,96 @@ const restored = niVotes(ballot);
 check(restored.every((v, i) => near(v, baseVotes[i], 1e-6)),
   'putting everyone back restores the votes exactly');
 ballot.setElection('fptp', 5, 2);
+
+/* --- standing bars -------------------------------------------------- */
+/* A party contests a region only where it has the support to bother: a number
+ * of voters under STV, a share of the region under first past the post. */
+console.log('\nstanding bars');
+const stand = new RegionModel(graph, pops, geom, demo, voters);
+stand.start(18, 3, { wPop: 1 });
+while (stand.buildStep());
+for (let i = 0; i < 150000; i++) stand.optimiseStep();
+
+const rawVotes = (m, r) => voters.parties.map((p, i) => m.parties[i].rSum[r]);
+const standingIn = (m, r) => Array.from(m.regionStanding(r, new Uint8Array(P)));
+const castIn = (m, r) => Array.from(m.regionVotes(r, new Float64Array(P)));
+
+stand.setElection('fptp', 5, 2, false, false);
+const noRule = Array.from({ length: stand.N }, (_, r) => castIn(stand, r));
+stand.setElection('fptp', 5, 2, false, true);
+const withRule = Array.from({ length: stand.N }, (_, r) => castIn(stand, r));
+
+/* Who stands is exactly the threshold rule, read off the votes as they came in. */
+const bars = voters.standing.fptp;
+let matchesRule = true;
+let absences = 0;
+for (let r = 0; r < stand.N; r++) {
+  const raw = rawVotes(stand, r);
+  const cast = raw.reduce((a, b) => a + b, 0);
+  const stands = standingIn(stand, r);
+  for (const k of raw.keys()) {
+    const want = raw[k] >= bars[k] * cast ? 1 : 0;
+    if (stands[k] !== want) matchesRule = false;
+    if (!want) absences++;
+  }
+}
+check(matchesRule, 'a party stands exactly where it clears its threshold');
+check(absences > 0 && absences < stand.N * P,
+  `some parties skip some regions, not all of them (${absences} absences over `
+  + `${stand.N * P} party-regions)`);
+
+check(withRule.every((v, r) => v.every((x, k) => x === 0 || standingIn(stand, r)[k] === 1)),
+  'a party that does not stand takes no votes there');
+check(withRule.every((v, r) => voters.parties.every((p, k) =>
+  standingIn(stand, r)[k] === 1 || stand.regionPartySeats(`party:${p}`, r) === 0)),
+  'and wins nothing there');
+
+/* Its voters abstain at its exhaustion rate; the rest transfer. */
+const stayedHome = noRule.reduce((a, v, r) =>
+  a + v.reduce((x, y) => x + y, 0) - withRule[r].reduce((x, y) => x + y, 0), 0);
+const wantHome = Array.from({ length: stand.N }, (_, r) => {
+  const stands = standingIn(stand, r);
+  return rawVotes(stand, r).reduce((a, v, k) =>
+    a + (stands[k] ? 0 : v * voters.exhaustion[k]), 0);
+}).reduce((a, b) => a + b, 0);
+check(near(stayedHome, wantHome, 1),
+  `their voters stay at home at the exhaustion rate (${Math.round(stayedHome).toLocaleString()} `
+  + `votes of ${Math.round(noRule.reduce((a, v) => a + v.reduce((x, y) => x + y, 0), 0)).toLocaleString()})`);
+
+/* Absolute under STV, so bigger regions carry more parties -- the property
+ * that let one number fit council DEAs and Assembly constituencies alike. */
+const absencesUnder = (n) => {
+  const m = new RegionModel(graph, pops, geom, demo, voters);
+  m.setElection('stv', 5, 2, false, true);
+  m.start(n, 3, { wPop: 1 });
+  while (m.buildStep());
+  for (let i = 0; i < 50000; i++) m.optimiseStep();
+  let out = 0;
+  for (let r = 0; r < m.N; r++) out += standingIn(m, r).filter((x) => !x).length;
+  return out / (m.N * P);
+};
+const few = absencesUnder(18);
+const many = absencesUnder(80);
+check(many > few,
+  `smaller regions mean more parties standing aside (${(100 * few).toFixed(1)}% of `
+  + `party-regions at 18, ${(100 * many).toFixed(1)}% at 80)`);
+
+/* A merger's threshold is its members' put together, weighted by their votes. */
+stand.setBallot({ merge: { TUV: 'DUP' } });
+const w = [idx('DUP'), idx('TUV')].map((i) => stand._nationalVotes[i]);
+const wanted = (voters.standing.stv[idx('DUP')] * w[0] + voters.standing.stv[idx('TUV')] * w[1])
+  / (w[0] + w[1]);
+check(near(stand._standStv[idx('DUP')], wanted, 1e-6),
+  `a merged party's threshold is the weighted mean (${Math.round(wanted)} votes)`);
+check(stand._standStv[idx('DUP')] > voters.standing.stv[idx('DUP')],
+  'which sits between its members');
+stand.setBallot({});
+
+/* Turning it off puts everything back exactly. */
+stand.setElection('fptp', 5, 2, false, false);
+const off2 = Array.from({ length: stand.N }, (_, r) => castIn(stand, r));
+check(off2.every((v, r) => v.every((x, k) => near(x, noRule[r][k], 1e-6))),
+  'switching the rule off restores the votes exactly');
 
 /* N=18 seed 7 is a known slow case, kept in the suite deliberately: regions 8
  * and 17 come out of the build as a sealed pocket, touching only each other and

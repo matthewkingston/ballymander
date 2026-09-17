@@ -602,10 +602,11 @@ The switch at the top of the left panel chooses what the run is steered by.
   grade, each with a weight and an average / extreme / gerrymander mode.
 * **Election** replaces those blocks with one party block — a party selector
   and the same weight, mode and gerrymander controls — and draws seats. Its own
-  controls sit above Regions: **Election type** (first past the post or STV)
-  and, for STV, **Elected/Region**, which has no upper limit — one region
-  electing everybody is roughly a national list, and Regions goes down to 1 for
-  exactly that.
+  controls sit above Regions: **Election type** (first past the post or STV),
+  for STV **Elected/Region**, which has no upper limit — one region electing
+  everybody is roughly a national list, and Regions goes down to 1 for exactly
+  that — and **Realistic standing**, which keeps parties off the ballot where
+  they are too weak to contest.
 
 Regions is fixed for the life of a run, since changing it means a different
 map; the election controls stay live, so a paused or stopped map can be
@@ -688,6 +689,17 @@ viability, desertion rises as viability falls and as the seat is more in doubt,
 and deserters spread over the others by viability and preference — so three
 parties in contention all hold their vote, while the hopeless give way. A safe
 seat squeezes nobody. It can be switched off, and does not apply under STV.
+
+**Realistic standing**, on by default, keeps a party off a region's ballot
+where it has too little support there to bother putting up a candidate — a
+number of voters under STV, where the question is whether a branch can find a
+candidate, and a share of the region under first past the post, where the
+question is whether the seat is winnable at all. Thresholds are per party and
+measured from the real elections (see
+[the model notes](docs/voting-model.md#standing-thresholds-standing-v0)).
+Because the STV bar is an absolute number, big regions carry more parties and
+small ones fewer, which is how real DEAs and constituencies differ. Voters
+whose party is absent abstain at its exhaustion rate; the rest transfer.
 
 Gerrymander mode differs for a party, and differs again by election type.
 Under first past the post the threshold is a **winning margin**, the party's

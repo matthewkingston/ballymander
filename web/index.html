@@ -51,6 +51,10 @@
            look at, and is roughly what a national PR list would do. -->
       <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
              value="5" hidden>
+      <!-- Parties only contest regions where they have the support to bother:
+           standing v0, a threshold per party per election type. -->
+      <label for="ctl-standing" class="election-only" hidden>Realistic standing</label>
+      <input id="ctl-standing" class="election-only" type="checkbox" checked hidden>
       <label for="ctl-seed">Seed</label>
       <input id="ctl-seed" type="number" min="0" step="1" value="1">
       <label for="ctl-temp">Temperature</label>

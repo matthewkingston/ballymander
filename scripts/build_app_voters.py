@@ -11,6 +11,10 @@ party's exhaustion rate -- the share of a transferring pile that had no further
 preference among the parties left, measured from the same clean transfer events
 the matrix was fitted on.
 
+Also carries standing v0: the support each party needs in a region before it
+puts up a candidate there, in votes under STV and in share under first past the
+post (see scripts/fit_standing.py).
+
 Also carries, per party, the two spread constants the region model needs to
 scale its score term, measured the same way as the demographic ones:
 
@@ -20,8 +24,8 @@ scale its score term, measured the same way as the demographic ones:
 Both are measured over the 18 real 2024 constituencies, which is the size of
 region the app defaults to.
 
-Reads   data/model/voters_v0_dz.csv, data/dz21_electorate.json,
-        data/dz21_to_pc24.csv
+Reads   data/model/voters_v0_dz.csv, data/model/standing_v0.json,
+        data/dz21_electorate.json, data/dz21_to_pc24.csv
 Writes  web/data/dz_voters.json
 """
 from __future__ import annotations
@@ -35,6 +39,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHARES = os.path.join(ROOT, "data", "model", "voters_v0_dz.csv")
 TRANSFERS = os.path.join(ROOT, "data", "model", "transfer_matrix_v0.json")
 EVENTS = os.path.join(ROOT, "data", "model", "transfer_events.json")
+STANDING = os.path.join(ROOT, "data", "model", "standing_v0.json")
 ELECTORATE = os.path.join(ROOT, "data", "dz21_electorate.json")
 CONSTITUENCIES = os.path.join(ROOT, "data", "dz21_to_pc24.csv")
 OUT = os.path.join(ROOT, "web", "data", "dz_voters.json")
@@ -105,6 +110,8 @@ def main() -> None:
     with open(TRANSFERS) as fh:
         matrix = json.load(fh)["matrix"]
     leaks = exhaustion(parties)
+    with open(STANDING) as fh:
+        standing = json.load(fh)
 
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as fh:
@@ -115,6 +122,12 @@ def main() -> None:
                    "transfers": [[round(matrix[a].get(b, 0.0), 5) for b in parties]
                                  for a in parties],
                    "exhaustion": [leaks[p] for p in parties],
+                   # standing v0: the support needed before a party puts up a
+                   # candidate -- votes under STV, share under FPTP; 0 is always
+                   "standing": {
+                       "stv": [standing["stv"]["thresholds"][p] for p in parties],
+                       "fptp": [standing["fptp"]["thresholds"][p] for p in parties],
+                   },
                    "zones": zones},
                   fh, ensure_ascii=False, separators=(",", ":"))
         fh.write("\n")
@@ -124,6 +137,9 @@ def main() -> None:
         print(f"  {s['party']:<10} national {100 * s['national']:>5.1f}%   "
               f"vSpread {s['vSpread']:.4f}   rSpread {s['rSpread']:.4f}   "
               f"exhaustion {100 * leaks[s['party']]:>4.1f}%")
+    print("  standing thresholds: " + ", ".join(
+        f"{p} {standing['stv']['thresholds'][p]:,} votes / "
+        f"{100 * standing['fptp']['thresholds'][p]:.1f}%" for p in parties))
 
 
 if __name__ == "__main__":

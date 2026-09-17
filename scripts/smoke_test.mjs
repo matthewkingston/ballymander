@@ -422,6 +422,26 @@ election.stv = await page.evaluate(() => {
   };
 });
 
+// The standing rule: with it on, parties that fall short of their threshold
+// leave the ballot in that region and some of their voters stay at home.
+election.standing = await page.evaluate(() => {
+  const m = window.__model;
+  const box = document.getElementById('ctl-standing');
+  const cast = () => Math.round(Array.from({ length: m.N },
+    (_, r) => m.regionVotesCast(r)).reduce((a, b) => a + b, 0));
+  const absent = () => {
+    const out = new Uint8Array(m.parties.length);
+    let n = 0;
+    for (let r = 0; r < m.N; r++) n += [...m.regionStanding(r, out)].filter((x) => !x).length;
+    return n;
+  };
+  const on = { rule: m.standingRule, votes: cast(), absent: absent(), shown: !box.hidden };
+  box.click();
+  const off = { rule: m.standingRule, votes: cast(), absent: absent() };
+  box.click();
+  return { on, off, back: { rule: m.standingRule, votes: cast() } };
+});
+
 // The party editor: exclude a party, merge two, and put them back.
 await page.click('#party-editor .demo-toggle');
 const editorPick = (names) => page.evaluate((want) => {
@@ -595,6 +615,20 @@ if (!election || !election.backToDemographics.options.includes('demo:rel')
 if (!election || !election.backToDemographics.partyRowHidden) {
   problems.push('party readout stayed in demographics mode');
 }
+if (!election || !election.standing.on.shown) problems.push('standing checkbox hidden in election mode');
+if (!election || !election.standing.on.rule || election.standing.off.rule) {
+  problems.push('standing checkbox did not reach the model');
+}
+if (!election || !(election.standing.on.absent > 0) || election.standing.off.absent !== 0) {
+  problems.push('standing rule kept every party on every ballot');
+}
+if (!election || !(election.standing.on.votes < election.standing.off.votes)) {
+  problems.push('nobody stayed at home when their party did not stand');
+}
+if (!election || election.standing.back.votes !== election.standing.off.votes) {
+  problems.push('turning the standing rule off did not restore the votes');
+}
+
 // Votes are conserved: every voter lands in exactly one region.
 if (!election || Math.abs(election.nationalVotes - 789554) > 2) {
   problems.push(`votes not conserved (${election && election.nationalVotes})`);
