@@ -94,7 +94,10 @@ html, body {
   padding: 5px 8px;
   font: inherit;
   font-size: 11.5px;
-  letter-spacing: 0.02em;
+  /* Capitals, like the run buttons and the readout labels, so the panel reads
+     as one thing. Capitals need the extra tracking to stay legible small. */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--ink-muted);
   background: none;
   border: 0;
@@ -487,9 +490,13 @@ html, body {
 .view-switch[hidden] { display: none; }
 .view-switch button {
   flex: 1;
-  padding: 4px 8px;
+  /* Matching the mode switch on the other side, which it did not: it was half a
+     point smaller with a point less padding. */
+  padding: 5px 8px;
   font: inherit;
-  font-size: 11px;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--ink-muted);
   background: none;
   border: 0;
