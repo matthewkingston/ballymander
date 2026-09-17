@@ -89,13 +89,16 @@ html, body {
   background: rgba(28, 37, 48, 0.05);
   border-radius: 6px;
 }
+/* The panel has three type families and no more: CONTROLS (the switches and the
+   run buttons, 11.5px semibold capitals), LABELS (10px capitals, muted) and
+   VALUES (13px semibold). The three controls sit directly on top of each other,
+   so any difference between them reads as a mistake rather than a hierarchy. */
 .mode-switch button {
   flex: 1;
   padding: 5px 8px;
   font: inherit;
   font-size: 11.5px;
-  /* Capitals, like the run buttons and the readout labels, so the panel reads
-     as one thing. Capitals need the extra tracking to stay legible small. */
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-muted);
@@ -221,13 +224,15 @@ html, body {
 }
 .ctl-grid input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-.ctl-buttons { display: flex; gap: 6px; }
+/* The 3px matches the switch's track padding above, so GO and STOP line up with
+   DEMOGRAPHICS and ELECTION rather than sitting 3px proud of them. */
+.ctl-buttons { display: flex; gap: 6px; padding: 0 3px; }
 .brand + * { margin-top: 0; }
 .ctl-buttons button {
   font: inherit;
   font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   flex: 1;
   padding: 6px 0;
   color: #fff;
@@ -490,11 +495,11 @@ html, body {
 .view-switch[hidden] { display: none; }
 .view-switch button {
   flex: 1;
-  /* Matching the mode switch on the other side, which it did not: it was half a
-     point smaller with a point less padding. */
+  /* CONTROLS, exactly as the mode switch on the other side. */
   padding: 5px 8px;
   font: inherit;
   font-size: 11.5px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--ink-muted);
@@ -510,7 +515,7 @@ html, body {
 }
 #region-view[hidden], #region-stages[hidden], #region-pie[hidden] { display: none; }
 #region-title {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-muted);
