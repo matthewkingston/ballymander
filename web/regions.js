@@ -338,46 +338,74 @@ function stvCount(votes, seats, transfers, exhaustion, seatsOut, liveIn) {
 
 /* --- tactical voting -----------------------------------------------------
  *
- * Under first past the post, voters whose party cannot win a seat often back
- * whichever of the leading two they can stomach. Measured against the same
- * ground at other elections, parties outside the top two lose about a seventh
- * of their vote where the race is tight and almost nothing where it is safe,
- * and the effect is absent between two STV elections. See docs/voting-model.md.
+ * Under first past the post, voters whose party cannot win often back someone
+ * who can. Northern Ireland rarely offers a tidy two-horse race, so nothing
+ * here ranks the parties: each has a viability, and everything follows from it.
  *
- *   keep(t) = 1 - SQUEEZE * exp(-t / SQUEEZE_SCALE)
+ *   viability   how close a party is to the leader, falling smoothly with the
+ *               gap, so three parties within a few points are all live
+ *   doubt       how spread that viability is: a dominant party means none, two
+ *               or three in contention means plenty
+ *   desertion   MAX * doubt * (1 - viability) -- you leave when your own party
+ *               cannot win AND the seat is genuinely in doubt, so a safe seat
+ *               squeezes nobody however hopeless they are
+ *   destination each other party in proportion to its viability times this
+ *               party's preference for it, from the transfer matrix
  *
- * with t the gap between the top two in log votes: 0.86 in a dead heat, 0.92
- * at a middling gap, 0.97 in a safe seat.
- *
- * Where the deserters go is the assumed part: they split between the top two by
- * the transfer matrix, which is the right instrument in principle but is not
- * confirmed by 18 seats of evidence. Nothing moves in a region where one party
- * is unopposed, and nothing moves under STV, where a lower preference costs a
- * voter nothing. */
-const SQUEEZE = 0.14;
-const SQUEEZE_SCALE = 0.5;
+ * Calibrated on the measured squeeze: parties outside contention lose about a
+ * seventh of their vote in the tightest seats and almost nothing in safe ones
+ * (see docs/voting-model.md). The shape is reasoning rather than measurement --
+ * candidate effects of up to x2.4 swamp any attempt to fit it -- and one pass
+ * is taken rather than chasing the fixed point where the switching changes the
+ * viabilities that caused it. Nothing happens under STV, where a lower
+ * preference costs a voter nothing. */
+const TACTICAL_MAX = 0.28;      // desertion when nobody can win and all is in doubt
+const VIABILITY_SCALE = 0.08;   // a party this far behind the leader is half live
 
 function tacticalVotes(votes, transfers) {
   const K = votes.length;
-  let a = -1;
-  let b = -1;
+  let total = 0;
+  let lead = 0;
+  for (let p = 0; p < K; p++) {
+    total += votes[p];
+    if (votes[p] > lead) lead = votes[p];
+  }
+  if (total <= 0 || lead <= 0) return votes;
+  const viable = new Float64Array(K);
+  let mass = 0;
   for (let p = 0; p < K; p++) {
     if (votes[p] <= 0) continue;
-    if (a < 0 || votes[p] > votes[a]) { b = a; a = p; }
-    else if (b < 0 || votes[p] > votes[b]) b = p;
+    viable[p] = Math.exp(-((lead - votes[p]) / total) / VIABILITY_SCALE);
+    mass += viable[p];
   }
-  if (a < 0 || b < 0 || votes[b] <= 0) return votes;
-  const keep = 1 - SQUEEZE * Math.exp(-Math.log(votes[a] / votes[b]) / SQUEEZE_SCALE);
+  if (mass <= 0) return votes;
+  let concentration = 0;
+  for (let p = 0; p < K; p++) concentration += (viable[p] / mass) ** 2;
+  const doubt = 1 - concentration;          // 0 when one party has it sewn up
+  if (doubt <= 0) return votes;
+  const moving = new Float64Array(K);
   for (let p = 0; p < K; p++) {
-    if (p === a || p === b || votes[p] <= 0) continue;
-    const lost = votes[p] * (1 - keep);
-    votes[p] -= lost;
-    const wa = transfers[p * K + a];
-    const wb = transfers[p * K + b];
-    // With no preference between the two, the deserters follow their sizes.
-    const share = wa + wb > 0 ? wa / (wa + wb) : votes[a] / (votes[a] + votes[b]);
-    votes[a] += lost * share;
-    votes[b] += lost * (1 - share);
+    if (votes[p] <= 0) continue;
+    moving[p] = votes[p] * TACTICAL_MAX * doubt * (1 - viable[p]);
+  }
+  for (let p = 0; p < K; p++) {
+    if (moving[p] <= 0) continue;
+    let weight = 0;
+    for (let q = 0; q < K; q++) {
+      if (q !== p && votes[q] > 0) weight += viable[q] * transfers[p * K + q];
+    }
+    // No preference to go on: viability alone decides.
+    const fallback = weight <= 0;
+    if (fallback) {
+      for (let q = 0; q < K; q++) if (q !== p && votes[q] > 0) weight += viable[q];
+    }
+    if (weight <= 0) continue;
+    votes[p] -= moving[p];
+    for (let q = 0; q < K; q++) {
+      if (q === p || votes[q] <= 0) continue;
+      const w = fallback ? viable[q] : viable[q] * transfers[p * K + q];
+      votes[q] += (moving[p] * w) / weight;
+    }
   }
   return votes;
 }

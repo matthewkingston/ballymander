@@ -1152,8 +1152,8 @@ stv.setElection('fptp', 5, 2);
 check(stv.totalSeats === stv.N, 'first past the post returns one seat a region');
 
 /* --- tactical voting ----------------------------------------------------- */
-/* Third parties squeezed towards the leading two, by how tight the race is.
- * Votes move; nobody stays at home. */
+/* Nothing here ranks the parties: each has a viability, desertion follows from
+ * that and from how much doubt there is about the seat. */
 console.log('\ntactical voting');
 const tac = new RegionModel(graph, pops, geom, demo, voters);
 tac.start(18, 3, { wPop: 1 });
@@ -1165,39 +1165,72 @@ tac.setElection('fptp', 5, 2, false);
 const plain = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
 tac.setElection('fptp', 5, 2, true);
 const cast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));
+const total = (v) => v.reduce((a, b) => a + b, 0);
 
-const totals = (v) => v.reduce((a, b) => a + b, 0);
-check(plain.every((v, r) => near(totals(v), totals(cast[r]), 1e-6 * totals(v))),
+check(plain.every((v, r) => near(total(v), total(cast[r]), 1e-6 * total(v))),
   'tactical switching moves votes without losing any');
 
-/* Where the race is tight the third parties give way; where it is safe they
- * barely move. */
 const gap = (v) => {
   const s = [...v].sort((a, b) => b - a);
-  return Math.log(s[0] / s[1]);
+  return (s[0] - s[1]) / total(v);
 };
-const squeeze = (r) => {
+const keptByOthers = (r) => {
   const order = [...plain[r].keys()].sort((a, b) => plain[r][b] - plain[r][a]);
   const rest = order.slice(2).filter((k) => plain[r][k] > 0);
   return rest.reduce((a, k) => a + cast[r][k], 0) / rest.reduce((a, k) => a + plain[r][k], 0);
 };
 const tightest = [...plain.keys()].sort((a, b) => gap(plain[a]) - gap(plain[b]))[0];
 const safest = [...plain.keys()].sort((a, b) => gap(plain[b]) - gap(plain[a]))[0];
-check(squeeze(tightest) < 0.95 && squeeze(tightest) > 0.8,
-  `the tightest region squeezes its third parties (x${squeeze(tightest).toFixed(2)}, `
-  + `gap ${gap(plain[tightest]).toFixed(2)})`);
-check(squeeze(safest) > 0.97,
-  `the safest barely does (x${squeeze(safest).toFixed(2)}, gap ${gap(plain[safest]).toFixed(2)})`);
-check(squeeze(tightest) < squeeze(safest), 'the tighter the race, the harder the squeeze');
+check(keptByOthers(tightest) < 0.95,
+  `a seat in doubt squeezes the parties out of contention (x${keptByOthers(tightest).toFixed(2)})`);
+check(keptByOthers(safest) > 0.97,
+  `a safe seat barely does, however hopeless they are (x${keptByOthers(safest).toFixed(2)})`);
+check(keptByOthers(tightest) < keptByOthers(safest), 'the more doubt, the harder the squeeze');
 
-/* The leaders take what the others lose. */
-const leadersGain = [...plain.keys()].every((r) => {
-  const order = [...plain[r].keys()].sort((a, b) => plain[r][b] - plain[r][a]);
-  const before = plain[r][order[0]] + plain[r][order[1]];
-  const after = cast[r][order[0]] + cast[r][order[1]];
-  return after >= before - 1e-6;
+/* The leader is fully viable, so it never deserts and can only gain. */
+check([...plain.keys()].every((r) => {
+  const lead = plain[r].indexOf(Math.max(...plain[r]));
+  return cast[r][lead] >= plain[r][lead] - 1e-6;
+}), 'the leader never loses by it');
+
+/* The further from winning, the worse a party does out of it -- as a tendency,
+ * not a law: a weak party others like can take in more than it loses, and
+ * there is no cliff at second place either way. */
+const pairs = [];
+for (let r = 0; r < tac.N; r++) {
+  const t = total(plain[r]);
+  for (const k of plain[r].keys()) {
+    if (plain[r][k] > 0.01 * t) pairs.push([plain[r][k] / t, cast[r][k] / plain[r][k]]);
+  }
+}
+const rank = (xs) => xs.map((x, i) => [x, i]).sort((a, b) => a[0] - b[0])
+  .map(([, i], j) => [i, j]).sort((a, b) => a[0] - b[0]).map(([, j]) => j);
+const rx = rank(pairs.map((p) => p[0]));
+const ry = rank(pairs.map((p) => p[1]));
+const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+const mx = mean(rx);
+const my = mean(ry);
+const corr = rx.reduce((a, x, i) => a + (x - mx) * (ry[i] - my), 0)
+  / Math.sqrt(rx.reduce((a, x) => a + (x - mx) ** 2, 0) * ry.reduce((a, y) => a + (y - my) ** 2, 0));
+// Moderate rather than strong by construction: desertion follows viability,
+// but what a party takes in follows everyone else's preferences.
+check(corr > 0.25,
+  `the stronger a party, the better it does out of the switching (rank correlation ${corr.toFixed(2)})`);
+
+/* Three parties in contention should all hold up, which is what ranking by a
+ * top two could not do. */
+const threeWay = [...plain.keys()].find((r) => {
+  const s = [...plain[r]].sort((a, b) => b - a).map((v) => v / total(plain[r]));
+  return s[2] > 0.18 && s[0] - s[2] < 0.12;
 });
-check(leadersGain, 'the leading two never lose by it');
+if (threeWay !== undefined) {
+  const order = [...plain[threeWay].keys()].sort((a, b) => plain[threeWay][b] - plain[threeWay][a]);
+  const kept = order.slice(0, 3).map((k) => cast[threeWay][k] / plain[threeWay][k]);
+  check(kept.every((x) => x > 0.97),
+    `all three live parties hold their vote (x${kept.map((x) => x.toFixed(2)).join(', ')})`);
+} else {
+  check(true, 'no three-way seat in this map to test');
+}
 
 tac.setElection('stv', 5, 2, true);
 const stvCast = Array.from({ length: tac.N }, (_, r) => castOf(tac, r));

@@ -758,32 +758,43 @@ changes no winner. See "Demographics and Election modes" in
 
 ### Tactical voting
 
-Under first past the post, voters whose party cannot win often back whichever of
-the leading two they can stomach. The model does that per region, so it follows
-the map: redraw a seat and who is viable changes, and the switching with it.
+Under first past the post, voters whose party cannot win often back someone who
+can. Northern Ireland rarely offers a tidy two-horse race — three parties are
+often live, and sometimes the real contest is for second — so nothing here
+ranks the parties. Each has a **viability**, and everything follows from it:
 
-    keep(t) = 1 − 0.14 × exp(−t / 0.5)
+| | |
+|---|---|
+| viability | how close a party is to the leader, falling smoothly with the gap; a party 8 points behind is half live |
+| doubt | how spread that viability is: one dominant party means none, two or three in contention means plenty |
+| desertion | `0.28 × doubt × (1 − viability)` — you leave when your own party cannot win *and* the seat is in doubt, so a safe seat squeezes nobody however hopeless they are |
+| destination | every other party, in proportion to its viability times this party's preference for it from the transfer matrix |
 
-where t is the gap between the top two in log votes. A party outside the top two
-keeps 86% of its vote in a dead heat, 92% at a middling gap and 97% in a safe
-seat; what it loses goes to the top two, split by the transfer matrix. Votes
-move, none are lost, and nothing happens under STV.
+Votes move, none are lost, and nothing happens under STV, where a lower
+preference costs a voter nothing. It can be switched off in the app.
 
-* **Calibrated on the squeeze, not the gain.** Measured moves are ×0.86 for the
-  others in the tightest seats against ×0.96 in safe ones (see
-  [Campaign concentration](#campaign-concentration)). The top two's measured gain
-  is larger than conservation allows, because it also contains candidate surges
-  this doesn't model — so the leaders simply take what the others lose.
-* **The destination is assumed.** Splitting deserters by the transfer matrix is
-  right in principle but unconfirmed: across 18 seats the side the matrix
-  favours gained more in 6, which is a coin toss. The test cannot settle it
-  either way under candidate effects of up to ×2.4.
-* **It changes no winners on the real 2024 map** — 10 of 18 either way. It
-  shifts a couple of points in tight seats (Belfast East: Alliance 35.2% →
-  37.5%, DUP 34.3% → 36.1%, with UUP, TUV and Green giving way) and nothing in
-  safe ones. The seats the model misses are wrong by much more than this.
+**Calibration** is anchored on the measured squeeze — parties out of contention
+keep about six-sevenths of their vote in the tightest seats and nearly all of it
+in safe ones ([Campaign concentration](#campaign-concentration)). The model
+reproduces that without tuning:
 
-It can be switched off in the app.
+| Top-two gap | Measured | Model |
+|---|---:|---:|
+| Tightest | ×0.86 | ×0.88 |
+| Close | ×0.91 | ×0.92 |
+| Safe | ×0.96 | ×0.98 |
+
+**What is reasoned rather than measured:** the shape. Viability, doubt and the
+destination rule are argued from how tactical voting works, not fitted — our
+data cannot distinguish them from a cruder rank-based rule, because candidate
+effects of up to ×2.4 swamp the comparison. One pass is taken rather than
+chasing the fixed point where the switching changes the viabilities that caused
+it.
+
+**How much it does:** across 8 drawn maps and 144 seats it changed the winner in
+3, all in seats decided by under 5 points — about a fifth of seats are that
+close. On the real 2024 boundaries it changes no winners. It is a few points in
+a marginal, not a mechanism that rescues the seats the model gets wrong.
 
 ### Who stands
 
