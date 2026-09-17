@@ -48,6 +48,29 @@ html, body {
 /* --- mode switch --------------------------------------------------------- */
 /* Two buttons acting as one control: which set of variables the run steers by.
    The pressed one is filled, so the current mode reads at a glance. */
+/* Name and mark, at the top of the panel. Small on purpose: the panel is 350px
+   and everything below it is the actual controls. */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 10px;
+}
+.brand img {
+  flex: none;
+  /* The mark is line art on transparency, so it needs no background of its
+     own; the height is what keeps it in proportion with the wordmark. */
+  height: 27px;
+  width: auto;
+}
+.brand h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
 .mode-switch {
   display: flex;
   gap: 4px;
