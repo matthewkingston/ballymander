@@ -576,6 +576,49 @@ Weighted partial correlations, with drop-top-N and jackknife checks.
   * For comparison, fully independent errors would give −1: errors are
     strongly spatially clustered.
 
+### Campaign concentration
+
+How much does a concentrated campaign move one seat? Measured by comparing each
+party's share in a constituency with what the same ground gave at the other
+elections, spreading those results to Data Zones by the model's own pattern.
+Moves are in centred log shares, so only relative movement counts.
+
+The ceiling is about **×2.2 of a party's share**: Belfast South & Mid Down SDLP
+20.7% → 49.1% (×2.37), Fermanagh & South Tyrone UUP ×2.03, South Antrim UUP
+×2.06. Squeezes are as large the other way — Belfast East UUP ×0.28, Lagan
+Valley SDLP ×0.31.
+
+Spread of the effect by party (log share, Westminster against the Assembly's
+ground, 121 party-seat cases):
+
+| | SF | PBP | DUP | Alliance | TUV | Aontú | Green | SDLP | UUP |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| spread | 0.11 | 0.19 | 0.24 | 0.27 | 0.27 | 0.28 | 0.40 | 0.48 | 0.53 |
+
+* **Mid-sized parties move most.** Not the smallest: PBP and Aontú are steadier
+  than UUP and SDLP, so this is not a small-numbers artefact.
+* **It is mostly a first-past-the-post phenomenon.** The same comparison between
+  two STV elections — Assembly against council — gives roughly half the spread
+  (SF 0.10, UUP 0.27) and a largest move of ×1.8.
+* **It is what the Westminster floor stands for.** That floor is 0.55 pairwise,
+  about 0.39 a party; UUP, SDLP and Green sit at or above it, SF far below.
+
+**Is it incentive or capacity?** Each case was scored by how close the party was
+to leading on the other elections' ground, and the move compared:
+
+| Position | n | Mean move |
+|---|---:|---:|
+| Safe lead | 6 | ×1.00 |
+| Narrow lead | 12 | ×1.20 |
+| Close behind | 21 | ×1.19 |
+| Middling | 34 | ×0.94 |
+| Far behind | 48 | ×0.92 |
+
+Parties in contention do gain about a fifth, and also-rans lose about a
+twelfth — but that accounts for only **9% of the variance**, and the per-party
+spreads are unchanged by controlling for it (UUP 0.53 → 0.54, SDLP 0.48 → 0.44,
+SF 0.11 → 0.09). So the asymmetry is party-shaped, not position-shaped.
+
 ### Seat-count sanity check
 
 Does voters v0 reproduce real results on real boundaries? This is a
@@ -816,6 +859,33 @@ extreme modes still work on the party's share.
 
 * Who stands *per region* (pacts, local stand-asides, thresholds). Standing
   aside and merging are built, but only NI-wide.
+* **A party election strategy layer** (owner's idea): every so often, each
+  party in turn spends a budget — proportional to its support — across the
+  constituencies where it might win, the spend lifting its vote at the expense
+  of the parties whose voters transfer to it most readily. It aims at the
+  clearest remaining error: the seats we miss are the concentrated-campaign
+  ones (North Antrim, South Antrim, Foyle, Belfast South).
+
+  What [the measurement](#campaign-concentration) says about building it:
+  * The ceiling is real and bounded, about ×2.2 in share, so the effect size
+    has a calibration rather than a guess.
+  * The hoped-for elegance is not there. One uniform effect size plus an
+    optimiser would produce a competitiveness-shaped pattern, and
+    competitiveness explains only 9% of what actually happens. Matching
+    reality means per-party ceilings as an input, which is closer to assuming
+    the answer.
+  * It splits in two: a modest strategic part (×1.2 in contention, ×0.9 for
+    also-rans) that an optimiser can genuinely generate, and a much larger
+    seat-level lottery — Hanna, Swann, Eastwood — that is candidate-specific,
+    unpredictable from position, and already what the Westminster floor
+    represents.
+  * It would belong to first past the post: the STV comparison gives about
+    half the spread.
+  * Watch for best-response oscillation if parties re-optimise against each
+    other every N steps; one greedy pass in random order avoids it.
+  * Saving budget by standing aside is a separate question -- standing is
+    driven by pacts and principle too, and the party editor already covers it.
+
 * **Party compatibility from the transfer matrix** (owner's suggestion): rank
   how close parties are by how freely their voters transfer, and use that to
   put a number on abstention or defection after a merger — a merger of two
