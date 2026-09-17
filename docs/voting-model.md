@@ -989,8 +989,54 @@ extreme modes still work on the party's share.
   ([standing v0](#standing-thresholds-standing-v0)), which covers a party
   skipping a region it is weak in. What it cannot express is a party skipping a
   region it is *strong* in to give an ally a clear run — the DUP in Fermanagh
-  and South Tyrone, Sinn Féin in Belfast South — which needs a notion of which
-  parties would deal with which, and over what.
+  and South Tyrone, Sinn Féin in Belfast South. Measured and **not recommended**
+  for building; the findings, since the question will come round again:
+
+  * **The arithmetic does not predict the real pacts.** Form a pact wherever a
+    bloc's split costs it the seat, and on the real boundaries the rule fires in
+    4 of 18 seats (East Londonderry, Upper Bann, North Down, Belfast East) —
+    none of them a seat where a pact actually happened. The reason is that no
+    2024 pact was decisive: the DUP stood aside in Fermanagh and South Tyrone
+    and Sinn Féin still won by 8.9%; the UUP stood aside in Belfast North, SF by
+    13.9%; Sinn Féin stood aside in Belfast South and the SDLP won by 28.8%,
+    which it would have anyway. Meanwhile East Londonderry — decided by 0.4%,
+    the tightest seat in Northern Ireland, and one a unionist pact would plainly
+    have taken — had no pact at all. Poor recall and poor precision on the only
+    cases we can see. Pacts are bloc solidarity and habit (the same handful of
+    seats recur since 2015) as much as calculation.
+  * **Tactical voting already does most of the work.** With the viability model
+    on, the seats a pact would flip on real boundaries drop from 4 to 1 of 18.
+    Voters in a tight seat are already deserting the weaker bloc partner, so a
+    formal pact adds about a third of what its raw transfer implies — and
+    modelling both risks counting the same coordination twice.
+  * **On a gerrymandered map it depends entirely on how disciplined the pact
+    is.** Over 3 gerrymander targets × 2 seeds (108 seats), letting a bloc fold
+    *every* junior partner at once moved 10 seats — Sinn Féin's 14-seat map
+    falls to 10 on both seeds. Restricted to the pairwise pacts that actually
+    occur, one partner stepping back, it moved 2. A gerrymander against
+    unionism works by splitting it three ways, and folding either the UUP or
+    TUV alone does not clear Sinn Féin; only folding both does. **Gerrymandering
+    a three-way split bloc is robust to pairwise coordination and vulnerable
+    only to total coordination.**
+  * **Pacts are a unionist instrument here.** A DUP-drawn map offered no
+    available pact at all on either seed: its victim is the nationalist bloc,
+    which is not split — SF at 30.3% against the SDLP's 9.3% — so there is
+    nothing to coordinate. Unionism is the fragmented bloc (23.3 / 11.0 / 6.1),
+    so it is the one with a counter-move.
+  * **The party editor already covers the version that matters.** "What if
+    unionism ran one candidate?" is a DUP + UUP + TUV merge, available now, and
+    by the measurement above that global merge is exactly the disciplined case
+    with real consequences. A pact feature would add the per-region refinement
+    of something the app already does bluntly, for the case worth 2 seats in
+    108.
+  * **It could not be validated in any case.** The three real pact seats are
+    among the ones the model fits worst — it has SF winning Fermanagh and South
+    Tyrone by 31% where the truth is 8.9%.
+  * What would be needed to do better: 2015, 2017 and 2019 Westminster results,
+    which are not in the repo (`data/dz21_to_pc08.csv` already maps the old
+    boundaries, so they are usable). That would give roughly 15 pact events over
+    ~72 seat-elections. Given the first finding, expect the best predictor to
+    come out as "there was a pact here last time" — history, not a model.
 * **A party election strategy layer** (owner's idea): every so often, each
   party in turn spends a budget — proportional to its support — across the
   constituencies where it might win, the spend lifting its vote at the expense
