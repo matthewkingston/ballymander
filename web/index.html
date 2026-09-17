@@ -17,8 +17,9 @@
   <div id="map"></div>
 
   <div id="panel">
-    <!-- The mark runs the full height of the name and the mode switch beside
-         it, which is what gives it room to read as the mural it is.
+    <!-- The mark runs the full height of the name, the mode switch and the run
+         buttons beside it, which is what gives it room to read as the mural it
+         is.
          Which set of variables the run is steered by: election mode swaps the
          demographic blocks for the party block; the hidden side is switched
          off, never left steering unseen. -->
@@ -31,14 +32,13 @@
             Demographics</button>
           <button id="mode-election" type="button" aria-pressed="false">Election</button>
         </div>
+        <div class="ctl-buttons">
+          <button id="ctl-go" type="button" disabled>GO</button>
+          <button id="ctl-pause" type="button" disabled>PAUSE</button>
+          <button id="ctl-stop" type="button" disabled>STOP</button>
+        </div>
       </div>
     </header>
-
-    <div class="ctl-buttons">
-      <button id="ctl-go" type="button" disabled>GO</button>
-      <button id="ctl-pause" type="button" disabled>PAUSE</button>
-      <button id="ctl-stop" type="button" disabled>STOP</button>
-    </div>
 
     <div class="ctl-grid">
       <!-- Boundaries that actually exist, as a starting point. Only offered

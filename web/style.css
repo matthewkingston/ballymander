@@ -55,13 +55,13 @@ html, body {
   display: flex;
   align-items: stretch;
   gap: 11px;
-  margin: 0 0 11px;
+  margin: 0 0 13px;
 }
 .brand img {
   flex: none;
   /* Line art on transparency, so it carries no background of its own. Sized by
      width, with the height left to follow the drawing's own proportions. */
-  width: 74px;
+  width: 106px;
   height: auto;
   align-self: center;
 }
@@ -218,12 +218,13 @@ html, body {
 }
 .ctl-grid input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-.ctl-buttons { display: flex; gap: 8px; margin-bottom: 13px; }
+.ctl-buttons { display: flex; gap: 6px; }
+.brand + * { margin-top: 0; }
 .ctl-buttons button {
   font: inherit;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   flex: 1;
   padding: 6px 0;
   color: #fff;
