@@ -32,7 +32,9 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10);
   backdrop-filter: blur(6px);
-  width: 350px;
+  /* 20px wider than the controls need, which is what the scrollbar gutter
+     takes back. */
+  width: 370px;
   max-height: calc(100% - 32px);
   overflow-y: auto;
   /* Room for the scrollbar whether or not one is showing: otherwise every
@@ -160,8 +162,33 @@ html, body {
   border: 1.5px solid currentColor;
   border-radius: 50%;
 }
-.add-variable select[hidden] { display: none; }
-.add-variable select { width: 100%; }
+.add-menu[hidden] { display: none; }
+.add-menu {
+  display: flex;
+  flex-direction: column;
+  /* Thirteen things can be added and the panel is not always tall enough for
+     them: the menu scrolls on its own rather than pushing the panel about. */
+  max-height: 232px;
+  overflow-y: auto;
+  margin-top: 5px;
+  padding: 3px;
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(20, 34, 48, 0.12);
+}
+.add-item {
+  padding: 4px 7px;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.add-item:hover, .add-item:focus-visible { background: rgba(28, 37, 48, 0.06); }
 
 /* The party editor sits in the run of controls rather than under them, so it
    spans the grid -- and without the rule a demo block carries, since a single

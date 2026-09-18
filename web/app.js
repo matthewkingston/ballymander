@@ -397,38 +397,50 @@ function removeVariable(v) {
   if (run.model) { sync(); readout(); drawBars(); }
 }
 
+/* The menu is built rather than borrowed from a <select>, because a native
+ * dropdown swallows the click that dismisses it: the page never hears it, so
+ * the collapsed select would sit there until something else was clicked. */
 function rebuildAddMenu() {
   const taken = new Set(variables.map((v) => v.key));
   els.add.textContent = '';
   for (const entry of catalogue()) {
     if (taken.has(entry.key) || !canSteer(entry)) continue;
-    els.add.append(el('option', { value: entry.key },
-      entry.isParty ? entityLabel(entry.party) : entry.def.label));
+    const item = el('button', {
+      class: 'add-item', type: 'button', role: 'menuitem', 'data-key': entry.key,
+      text: entry.isParty ? entityLabel(entry.party) : entry.def.label,
+    });
+    item.addEventListener('click', () => chooseVariable(entry.key));
+    els.add.append(item);
   }
-  // Nothing selected rather than a blank first option: the menu offers what can
-  // be added and nothing else, and with no selection every option is a change,
-  // including whichever one happens to be first.
-  els.add.selectedIndex = -1;
-  const nothingLeft = !els.add.options.length;
-  els.add.disabled = nothingLeft;
-  els.addOpen.disabled = nothingLeft;
+  els.addOpen.disabled = !els.add.children.length;
 }
 
 /* The menu is not a fixture: the plus asks for it, it answers, and it goes away
  * again -- whether something was picked or the pointer went elsewhere. */
 function openAddMenu() {
+  if (els.addOpen.disabled) return;
   els.addOpen.hidden = true;
   els.add.hidden = false;
-  els.add.selectedIndex = -1;
-  els.add.focus();
-  // Where the browser allows it the list drops open on the one click; where it
-  // does not, the select is focused and a second click opens it.
-  try { els.add.showPicker(); } catch { /* not supported, which is fine */ }
+  const first = els.add.querySelector('.add-item');
+  if (first) first.focus();
+  // The panel scrolls, and the menu may open below its edge: bring it into
+  // view rather than leaving it half cut off.
+  els.add.scrollIntoView({ block: 'nearest' });
 }
 
 function closeAddMenu() {
   els.add.hidden = true;
   els.addOpen.hidden = false;
+}
+
+function chooseVariable(key) {
+  closeAddMenu();
+  const v = addVariable(key);
+  if (!v) return;
+  // Opened on arrival: a variable is added in order to set it up.
+  v.body.hidden = false;
+  v.toggle.setAttribute('aria-expanded', 'true');
+  if (run.model) { sync(); readout(); drawBars(); }
 }
 
 /* The page follows the list: the results selector, the readout rows and the
@@ -1614,18 +1626,14 @@ async function main() {
   });
 
   els.addOpen.addEventListener('click', openAddMenu);
-  els.add.addEventListener('blur', closeAddMenu);
-  els.add.addEventListener('change', () => {
-    const key = els.add.value;
-    els.add.selectedIndex = -1;
-    closeAddMenu();
-    if (!key) return;
-    const v = addVariable(key);
-    if (!v) return;
-    // Opened on arrival: a variable is added in order to set it up.
-    v.body.hidden = false;
-    v.toggle.setAttribute('aria-expanded', 'true');
-    if (run.model) { sync(); readout(); drawBars(); }
+  // Anywhere else closes it, first click and all: the menu is ours, so the
+  // click that dismisses it reaches the page like any other.
+  document.addEventListener('pointerdown', (e) => {
+    if (els.add.hidden) return;
+    if (!els.add.contains(e.target) && e.target !== els.addOpen) closeAddMenu();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !els.add.hidden) { closeAddMenu(); els.addOpen.focus(); }
   });
 
   // Without the voter file there are no parties to steer by; the demographics

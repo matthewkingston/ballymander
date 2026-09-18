@@ -78,9 +78,8 @@ await page.evaluate(() => {
   // shape. Blocks are generated from one definition, party or demographic
   // alike, so this checks the generation as much as the terms.
   const add = (key) => {
-    const sel = document.getElementById('ctl-add');
-    sel.value = key;
-    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    document.getElementById('ctl-add-open').click();
+    document.querySelector(`#ctl-add [data-key="${key}"]`).click();
   };
   for (const [key, want] of [['rel', 'gerrymander'], ['age', 'extreme'],
                              ['orient', 'average'], ['grade', 'extreme']]) {
@@ -293,9 +292,8 @@ const painted = await page.evaluate(() => {
 // the wiring: that the right things show, and that what the panel says matches
 // what the model holds.
 await page.evaluate(() => {
-  const sel = document.getElementById('ctl-add');
-  sel.value = 'party:DUP';
-  sel.dispatchEvent(new Event('change', { bubbles: true }));
+  document.getElementById('ctl-add-open').click();
+  document.querySelector('#ctl-add [data-key="party:DUP"]').click();
 });
 const electionOptions = await page.evaluate(() =>
   [...document.querySelectorAll('#bars-stat option')].map((o) => o.value));
@@ -485,7 +483,7 @@ const editorState = () => page.evaluate(() => ({
   selected: [...document.querySelectorAll('.pe-row input')].filter((b) => b.checked).length,
   votes: window.__model.parties.map((q) => Math.round(Array.from(
     { length: window.__model.N }, (_, r) => q.rSum[r]).reduce((a, b) => a + b, 0))),
-  offered: [...document.getElementById('ctl-add').options].map((o) => o.text),
+  offered: [...document.querySelectorAll('#ctl-add .add-item')].map((b) => b.textContent),
   // The party variables on the page, by the name their block carries.
   steering: [...document.querySelectorAll('#variables .demo-toggle')]
     .map((b) => b.textContent.replace('\u25B8', '').trim()),
@@ -564,7 +562,7 @@ election.removed = await page.evaluate(() => {
   const before = {
     blocks: document.querySelectorAll('#variables .demo-block').length,
     options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
-    offered: [...document.getElementById('ctl-add').options].map((o) => o.value),
+    offered: [...document.querySelectorAll('#ctl-add .add-item')].map((b) => b.dataset.key),
   };
   document.querySelector('#rel-body').previousElementSibling
     .querySelector('.var-remove').click();
@@ -572,7 +570,7 @@ election.removed = await page.evaluate(() => {
     before,
     blocks: document.querySelectorAll('#variables .demo-block').length,
     options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
-    offered: [...document.getElementById('ctl-add').options].map((o) => o.value),
+    offered: [...document.querySelectorAll('#ctl-add .add-item')].map((b) => b.dataset.key),
     rowGone: document.getElementById('run-var-rel') === null,
     weight: window.__model.demoByKey.rel.weight,
     mode: window.__model.demoByKey.rel.mode,
