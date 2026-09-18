@@ -1013,10 +1013,22 @@ function addZoneLayers(map, geojson) {
  * Terms marked `data-off` get one detent below the range, which reads as off.
  * Population has no such detent: it is the reference term and switching it off
  * entirely would leave nothing anchoring the regions to equal population. */
+/* Weights land on a grid that coarsens as they grow: 0.01 apart below 0.5, then
+ * 0.05, 0.1 and 0.5. The slider itself stays logarithmic -- it is the value
+ * coming off it that snaps -- which keeps two decimal places as the most any
+ * weight ever needs, and stops the figure beside a label claiming a precision
+ * nobody chose. 0.191 was never a considered number. */
+const WEIGHT_STEPS = [[0.5, 0.01], [1, 0.05], [5, 0.1], [Infinity, 0.5]];
+
+function snapWeight(w) {
+  const [, step] = WEIGHT_STEPS.find(([limit]) => w < limit);
+  return Number((Math.round(w / step) * step).toFixed(2));
+}
+
 function weightOf(el) {
   const v = Number(el.value);
   if (el.dataset.off !== undefined && v <= Number(el.min) + 1e-9) return 0;
-  return 10 ** v;
+  return snapWeight(10 ** v);
 }
 
 /* Flips between recombinations. Log like the weights, but the "never" detent
@@ -1031,7 +1043,7 @@ function formatInterval(v) {
 }
 
 function formatWeight(w) {
-  return w === 0 ? 'off' : String(Number(w.toPrecision(3)));
+  return w === 0 ? 'off' : String(w);      // already snapped, so already short
 }
 
 /* --- region colour ------------------------------------------------------- */
