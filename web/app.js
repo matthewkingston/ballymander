@@ -352,7 +352,11 @@ function buildVariable(entry) {
 
   v.block = el('div', { class: 'demo-block' },
     el('div', { class: 'ctl-grid' },
-      el('div', { class: 'ctl-head' }, v.toggle, v.modeLabel, v.wValue, v.remove), v.w),
+      el('div', { class: 'ctl-head' }, v.toggle, v.modeLabel,
+        // The weight and the remove button travel together, so a head too long
+        // for one line puts the figure on the second rather than leaving the
+        // button down there on its own looking like a gap.
+        el('span', { class: 'ctl-head-end' }, v.wValue, v.remove)), v.w),
     v.body);
   els.variables.append(v.block);
 

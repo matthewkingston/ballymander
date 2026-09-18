@@ -242,6 +242,12 @@ html, body {
 
 /* Every slider readout, whether written into the HTML or generated. */
 .ctl-grid label span, .ctl-head span { font-variant-numeric: tabular-nums; }
+.ctl-head-end {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  white-space: nowrap;
+}
 
 /* Form controls do not inherit the body font. */
 .ctl-grid input {
