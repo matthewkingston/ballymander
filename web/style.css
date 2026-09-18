@@ -137,6 +137,29 @@ html, body {
 }
 .ctl-more { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
 
+/* Two checkboxes on one line, spanning both columns of the grid. Each label
+   wraps its own box so the whole phrase is the hit target. */
+.ctl-checks {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+}
+.ctl-checks[hidden] { display: none; }
+.ctl-checks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.ctl-checks label[hidden] { display: none; }
+.ctl-checks input { margin: 0; }
+
+/* The party editor sits in the run of controls rather than under them, so it
+   spans the grid. */
+#party-editor { grid-column: 1 / -1; }
+
 /* --- demographics, collapsible ------------------------------------------ */
 /* One block per demographic, built by app.js from the definition table in
    regions.js. Collapsed still shows the weight slider and the current mode,

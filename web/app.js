@@ -92,12 +92,8 @@ const els = {
   stop: document.getElementById('ctl-stop'),
   runPhase: document.getElementById('run-phase'),
   runDev: document.getElementById('run-dev'),
-  runShape: document.getElementById('run-shape'),
-  runPShape: document.getElementById('run-pshape'),
-  runCut: document.getElementById('run-cut'),
   runRecom: document.getElementById('run-recom'),
   runMoves: document.getElementById('run-moves'),
-  runScoreRow: document.getElementById('run-score-row'),
   runScore: document.getElementById('run-score'),
   runBest: document.getElementById('run-best'),
   results: document.getElementById('results'),
@@ -299,8 +295,11 @@ function buildDemoControls() {
 
     // Mode-dependent, because the useful number differs: how far apart the
     // regions are for average/extreme, how many clear the bar for gerrymander.
+    // Last in the block, with the party readout: these are what the map is
+    // being drawn for, not how the drawing is going.
     const readout = el('dd', { id: `run-demo-${def.key}`, text: '\u2014' });
-    els.runScoreRow.before(el('div', {}, el('dt', { text: def.label }), readout));
+    document.getElementById('run').append(
+      el('div', {}, el('dt', { text: def.label }), readout));
 
     els.barsStat.querySelector('option[value="cut"]')
       .before(el('option', { value: `demo:${def.key}` }, def.label));
@@ -1282,20 +1281,14 @@ function setButtons(state) {   // idle | running | paused
 function readout() {
   const m = run.model;
   const phase = {
-    build: `building ${nf.format(m.assigned)}/${nf.format(m.n)}`,
-    optimise: 'optimising',
-    done: 'stopped — best shown',
+    build: `Building ${nf.format(m.assigned)}/${nf.format(m.n)}`,
+    optimise: 'Optimising',
+    done: 'Stopped — best shown',
   }[run.phase] || '—';
   els.runPhase.textContent = run.paused ? `${phase} — paused` : phase;
   els.runDev.textContent = pct.format(m.maxDeviation);
   els.runMoves.textContent = nf.format(m.moves);
   els.runRecom.textContent = nf.format(m.recombinations);
-  // The legible numbers: 1 is a circle for land, and evenly-spread population
-  // for people. The normalised terms are measured per move, so their own
-  // values are large and say little.
-  els.runShape.textContent = m.meanPenalty.toFixed(2);
-  els.runPShape.textContent = m.meanPopPenalty.toFixed(2);
-  els.runCut.textContent = nf.format(m.cutRaw);
   for (const u of demoUI) {
     const live = m.demoByKey[u.def.key];
     u.readout.textContent = !live || live.weight === 0 ? '—'

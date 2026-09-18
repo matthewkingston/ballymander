@@ -58,18 +58,24 @@
       </select>
       <label for="ctl-n">Regions</label>
       <input id="ctl-n" type="number" min="1" max="500" step="1" value="18">
-      <label for="ctl-tactical" class="fptp-only" hidden>Tactical voting</label>
-      <input id="ctl-tactical" class="fptp-only" type="checkbox" checked hidden>
       <label for="ctl-seats" class="stv-only" hidden>Elected/Region</label>
       <!-- No upper bound: one region electing everyone is a legitimate thing to
            look at, and is roughly what a national PR list would do. -->
       <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
              value="5" hidden>
-      <!-- Parties only contest regions where they have the support to bother:
-           standing v0, a threshold per party per election type. -->
-      <label for="ctl-standing" class="election-only" hidden>Realistic standing</label>
-      <input id="ctl-standing" class="election-only" type="checkbox" checked hidden>
-      <label for="ctl-seed">Seed</label>
+      <!-- Both of the ways a ballot differs from the voters behind it, on one
+           line: who deserts a party that cannot win, and who is not on the
+           ballot at all (standing v0, a threshold per party per election). -->
+      <div class="ctl-checks election-only" hidden>
+        <label class="fptp-only" for="ctl-tactical">
+          <input id="ctl-tactical" type="checkbox" checked> Tactical voting</label>
+        <label for="ctl-standing">
+          <input id="ctl-standing" type="checkbox" checked> Standing threshold</label>
+      </div>
+      <!-- Which parties are on the ballot, and which have merged. Built by
+           app.js; its state outlives a run. -->
+      <div id="party-editor" hidden></div>
+      <label for="ctl-seed">Random seed</label>
       <input id="ctl-seed" type="number" min="0" step="1" value="1">
       <label for="ctl-temp">Temperature</label>
       <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
@@ -94,9 +100,6 @@
          gerrymander controls. Built by app.js from web/data/dz_voters.json. -->
     <div id="party-block" hidden></div>
 
-    <!-- Which parties are on the ballot, and which have merged. Built by
-         app.js; its state outlives a run. -->
-    <div id="party-editor" hidden></div>
 
     <div class="ctl-grid ctl-more">
       <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
@@ -123,15 +126,15 @@
 
     <div id="overall">
     <dl id="run">
+      <!-- What a person can actually read something into. The shape penalties
+           and the cut-edge count were figures the algorithm cares about and
+           nobody else; they are still on the model for the tests. -->
       <div class="run-wide"><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
-      <div><dt>Max pop dev</dt><dd id="run-dev">&mdash;</dd></div>
-      <div><dt>Moves</dt><dd id="run-moves">&mdash;</dd></div>
+      <div><dt>Flips</dt><dd id="run-moves">&mdash;</dd></div>
       <div><dt>ReCom</dt><dd id="run-recom">&mdash;</dd></div>
-      <div><dt>Land</dt><dd id="run-shape">&mdash;</dd></div>
-      <div><dt>People</dt><dd id="run-pshape">&mdash;</dd></div>
-      <div><dt>Cut</dt><dd id="run-cut">&mdash;</dd></div>
       <div id="run-score-row"><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
-      <div><dt>Best</dt><dd id="run-best">&mdash;</dd></div>
+      <div><dt>Best score</dt><dd id="run-best">&mdash;</dd></div>
+      <div><dt>Max pop dev</dt><dd id="run-dev">&mdash;</dd></div>
     </dl>
 
     <!-- Election mode: seats by party. Filled by app.js; the caption names the

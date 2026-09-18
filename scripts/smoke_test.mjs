@@ -94,7 +94,7 @@ const gerryVisible = await page.evaluate(() => ({
 }));
 await page.click('#ctl-go');
 await page.waitForFunction(
-  () => document.getElementById('run-phase').textContent.startsWith('optimising'),
+  () => document.getElementById('run-phase').textContent.startsWith('Optimising'),
   { timeout: 60000 }
 );
 await page.evaluate(() => new Promise(r => setTimeout(r, 1500)));
@@ -150,14 +150,17 @@ const regions = await page.evaluate(() => {
     resultsShown: !document.getElementById('results').hidden,
     phase: document.getElementById('run-phase').textContent,
     maxDev: document.getElementById('run-dev').textContent,
-    shapeShown: document.getElementById('run-shape').textContent,
     meanPenalty: Number(m.meanPenalty.toFixed(3)),
     meanPopPenalty: Number(m.meanPopPenalty.toFixed(3)),
     sealed: m.sealed,
     cutTotal: m.cutRaw,
     recomTotal: m.recombinations,
     recomShown: document.getElementById('run-recom').textContent,
-    cutShown: document.getElementById('run-cut').textContent,
+    movesShown: document.getElementById('run-moves').textContent,
+    moves: m.moves,
+    // The overall block is deliberately short: phase, flips, recom, score, best
+    // score, max pop dev, and then whatever the map is being drawn for.
+    statLabels: [...document.querySelectorAll('#run dt')].map((d) => d.textContent),
     relMode: m.demoByKey.rel.mode,
     relSeats: `${m.demoSeats('rel')}/${m.N}`,
     relShown: document.getElementById('run-demo-rel').textContent,
@@ -572,8 +575,12 @@ if (!statSwitch || statSwitch.before.max === statSwitch.demo
     || statSwitch.demo === statSwitch.after.max) {
   problems.push('switching the statistic did not rescale the axis');
 }
-if (!regions || regions.cutShown !== regions.cutTotal.toLocaleString('en-GB')) {
-  problems.push('cut edge readout does not match the model');
+if (!regions || regions.movesShown !== regions.moves.toLocaleString('en-GB')) {
+  problems.push('flips readout does not match the model');
+}
+const WANT_STATS = ['Phase', 'Flips', 'ReCom', 'Score', 'Best score', 'Max pop dev'];
+if (!regions || WANT_STATS.some((label, i) => regions.statLabels[i] !== label)) {
+  problems.push(`overall stats wrong: ${regions && regions.statLabels.join(', ')}`);
 }
 if (!regions || !(regions.recomTotal > 0)) problems.push('no recombinations happened');
 if (!regions || regions.recomShown !== regions.recomTotal.toLocaleString('en-GB')) {
