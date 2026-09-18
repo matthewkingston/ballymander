@@ -157,8 +157,10 @@ html, body {
 .ctl-checks input { margin: 0; }
 
 /* The party editor sits in the run of controls rather than under them, so it
-   spans the grid. */
+   spans the grid -- and without the rule a demo block carries, since a single
+   line here divides the controls into two halves that mean nothing. */
 #party-editor { grid-column: 1 / -1; }
+#party-editor .demo-block { margin-top: 0; padding-top: 0; border-top: 0; }
 
 /* --- demographics, collapsible ------------------------------------------ */
 /* One block per demographic, built by app.js from the definition table in
