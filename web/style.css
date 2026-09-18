@@ -55,10 +55,9 @@ html, body {
 }
 .brand img {
   display: block;
-  /* Short of the full width, so the gable reads as a sign hung on the panel
-     rather than as the panel's own top edge -- and so it costs less of the
-     height before the first control. */
-  width: 80%;
+  /* Just short of the full width, so the gable reads as a sign hung on the
+     panel rather than as the panel's own top edge. */
+  width: 90%;
   height: auto;
   margin: 0 auto;
 }
