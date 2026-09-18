@@ -48,38 +48,15 @@ html, body {
 /* --- mode switch --------------------------------------------------------- */
 /* Two buttons acting as one control: which set of variables the run steers by.
    The pressed one is filled, so the current mode reads at a glance. */
-/* Name and mark at the top of the panel. The mark stands to the left of both
-   the name and the mode switch, tall enough for the mural on the gable to be
-   the thing you see rather than a smudge. */
+/* The gable carries the name, so it stands alone across the top of the panel at
+   its own proportions. Line art on transparency: no background of its own. */
 .brand {
-  display: flex;
-  align-items: stretch;
-  gap: 11px;
-  margin: 0 0 13px;
+  margin: 0 0 11px;
 }
 .brand img {
-  flex: none;
-  /* Line art on transparency, so it carries no background of its own. Sized by
-     width, with the height left to follow the drawing's own proportions. */
-  width: 106px;
+  display: block;
+  width: 100%;
   height: auto;
-  align-self: center;
-}
-.brand-side {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 7px;
-}
-.brand h1 {
-  margin: 0;
-  font-size: 23px;
-  font-weight: 600;
-  line-height: 1.1;
-  letter-spacing: 0.01em;
-  color: var(--ink);
 }
 
 .mode-switch {
@@ -159,7 +136,7 @@ html, body {
 /* The party editor sits in the run of controls rather than under them, so it
    spans the grid -- and without the rule a demo block carries, since a single
    line here divides the controls into two halves that mean nothing. */
-#party-editor { grid-column: 1 / -1; }
+#party-editor { grid-column: 1 / -1; margin-top: 4px; }
 #party-editor .demo-block { margin-top: 0; padding-top: 0; border-top: 0; }
 
 /* --- demographics, collapsible ------------------------------------------ */
