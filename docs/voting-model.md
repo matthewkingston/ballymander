@@ -9,8 +9,8 @@ voting systems and boundaries, and the aim is "decently plausible".
 This document records where the model stands at the **voters v1 checkpoint**
 (prior v3, transfer matrix v0, and the fit to three elections): what is built,
 the evidence behind each choice, and, kept separate, what is still open. What
-of it reaches the map is in [In the app](#in-the-app); the demographics mode and
-`build/dz_attributes.csv` are unchanged.
+of it reaches the map is in [In the app](#in-the-app); the demographic terms
+and `build/dz_attributes.csv` are unchanged.
 
 Every decision below was made explicitly by the project owner. Choices made
 during implementation that were flagged but not separately discussed are
@@ -873,8 +873,7 @@ and tactical voting, which the model deliberately doesn't represent.
 
 ## In the app
 
-The map's **Election mode** draws seats from `voters_v1_dz.csv`, under first
-past the post or STV: `scripts/build_app_voters.py` writes each DZ's electorate,
+The map draws seats from `voters_v1_dz.csv`, under first past the post or STV: `scripts/build_app_voters.py` writes each DZ's electorate,
 voter shares and [turnout index](#turnout-v0) to `web/data/dz_voters.json`, and
 a zone's votes are
 
@@ -902,8 +901,7 @@ and is visible to the app. Nothing between the anchors is evidence.
 
 The level scales a whole region alike and so changes no winner; the index does
 not, and is the reason an equal-population region is not an equal-voter one. See
-"Demographics and Election modes" in
-[the README](../README.md#demographics-and-election-modes).
+"Variables" in [the README](../README.md#variables).
 
 ### Tactical voting
 

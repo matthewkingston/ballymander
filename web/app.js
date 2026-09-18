@@ -61,11 +61,9 @@ const els = {
   cutValue: document.getElementById('ctl-cut-value'),
   recom: document.getElementById('ctl-recom'),
   recomValue: document.getElementById('ctl-recom-value'),
-  demoBlocks: document.getElementById('demo-blocks'),
-  partyBlock: document.getElementById('party-block'),
+  variables: document.getElementById('variables'),
+  add: document.getElementById('ctl-add'),
   partyEditor: document.getElementById('party-editor'),
-  modeDemographics: document.getElementById('mode-demographics'),
-  modeElection: document.getElementById('mode-election'),
   real: document.getElementById('ctl-real'),
   tactical: document.getElementById('ctl-tactical'),
   standing: document.getElementById('ctl-standing'),
@@ -99,6 +97,8 @@ const els = {
   results: document.getElementById('results'),
   resultsList: document.getElementById('results-list'),
   barsStat: document.getElementById('bars-stat'),
+  bonus: document.getElementById('ctl-bonus'),
+  bonusValue: document.getElementById('ctl-bonus-value'),
   bars: document.getElementById('bars'),
   barsMin: document.getElementById('bars-min'),
   barsMax: document.getElementById('bars-max'),
@@ -132,13 +132,33 @@ const PARTY_COLORS = {
   PBP: '#ef5a7a',
 };
 
-/* Which set of variables steers the run: 'demographics' or 'election'. The
- * hidden side's weights are forced to zero, so nothing steers unseen. */
-let uiMode = 'demographics';
 /* Which half of the results panel is showing: the whole map, or one region's
  * election in detail. */
 let panelView = 'overall';
-let election = null;      // set once web/data/dz_voters.json is loaded
+let voters = null;        // web/data/dz_voters.json, once loaded
+
+/* The election every drawn map holds. One election, so these are the page's,
+ * not any one variable's -- including the seat bonus, which scores the count
+ * itself rather than a party. */
+const elect = {
+  type: () => els.electionType.value,
+  seatsPer: () => Math.max(1, Number(els.seats.value) || 1),
+  bonus: () => Number(els.bonus.value) || 2,
+  // A zone's ballots: its electorate, its turnout index, and the level of
+  // whichever election is being simulated.
+  votes: (code) => {
+    const z = voters && voters.zones[code];
+    if (!z) return 0;
+    const levels = voters.levels || {};
+    return z.e * (z.t == null ? 1 : z.t) * (levels[els.electionType.value] || voters.turnout);
+  },
+  share: (code, party) => {
+    const z = voters && voters.zones[code];
+    if (!z) return 0;
+    const total = z.s.reduce((a, x) => a + x, 0) || 1;
+    return z.s[voters.parties.indexOf(party)] / total;
+  },
+};
 
 /* The region being shown in detail. Kept for the life of a run, so clicking
  * around the map and coming back lands where you left off; a new run starts at
@@ -181,7 +201,6 @@ for (const def of DEMOGRAPHICS) {
   BAR_STATS[`demo:${def.key}`] = {
     values: (m) => perRegion(m, (x, r) => x.regionDemo(def.key, r)),
     format: (v) => v.toFixed(def.decimals),
-    modes: ['demographics'],
   };
 }
 
@@ -197,35 +216,46 @@ function addPartyBarStats(parties) {
       // ("took a seat here") is joined by the count itself.
       wins: (m, r) => m.regionPartySeats(key, r) > 0,
       seats: (m, r) => m.regionPartySeats(key, r),
-      modes: ['election'],
     };
   }
 }
 
-/* The statistic list depends on the mode: shared terms always, then either the
- * demographics or the parties. Keeps the current choice if it still applies. */
+/* The map's own four always, then one entry per variable being steered -- so
+ * the results offer exactly what was asked for. Keeps the current choice if it
+ * is still on the list. */
+const MAP_STATS = { pop: 'Population', land: 'Land shape', people: 'People shape',
+                    cut: 'Cut edges' };
+
 function rebuildBarOptions() {
   const want = els.barsStat.value;
   els.barsStat.textContent = '';
-  for (const [key, stat] of Object.entries(BAR_STATS)) {
-    if (stat.modes && !stat.modes.includes(uiMode)) continue;
-    if (key.startsWith('party:') && entityHost(key.slice(6)) !== key.slice(6)) continue;
-    const label = key.startsWith('party:') ? `${entityLabel(key.slice(6))} votes`
-      : key.startsWith('demo:')
-        ? DEMOGRAPHICS.find((d) => d.key === key.slice(5)).label
-        : { pop: 'Population', land: 'Land shape', people: 'People shape',
-            cut: 'Cut edges' }[key];
+  for (const [key, label] of Object.entries(MAP_STATS)) {
     els.barsStat.append(el('option', { value: key }, label));
   }
-  els.barsStat.value = BAR_STATS[want] && (!BAR_STATS[want].modes
-    || BAR_STATS[want].modes.includes(uiMode)) ? want : 'pop';
+  for (const v of variables) {
+    els.barsStat.append(el('option', { value: barKey(v) },
+      v.isParty ? `${varLabel(v)} votes` : varLabel(v)));
+  }
+  const offered = [...els.barsStat.options].some((o) => o.value === want);
+  els.barsStat.value = offered ? want : 'pop';
 }
 
-/* --- demographic controls ------------------------------------------------ */
-/* One collapsible block per entry in DEMOGRAPHICS, plus its readout row, its
- * bar-chart entry and its two tooltip lines. All of it is generated, so a third
- * demographic is one entry in regions.js and nothing here or in the HTML. */
-const demoUI = [];
+/* --- variables ------------------------------------------------------------
+ *
+ * What the run is steered by. A variable is a party or a demographic -- the
+ * model scores both the same way, so nothing here needs to know which it has
+ * beyond the labels and the units of the gerrymander controls.
+ *
+ * The page carries as many as are asked for and no more: each brings its own
+ * block of controls, its readout row, its entry in the results selector and its
+ * two tooltip lines, and takes all of them away again when removed. A party and
+ * a demographic can be steered at once, and so can two parties.
+ *
+ * A new variable arrives at weight zero. Weights are shares of one budget, so
+ * an arriving variable would otherwise quietly dilute every variable already
+ * there; at zero it changes nothing until its slider is moved. */
+const variables = [];
+const varByKey = new Map();
 
 const el = (tag, attrs = {}, ...kids) => {
   const node = document.createElement(tag);
@@ -239,79 +269,149 @@ const el = (tag, attrs = {}, ...kids) => {
   return node;
 };
 
-function buildDemoControls() {
-  for (const def of DEMOGRAPHICS) {
-    const id = (part) => `ctl-${def.key}-${part}`;
-    const bodyId = `demo-${def.key}-body`;
-
-    const wValue = el('span', { text: 'off' });
-    const modeLabel = el('span', { class: 'demo-mode-label', text: 'average' });
-    const toggle = el('button', {
-      class: 'demo-toggle', type: 'button', 'aria-expanded': 'false',
-      'aria-controls': bodyId,
-    }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }),
-       ` ${def.label}`);
-    const w = el('input', {
-      id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
-      'data-weight': true, 'data-off': true,
-    });
-
-    const mode = el('select', { id: id('mode') },
-      ...['average', 'extreme', 'gerrymander'].map((v) =>
-        el('option', { value: v, selected: v === 'average' },
-          v[0].toUpperCase() + v.slice(1))));
-
-    // The threshold and steepness sliders carry the term's own units and
-    // range -- 0-1 for religion, years for age -- straight from its definition.
-    const [tMin, tMax, tStep] = def.thresholdRange;
-    const [sMin, sMax, sStep] = def.steepnessRange;
-    const tValue = el('span', { text: String(def.threshold) });
-    const sValue = el('span', { text: String(def.steepness) });
-    const t = el('input', {
-      id: id('t'), type: 'range', min: tMin, max: tMax, step: tStep,
-      value: def.threshold,
-    });
-    const st = el('input', {
-      id: id('s'), type: 'range', min: sMin, max: sMax, step: sStep,
-      value: def.steepness,
-    });
-    const above = el('input', { id: id('a'), type: 'checkbox', checked: true });
-
-    const gerry = el('div', {
-      id: `demo-${def.key}-gerry`, class: 'ctl-grid ctl-sub', hidden: true },
-      el('label', { for: id('t') }, 'Threshold ', tValue), t,
-      el('label', { for: id('s') }, 'Steepness ', sValue), st,
-      el('label', { for: id('a'), text: 'Above threshold' }), above);
-
-    const body = el('div', { id: bodyId, class: 'demo-body', hidden: true },
-      el('div', { class: 'ctl-grid ctl-sub' },
-        el('label', { for: id('mode'), text: 'Mode' }), mode),
-      gerry);
-
-    els.demoBlocks.append(el('div', { class: 'demo-block' },
-      el('div', { class: 'ctl-grid' },
-        el('div', { class: 'ctl-head' }, toggle, modeLabel, wValue), w),
-      body));
-
-    // Mode-dependent, because the useful number differs: how far apart the
-    // regions are for average/extreme, how many clear the bar for gerrymander.
-    // Last in the block, with the party readout: these are what the map is
-    // being drawn for, not how the drawing is going.
-    const readout = el('dd', { id: `run-demo-${def.key}`, text: '\u2014' });
-    document.getElementById('run').append(
-      el('div', {}, el('dt', { text: def.label }), readout));
-
-    els.barsStat.querySelector('option[value="cut"]')
-      .before(el('option', { value: `demo:${def.key}` }, def.label));
-
-    const tip = el('div');
-    const regionTip = el('div');
-    els.ttDemo.append(tip);
-    els.ttRegionDemo.append(regionTip);
-
-    demoUI.push({ def, toggle, body, modeLabel, wValue, w, mode, gerry,
-                  t, tValue, s: st, sValue, above, readout, tip, regionTip });
+/* Everything that could be steered: the demographics, then the parties in
+ * ballot order. `key` is the model's own term key, so a variable needs no
+ * translation to reach the model. */
+function catalogue() {
+  const out = DEMOGRAPHICS.map((def) => ({ key: def.key, def, isParty: false }));
+  if (voters) {
+    out.push(...voters.parties.map((party) => ({ key: `party:${party}`, party, isParty: true })));
   }
+  return out;
+}
+
+const varLabel = (v) => (v.isParty ? entityLabel(v.party) : v.def.label);
+/* The results selector keys demographics apart from the model's own keys. */
+const barKey = (v) => (v.isParty ? v.key : `demo:${v.key}`);
+
+/* A party that has been struck off, or merged into another, is no longer
+ * something to steer by: only entities can be. */
+function canSteer(entry) {
+  if (!entry.isParty) return true;
+  return ballotEntities().some((e) => e.host === entry.party);
+}
+
+function buildVariable(entry) {
+  // Accents folded rather than dropped, so Sinn Féin and Aontú get ids worth
+  // reading -- party-sinn-fein, party-aontu.
+  const slug = entry.key.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/gi, '-').toLowerCase();
+  const id = (part) => `ctl-${slug}-${part}`;
+  const bodyId = `${slug}-body`;
+  const v = { ...entry };
+
+  v.wValue = el('span', { text: 'off' });
+  v.modeLabel = el('span', { class: 'demo-mode-label', text: 'average' });
+  v.toggleName = el('span', { text: varLabel(entry) });
+  v.toggle = el('button', {
+    class: 'demo-toggle', type: 'button', 'aria-expanded': 'false',
+    'aria-controls': bodyId,
+  }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }), ' ', v.toggleName);
+  v.remove = el('button', {
+    class: 'var-remove', type: 'button', title: `Remove ${varLabel(entry)}`,
+    'aria-label': `Remove ${varLabel(entry)}`, text: '\u00D7',
+  });
+  v.w = el('input', {
+    id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
+    'data-weight': true, 'data-off': true,
+  });
+  v.mode = el('select', { id: id('mode') },
+    ...['average', 'extreme', 'gerrymander'].map((m) =>
+      el('option', { value: m, selected: m === 'average' },
+        m[0].toUpperCase() + m.slice(1))));
+
+  // A demographic's threshold carries its own units and range -- 0-1 for
+  // religion, years for age -- straight from its definition. A party's is a
+  // winning margin instead: its share minus the best other party's, because
+  // that, not a fixed share, is what takes a seat under first past the post.
+  const [tMin, tMax, tStep] = entry.isParty ? [-0.3, 0.3, 0.005] : entry.def.thresholdRange;
+  const [sMin, sMax, sStep] = entry.isParty ? [0.005, 0.15, 0.005] : entry.def.steepnessRange;
+  const t0 = entry.isParty ? 0 : entry.def.threshold;
+  const s0 = entry.isParty ? 0.02 : entry.def.steepness;
+  v.tValue = el('span', { text: String(t0) });
+  v.sValue = el('span', { text: String(s0) });
+  v.t = el('input', { id: id('t'), type: 'range', min: tMin, max: tMax, step: tStep, value: t0 });
+  v.s = el('input', { id: id('s'), type: 'range', min: sMin, max: sMax, step: sStep, value: s0 });
+  v.above = el('input', { id: id('a'), type: 'checkbox', checked: true });
+
+  v.tLabel = el('label', { for: id('t') },
+    entry.isParty ? 'Winning margin ' : 'Threshold ', v.tValue);
+  v.sLabel = el('label', { for: id('s') }, 'Steepness ', v.sValue);
+  v.dirLabel = el('label', { for: id('a'),
+    text: entry.isParty ? 'Above margin' : 'Above threshold' });
+  v.gerry = el('div', { id: `${slug}-gerry`, class: 'ctl-grid ctl-sub', hidden: true },
+    v.tLabel, v.t, v.sLabel, v.s, v.dirLabel, v.above);
+
+  v.body = el('div', { id: bodyId, class: 'demo-body', hidden: true },
+    el('div', { class: 'ctl-grid ctl-sub' },
+      el('label', { for: id('mode'), text: 'Mode' }), v.mode),
+    v.gerry);
+
+  v.block = el('div', { class: 'demo-block' },
+    el('div', { class: 'ctl-grid' },
+      el('div', { class: 'ctl-head' }, v.toggle, v.modeLabel, v.wValue, v.remove), v.w),
+    v.body);
+  els.variables.append(v.block);
+
+  // Mode-dependent, because the useful number differs: how far apart the
+  // regions are for average/extreme, how many clear the bar for gerrymander --
+  // and for a party, always the seats, since that is the result the map is for.
+  v.readout = el('dd', { id: `run-var-${slug}`, text: '\u2014' });
+  v.readoutRow = el('div', {}, el('dt', { text: varLabel(entry) }), v.readout);
+  document.getElementById('run').append(v.readoutRow);
+
+  v.tip = el('div');
+  v.regionTip = el('div');
+  (entry.isParty ? els.ttParty : els.ttDemo).append(v.tip);
+  if (!entry.isParty) els.ttRegionDemo.append(v.regionTip);
+  return v;
+}
+
+/* Add, remove, and the menu that offers what is not already there. */
+function addVariable(key) {
+  if (varByKey.has(key)) return varByKey.get(key);
+  const entry = catalogue().find((e) => e.key === key);
+  if (!entry || !canSteer(entry)) return null;
+  const v = buildVariable(entry);
+  variables.push(v);
+  varByKey.set(key, v);
+  wireVariable(v);
+  applyVariables();
+  return v;
+}
+
+function removeVariable(v) {
+  // Off, not merely unweighted: a term left in gerrymander mode would still be
+  // recomputed on every move for nothing.
+  if (run.model) run.model.setDemographic(v.key, 'off', 0, 0.02, true);
+  v.block.remove();
+  v.readoutRow.remove();
+  v.tip.remove();
+  v.regionTip.remove();
+  variables.splice(variables.indexOf(v), 1);
+  varByKey.delete(v.key);
+  applyVariables();
+  if (run.model) { sync(); readout(); drawBars(); }
+}
+
+function rebuildAddMenu() {
+  const taken = new Set(variables.map((v) => v.key));
+  els.add.textContent = '';
+  els.add.append(el('option', { value: '', selected: true }, '\u2014'));
+  for (const entry of catalogue()) {
+    if (taken.has(entry.key) || !canSteer(entry)) continue;
+    els.add.append(el('option', { value: entry.key },
+      entry.isParty ? entityLabel(entry.party) : entry.def.label));
+  }
+  els.add.disabled = els.add.options.length < 2;
+}
+
+/* The page follows the list: the results selector, the readout rows and the
+ * pie all show what is being steered and nothing else. */
+function applyVariables() {
+  rebuildAddMenu();
+  rebuildBarOptions();
+  applyElectionType();
 }
 
 /* --- seats pie ----------------------------------------------------------- */
@@ -353,7 +453,7 @@ function wedgePath(from, to) {
 
 function drawPie() {
   const m = run.model;
-  if (!election || !pieWedges.length || !m || !m.N) return;
+  if (!voters || !pieWedges.length || !m || !m.N) return;
   const seats = pieWedges.map((w) => m.partySeats(`party:${w.party}`));
   const key = seats.join(',');
   if (key === pieShown) return;      // nothing moved; leave the DOM alone
@@ -441,7 +541,7 @@ function initBallot(parties) {
 
 /* Hand the model the ballot and refresh everything that reads it. */
 function applyBallot() {
-  if (!run.model || !election) return;
+  if (!run.model || !voters) return;
   const standing = {};
   const merge = {};
   for (const item of ballot.items) {
@@ -452,7 +552,7 @@ function applyBallot() {
     }
   }
   run.model.setBallot({ standing, merge });
-  refreshPartyOptions();
+  refreshPartyVariables();
   rebuildBarOptions();
   readout();
   drawBars();
@@ -463,17 +563,18 @@ function applyBallot() {
 
 /* The gerrymander target follows the ballot: one entry per entity, named as the
  * editor names it. A party that has merged away is replaced by its host. */
-function refreshPartyOptions() {
-  if (!election) return;
-  const want = entityHost(election.party.value);
-  election.party.textContent = '';
-  for (const { host, label } of ballotEntities()) {
-    election.party.append(el('option', { value: host }, label));
+function refreshPartyVariables() {
+  // A party struck off the ballot, or merged into another, is no longer an
+  // entity and so is no longer something to steer by: its variable goes, and
+  // a host's keeps its place under whatever the merger ended up called.
+  for (const v of [...variables]) {
+    if (v.isParty && !canSteer(v)) removeVariable(v);
   }
-  election.party.value = ballotEntities().some((e) => e.host === want)
-    ? want : ballotEntities()[0].host;
-  election.toggleName.textContent = entityLabel(election.party.value);
+  sync();
+  for (const v of variables) v.readoutRow.querySelector('dt').textContent = varLabel(v);
+  applyVariables();
 }
+
 
 /* Ticking a box must not rebuild the list: the checkboxes would be replaced
  * mid-click and the next one would land on a detached node. Only the buttons
@@ -530,7 +631,7 @@ function editorAction(what) {
   } else {
     // Merge: one item at the top, holding every party of every item chosen.
     const members = chosen.flatMap((item) => item.members)
-      .sort((a, b) => election.voters.parties.indexOf(a) - election.voters.parties.indexOf(b));
+      .sort((a, b) => voters.parties.indexOf(a) - voters.parties.indexOf(b));
     const prev = {};
     for (const item of chosen) {
       for (const party of item.members) {
@@ -553,7 +654,7 @@ function byBallotOrder(a, b) {
   const mb = b.members.length > 1;
   if (ma !== mb) return ma ? -1 : 1;
   if (ma) return 0;
-  const order = election.voters.parties;
+  const order = voters.parties;
   return order.indexOf(a.members[0]) - order.indexOf(b.members[0]);
 }
 
@@ -601,7 +702,7 @@ function regionCaption(text) {
 
 /* First past the post: the region's votes as a pie, hover for the figures. */
 function drawRegionPie(m, r) {
-  const parties = election.voters.parties;   // slots; merged ones hold nothing
+  const parties = voters.parties;   // slots; merged ones hold nothing
   const votes = m.regionVotes(r, new Float64Array(parties.length));
   const total = votes.reduce((a, b) => a + b, 0) || 1;
   els.regionPie.textContent = '';
@@ -630,7 +731,7 @@ function drawRegionPie(m, r) {
  * rather than vanishing from the chart. Votes that have exhausted make up the
  * grey tail, which is why every bar is the same width. */
 function drawRegionStages(m, r) {
-  const parties = election.voters.parties;
+  const parties = voters.parties;
   const { quota, total, stages } = m.regionCount(r);
   els.regionStages.textContent = '';
   const scale = total || 1;
@@ -681,7 +782,7 @@ function drawRegion() {
   show(els.regionHint, !live);
   show(els.regionPie, false);
   show(els.regionStages, false);
-  if (!live || !election) {
+  if (!live || !voters) {
     els.regionTitle.textContent = '—';
     els.regionSeats.textContent = '—';
     regionCaption('');
@@ -699,7 +800,7 @@ function drawRegion() {
 }
 
 function applyView() {
-  const region = panelView === 'region' && uiMode === 'election' && election;
+  const region = panelView === 'region' && Boolean(voters);
   els.overall.hidden = Boolean(region);
   els.regionView.hidden = !region;
   els.viewOverall.classList.toggle('is-active', !region);
@@ -710,171 +811,65 @@ function applyView() {
   else if (run.model) { drawBars(); drawPie(); }
 }
 
-/* --- the party block ----------------------------------------------------- */
+/* --- steering -------------------------------------------------------------- */
 
-/* One block, not one per party: the party selector picks which of the nine the
- * run is steering. Same controls as a demographic, except that in gerrymander
- * mode the threshold is a winning margin -- the party's share minus the best
- * other party's -- because that, not a fixed share, is what wins a seat under
- * first past the post. */
-function buildPartyControls(voters) {
-  const id = (part) => `ctl-party-${part}`;
-  const wValue = el('span', { text: 'off' });
-  const modeLabel = el('span', { class: 'demo-mode-label', text: 'average' });
-  // The selected party names the block, so a collapsed block still says who
-  // the run is drawing for.
-  const toggleName = el('span', { text: 'Party' });
-  const toggle = el('button', {
-    class: 'demo-toggle', type: 'button', 'aria-expanded': 'false',
-    'aria-controls': 'party-body',
-  }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }), ' ', toggleName);
-  const w = el('input', {
-    id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
-    'data-weight': true, 'data-off': true,
-  });
-  const party = el('select', { id: id('p') },
-    ...voters.parties.map((p, i) => el('option', { value: p, selected: i === 0 }, p)));
-  const mode = el('select', { id: id('mode') },
-    ...['average', 'extreme', 'gerrymander'].map((v) =>
-      el('option', { value: v, selected: v === 'average' },
-        v[0].toUpperCase() + v.slice(1))));
-
-  const tValue = el('span', { text: '0' });
-  const sValue = el('span', { text: '0.02' });
-  const t = el('input', {
-    id: id('t'), type: 'range', min: -0.3, max: 0.3, step: 0.005, value: 0,
-  });
-  const st = el('input', {
-    id: id('s'), type: 'range', min: 0.005, max: 0.15, step: 0.005, value: 0.02,
-  });
-  const above = el('input', { id: id('a'), type: 'checkbox', checked: true });
-
-  // Under STV the target is the count itself, so the margin and its steepness
-  // give way to the seat bonus: how much a seat is worth against a quota of
-  // leftover votes.
-  const bValue = el('span', { text: '2' });
-  const bonus = el('input', {
-    id: id('b'), type: 'range', min: 1, max: 5, step: 0.5, value: 2,
-  });
-  const marginLabel = el('label', { for: id('t') }, 'Winning margin ', tValue);
-  const steepLabel = el('label', { for: id('s') }, 'Steepness ', sValue);
-  const bonusLabel = el('label', { for: id('b') }, 'Seat bonus ', bValue);
-  const dirLabel = el('label', { for: id('a'), text: 'Above margin' });
-  const gerry = el('div', { id: 'party-gerry', class: 'ctl-grid ctl-sub', hidden: true },
-    marginLabel, t, steepLabel, st, bonusLabel, bonus, dirLabel, above);
-
-  const body = el('div', { id: 'party-body', class: 'demo-body', hidden: true },
-    el('div', { class: 'ctl-grid ctl-sub' },
-      el('label', { for: id('p'), text: 'Party' }), party,
-      el('label', { for: id('mode'), text: 'Mode' }), mode),
-    gerry);
-
-  els.partyBlock.append(el('div', { class: 'demo-block' },
-    el('div', { class: 'ctl-grid' },
-      el('div', { class: 'ctl-head' }, toggle, modeLabel, wValue), w),
-    body));
-
-  // Always the seats won, whatever the mode: it is the result the map is for.
-  // Last in the block, under the run's own figures.
-  const readout = el('dd', { id: 'run-party', text: '\u2014' });
-  const row = el('div', {}, el('dt', { class: 'run-party-label', text: 'Party' }), readout);
-  document.getElementById('run').append(row);
-
-  const tip = el('div');
-  const regionTip = el('div');
-  els.ttParty.append(tip);
-  els.ttRegionParty.append(regionTip);
-
-  addPartyBarStats(voters.parties);
-  buildPie(voters.parties);
-  return { voters, toggle, toggleName, body, modeLabel, wValue, w, party, mode, gerry,
-           t, tValue, s: st, sValue, above, readout, row, tip, regionTip,
-           bonus, bValue, marginLabel, steepLabel, bonusLabel, dirLabel,
-           type: () => els.electionType.value,
-           seatsPer: () => Math.max(1, Number(els.seats.value) || 1),
-           key: () => `party:${party.value}`,
-           // A zone's ballots: its electorate, its turnout index, and the
-           // level of whichever election is being simulated.
-           votes: (code) => {
-             const z = voters.zones[code];
-             if (!z) return 0;
-             const levels = voters.levels || {};
-             const level = levels[els.electionType.value] || voters.turnout;
-             return z.e * (z.t == null ? 1 : z.t) * level;
-           },
-           share: (code) => {
-             const z = voters.zones[code];
-             if (!z) return 0;
-             const i = voters.parties.indexOf(party.value);
-             const total = z.s.reduce((a, x) => a + x, 0) || 1;
-             return z.s[i] / total;
-           } };
-}
-
-/* Weights for every steered term, with the hidden mode's forced to zero. Both
- * the live tick and start() go through this, so they cannot disagree. */
+/* Weights for every term the model carries: what is not on the page is off, so
+ * nothing steers unseen. */
 function termWeights() {
   const out = {};
-  for (const u of demoUI) {
-    out[u.def.key] = uiMode === 'demographics' ? weightOf(u.w) : 0;
-  }
-  if (election) {
-    for (const party of election.voters.parties) {
-      out[`party:${party}`] = uiMode === 'election' && `party:${party}` === election.key()
-        ? weightOf(election.w) : 0;
-    }
-  }
+  for (const def of DEMOGRAPHICS) out[def.key] = 0;
+  if (voters) for (const party of voters.parties) out[`party:${party}`] = 0;
+  for (const v of variables) out[v.key] = weightOf(v.w);
   return out;
 }
 
-/* Which of the gerrymander controls apply depends on the election being
- * simulated, so this runs on a mode switch and on an election-type change. */
-function applyElectionType() {
-  if (!election) return;
-  const stv = uiMode === 'election' && election.type() === 'stv';
-  for (const node of document.querySelectorAll('.election-only')) {
-    node.hidden = uiMode !== 'election';
+/* Collapsed still shows the weight slider and the current mode; the selector
+ * and the gerrymander knobs are what fold away. There is no 'off' mode: the
+ * weight slider turns a term off, as it does for every other term, and the
+ * mode label greys out to show when that has happened. */
+function sync() {
+  for (const v of variables) {
+    v.gerry.hidden = v.mode.value !== 'gerrymander';
+    v.modeLabel.textContent = v.mode.value;
+    v.modeLabel.classList.toggle('is-off', weightOf(v.w) === 0);
+    if (v.isParty) v.toggleName.textContent = varLabel(v);
   }
+}
+
+function wireVariable(v) {
+  v.toggle.addEventListener('click', () => {
+    const open = v.body.hidden;
+    v.body.hidden = !open;
+    v.toggle.setAttribute('aria-expanded', String(open));
+  });
+  v.remove.addEventListener('click', () => removeVariable(v));
+  v.mode.addEventListener('change', () => { sync(); if (run.model) readout(); });
+  v.w.addEventListener('input', sync);
+  for (const [input, out] of [[v.w, v.wValue], [v.t, v.tValue], [v.s, v.sValue]]) {
+    wireReadout(input, out);
+  }
+  sync();
+  applyElectionType();
+}
+
+/* Which of a party's gerrymander controls apply depends on the election being
+ * simulated, so this runs whenever either changes. */
+function applyElectionType() {
+  const stv = els.electionType.value === 'stv';
   for (const node of document.querySelectorAll('.stv-only')) node.hidden = !stv;
   // Tactical voting is a first-past-the-post affair; under STV a lower
   // preference costs a voter nothing.
-  for (const node of document.querySelectorAll('.fptp-only')) {
-    node.hidden = uiMode !== 'election' || stv;
+  for (const node of document.querySelectorAll('.fptp-only')) node.hidden = stv;
+  for (const v of variables) {
+    if (!v.isParty) continue;
+    // Under STV the target is the count itself, so the margin and its steepness
+    // give way; how much a seat is worth is the election's seat bonus.
+    v.tLabel.hidden = stv;
+    v.t.hidden = stv;
+    v.sLabel.hidden = stv;
+    v.s.hidden = stv;
+    v.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
   }
-  election.marginLabel.hidden = stv;
-  election.t.hidden = stv;
-  election.steepLabel.hidden = stv;
-  election.s.hidden = stv;
-  election.bonusLabel.hidden = !stv;
-  election.bonus.hidden = !stv;
-  election.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
-}
-
-function applyMode() {
-  const demographics = uiMode === 'demographics';
-  els.demoBlocks.hidden = !demographics;
-  els.partyBlock.hidden = demographics || !election;
-  els.partyEditor.hidden = demographics || !election;
-  els.modeDemographics.classList.toggle('is-active', demographics);
-  els.modeElection.classList.toggle('is-active', !demographics);
-  els.modeDemographics.setAttribute('aria-pressed', String(demographics));
-  els.modeElection.setAttribute('aria-pressed', String(!demographics));
-  for (const u of demoUI) u.readout.parentElement.hidden = !demographics;
-  if (election) election.row.hidden = demographics;
-  els.pie.hidden = demographics || !election || !run.model || run.phase === 'idle';
-  els.viewSwitch.hidden = demographics || !election;
-  if (demographics) panelView = 'overall';
-  applyElectionType();
-  rebuildBarOptions();
-  // Re-count before redrawing: the map may have been drawn in the other mode,
-  // and while paused or stopped nothing else will do it.
-  if (run.model && election) {
-    run.model.setElection(demographics ? 'fptp' : election.type(),
-      election.seatsPer(), Number(election.bonus.value), els.tactical.checked,
-      els.standing.checked);
-  }
-  applyView();
-  if (run.model) { readout(); drawBars(); pieShown = ''; drawPie(); }
 }
 
 /* --- data ---------------------------------------------------------------- */
@@ -1049,37 +1044,37 @@ function clearRegions(map) {
 
 /* --- interaction --------------------------------------------------------- */
 
-/* With four demographics the tooltip would run to eight extra lines, most of
- * them about terms the run is ignoring. So it shows the ones being steered --
- * falling back to all of them when none is, since an idle map should still let
- * you read a zone's figures. Read off the sliders rather than the model so it
- * follows a weight being dragged, run or no run. */
-function activeDemos() {
-  const on = demoUI.filter((u) => weightOf(u.w) > 0);
-  return on.length ? on : demoUI;
+/* The tooltip shows the variables being steered -- falling back to all of them
+ * when none is, since an idle map should still let you read a zone's figures.
+ * Read off the sliders rather than the model so it follows a weight being
+ * dragged, run or no run. */
+function activeVars() {
+  const on = variables.filter((v) => weightOf(v.w) > 0);
+  return on.length ? on : variables;
 }
 
 function showTooltip(point, props) {
   els.ttName.textContent = props.name || props.code;
   els.ttPop.textContent = props.pop == null ? '—' : nf.format(props.pop);
-  // Election mode reads the party lines, so the demographic ones fold away --
-  // the same filtering the results panel does.
-  const shown = uiMode === 'election' ? new Set() : new Set(activeDemos());
-  for (const u of demoUI) {
-    const v = props[u.def.field];
-    const show = shown.has(u) && typeof v === 'number';
-    u.tip.textContent = show
-      ? `${u.def.label.toLowerCase()} ${v.toFixed(u.def.decimals)}` : '';
-    u.tip.hidden = !show;
+  const shown = new Set(activeVars());
+  for (const v of variables) {
+    const show = shown.has(v);
+    if (v.isParty) {
+      const share = elect.share(props.code, v.party);
+      const votes = Math.round(elect.votes(props.code) * share);
+      v.tip.textContent = show ? `${varLabel(v)} ${nf.format(votes)} `
+        + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(share)})` : '';
+      v.tip.hidden = !show;
+    } else {
+      const value = props[v.def.field];
+      const ok = show && typeof value === 'number';
+      v.tip.textContent = ok
+        ? `${v.def.label.toLowerCase()} ${value.toFixed(v.def.decimals)}` : '';
+      v.tip.hidden = !ok;
+    }
   }
-
-  const party = election && uiMode === 'election';
-  els.ttParty.hidden = !party;
-  if (party) {
-    const votes = Math.round(election.votes(props.code) * election.share(props.code));
-    election.tip.textContent = `${entityLabel(election.party.value)} ${nf.format(votes)} `
-      + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(election.share(props.code))})`;
-  }
+  const party = Boolean(voters) && variables.some((v) => v.isParty && shown.has(v));
+  els.ttParty.hidden = !variables.some((v) => v.isParty && shown.has(v));
 
   const region = run.model && run.model.regionOf(props.code);
   if (region == null) {
@@ -1088,21 +1083,23 @@ function showTooltip(point, props) {
   } else {
     els.ttRegionName.textContent = `Region ${region + 1}`;
     els.ttRegionPop.textContent = nf.format(Math.round(run.model.regionPop[region]));
-    for (const u of demoUI) {
-      const show = shown.has(u) && run.model.demoByKey[u.def.key] !== undefined;
-      u.regionTip.textContent = show
-        ? `${u.def.label.toLowerCase()} `
-          + `${run.model.regionDemo(u.def.key, region).toFixed(u.def.decimals)}`
+    for (const v of variables) {
+      if (v.isParty) continue;
+      const show = shown.has(v) && run.model.demoByKey[v.key] !== undefined;
+      v.regionTip.textContent = show
+        ? `${v.def.label.toLowerCase()} `
+          + `${run.model.regionDemo(v.key, region).toFixed(v.def.decimals)}`
         : '';
-      u.regionTip.hidden = !show;
+      v.regionTip.hidden = !show;
     }
     els.ttRegionParty.hidden = !party;
     if (party) {
       // The region's result, strongest first, so the winner is the top row.
-      // The selected party is highlighted; if it misses the top five, the
-      // fifth row gives way to it and carries its rank.
-      const key = election.key();
-      const standings = election.voters.parties
+      // The parties being steered are highlighted; if one misses the top five,
+      // the fifth row gives way to it and carries its rank.
+      const targets = new Set(variables.filter((v) => v.isParty && shown.has(v))
+        .map((v) => v.key));
+      const standings = voters.parties
         .filter((name) => entityHost(name) === name)
         .map((name) => ({
         name: entityLabel(name),
@@ -1111,13 +1108,15 @@ function showTooltip(point, props) {
         share: run.model.regionPartyShare(`party:${name}`, region),
         seats: run.model.regionPartySeats(`party:${name}`, region),
       })).sort((a, b) => b.votes - a.votes);
-      const rank = standings.findIndex((row) => row.key === key);
-      const rows = rank < 5 ? standings.slice(0, 5)
-        : [...standings.slice(0, 4), { ...standings[rank], rank: rank + 1 }];
-      election.regionTip.textContent = '';
+      const missing = [...targets].map((k) => standings.findIndex((row) => row.key === k))
+        .filter((i) => i >= 5).sort((a, b) => a - b);
+      const rows = !missing.length ? standings.slice(0, 5)
+        : [...standings.slice(0, 5 - missing.length),
+           ...missing.map((i) => ({ ...standings[i], rank: i + 1 }))];
+      els.ttRegionParty.textContent = '';
       for (const row of rows) {
-        election.regionTip.append(el('div', {
-          class: row.key === key ? 'tt-party-row is-target' : 'tt-party-row',
+        els.ttRegionParty.append(el('div', {
+          class: targets.has(row.key) ? 'tt-party-row is-target' : 'tt-party-row',
         }, ...(row.rank ? [el('span', { class: 'tt-party-rank', text: `${row.rank}.` })] : []),
            el('span', { class: 'tt-party-name', text: row.name }),
            el('span', { class: 'tt-party-votes',
@@ -1167,7 +1166,7 @@ function wireHover(map) {
   // Clicking a zone chooses the region shown in detail. Only while that view
   // is open, so a click means nothing else in the app.
   map.on('click', 'dz-fill', (e) => {
-    if (panelView !== 'region' || uiMode !== 'election' || !run.model) return;
+    if (panelView !== 'region' || !run.model) return;
     const f = e.features && e.features[0];
     const region = f && run.model.regionOf(f.properties.code);
     if (region == null) return;
@@ -1199,20 +1198,13 @@ function runOptions() {
     wPopShape: weightOf(els.pshape),
     wCut: weightOf(els.cut),
     demo: {
-      ...Object.fromEntries(demoUI.map((u) => [u.def.key, {
-        weight: termWeights()[u.def.key],
-        mode: u.mode.value,
-        threshold: Number(u.t.value),
-        steepness: Number(u.s.value),
-        above: u.above.checked,
+      ...Object.fromEntries(variables.map((v) => [v.key, {
+        weight: weightOf(v.w),
+        mode: v.mode.value,
+        threshold: Number(v.t.value),
+        steepness: Number(v.s.value),
+        above: v.above.checked,
       }])),
-      ...(election ? { [election.key()]: {
-        weight: termWeights()[election.key()],
-        mode: election.mode.value,
-        threshold: Number(election.t.value),
-        steepness: Number(election.s.value),
-        above: election.above.checked,
-      } } : {}),
     },
   };
 }
@@ -1238,7 +1230,7 @@ function showRealRegions(map, key) {
   setButtons('idle');
   els.results.hidden = false;
   els.resultsList.hidden = false;
-  els.pie.hidden = uiMode !== 'election' || !election;
+  els.pie.hidden = !voters;
   shownRegion = 0;
   buildBars(n);
   drawBars();
@@ -1289,23 +1281,20 @@ function readout() {
   els.runDev.textContent = pct.format(m.maxDeviation);
   els.runMoves.textContent = nf.format(m.moves);
   els.runRecom.textContent = nf.format(m.recombinations);
-  for (const u of demoUI) {
-    const live = m.demoByKey[u.def.key];
-    u.readout.textContent = !live || live.weight === 0 ? '—'
-      : live.mode === 'gerrymander' ? `${m.demoSeats(u.def.key)}/${m.N}`
-        : m.demoSpread(u.def.key).toFixed(u.def.decimals);
-  }
-  if (election) {
-    // Seats won always, since that is the outcome being drawn for; the spread
-    // comes too in the modes where it is what the term is steering.
-    const key = election.key();
-    const live = m.demoByKey[key];
-    const seats = `${m.partySeats(key)}/${m.totalSeats} won`;
-    election.readout.textContent = !live || live.weight === 0
-      || live.mode === 'gerrymander' ? seats
-      : `${seats} · spread ${m.demoSpread(key).toFixed(3)}`;
-    election.row.querySelector('.run-party-label').textContent =
-      entityLabel(election.party.value);
+  for (const v of variables) {
+    const live = m.demoByKey[v.key];
+    if (v.isParty) {
+      // Seats won always, since that is the outcome being drawn for; the spread
+      // comes too in the modes where it is what the term is steering.
+      const seats = `${m.partySeats(v.key)}/${m.totalSeats} won`;
+      v.readout.textContent = !live || live.weight === 0 || live.mode === 'gerrymander'
+        ? seats : `${seats} · spread ${m.demoSpread(v.key).toFixed(3)}`;
+    } else {
+      v.readout.textContent = !live || live.weight === 0 ? '—'
+        : live.mode === 'gerrymander' ? `${m.demoSeats(v.key)}/${m.N}`
+          : m.demoSpread(v.key).toFixed(v.def.decimals);
+    }
+    v.readoutRow.querySelector('dt').textContent = varLabel(v);
   }
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);
@@ -1330,26 +1319,24 @@ function tick(map) {
       run.model.temperature = t > 0 ? t : 1;
       // Modes first: turning one off zeroes that term's weight, and setWeights
       // then reapplies the rest against the right total.
-      for (const u of demoUI) {
-        run.model.setDemographic(u.def.key, u.mode.value, Number(u.t.value),
-          Number(u.s.value), u.above.checked);
+      if (voters) {
+        run.model.setElection(elect.type(), elect.seatsPer(), elect.bonus(),
+          els.tactical.checked, els.standing.checked);
       }
-      if (election) {
-        run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
-          election.seatsPer(), Number(election.bonus.value), els.tactical.checked,
-          els.standing.checked);
-        const chosen = election.key();
-        for (const party of election.voters.parties) {
+      // Off, not merely unweighted: a term left in gerrymander mode would still
+      // be recomputed on every move for nothing.
+      for (const def of DEMOGRAPHICS) {
+        if (!varByKey.has(def.key)) run.model.setDemographic(def.key, 'off', 0, 0.02, true);
+      }
+      if (voters) {
+        for (const party of voters.parties) {
           const key = `party:${party}`;
-          if (key === chosen && uiMode === 'election') {
-            run.model.setDemographic(key, election.mode.value, Number(election.t.value),
-              Number(election.s.value), election.above.checked);
-          } else {
-            // Off, not just unweighted: a term left in gerrymander mode would
-            // still be recomputed on every move for nothing.
-            run.model.setDemographic(key, 'off', 0, 0.02, true);
-          }
+          if (!varByKey.has(key)) run.model.setDemographic(key, 'off', 0, 0.02, true);
         }
+      }
+      for (const v of variables) {
+        run.model.setDemographic(v.key, v.mode.value, Number(v.t.value),
+          Number(v.s.value), v.above.checked);
       }
       const demoWeights = termWeights();
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
@@ -1397,7 +1384,7 @@ function start(map) {
     setButtons('running');
     els.results.hidden = false;
     els.resultsList.hidden = false;
-    els.pie.hidden = uiMode !== 'election' || !election;
+    els.pie.hidden = !voters;
     readout();
     run.raf = requestAnimationFrame(tick(map));
     return;
@@ -1409,10 +1396,9 @@ function start(map) {
   stop(map, { silent: true });
   clearRegions(map);
 
-  if (election) {
-    run.model.setElection(uiMode === 'election' ? election.type() : 'fptp',
-      election.seatsPer(), Number(election.bonus.value), els.tactical.checked,
-      els.standing.checked);
+  if (voters) {
+    run.model.setElection(elect.type(), elect.seatsPer(), elect.bonus(),
+      els.tactical.checked, els.standing.checked);
   }
   run.model.start(n, Number(els.seed.value) || 0, {
     temperature: Number(els.temp.value) || 1,
@@ -1420,22 +1406,13 @@ function start(map) {
     wShape: weightOf(els.shape),
     wPopShape: weightOf(els.pshape),
     wCut: weightOf(els.cut),
-    demo: {
-      ...Object.fromEntries(demoUI.map((u) => [u.def.key, {
-        weight: termWeights()[u.def.key],
-        mode: u.mode.value,
-        threshold: Number(u.t.value),
-        steepness: Number(u.s.value),
-        above: u.above.checked,
-      }])),
-      ...(election ? { [election.key()]: {
-        weight: termWeights()[election.key()],
-        mode: election.mode.value,
-        threshold: Number(election.t.value),
-        steepness: Number(election.s.value),
-        above: election.above.checked,
-      } } : {}),
-    },
+    demo: Object.fromEntries(variables.map((v) => [v.key, {
+      weight: weightOf(v.w),
+      mode: v.mode.value,
+      threshold: Number(v.t.value),
+      steepness: Number(v.s.value),
+      above: v.above.checked,
+    }])),
   });
   run.colors = palette(n);
   map.setPaintProperty('dz-fill', 'fill-color', fillExpression(run.colors));
@@ -1447,7 +1424,7 @@ function start(map) {
   setButtons('running');
   els.results.hidden = false;
   els.resultsList.hidden = false;  // bars are live from the first build step
-  els.pie.hidden = uiMode !== 'election' || !election;
+  els.pie.hidden = !voters;
   shownRegion = 0;                 // a new map, so back to the first region
   buildBars(n);
   drawBars();
@@ -1571,110 +1548,80 @@ function drawBars() {
 
 /* --- boot ---------------------------------------------------------------- */
 
+/* Slider to the figure beside its label. Variables are added and removed, so
+ * this is per input rather than a list walked once at boot. */
+function wireReadout(input, out) {
+  const show = () => {
+    if (input.dataset.weight !== undefined) out.textContent = formatWeight(weightOf(input));
+    else if (input.dataset.interval !== undefined) {
+      out.textContent = formatInterval(recomIntervalOf(input));
+    } else out.textContent = input.value;
+  };
+  input.addEventListener('input', show);
+  show();
+}
+
 async function main() {
   const map = createMap();
   // Registered before anything is awaited: 'load' fires once, and awaiting the
   // voter file first would otherwise miss it and hang the boot.
   const mapLoaded = new Promise((resolve) => map.on('load', resolve));
 
-  buildDemoControls();
   rebuildBarOptions();
 
   // Switching the statistic re-ranks immediately rather than waiting for the
   // next tick, so the panel responds even while paused or stopped.
   els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
 
-  const readouts = [[els.fps, els.fpsValue], [els.build, els.buildValue],
-                    [els.opt, els.optValue], [els.popw, els.popwValue],
-                    [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
-                    [els.cut, els.cutValue], [els.recom, els.recomValue]];
-
-  for (const u of demoUI) {
-    // Collapsed still shows the weight slider and the current mode; the
-    // selector and the gerrymander knobs are what fold away.
-    u.toggle.addEventListener('click', () => {
-      const open = u.body.hidden;
-      u.body.hidden = !open;
-      u.toggle.setAttribute('aria-expanded', String(open));
-    });
-
-    // There is no 'off' mode: the weight slider turns the term off, as it does
-    // for every other term. The mode label greys out to show when that has
-    // happened. Threshold and steepness only mean anything in gerrymander mode.
-    const sync = () => {
-      u.gerry.hidden = u.mode.value !== 'gerrymander';
-      u.modeLabel.textContent = u.mode.value;
-      u.modeLabel.classList.toggle('is-off', weightOf(u.w) === 0);
-    };
-    u.mode.addEventListener('change', sync);
-    u.w.addEventListener('input', sync);
-    sync();
-
-    readouts.push([u.w, u.wValue], [u.t, u.tValue], [u.s, u.sValue]);
+  for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
+                             [els.opt, els.optValue], [els.popw, els.popwValue],
+                             [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
+                             [els.cut, els.cutValue], [els.recom, els.recomValue],
+                             [els.bonus, els.bonusValue]]) {
+    wireReadout(input, out);
   }
 
   els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });
   els.viewRegion.addEventListener('click', () => {
-    if (!election || uiMode !== 'election') return;
+    if (!voters) return;
     panelView = 'region';
     applyView();
   });
 
-  els.modeDemographics.addEventListener('click', () => {
-    uiMode = 'demographics';
-    applyMode();
+  els.add.addEventListener('change', () => {
+    const key = els.add.value;
+    els.add.value = '';
+    if (!key) return;
+    const v = addVariable(key);
+    if (!v) return;
+    // Opened on arrival: a variable is added in order to set it up.
+    v.body.hidden = false;
+    v.toggle.setAttribute('aria-expanded', 'true');
+    if (run.model) { sync(); readout(); drawBars(); }
   });
-  els.modeElection.addEventListener('click', () => {
-    if (!election) return;
-    uiMode = 'election';
-    applyMode();
-  });
-  els.modeElection.disabled = true;      // until the voter file is in
 
-  for (const [input, out] of readouts) {
-    const show = () => {
-      if (input.dataset.weight !== undefined) {
-        out.textContent = formatWeight(weightOf(input));
-      } else if (input.dataset.interval !== undefined) {
-        out.textContent = formatInterval(recomIntervalOf(input));
-      } else {
-        out.textContent = input.value;
-      }
-    };
-    input.addEventListener('input', show);
-    show();
-  }
-
-  // The voter file is the election mode's only input; without it the mode
-  // stays unavailable and the demographics map works exactly as before.
-  let voters = null;
+  // Without the voter file there are no parties to steer by; the demographics
+  // work exactly as before.
   try {
     voters = await loadVoters();
   } catch (err) {
-    console.warn('voter data unavailable, election mode off:', err.message);
+    console.warn('voter data unavailable, parties unavailable:', err.message);
   }
   if (voters) {
-    election = buildPartyControls(voters);
+    addPartyBarStats(voters.parties);
+    buildPie(voters.parties);
     buildPartyEditor(voters);
-    refreshPartyOptions();
-    els.modeElection.disabled = false;
-    const sync = () => {
-      election.toggleName.textContent = election.party.value;
-      election.gerry.hidden = election.mode.value !== 'gerrymander';
-      election.modeLabel.textContent = election.mode.value;
-      election.modeLabel.classList.toggle('is-off', weightOf(election.w) === 0);
-      if (run.model && uiMode === 'election') readout();
-    };
-    election.toggle.addEventListener('click', () => {
-      const open = election.body.hidden;
-      election.body.hidden = !open;
-      election.toggle.setAttribute('aria-expanded', String(open));
-    });
+    refreshPartyVariables();
+    // Both belong to the election rather than to any variable, and both were
+    // hidden until a mode revealed them. With one page they are simply there,
+    // for as long as there are parties to have an election between.
+    els.partyEditor.hidden = false;
+    els.viewSwitch.hidden = false;
     // Both re-count the map as it stands, so the panel is right whether the run
     // is going, paused or stopped.
     const recount = () => {
       if (!run.model) return;
-      run.model.setElection(election.type(), election.seatsPer(), Number(election.bonus.value),
+      run.model.setElection(elect.type(), elect.seatsPer(), elect.bonus(),
         els.tactical.checked, els.standing.checked);
       readout();
       drawBars();
@@ -1686,27 +1633,16 @@ async function main() {
     els.seats.addEventListener('change', recount);
     els.tactical.addEventListener('change', recount);
     els.standing.addEventListener('change', recount);
-    election.bonus.addEventListener('change', recount);
-    election.mode.addEventListener('change', sync);
-    election.w.addEventListener('input', sync);
-    election.party.addEventListener('change', () => {
-      sync();
-      if (run.model) { readout(); drawBars(); }
-    });
+    els.bonus.addEventListener('change', recount);
     els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
-    sync();
-    readouts.push([election.w, election.wValue], [election.t, election.tValue],
-                  [election.s, election.sValue], [election.bonus, election.bValue]);
-    for (const [input, out] of readouts.slice(-4)) {
-      const show = () => {
-        out.textContent = input.dataset.weight !== undefined
-          ? formatWeight(weightOf(input)) : input.value;
-      };
-      input.addEventListener('input', show);
-      show();
-    }
   }
-  applyMode();
+
+  // The page opens with one variable, which is what a variable is for: an
+  // empty page would say nothing about what the tool does.
+  addVariable(voters ? 'party:Alliance' : DEMOGRAPHICS[0].key);
+  applyVariables();
+  applyView();
+
 
   try {
     realRegions = await fetchRealRegions();

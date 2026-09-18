@@ -62,38 +62,6 @@ html, body {
   margin: 0 auto;
 }
 
-.mode-switch {
-  display: flex;
-  gap: 4px;
-  padding: 3px;
-  background: rgba(28, 37, 48, 0.05);
-  border-radius: 6px;
-}
-/* The panel has three type families and no more: CONTROLS (the switches and the
-   run buttons, 11.5px semibold capitals), LABELS (10px capitals, muted) and
-   VALUES (13px semibold). The three controls sit directly on top of each other,
-   so any difference between them reads as a mistake rather than a hierarchy. */
-.mode-switch button {
-  flex: 1;
-  padding: 5px 8px;
-  font: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--ink-muted);
-  background: none;
-  border: 0;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.mode-switch button:hover:not(:disabled) { color: var(--ink); }
-.mode-switch button.is-active {
-  color: var(--ink);
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(20, 34, 48, 0.12);
-}
-.mode-switch button:disabled { opacity: 0.45; cursor: default; }
 
 /* A control that cannot be changed right now -- the region count, once a run
    has started -- reads as greyed rather than merely inert. */
@@ -135,6 +103,30 @@ html, body {
 }
 .ctl-checks label[hidden] { display: none; }
 .ctl-checks input { margin: 0; }
+
+/* Each variable can be taken off the page again; the button sits in the block's
+   head, quiet until the block is hovered. */
+.var-remove {
+  padding: 0 2px;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--ink-muted);
+  background: none;
+  border: 0;
+  border-radius: 3px;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+.demo-block:hover .var-remove,
+.var-remove:focus-visible { opacity: 1; }
+.var-remove:hover { color: var(--accent); }
+
+/* What is not on the page yet. Reads as one more control rather than a button,
+   because that is what it is: pick a thing, get its block. */
+.add-variable { margin-top: 9px; }
+.add-variable select:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* The party editor sits in the run of controls rather than under them, so it
    spans the grid -- and without the rule a demo block carries, since a single

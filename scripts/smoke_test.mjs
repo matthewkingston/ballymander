@@ -72,12 +72,19 @@ await page.evaluate(() => {
   build.dispatchEvent(new Event('input'));
   document.getElementById('ctl-n').value = '12';
   document.getElementById('ctl-seed').value = '3';
-  // Every demographic block, in a mix of modes: religion gerrymandering, which
-  // is also what opens the sub-block only that mode uses, and the rest in the
-  // two modes that share a shape. The blocks are generated from the definition
-  // table, so this checks the generation as much as the terms.
+  // The page opens with one variable, Alliance. Add every demographic to it, in
+  // a mix of modes: religion gerrymandering, which is also what opens the
+  // sub-block only that mode uses, and the rest in the two modes that share a
+  // shape. Blocks are generated from one definition, party or demographic
+  // alike, so this checks the generation as much as the terms.
+  const add = (key) => {
+    const sel = document.getElementById('ctl-add');
+    sel.value = key;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  };
   for (const [key, want] of [['rel', 'gerrymander'], ['age', 'extreme'],
                              ['orient', 'average'], ['grade', 'extreme']]) {
+    add(key);
     const mode = document.getElementById(`ctl-${key}-mode`);
     mode.value = want;
     mode.dispatchEvent(new Event('change'));
@@ -87,9 +94,9 @@ await page.evaluate(() => {
   }
 });
 const gerryVisible = await page.evaluate(() => ({
-  rel: !document.getElementById('demo-rel-gerry').hidden,
-  age: !document.getElementById('demo-age-gerry').hidden,   // extreme: stays shut
-  blocks: document.querySelectorAll('#demo-blocks .demo-block').length,
+  rel: !document.getElementById('rel-gerry').hidden,
+  age: !document.getElementById('age-gerry').hidden,        // extreme: stays shut
+  blocks: document.querySelectorAll('#variables .demo-block').length,
   bars: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
 }));
 await page.click('#ctl-go');
@@ -163,13 +170,13 @@ const regions = await page.evaluate(() => {
     statLabels: [...document.querySelectorAll('#run dt')].map((d) => d.textContent),
     relMode: m.demoByKey.rel.mode,
     relSeats: `${m.demoSeats('rel')}/${m.N}`,
-    relShown: document.getElementById('run-demo-rel').textContent,
+    relShown: document.getElementById('run-var-rel').textContent,
     ageMode: m.demoByKey.age.mode,
     ageSpread: m.demoSpread('age').toFixed(1),
-    ageShown: document.getElementById('run-demo-age').textContent,
+    ageShown: document.getElementById('run-var-age').textContent,
     demoKeys: m.demographics.map((d) => d.key),
     demoReadouts: m.demographics.map((d) =>
-      document.getElementById(`run-demo-${d.key}`).textContent),
+      document.getElementById(`run-var-${d.key}`).textContent),
     gerryVisible: window.__gerryVisible,
     popsSumToTotal: pops.reduce((a, b) => a + b, 0),
   };
@@ -279,12 +286,17 @@ const painted = await page.evaluate(() => {
   return { w: c.width, h: c.height };
 });
 
-// --- election mode ------------------------------------------------------
-// Switch modes, gerrymander one party, and check the panel, the bars and the
-// tooltip all follow. The party terms ride the demographic machinery, so what
-// matters here is the wiring: that the right things show, and that what the
-// panel says matches what the model holds.
-await page.click('#mode-election');
+// --- a party as a variable ----------------------------------------------
+// There are no modes: a party is one more variable beside the demographics.
+// Add DUP, gerrymander by it, and check the panel, the bars and the tooltip all
+// follow. Party terms ride the demographic machinery, so what matters here is
+// the wiring: that the right things show, and that what the panel says matches
+// what the model holds.
+await page.evaluate(() => {
+  const sel = document.getElementById('ctl-add');
+  sel.value = 'party:DUP';
+  sel.dispatchEvent(new Event('change', { bubbles: true }));
+});
 const electionOptions = await page.evaluate(() =>
   [...document.querySelectorAll('#bars-stat option')].map((o) => o.value));
 await page.evaluate(() => {
@@ -294,9 +306,8 @@ await page.evaluate(() => {
     e.dispatchEvent(new Event('change', { bubbles: true }));
     e.dispatchEvent(new Event('input', { bubbles: true }));
   };
-  set('ctl-party-p', 'DUP');
-  set('ctl-party-mode', 'gerrymander');
-  set('ctl-party-w', '0.4');
+  set('ctl-party-dup-mode', 'gerrymander');
+  set('ctl-party-dup-w', '0.4');
 });
 await page.click('#ctl-go');
 await page.waitForFunction(() => window.__model.assigned === window.__model.n,
@@ -323,15 +334,15 @@ const election = await page.evaluate(() => {
   return {
     options: [...sel.options].map((o) => o.value),
     seats: m.partySeats(key),
-    shown: document.getElementById('run-party').textContent,
-    label: document.querySelector('.run-party-label').textContent,
+    shown: document.getElementById('run-var-party-dup').textContent,
+    label: document.getElementById('run-var-party-dup').previousElementSibling.textContent,
     mode: m.demoByKey[key].mode,
     regions: m.N,
-    demoBlocksHidden: document.getElementById('demo-blocks').hidden,
-    partyBlockShown: !document.getElementById('party-block').hidden,
-    demoRowsHidden: [...document.querySelectorAll('[id^="run-demo-"]')]
-      .every((d) => d.parentElement.hidden),
-    demoWeightsOff: m.demographics.every((d) => d.weight === 0),
+    // Parties and demographics share the page: five blocks, five readout rows,
+    // and every one of them steering.
+    blocks: document.querySelectorAll('#variables .demo-block').length,
+    relStillThere: document.getElementById('run-var-rel') !== null,
+    demoWeightsOn: m.demographics.filter((d) => d.weight > 0).length,
     totalVotes: Math.round(votes.reduce((a, b) => a + b, 0)),
     // Conservation, against the zones themselves rather than a number written
     // down here: every zone's electorate times its turnout index should end up
@@ -367,7 +378,7 @@ election.pie = await page.evaluate(() => {
     total: seats.reduce((a, b) => a + b, 0),
     regions: m.N,
     lastRowIsParty: document.getElementById('run').lastElementChild
-      .querySelector('#run-party') !== null,
+      .querySelector('#run-var-party-dup') !== null,
   };
 });
 const biggest = await page.evaluate(() => {
@@ -419,16 +430,16 @@ election.stv = await page.evaluate(() => {
   return {
     controls: {
       seats: !document.getElementById('ctl-seats').hidden,
-      margin: !document.getElementById('ctl-party-t').hidden,
-      bonus: !document.getElementById('ctl-party-b').hidden,
-      direction: document.querySelector('label[for="ctl-party-a"]').textContent,
+      margin: !document.getElementById('ctl-party-dup-t').hidden,
+      bonus: !document.getElementById('ctl-bonus').hidden,
+      direction: document.querySelector('label[for="ctl-party-dup-a"]').textContent,
     },
     seatsPer: m.seatsPerRegion,
     total: m.totalSeats,
     regions: m.N,
     perRegion,
     allParties: m.parties.reduce((a, q) => a + m.partySeats(q.key), 0),
-    readout: document.getElementById('run-party').textContent,
+    readout: document.getElementById('run-var-party-dup').textContent,
     dup: m.partySeats('party:DUP'),
     barSeats: [...document.querySelectorAll('#bars .bar-seats')]
       .filter((e) => !e.hidden).map((e) => Number(e.textContent)),
@@ -474,7 +485,7 @@ const editorState = () => page.evaluate(() => ({
   selected: [...document.querySelectorAll('.pe-row input')].filter((b) => b.checked).length,
   votes: window.__model.parties.map((q) => Math.round(Array.from(
     { length: window.__model.N }, (_, r) => q.rSum[r]).reduce((a, b) => a + b, 0))),
-  selector: [...document.getElementById('ctl-party-p').options].map((o) => o.text),
+  offered: [...document.getElementById('ctl-add').options].map((o) => o.text),
 }));
 election.editor = { start: await editorState() };
 await editorPick(['TUV']);
@@ -543,14 +554,29 @@ await page.click('#view-region');
 election.region.remembered = await page.evaluate(() =>
   document.getElementById('region-title').textContent);
 
-await page.click('#mode-demographics');
-election.backToDemographics = await page.evaluate(() => ({
-  options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
-  partyRowHidden: document.getElementById('run-party').parentElement.hidden,
-  pieHidden: document.getElementById('pie').hidden,
-  viewSwitchHidden: document.querySelector('.view-switch').hidden,
-  overallShown: !document.getElementById('overall').hidden,
-}));
+// A variable taken off the page takes its block, its readout row and its entry
+// in the results selector with it -- and stops steering, which is the point.
+await page.click('#view-overall');
+election.removed = await page.evaluate(() => {
+  const before = {
+    blocks: document.querySelectorAll('#variables .demo-block').length,
+    options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
+    offered: [...document.getElementById('ctl-add').options].map((o) => o.value),
+  };
+  document.querySelector('#rel-body').previousElementSibling
+    .querySelector('.var-remove').click();
+  return {
+    before,
+    blocks: document.querySelectorAll('#variables .demo-block').length,
+    options: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
+    offered: [...document.getElementById('ctl-add').options].map((o) => o.value),
+    rowGone: document.getElementById('run-var-rel') === null,
+    weight: window.__model.demoByKey.rel.weight,
+    mode: window.__model.demoByKey.rel.mode,
+    // The pie belongs to the map, not to any variable: it stays.
+    pieShown: !document.getElementById('pie').hidden,
+  };
+});
 election.electionOptions = electionOptions;
 
 console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, real, painted, errors, failed, external }, null, 2));
@@ -617,11 +643,12 @@ if (!tip || tip.demo.length !== wantDemo) {
 if (!tip || tip.regionDemo.length !== wantDemo) {
   problems.push("a demographic is missing from the tooltip's region block");
 }
-if (!election || !election.demoBlocksHidden || !election.partyBlockShown) {
-  problems.push('mode switch did not swap the control blocks');
+if (!election || election.blocks !== 5 || !election.relStillThere) {
+  problems.push(`parties and demographics should share the page (${election && election.blocks} blocks)`);
 }
-if (!election || !election.demoRowsHidden) problems.push('demographic readouts stayed in election mode');
-if (!election || !election.demoWeightsOff) problems.push('demographics kept steering in election mode');
+if (!election || election.demoWeightsOn !== 4) {
+  problems.push(`every demographic should still be steering (${election && election.demoWeightsOn})`);
+}
 if (!election || election.mode !== 'gerrymander') problems.push('party mode did not take');
 if (!election || election.shown !== `${election.seats}/${election.regions} won`) {
   problems.push('party readout does not match the model');
@@ -634,13 +661,24 @@ if (!election || !election.electionOptions.includes('party:Sinn Féin')
     || election.electionOptions.some((o) => o.startsWith('demo:'))) {
   problems.push('statistic selector not filtered to the mode');
 }
-if (!election || !election.backToDemographics.options.includes('demo:rel')
-    || election.backToDemographics.options.some((o) => o.startsWith('party:'))) {
-  problems.push('statistic selector did not switch back');
+if (!election || election.removed.blocks !== election.removed.before.blocks - 1
+    || !election.removed.rowGone) {
+  problems.push('removing a variable left its block or its readout behind');
 }
-if (!election || !election.backToDemographics.partyRowHidden) {
-  problems.push('party readout stayed in demographics mode');
+if (!election || election.removed.options.includes('demo:rel')
+    || !election.removed.before.options.includes('demo:rel')) {
+  problems.push('removing a variable left it in the results selector');
 }
+if (!election || election.removed.offered.includes('demo:rel') === false) {
+  problems.push('a removed variable was not offered again');
+}
+if (!election || election.removed.weight !== 0 || election.removed.mode !== 'off') {
+  problems.push('a removed variable kept steering the map');
+}
+if (!election || !election.removed.pieShown) {
+  problems.push('the pie should not depend on which variables are on the page');
+}
+
 if (!election || !election.standing.on.shown) problems.push('standing checkbox hidden in election mode');
 if (!election || !election.standing.on.rule || election.standing.off.rule) {
   problems.push('standing checkbox did not reach the model');
@@ -689,9 +727,6 @@ if (!election || !/\u2014 \d+ seats?$/.test(election.pie.caption || '')) {
 }
 if (!election || !election.pie.lastRowIsParty) {
   problems.push('party readout is not last in the results block');
-}
-if (!election || !election.backToDemographics.pieHidden) {
-  problems.push('seats pie stayed in demographics mode');
 }
 // STV: the controls that apply, and a count that fills every region.
 if (!election || !election.lockedDuringRun.regions || election.lockedDuringRun.type
@@ -751,10 +786,7 @@ if (!election || election.region.fptp.wedges < 2 || election.region.fptp.stagesS
 if (!election || election.region.remembered !== election.region.afterClick.title) {
   problems.push('region view forgot which region was shown');
 }
-if (!election || !election.backToDemographics.viewSwitchHidden
-    || !election.backToDemographics.overallShown) {
-  problems.push('region view stayed available in demographics mode');
-}
+
 if (!election || !election.stv.controls.seats || election.stv.controls.margin
     || !election.stv.controls.bonus
     || election.stv.controls.direction !== 'Win seats') {

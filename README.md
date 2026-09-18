@@ -594,19 +594,35 @@ DOM. `window.__map` is exposed as a console handle, with `window.__graph` and
 `window.__model` beside it. The graph loads off the critical path — nothing on screen depends on it, so a
 failure to fetch it warns to the console and leaves the map working.
 
-### Demographics and Election modes
+### Variables
 
-The switch at the top of the left panel chooses what the run is steered by.
+There is one page, and what steers the run is a list of **variables** you build
+yourself. A variable is a party or a demographic — the model scores both the
+same way, so nothing distinguishes them but their labels and their units — and
+each carries a weight, an average / extreme / gerrymander mode, and the
+gerrymander controls that mode uses. The page opens with one, Alliance, and
+**Add variable** offers whatever is not already on it.
 
-* **Demographics** is the original map: religion, age, orientation and social
-  grade, each with a weight and an average / extreme / gerrymander mode.
-* **Election** replaces those blocks with one party block — a party selector
-  and the same weight, mode and gerrymander controls — and draws seats. Its own
-  controls sit above Regions: **Election type** (first past the post or STV),
-  for STV **Elected/Region**, which has no upper limit — one region electing
-  everybody is roughly a national list, and Regions goes down to 1 for exactly
-  that — and **Realistic standing**, which keeps parties off the ballot where
-  they are too weak to contest.
+A party and a demographic can steer at once, and so can two parties: gerrymander
+for Sinn Féin while watching the DUP's margin, or draw for age and religion
+together.
+
+Two consequences worth knowing:
+
+* **A new variable arrives at weight zero.** Weights are shares of one budget,
+  so an arriving variable would otherwise quietly dilute every variable already
+  there. Turn its slider up and it starts to count.
+* **The page is only as crowded as you make it.** Removing a variable takes its
+  block, its readout row and its entry in the results selector with it, and
+  stops it steering. What is not on the page is off.
+
+The election itself belongs to the map rather than to any variable, so its
+controls sit with the rest above Regions: **Election type** (first past the post
+or STV), for STV **Elected/Region**, which has no upper limit — one region
+electing everybody is roughly a national list, and Regions goes down to 1 for
+exactly that — plus **Seat bonus**, **Tactical voting** and **Standing
+threshold**. The seats pie is likewise always there: it is the map's result,
+whatever you chose to draw by.
 
 Regions is fixed for the life of a run, since changing it means a different
 map; the election controls stay live, so a paused or stopped map can be
@@ -718,7 +734,7 @@ transfer matrix and each party's exhaustion rate. It gets 95% of the seats
 right across 91 real contests; see
 [docs/voting-model.md](docs/voting-model.md#the-stv-count).
 
-Election mode needs `web/data/dz_voters.json`, built by
+Parties as variables need `web/data/dz_voters.json`, built by
 `scripts/build_app_voters.py` from the voting model's estimates
 ([docs/voting-model.md](docs/voting-model.md)) and produced by `./run.sh`. It
 holds each Data Zone's electorate, the nine parties' voter shares and its

@@ -23,15 +23,6 @@
       <img src="img/ballymander-wide.png" alt="Ballymander" width="1619" height="978">
     </h1>
 
-    <!-- Which set of variables the run is steered by. Election mode swaps the
-         demographic blocks for the party block; the hidden side is switched
-         off, never left steering unseen. -->
-    <div class="mode-switch" role="group" aria-label="Mode">
-      <button id="mode-demographics" type="button" class="is-active" aria-pressed="true">
-        Demographics</button>
-      <button id="mode-election" type="button" aria-pressed="false">Election</button>
-    </div>
-
     <div class="ctl-buttons">
       <button id="ctl-go" type="button" disabled>GO</button>
       <button id="ctl-pause" type="button" disabled>PAUSE</button>
@@ -48,9 +39,10 @@
         <option value="assembly">Assembly</option>
         <option value="council">Council</option>
       </select>
-      <!-- Election mode only, above Regions; the seat count only applies to STV. -->
-      <label for="ctl-election-type" class="election-only" hidden>Election type</label>
-      <select id="ctl-election-type" class="election-only" hidden>
+      <!-- The election every drawn map holds. The seat count and the seat bonus
+           only apply to STV. -->
+      <label for="ctl-election-type">Election type</label>
+      <select id="ctl-election-type">
         <option value="fptp" selected>FPTP</option>
         <option value="stv">STV</option>
       </select>
@@ -61,10 +53,16 @@
            look at, and is roughly what a national PR list would do. -->
       <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
              value="5" hidden>
+      <!-- How much a seat is worth against a quota of leftover votes, when a
+           party variable is drawing for seats. One election, one bonus. -->
+      <label for="ctl-bonus" class="stv-only" hidden>Seat bonus <span
+        id="ctl-bonus-value">2</span></label>
+      <input id="ctl-bonus" class="stv-only" type="range" min="1" max="5" step="0.5"
+             value="2" hidden>
       <!-- Both of the ways a ballot differs from the voters behind it, on one
            line: who deserts a party that cannot win, and who is not on the
            ballot at all (standing v0, a threshold per party per election). -->
-      <div class="ctl-checks election-only" hidden>
+      <div class="ctl-checks">
         <label class="fptp-only" for="ctl-tactical">
           <input id="ctl-tactical" type="checkbox" checked> Tactical voting</label>
         <label for="ctl-standing">
@@ -92,11 +90,13 @@
 
     <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new
          demographic is its data plus one entry there, and needs no markup. -->
-    <div id="demo-blocks"></div>
-
-    <!-- Election mode's single block: party selector, weight, mode and the
-         gerrymander controls. Built by app.js from web/data/dz_voters.json. -->
-    <div id="party-block" hidden></div>
+    <!-- What the run is steered by: as many or as few as are wanted, each one
+         a party or a demographic. Built by app.js; the page starts with one. -->
+    <div id="variables"></div>
+    <div class="ctl-grid add-variable">
+      <label for="ctl-add">Add variable</label>
+      <select id="ctl-add"></select>
+    </div>
 
 
     <div class="ctl-grid ctl-more">
