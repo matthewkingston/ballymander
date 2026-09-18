@@ -350,7 +350,7 @@ html, body {
    rather than type. Narrower than the panel: the view switch below it runs the
    full width, and the two reading as one block would be a muddle. */
 .results-title {
-  margin: 0 0 10px;
+  margin: 0 0 16px;
 }
 .results-title img {
   display: block;
