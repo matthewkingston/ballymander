@@ -63,6 +63,7 @@ const els = {
   recomValue: document.getElementById('ctl-recom-value'),
   variables: document.getElementById('variables'),
   add: document.getElementById('ctl-add'),
+  addOpen: document.getElementById('ctl-add-open'),
   partyEditor: document.getElementById('party-editor'),
   real: document.getElementById('ctl-real'),
   tactical: document.getElementById('ctl-tactical'),
@@ -301,7 +302,7 @@ function buildVariable(entry) {
   const v = { ...entry };
 
   v.wValue = el('span', { text: 'off' });
-  v.modeLabel = el('span', { class: 'demo-mode-label', text: 'average' });
+  v.modeLabel = el('span', { class: 'demo-mode-label', text: 'gerrymander' });
   v.toggleName = el('span', { text: varLabel(entry) });
   v.toggle = el('button', {
     class: 'demo-toggle', type: 'button', 'aria-expanded': 'false',
@@ -315,9 +316,11 @@ function buildVariable(entry) {
     id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
     'data-weight': true, 'data-off': true,
   });
+  // Gerrymander by default: it is what the tool is for, and the other two modes
+  // are one click away.
   v.mode = el('select', { id: id('mode') },
     ...['average', 'extreme', 'gerrymander'].map((m) =>
-      el('option', { value: m, selected: m === 'average' },
+      el('option', { value: m, selected: m === 'gerrymander' },
         m[0].toUpperCase() + m.slice(1))));
 
   // A demographic's threshold carries its own units and range -- 0-1 for
@@ -403,7 +406,25 @@ function rebuildAddMenu() {
     els.add.append(el('option', { value: entry.key },
       entry.isParty ? entityLabel(entry.party) : entry.def.label));
   }
-  els.add.disabled = els.add.options.length < 2;
+  const nothingLeft = els.add.options.length < 2;
+  els.add.disabled = nothingLeft;
+  els.addOpen.disabled = nothingLeft;
+}
+
+/* The menu is not a fixture: the plus asks for it, it answers, and it goes away
+ * again -- whether something was picked or the pointer went elsewhere. */
+function openAddMenu() {
+  els.addOpen.hidden = true;
+  els.add.hidden = false;
+  els.add.focus();
+  // Where the browser allows it the list drops open on the one click; where it
+  // does not, the select is focused and a second click opens it.
+  try { els.add.showPicker(); } catch { /* not supported, which is fine */ }
+}
+
+function closeAddMenu() {
+  els.add.hidden = true;
+  els.addOpen.hidden = false;
 }
 
 /* The page follows the list: the results selector, the readout rows and the
@@ -1588,9 +1609,12 @@ async function main() {
     applyView();
   });
 
+  els.addOpen.addEventListener('click', openAddMenu);
+  els.add.addEventListener('blur', closeAddMenu);
   els.add.addEventListener('change', () => {
     const key = els.add.value;
     els.add.value = '';
+    closeAddMenu();
     if (!key) return;
     const v = addVariable(key);
     if (!v) return;

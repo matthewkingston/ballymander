@@ -93,9 +93,10 @@
     <!-- What the run is steered by: as many or as few as are wanted, each one
          a party or a demographic. Built by app.js; the page starts with one. -->
     <div id="variables"></div>
-    <div class="ctl-grid add-variable">
-      <label for="ctl-add">Add variable</label>
-      <select id="ctl-add"></select>
+    <div class="add-variable">
+      <button id="ctl-add-open" type="button" class="add-open">
+        <span class="add-plus" aria-hidden="true">+</span>Add variable</button>
+      <select id="ctl-add" aria-label="Add variable" hidden></select>
     </div>
 
 
