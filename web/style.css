@@ -469,11 +469,16 @@ html, body {
 }
 .pe-row.is-out .pe-name { color: var(--ink-muted); text-decoration: line-through; }
 .pe-actions { display: flex; gap: 5px; }
+/* CONTROLS, like the switches and the run buttons. Secondary actions, so they
+   are set apart by colour -- ink on white, outlined -- not by type. */
 .pe-action {
   flex: 1;
-  padding: 4px 6px;
+  padding: 5px 6px;
   font: inherit;
-  font-size: 11px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--ink);
   background: #fff;
   border: 1px solid var(--rule);
