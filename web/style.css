@@ -32,10 +32,11 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10);
   backdrop-filter: blur(6px);
-  /* Wider than the controls strictly need: 20px of it is what the scrollbar
-     gutter takes back, and the rest is headroom for a variable's head, which
-     wraps as soon as a long name meets a long mode. */
-  width: 390px;
+  /* Sized by the widest variable head rather than by the controls: Social grade
+     in gerrymander mode at a four-character weight needs 234px of label column,
+     and the scrollbar gutter takes 20px back. Every head then sits on one
+     line. */
+  width: 415px;
   max-height: calc(100% - 32px);
   overflow-y: auto;
   /* Room for the scrollbar whether or not one is showing: otherwise every
