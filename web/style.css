@@ -35,6 +35,10 @@ html, body {
   width: 350px;
   max-height: calc(100% - 32px);
   overflow-y: auto;
+  /* Room for the scrollbar whether or not one is showing: otherwise every
+     control in the panel shifts and narrows the moment the content outgrows
+     the screen. */
+  scrollbar-gutter: stable;
 }
 
 #panel .hint {
@@ -320,6 +324,7 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10);
   backdrop-filter: blur(6px);
+  scrollbar-gutter: stable;    /* as the controls panel: no shift when it appears */
   overflow-y: auto;            /* like the controls panel, rather than running
                                   off the bottom of the screen */
 }
@@ -366,7 +371,12 @@ html, body {
 }
 #bars-stat:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-#results-scroll { min-height: 0; margin-top: 8px; overflow-y: auto; }
+#results-scroll {
+  min-height: 0;
+  margin-top: 8px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
 
 /* --- population bars ---------------------------------------------------- */
 /* Rows never move in the DOM. Each one keeps its place and is drawn at its

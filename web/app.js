@@ -400,13 +400,16 @@ function removeVariable(v) {
 function rebuildAddMenu() {
   const taken = new Set(variables.map((v) => v.key));
   els.add.textContent = '';
-  els.add.append(el('option', { value: '', selected: true }, '\u2014'));
   for (const entry of catalogue()) {
     if (taken.has(entry.key) || !canSteer(entry)) continue;
     els.add.append(el('option', { value: entry.key },
       entry.isParty ? entityLabel(entry.party) : entry.def.label));
   }
-  const nothingLeft = els.add.options.length < 2;
+  // Nothing selected rather than a blank first option: the menu offers what can
+  // be added and nothing else, and with no selection every option is a change,
+  // including whichever one happens to be first.
+  els.add.selectedIndex = -1;
+  const nothingLeft = !els.add.options.length;
   els.add.disabled = nothingLeft;
   els.addOpen.disabled = nothingLeft;
 }
@@ -416,6 +419,7 @@ function rebuildAddMenu() {
 function openAddMenu() {
   els.addOpen.hidden = true;
   els.add.hidden = false;
+  els.add.selectedIndex = -1;
   els.add.focus();
   // Where the browser allows it the list drops open on the one click; where it
   // does not, the select is focused and a second click opens it.
@@ -1613,7 +1617,7 @@ async function main() {
   els.add.addEventListener('blur', closeAddMenu);
   els.add.addEventListener('change', () => {
     const key = els.add.value;
-    els.add.value = '';
+    els.add.selectedIndex = -1;
     closeAddMenu();
     if (!key) return;
     const v = addVariable(key);
