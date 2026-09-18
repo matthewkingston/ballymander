@@ -346,6 +346,19 @@ html, body {
 /* --- results panel ------------------------------------------------------ */
 /* Its own panel on the right, so a long list at high N has the full height of
    the window rather than pushing the controls off the bottom of the left one. */
+/* Drawn in the same hand as the wordmark on the other side, so it is an image
+   rather than type. Narrower than the panel: the view switch below it runs the
+   full width, and the two reading as one block would be a muddle. */
+.results-title {
+  margin: 0 0 10px;
+}
+.results-title img {
+  display: block;
+  width: 62%;
+  height: auto;
+  margin: 0 auto;
+}
+
 #results {
   position: absolute;
   top: 16px;
