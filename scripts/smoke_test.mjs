@@ -486,6 +486,9 @@ const editorState = () => page.evaluate(() => ({
   votes: window.__model.parties.map((q) => Math.round(Array.from(
     { length: window.__model.N }, (_, r) => q.rSum[r]).reduce((a, b) => a + b, 0))),
   offered: [...document.getElementById('ctl-add').options].map((o) => o.text),
+  // The party variables on the page, by the name their block carries.
+  steering: [...document.querySelectorAll('#variables .demo-toggle')]
+    .map((b) => b.textContent.replace('\u25B8', '').trim()),
 }));
 election.editor = { start: await editorState() };
 await editorPick(['TUV']);
@@ -624,8 +627,9 @@ if (!regions || regions.relMode !== 'gerrymander') problems.push('religion mode 
 if (!regions || regions.ageMode !== 'extreme') problems.push('age mode did not take');
 if (!regions || !regions.gerryVisible.rel) problems.push('gerrymander sub-controls stayed hidden');
 if (!regions || regions.gerryVisible.age) problems.push('gerrymander sub-controls shown outside that mode');
-if (!regions || regions.gerryVisible.blocks !== regions.demoKeys.length) {
-  problems.push('a demographic control block is missing');
+if (!regions || regions.gerryVisible.blocks !== regions.demoKeys.length + 1) {
+  problems.push(`a variable block is missing (${regions && regions.gerryVisible.blocks} `
+    + `for ${regions && regions.demoKeys.length} demographics plus the opening one)`);
 }
 if (!regions || regions.demoKeys.some((k) => !regions.gerryVisible.bars.includes(`demo:${k}`))) {
   problems.push('a demographic is missing from the statistic selector');
@@ -643,7 +647,7 @@ if (!tip || tip.demo.length !== wantDemo) {
 if (!tip || tip.regionDemo.length !== wantDemo) {
   problems.push("a demographic is missing from the tooltip's region block");
 }
-if (!election || election.blocks !== 5 || !election.relStillThere) {
+if (!election || election.blocks !== 6 || !election.relStillThere) {
   problems.push(`parties and demographics should share the page (${election && election.blocks} blocks)`);
 }
 if (!election || election.demoWeightsOn !== 4) {
@@ -657,9 +661,11 @@ if (!election || election.label !== 'DUP') problems.push('party readout not labe
 if (!election || election.marked !== election.seats) {
   problems.push('bars marked as won do not match the seats');
 }
-if (!election || !election.electionOptions.includes('party:Sinn Féin')
-    || election.electionOptions.some((o) => o.startsWith('demo:'))) {
-  problems.push('statistic selector not filtered to the mode');
+if (!election || !election.electionOptions.includes('party:DUP')
+    || !election.electionOptions.includes('demo:rel')
+    || election.electionOptions.includes('party:Sinn Féin')) {
+  problems.push(`statistic selector should offer exactly the variables on the page `
+    + `(${election && election.electionOptions.join(', ')})`);
 }
 if (!election || election.removed.blocks !== election.removed.before.blocks - 1
     || !election.removed.rowGone) {
@@ -669,8 +675,10 @@ if (!election || election.removed.options.includes('demo:rel')
     || !election.removed.before.options.includes('demo:rel')) {
   problems.push('removing a variable left it in the results selector');
 }
-if (!election || election.removed.offered.includes('demo:rel') === false) {
-  problems.push('a removed variable was not offered again');
+if (!election || !election.removed.offered.includes('rel')
+    || election.removed.before.offered.includes('rel')) {
+  problems.push(`a removed variable was not offered again `
+    + `(${election && election.removed.offered.join(', ')})`);
 }
 if (!election || election.removed.weight !== 0 || election.removed.mode !== 'off') {
   problems.push('a removed variable kept steering the map');
@@ -713,7 +721,9 @@ if (!election || !election.tip
     || election.tip.ranked !== (election.tip.rows.findIndex((r) => /DUP/.test(r)) === 4 ? 1 : 0)) {
   problems.push('tooltip rank number shown in the wrong case');
 }
-if (!election || !election.tip.demoHidden) problems.push('tooltip kept the demographic lines');
+if (!election || election.tip.demoHidden) {
+  problems.push('tooltip dropped the demographic lines, which now share it with the parties');
+}
 if (!election || !election.pie.shown) problems.push('seats pie missing in election mode');
 if (!election || election.pie.wedges !== 9) problems.push('a party is missing from the pie');
 if (!election || election.pie.drawn !== election.pie.withSeats) {
@@ -759,9 +769,12 @@ if (!ed || ed.merged.votes[3] !== 0
     || Math.abs(ed.merged.votes[1] - (ed.excluded.votes[1] + ed.excluded.votes[3])) > 2) {
   problems.push('a merger did not gather its parties\' votes');
 }
-if (!ed || !ed.merged.selector.includes(ed.merged.rows[0])
-    || ed.merged.selector.includes('UUP')) {
-  problems.push('the gerrymander target did not follow the merger');
+// DUP was being gerrymandered and hosts the merger, so its variable stays and
+// takes the merger's name; UUP is no longer an entity, so it is not on offer.
+if (!ed || !ed.merged.steering.includes(ed.merged.rows[0])
+    || ed.merged.offered.includes('UUP')) {
+  problems.push(`the gerrymander target did not follow the merger `
+    + `(${ed && ed.merged.steering.join(', ')})`);
 }
 if (!ed || ed.mergedPicked[2] !== 'Unmerge:on') {
   problems.push('one merged party selected should offer Unmerge');
