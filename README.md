@@ -711,8 +711,8 @@ region count follows and is locked while one is loaded, and the map appears as
 though a run had just stopped — so the results panel, the party editor and the
 region view all work on it.
 
-The selector is only offered while stopped, and disappears once GO is pressed,
-because from the first move the map is no longer the real one. GO carries on
+The selector is only offered while stopped, and disappears once START is pressed,
+because from the first move the map is no longer the real one. START carries on
 from the loaded boundaries rather than starting a fresh build. Choosing None
 clears the map.
 

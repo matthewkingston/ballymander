@@ -84,7 +84,6 @@ const els = {
   ttParty: document.querySelector('.tt-party'),
   ttRegionParty: document.querySelector('.tt-region-party'),
   go: document.getElementById('ctl-go'),
-  pause: document.getElementById('ctl-pause'),
   stop: document.getElementById('ctl-stop'),
   runPhase: document.getElementById('run-phase'),
   runDev: document.getElementById('run-dev'),
@@ -1371,10 +1370,16 @@ function clearRealRegions(map) {
 /* --- the run ------------------------------------------------------------- */
 
 function setButtons(state) {   // idle | running | paused
-  els.go.disabled = state !== 'idle';
-  els.pause.disabled = state === 'idle';
+  // One button does all three jobs, because only one of them is ever available:
+  // nothing to pause before a run, nothing to start during one.
+  els.go.textContent = state === 'idle' ? 'START'
+    : state === 'paused' ? 'RESUME' : 'PAUSE';
+  els.go.disabled = false;
   els.stop.disabled = state === 'idle';
-  els.pause.textContent = state === 'paused' ? 'RESUME' : 'PAUSE';
+  // The accent marks whatever the obvious next action is. Before a run that is
+  // starting it; once one is going, the button that ends it.
+  els.go.classList.toggle('is-primary', state === 'idle');
+  els.stop.classList.toggle('is-primary', state !== 'idle');
   // The number of regions and the seed are fixed once a run starts: changing
   // either mid-run would mean a different map, not a different reading of this
   // one. The election controls stay live, so a paused map can be re-counted.
@@ -1826,7 +1831,9 @@ async function main() {
           zoneDemographics(geojson.features), voters);
         run.shadow = new Int32Array(run.model.n).fill(-1);
         window.__model = run.model;
-        els.go.disabled = false;
+        // Through setButtons rather than by hand, so START arrives wearing the
+        // accent like every other idle state.
+        setButtons('idle');
         // Real boundaries can only be put up once the model exists, so this is
         // wired here with the rest of the run controls.
         els.real.addEventListener('change', () => {
@@ -1834,8 +1841,10 @@ async function main() {
           else if (!showRealRegions(map, els.real.value)) els.real.value = 'none';
           els.n.disabled = realLoaded();
         });
-        els.go.addEventListener('click', () => start(map));
-        els.pause.addEventListener('click', () => togglePause(map));
+        els.go.addEventListener('click', () => {
+          if (run.phase === 'idle' || run.phase === 'done') start(map);
+          else togglePause(map);
+        });
         els.stop.addEventListener('click', () => stop(map));
       })
       .catch((err) => console.warn('adjacency graph unavailable:', err.message));

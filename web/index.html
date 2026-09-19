@@ -24,8 +24,10 @@
     </h1>
 
     <div class="ctl-buttons">
-      <button id="ctl-go" type="button" disabled>GO</button>
-      <button id="ctl-pause" type="button" disabled>PAUSE</button>
+      <!-- Two, not three: the same button starts the run and then holds it,
+           since a run that has not started cannot be paused and one that is
+           going cannot be started again. -->
+      <button id="ctl-go" type="button" disabled>START</button>
       <button id="ctl-stop" type="button" disabled>STOP</button>
     </div>
 

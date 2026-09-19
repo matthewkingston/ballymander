@@ -307,16 +307,22 @@ html, body {
   letter-spacing: 0.05em;
   flex: 1;
   padding: 6px 0;
-  color: #fff;
-  background: var(--accent);
-  border: 1px solid transparent;
+  /* Plain by default. The accent is worn by whichever button is the obvious
+     next action, which moves from START to STOP once a run is going. */
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--rule);
   border-radius: 5px;
   cursor: pointer;
 }
+.ctl-buttons button.is-primary {
+  color: #fff;
+  background: var(--accent);
+  border-color: transparent;
+}
 .ctl-buttons button:hover:not(:disabled) { filter: brightness(1.08); }
 .ctl-buttons button:disabled { color: var(--ink-muted); background: #e7ebef; cursor: default; }
-#ctl-pause, #ctl-stop { color: var(--ink); background: #fff; border-color: var(--rule); }
-#ctl-pause:disabled, #ctl-stop:disabled {
+#ctl-go:disabled, #ctl-stop:disabled {
   color: var(--ink-muted);
   background: #e7ebef;
   border-color: transparent;

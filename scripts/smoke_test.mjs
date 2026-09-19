@@ -92,6 +92,11 @@ await page.evaluate(() => {
     w.dispatchEvent(new Event('input'));
   }
 });
+// Which button wears the accent before anything has been started.
+const primaryIdle = await page.evaluate(() =>
+  (document.getElementById('ctl-go').classList.contains('is-primary') ? 'ctl-go'
+    : document.getElementById('ctl-stop').classList.contains('is-primary')
+      ? 'ctl-stop' : 'none'));
 const gerryVisible = await page.evaluate(() => ({
   rel: !document.getElementById('rel-gerry').hidden,
   age: !document.getElementById('age-gerry').hidden,        // extreme: stays shut
@@ -107,23 +112,31 @@ await page.evaluate(() => new Promise(r => setTimeout(r, 1500)));
 await page.screenshot({ path: `${OUT}/map-regions.png` });
 
 // pause holds the run without ending it, and resume picks it back up
-await page.click('#ctl-pause');
+await page.click('#ctl-go');
 await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
 const paused = await page.evaluate(() => ({
-  label: document.getElementById('ctl-pause').textContent,
+  label: document.getElementById('ctl-go').textContent,
   phase: document.getElementById('run-phase').textContent,
   moves: window.__model.moves,
   goDisabled: document.getElementById('ctl-go').disabled,
 }));
 await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
 const stillPaused = await page.evaluate(() => window.__model.moves);
-await page.click('#ctl-pause');
+await page.click('#ctl-go');
 await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
 const resumed = await page.evaluate(() => ({
-  label: document.getElementById('ctl-pause').textContent,
+  label: document.getElementById('ctl-go').textContent,
   moves: window.__model.moves,
 }));
+const primary = await page.evaluate(() => {
+  const which = () => (document.getElementById('ctl-go').classList.contains('is-primary')
+    ? 'ctl-go'
+    : document.getElementById('ctl-stop').classList.contains('is-primary') ? 'ctl-stop' : 'none');
+  return { idle: null, running: which() };
+});
+primary.idle = primaryIdle;
 const pause = {
+  primary,
   label: paused.label,
   phase: paused.phase,
   held: stillPaused === paused.moves,
@@ -892,6 +905,12 @@ if (!real || real.cleared.painted !== 0 || real.cleared.results) {
   problems.push('choosing None did not clear the map');
 }
 if (!pause || pause.label !== 'RESUME' || !pause.held) problems.push('pause did not hold the run');
+// The accent marks the obvious next action, and it moves once a run is going.
+if (!pause || !pause.primary || pause.primary.idle !== 'ctl-go'
+    || pause.primary.running !== 'ctl-stop') {
+  problems.push(`the accent should sit on START, then on STOP `
+    + `(${pause && JSON.stringify(pause.primary)})`);
+}
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
 if (problems.length) {
   console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);
