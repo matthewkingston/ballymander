@@ -610,22 +610,22 @@ html, body {
   box-shadow: 0 1px 3px rgba(20, 34, 48, 0.12);
 }
 #region-view[hidden], #region-stages[hidden], #region-pie[hidden] { display: none; }
-/* Which region is on show is the most important thing in this panel, so it is
-   not a LABEL like the rest: it carries the colour the map paints it, and reads
-   at the size of a heading. */
+/* A VALUE, like the phase in the other view -- it is a figure the panel is
+   reporting, not a heading over it. The swatch carries the colour the map
+   paints the region, so it can be found by eye rather than by counting. */
 #region-title {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 15px;
+  gap: 6px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
 #region-swatch {
   flex: none;
-  width: 13px;
-  height: 13px;
+  width: 11px;
+  height: 11px;
   border: 1px solid rgba(20, 34, 48, 0.22);
   border-radius: 3px;
 }

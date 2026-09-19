@@ -805,7 +805,7 @@ if (!election || !/\d/.test(election.region.stv.seats)
 }
 if (!election || election.region.fptp.wedges < 2 || election.region.fptp.stagesShown
     || election.region.fptp.wedges !== election.region.fptp.standing
-    || !/wins the seat/.test(election.region.fptp.seats)) {
+    || !/^Winner: /.test(election.region.fptp.seats)) {
   problems.push('FPTP region view missing its pie');
 }
 if (!election || election.region.remembered !== election.region.afterClick.title) {

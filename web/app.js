@@ -766,8 +766,7 @@ function drawRegionPie(m, r) {
     from = to;
   });
   const winner = m.regionWinner(r);
-  els.regionSeats.textContent = winner
-    ? `${entityLabel(winner.slice(6))} wins the seat` : '—';
+  els.regionSeats.textContent = winner ? `Winner: ${entityLabel(winner.slice(6))}` : '—';
 }
 
 /* STV: one bar per stage of the count, parties always in the same order.
