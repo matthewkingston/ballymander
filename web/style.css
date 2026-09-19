@@ -4,7 +4,13 @@
   --ink:       #1c2530;
   --ink-muted: #64717f;
   --rule:      #d3dae1;
-  --accent:    #d9622b;
+  /* The Assembly's own blue. Every other hue in Northern Ireland is spoken for
+     -- orange and green by the two traditions, red and blue by the flags, and
+     the rest by the parties in PARTY_COLORS -- so the accent borrows from the
+     institution rather than from anybody's side. It was the DUP's orange
+     before, eleven degrees of hue from that party's own colour, which is not a
+     thing for every button in the app to be wearing. */
+  --accent:    #5e89c2;
 }
 
 * { box-sizing: border-box; }
@@ -761,7 +767,7 @@ html, body {
   font-size: 15px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: #ffc9a8;
+  color: #bcd6f2;
 }
 .tt-unit { font-size: 11px; font-weight: 400; color: #b9c4cf; }
 
@@ -788,7 +794,7 @@ html, body {
   font-size: 13px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: #ffc9a8;
+  color: #bcd6f2;
 }
 
 /* Election mode: the region's standings, strongest first. The selected party
@@ -810,7 +816,7 @@ html, body {
   color: #8fa0b0;                /* seats, when a region returns several */
 }
 .tt-party-row.is-target .tt-party-seats { color: inherit; }
-.tt-party-row.is-target { color: #ffc9a8; font-weight: 600; }
+.tt-party-row.is-target { color: #bcd6f2; font-weight: 600; }
 
 .tt-region-demo div {
   margin-top: 1px;
