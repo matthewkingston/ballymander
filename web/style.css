@@ -32,11 +32,11 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10);
   backdrop-filter: blur(6px);
-  /* Sized by the widest variable head rather than by the controls: Social grade
-     in gerrymander mode at a four-character weight needs 234px of label column,
-     and the scrollbar gutter takes 20px back. Every head then sits on one
-     line. */
-  width: 415px;
+  /* Sized so a typical variable head fits on one line -- "Alliance gerrymander
+     0.19 x" wants 205px -- rather than so the longest one does, which cost 29px
+     of empty space on every other row to spare two of them a wrap. Social grade
+     and Orientation now wrap, and the rest do not. */
+  width: 406px;
   max-height: calc(100% - 32px);
   overflow-y: auto;
   /* Room for the scrollbar whether or not one is showing: otherwise every
@@ -83,7 +83,7 @@ html, body {
   display: grid;
   /* The second column is the sliders and boxes; everything left over goes to
      the labels, which are the part that wraps. */
-  grid-template-columns: 1fr 118px;
+  grid-template-columns: 1fr 133px;
   align-items: center;
   gap: 7px 10px;
 }
