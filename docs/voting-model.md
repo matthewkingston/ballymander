@@ -639,6 +639,54 @@ Unique cost of removing each group from all 28:
 Age also broke under extrapolation: Botanic, 50% aged 18–29, reached z = 20
 when Belfast was held out.
 
+### Density, tested and null
+
+The model has no urban/rural variable and never has. Density is the obvious
+candidate — it needs no new data, since every zone already carries its own area
+— and it is worth recording that it was tried and dropped, so it is not tried
+again.
+
+Measured as people per hectare, bucketed rather than averaged: a region half
+city and half farmland has a middling mean density that describes neither half,
+whereas the **share of its people living at each density** describes both. At
+Data Zone level a band is one-hot, so aggregating it by the fit's own weights
+gives exactly that share.
+
+Two things recommended it.
+
+* **It is information the model does not have.** The 24 features predict log
+  density with R² = 0.58, so two fifths of the variation in how densely people
+  live is outside them.
+* **It tracks the vote**, and separates parties that religion and grade do not.
+  Correlation of a DEA's party share with the share of its people in each band:
+
+  | | rural <1/ha | edge 1–10 | town 10–40 | city >40 |
+  |---|---:|---:|---:|---:|
+  | Green | −0.43 | −0.24 | −0.02 | **+0.53** |
+  | PBP | −0.33 | −0.24 | −0.09 | **+0.48** |
+  | Alliance | **−0.47** | −0.15 | +0.35 | +0.33 |
+  | Sinn Féin | **+0.36** | +0.25 | −0.42 | −0.21 |
+  | DUP | −0.13 | −0.19 | +0.26 | +0.04 |
+
+It still buys nothing. Leave one council out, at the settled penalties:
+
+| Spec | KL |
+|---|---:|
+| baseline, 24 features | 51.8 |
+| + four density bands | 51.6 |
+| + log density | 51.8 |
+| + population quintiles | 51.3 |
+
+A gain of 0.2–0.5 millinats is noise beside the 2–4 that the groups which earned
+their place cost to remove. The quintile version picks its cuts from the
+population distribution rather than by hand, so this is not a null about where
+the thresholds were put.
+
+The likely reason: although density itself is not predicted by the existing
+features, the part of it that predicts votes already is. Urban Belfast is
+distinctive in national identity and social grade, the rural west in religion.
+Density describes those places again rather than adding an axis they vary on.
+
 ### Individual religion categories
 
 Weighted partial correlations, with drop-top-N and jackknife checks.
