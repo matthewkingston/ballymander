@@ -39,9 +39,16 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Encoding", "gzip")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Cache-Control", "no-cache")  # always pick up rebuilds
         self.end_headers()
         self.wfile.write(body)
+
+    def end_headers(self) -> None:  # noqa: D102
+        # On every response, not just the compressed ones. Images are not
+        # compressible, so they took the base class's path, which sends no cache
+        # directive at all -- and a browser left to its own judgement will hold
+        # an image across a rebuild while picking up the HTML that refers to it.
+        self.send_header("Cache-Control", "no-cache")   # always pick up rebuilds
+        super().end_headers()
 
     def _gzipped(self) -> tuple[bytes, str] | None:
         """Compressed body for this request, or None to fall back to the base class."""
