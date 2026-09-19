@@ -352,6 +352,8 @@ html, body {
 .results-title {
   margin: 0 0 16px;
 }
+/* The panel has no other heading: the old #results h2 rule was left over from a
+   text one and, being an id selector, was quietly zeroing this margin. */
 .results-title img {
   display: block;
   width: 62%;
@@ -401,12 +403,6 @@ html, body {
 }
 #results-list[hidden] { display: none; }
 
-#results h2 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
 /* The statistic selector doubles as the panel's heading. */
 #bars-stat {
   font: inherit;
