@@ -346,9 +346,9 @@ html, body {
 /* --- results panel ------------------------------------------------------ */
 /* Its own panel on the right, so a long list at high N has the full height of
    the window rather than pushing the controls off the bottom of the left one. */
-/* Drawn in the same hand as the wordmark on the other side, so it is an image
-   rather than type. Narrower than the panel: the view switch below it runs the
-   full width, and the two reading as one block would be a muddle. */
+/* A wall, drawn in the same hand as the gable on the other side, so it is an
+   image rather than type -- and sized like the gable rather than like a
+   wordmark, since that is what it now is. */
 .results-title {
   margin: 0 0 16px;
 }
@@ -356,7 +356,7 @@ html, body {
    text one and, being an id selector, was quietly zeroing this margin. */
 .results-title img {
   display: block;
-  width: 62%;
+  width: 90%;
   height: auto;
   margin: 0 auto;
 }
