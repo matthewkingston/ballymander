@@ -1634,6 +1634,37 @@ function drawBars() {
 
 /* --- boot ---------------------------------------------------------------- */
 
+/* How wide the label column has to be, measured in the browser doing the
+ * rendering rather than guessed from a number written here.
+ *
+ * A fixed width cannot be right everywhere: the same string is several per cent
+ * wider or narrower depending on the system font, so a column generous enough
+ * for one machine leaves a void on another. This builds one head off-screen,
+ * asks the browser how wide it is, and sizes the column to that. The reference
+ * is a typical head rather than the longest -- the two long ones wrap, which is
+ * the trade that got the void out of every other row. */
+const LABEL_REFERENCE = { name: 'Alliance', mode: 'gerrymander', weight: '0.85' };
+
+function sizeLabelColumn() {
+  const head = el('div', { class: 'ctl-head' },
+    el('button', { class: 'demo-toggle', type: 'button' },
+      el('span', { class: 'chev', text: '▸' }), ` ${LABEL_REFERENCE.name}`),
+    el('span', { class: 'demo-mode-label', text: LABEL_REFERENCE.mode }),
+    el('span', { class: 'ctl-head-end' },
+      el('span', { text: LABEL_REFERENCE.weight }),
+      el('button', { class: 'var-remove', type: 'button', text: '×' })));
+  const probe = el('div', { class: 'ctl-grid' }, head);
+  probe.style.cssText = 'position:absolute;visibility:hidden;width:auto;'
+    + 'white-space:nowrap;pointer-events:none';
+  head.style.flexWrap = 'nowrap';
+  els.variables.append(probe);
+  // Round up: a fraction short would wrap the very string being fitted.
+  const want = Math.ceil(head.getBoundingClientRect().width) + 1;
+  probe.remove();
+  document.documentElement.style.setProperty('--label-col', `${want}px`);
+  return want;
+}
+
 /* Slider to the figure beside its label. Variables are added and removed, so
  * this is per input rather than a list walked once at boot. */
 function wireReadout(input, out, format = null) {
@@ -1666,6 +1697,7 @@ async function main() {
     wireReadout(input, out);
   }
   wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));
+  sizeLabelColumn();
 
   els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });
   els.viewRegion.addEventListener('click', () => {

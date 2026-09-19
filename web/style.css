@@ -81,9 +81,10 @@ html, body {
 /* --- region builder controls -------------------------------------------- */
 .ctl-grid {
   display: grid;
-  /* The second column is the sliders and boxes; everything left over goes to
-     the labels, which are the part that wraps. */
-  grid-template-columns: 1fr 133px;
+  /* The label column is measured at boot against a typical head, in whatever
+     font the browser is using (see sizeLabelColumn); the sliders and boxes take
+     everything left. The fallback is what that measurement gives here. */
+  grid-template-columns: var(--label-col, 210px) 1fr;
   align-items: center;
   gap: 7px 10px;
 }
