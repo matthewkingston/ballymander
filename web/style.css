@@ -356,9 +356,13 @@ html, body {
    text one and, being an id selector, was quietly zeroing this margin. */
 .results-title img {
   display: block;
-  width: 90%;
+  /* Out past the panel's padding to sit 8px from its edges. The right-hand
+     overhang crosses the reserved scrollbar gutter, which is free in practice:
+     the panel itself does not scroll, the bars list inside it does. */
+  width: calc(100% + 32px);
+  max-width: none;
   height: auto;
-  margin: 0 auto;
+  margin-left: -8px;
 }
 
 #results {
