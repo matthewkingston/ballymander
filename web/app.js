@@ -122,9 +122,7 @@ const PARTY_COLORS = {
   'Sinn Féin': '#186a3b',
   SDLP: '#c8102e',
   DUP: '#e8801a',
-  // Moved cyan-ward from #7fb3e3, which sat five degrees of hue from the accent
-  // and muddied the bars, where a party's colour and the accent meet.
-  UUP: '#6ec6e0',
+  UUP: '#7fb3e3',
   TUV: '#1b2f6b',
   Alliance: '#f2c313',
   Green: '#7ac143',
