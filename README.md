@@ -397,17 +397,22 @@ of 186 zones at 5.4%.
 The cap is on the *reward* only. Average mode keeps the plain square: it is a
 penalty, bounded below by zero, with nothing to gain from a degenerate region —
 and capping it would remove the pull on exactly the outliers it exists to bring
-in. Gerrymander mode needs no cap either, since the logistic already saturates:
-a one-zone region wins one seat, the same as any other.
+in. Gerrymander mode needs no cap under first past the post, since the logistic
+already saturates: a one-zone region wins one seat, the same as any other.
+**Under STV that reasoning does not hold** — a region returns its whole slate,
+so one homogeneous zone returns all five seats to the same party, which is a far
+better trade than any honest region offers. See the guard below.
 
 ### The collapse guard
 
 **The cap was not enough.** Push further than the figures above — weight 10
 against population 0.1, both of which the interface allows — and extreme mode
 still strands a region: measured at N=18, a single zone of 748 people, 0.7% of
-target. Two other demographics do the same. Gerrymander mode never does, for the
-saturation reason above, which is why this is an extreme-mode problem wearing a
-general disguise.
+target. Two other demographics do the same. Gerrymander mode does it too, but only
+under STV, and it was owner-reported before it was measured: at 80 regions of 5,
+a single zone at 5.6% of target returning all five seats to the target party.
+Under first past the post it never does, which is what made this look like an
+extreme-mode problem when it is not.
 
 The reason no term can be tuned to stop it is that **every term is a share of
 one budget**. The score divides by the sum of the weights, so at 10 against 0.1
@@ -435,6 +440,10 @@ at weight 10 against population 0.1, three seeds each:
 | `(1 − s)²`, any constant | 5 of 9 | 2.5% | 12.2 |
 | linear, or a plain barrier | 9 of 9 | 31.9% | 7.8 |
 | **`1 + (1 − s)² ⁄ s`, ×300,000** | **9 of 9** | **20.0%** | **14.9** |
+
+Checked separately against the STV case: across four parties at 50 and 80
+regions, the guard holds every one, smallest region 21.0–56.6% of target against
+1–5 zones without it.
 
 `(1 − s)²` fails because it is soft where it matters: a region at 15% of target
 against a 20% floor is charged 5% of its maximum, so sitting just under the

@@ -1063,6 +1063,34 @@ check(without < 0.2,
 check(withGuard >= 0.2,
   `with it none goes under the floor (smallest ${(100 * withGuard).toFixed(1)}%)`);
 
+/* And the case first past the post hides. A stranded region wins one FPTP seat,
+ * the same as any other, so gerrymander mode has nothing to gain there -- but
+ * under STV it returns the whole slate, and one homogeneous zone returns all
+ * five to the same party. Owner-reported, then reproduced. */
+const stvCollapse = (guard) => {
+  const m = new RegionModel(graph, pops, geom, demo, voters);
+  if (!guard) m._floorCost = () => 0;
+  m.setElection('stv', 5, 2, false, true);
+  m.start(50, 3, { wPop: 0.1, wShape: 0, wPopShape: 0, wCut: 0,
+    demo: { 'party:Alliance': { weight: 10, mode: 'gerrymander', threshold: 0,
+      steepness: 0.02, above: true } } });
+  while (m.buildStep());
+  for (let i = 0; i < 150000; i++) m.optimiseStep();
+  m.restoreBest();
+  const smallest = Array.from(m.regionPop).indexOf(Math.min(...Array.from(m.regionPop)));
+  const out = new Int32Array(m.parties.length);
+  m.regionSeats(smallest, out);
+  const idx = m.parties.findIndex((q) => q.key === 'party:Alliance');
+  return { share: Math.min(...Array.from(m.regionPop)) / m.target, won: out[idx] };
+};
+const stvOff = stvCollapse(false);
+const stvOn = stvCollapse(true);
+check(stvOff.share < 0.2 && stvOff.won >= 3,
+  `under STV a stranded region returns a slate (${(100 * stvOff.share).toFixed(1)}% of `
+  + `target, ${stvOff.won} of 5 seats to the target party)`);
+check(stvOn.share >= 0.2,
+  `and the guard holds there too (smallest ${(100 * stvOn.share).toFixed(1)}%)`);
+
 /* The move deltas have to agree with the score, or the optimiser is steering by
  * one number and being judged by another. */
 const floorModel = new RegionModel(graph, pops, geom, demo);
