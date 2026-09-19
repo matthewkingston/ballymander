@@ -45,12 +45,8 @@ const els = {
   n: document.getElementById('ctl-n'),
   seed: document.getElementById('ctl-seed'),
   temp: document.getElementById('ctl-temp'),
-  fps: document.getElementById('ctl-fps'),
-  fpsValue: document.getElementById('ctl-fps-value'),
-  build: document.getElementById('ctl-build'),
-  buildValue: document.getElementById('ctl-build-value'),
-  opt: document.getElementById('ctl-opt'),
-  optValue: document.getElementById('ctl-opt-value'),
+  speed: document.getElementById('ctl-speed'),
+  speedValue: document.getElementById('ctl-speed-value'),
   popw: document.getElementById('ctl-popw'),
   popwValue: document.getElementById('ctl-popw-value'),
   shape: document.getElementById('ctl-shape'),
@@ -59,8 +55,6 @@ const els = {
   pshapeValue: document.getElementById('ctl-pshape-value'),
   cut: document.getElementById('ctl-cut'),
   cutValue: document.getElementById('ctl-cut-value'),
-  recom: document.getElementById('ctl-recom'),
-  recomValue: document.getElementById('ctl-recom-value'),
   variables: document.getElementById('variables'),
   add: document.getElementById('ctl-add'),
   addOpen: document.getElementById('ctl-add-open'),
@@ -110,6 +104,7 @@ const els = {
 /* Live run state. `shadow` is what the map currently shows, so each redraw only
  * pushes the zones that actually changed. */
 const run = {
+  owed: { build: 0, optimise: 0 },   // fractions of a step carried between frames
   model: null,
   phase: 'idle',          // idle | build | optimise | done
   raf: 0,
@@ -173,6 +168,25 @@ let shownRegion = 0;
  * the selector goes away as soon as a run begins. */
 let realRegions = null;
 const realLoaded = () => Boolean(realRegions) && els.real.value !== 'none';
+
+/* The run's clock. Ten frames a second is as fast as the eye gets anything
+ * from a map this size -- above it the fill just flickers -- so it is fixed
+ * rather than offered. What the speed slider moves is how much work happens
+ * between frames, and the two phases keep their ratio: a build step claims a
+ * whole zone and is worth watching, an optimiser step moves one zone in 3,780
+ * and is invisible on its own, so builds run far slower.
+ *
+ * Speed 1 is ten thousand optimiser steps a second. */
+const FRAME_MS = 100;            // ten frames a second
+const OPT_PER_SEC = 10000;       // at speed 1
+const BUILD_PER_SEC = 700;       // at speed 1
+const RECOM_INTERVAL = 200;      // flips between recombinations, fixed
+/* Work is measured against the clock rather than against frames, so the rate
+ * holds when the browser cannot keep ten frames a second -- which it often
+ * cannot, since painting 3,780 zones is the expensive part. A frame that
+ * arrives very late claims no more than this much time, or a stall would be
+ * followed by a burst long enough to cause another. */
+const MAX_FRAME_MS = 250;
 
 const BAR_ROW_H = 18;     // must match .bar-row height in style.css
 const BAR_INTERVAL = 200; // five redraws a second
@@ -1044,13 +1058,24 @@ function weightOf(el) {
 
 /* Flips between recombinations. Log like the weights, but the "never" detent
  * sits at the right-hand end, because in these units right means less often. */
-function recomIntervalOf(el) {
-  const v = Number(el.value);
-  return v >= Number(el.max) - 1e-9 ? Infinity : Math.round(10 ** v);
+/* The slider is log10 of the speed, so its ends are 0.01 and 10. */
+function speedOf() {
+  return 10 ** Number(els.speed.value);
 }
 
-function formatInterval(v) {
-  return v === Infinity ? 'off' : nf.format(v);
+/* Steps to take for the time that has passed, carrying the fraction left over
+ * so that rates below one step a frame still advance. */
+function stepsForElapsed(phase, perSecond, elapsed) {
+  const ms = Math.min(elapsed, MAX_FRAME_MS);
+  const want = run.owed[phase] + (perSecond * speedOf() * ms) / 1000;
+  const whole = Math.floor(want);
+  run.owed[phase] = want - whole;
+  return whole;
+}
+
+/* Two significant figures is plenty for a speed: 0.01, 0.35, 1, 10. */
+function formatSpeed(v) {
+  return String(Number(v.toPrecision(2)));
 }
 
 function formatWeight(w) {
@@ -1368,13 +1393,10 @@ function tick(map) {
   return function frame(now) {
     if (run.paused) return;
     if (run.phase !== 'build' && run.phase !== 'optimise') return;
-    const interval = 1000 / Number(els.fps.value);
-    if (now - run.lastDraw >= interval) {
+    if (now - run.lastDraw >= FRAME_MS) {
+      const elapsed = now - run.lastDraw;
       run.lastDraw = now;
-      // The two phases want very different rates: a build step claims a whole
-      // zone and is worth seeing, while an optimisation step moves one zone in
-      // 3,780 and is invisible on its own.
-      // Both knobs are read every frame rather than captured at GO.
+      // Read every frame rather than captured at GO.
       // Temperature only affects the acceptance rule, so it is free to move.
       // The shape weight is part of the score, so changing it makes anything
       // recorded under the old weight incomparable -- setShapeWeight re-bases
@@ -1407,15 +1429,15 @@ function tick(map) {
         weightOf(els.pshape), weightOf(els.cut), demoWeights);
       // Changes the move set rather than the score, so best-so-far stays
       // comparable and this needs no re-base.
-      run.model.recomInterval = recomIntervalOf(els.recom);
+      run.model.recomInterval = RECOM_INTERVAL;
 
       if (run.phase === 'build') {
-        const steps = Number(els.build.value);
+        const steps = stepsForElapsed('build', BUILD_PER_SEC, elapsed);
         for (let i = 0; i < steps; i++) {
           if (!run.model.buildStep()) { run.phase = 'optimise'; break; }
         }
       } else {
-        const steps = Number(els.opt.value);
+        const steps = stepsForElapsed('optimise', OPT_PER_SEC, elapsed);
         for (let i = 0; i < steps; i++) run.model.optimiseStep();
       }
       paintRegions(map);
@@ -1618,8 +1640,8 @@ function wireReadout(input, out, format = null) {
   const show = () => {
     if (format) out.textContent = format(input.value);
     else if (input.dataset.weight !== undefined) out.textContent = formatWeight(weightOf(input));
-    else if (input.dataset.interval !== undefined) {
-      out.textContent = formatInterval(recomIntervalOf(input));
+    else if (input.dataset.speed !== undefined) {
+      out.textContent = formatSpeed(speedOf());
     } else out.textContent = input.value;
   };
   input.addEventListener('input', show);
@@ -1638,13 +1660,12 @@ async function main() {
   // next tick, so the panel responds even while paused or stopped.
   els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
 
-  for (const [input, out] of [[els.fps, els.fpsValue], [els.build, els.buildValue],
-                             [els.opt, els.optValue], [els.popw, els.popwValue],
-                             [els.shape, els.shapeValue], [els.pshape, els.pshapeValue],
-                             [els.cut, els.cutValue], [els.recom, els.recomValue],
+  for (const [input, out] of [[els.popw, els.popwValue], [els.shape, els.shapeValue],
+                             [els.pshape, els.pshapeValue], [els.cut, els.cutValue],
                              [els.bonus, els.bonusValue]]) {
     wireReadout(input, out);
   }
+  wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));
 
   els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });
   els.viewRegion.addEventListener('click', () => {

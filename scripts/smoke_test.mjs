@@ -64,12 +64,12 @@ const graph = await page.evaluate(() => {
 });
 
 // --- drive a region run -------------------------------------------------
-// Wind the build rate up to its maximum so the smoke test exercises the same
-// code path without waiting out an animation meant for a human.
+// Wind the simulation speed up to its maximum so the smoke test exercises the
+// same code path without waiting out an animation meant for a human.
 await page.evaluate(() => {
-  const build = document.getElementById('ctl-build');
-  build.value = build.max;
-  build.dispatchEvent(new Event('input'));
+  const speed = document.getElementById('ctl-speed');
+  speed.value = speed.max;
+  speed.dispatchEvent(new Event('input'));
   document.getElementById('ctl-n').value = '12';
   document.getElementById('ctl-seed').value = '3';
   // The page opens with one variable, Alliance. Add every demographic to it, in

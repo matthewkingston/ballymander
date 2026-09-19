@@ -581,8 +581,8 @@ The set's totals are computed once and shared across candidate destinations, so
 each candidate's delta stays O(1) however big the branch. Turning it off restores
 the plain single-zone rule.
 
-**Recombination** is the large move. Every so often — **Flips per ReCom**, default
-200 — instead of nudging one zone it takes two adjacent regions, merges them,
+**Recombination** is the large move. Every 200 flips, instead of nudging one
+zone it takes two adjacent regions, merges them,
 draws a random spanning tree over the union and cuts a single edge of it. A tree
 splits into exactly two pieces when any edge is removed, and every tree edge is a
 real adjacency edge, so **both pieces are connected in the graph: contiguity is
@@ -682,6 +682,25 @@ whatever you chose to draw by.
 Regions is fixed for the life of a run, since changing it means a different
 map; the election controls stay live, so a paused or stopped map can be
 re-counted under other rules.
+
+### Simulation speed
+
+One slider, logarithmic, 0.01 to 10, and at 1 the optimiser takes **ten thousand
+steps a second**. The build takes 700 in the same second: a build step claims a
+whole zone and is worth watching, while an optimiser step moves one zone in 3,780
+and is invisible on its own, so the two are locked in that ratio rather than
+offered separately.
+
+Work is measured against the clock, not against frames. The map is redrawn ten
+times a second — fast enough that nothing is missed, slow enough that the fill
+does not flicker — but painting 3,780 zones is the expensive part of a frame, and
+on a slow machine the frames arrive later than that. Counting steps per frame
+would then quietly halve the speed; counting them per millisecond does not. A
+frame that arrives very late claims no more than 250ms of work, so a stall is not
+followed by a burst long enough to cause another.
+
+It replaced four controls — frame rate, build steps per frame, optimiser steps
+per frame, flips per recombination — three of which only ever wanted one setting.
 
 ### Real-life regions
 

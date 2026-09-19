@@ -101,15 +101,12 @@
 
 
     <div class="ctl-grid ctl-more">
-      <label for="ctl-fps">Frames/s <span id="ctl-fps-value">60</span></label>
-      <input id="ctl-fps" type="range" min="1" max="60" step="1" value="60">
-      <label for="ctl-build">Build/frame <span id="ctl-build-value">10</span></label>
-      <input id="ctl-build" type="range" min="1" max="200" step="1" value="10">
-      <label for="ctl-opt">Optimise/frame <span id="ctl-opt-value">200</span></label>
-      <input id="ctl-opt" type="range" min="1" max="4000" step="1" value="200">
-      <label for="ctl-recom">Flips per ReCom <span id="ctl-recom-value">200</span></label>
-      <input id="ctl-recom" type="range" min="1.4" max="5.02" step="0.02" value="2.3"
-             data-interval>
+      <!-- How fast the run goes, and nothing else: the frame rate, the two
+           step counts and the recombination interval were four ways of saying
+           it, three of which only ever wanted one setting. Logarithmic, 0.01 to
+           10, and 1 is ten thousand optimiser steps a second. -->
+      <label for="ctl-speed">Simulation speed <span id="ctl-speed-value">1</span></label>
+      <input id="ctl-speed" type="range" min="-2" max="1" step="0.02" value="0">
     </div>
 
     <p class="hint">Hover a zone for its figures, and its region's.</p>
