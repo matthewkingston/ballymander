@@ -76,6 +76,8 @@ const els = {
   overall: document.getElementById('overall'),
   regionView: document.getElementById('region-view'),
   regionTitle: document.getElementById('region-title'),
+  regionName: document.getElementById('region-name'),
+  regionSwatch: document.getElementById('region-swatch'),
   regionSeats: document.getElementById('region-seats'),
   regionPie: document.getElementById('region-pie'),
   regionStages: document.getElementById('region-stages'),
@@ -826,13 +828,17 @@ function drawRegion() {
   show(els.regionPie, false);
   show(els.regionStages, false);
   if (!live || !voters) {
-    els.regionTitle.textContent = '—';
+    els.regionName.textContent = '—';
+    els.regionSwatch.style.background = 'transparent';
     els.regionSeats.textContent = '—';
     regionCaption('');
     return;
   }
   if (shownRegion >= m.N) shownRegion = 0;
-  els.regionTitle.textContent = `Region ${shownRegion + 1}`;
+  els.regionName.textContent = `Region ${shownRegion + 1}`;
+  // The colour it is painted on the map, so the region can be found by eye
+  // rather than by counting.
+  els.regionSwatch.style.background = (run.colors && run.colors[shownRegion]) || 'transparent';
   if (m.electionType === 'stv') {
     show(els.regionStages, true);
     drawRegionStages(m, shownRegion);

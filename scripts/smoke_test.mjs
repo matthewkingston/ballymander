@@ -518,7 +518,7 @@ election.editor.restored = await editorState();
 election.region = {};
 await page.click('#view-region');
 election.region.stv = await page.evaluate(() => ({
-  title: document.getElementById('region-title').textContent,
+  title: document.getElementById('region-name').textContent,
   seats: document.getElementById('region-seats').textContent,
   stages: document.querySelectorAll('#region-stages .stage-row').length,
   full: [...document.querySelectorAll('#region-stages .stage-row')].every((row) =>
@@ -539,7 +539,7 @@ election.region.fptp = await page.evaluate(() => {
   const m = window.__model;
   const out = new Uint8Array(m.parties.length);
   // Which region is on show, before any click has told the test directly.
-  const r = Number(document.getElementById('region-title').textContent.replace(/\D/g, '')) - 1;
+  const r = Number(document.getElementById('region-name').textContent.replace(/\D/g, '')) - 1;
   return {
     wedges: document.querySelectorAll('#region-pie path').length,
     standing: [...m.regionStanding(r, out)].filter(Boolean).length,
@@ -548,19 +548,19 @@ election.region.fptp = await page.evaluate(() => {
   };
 });
 // clicking the map picks the region, and it is remembered
-const first = await page.evaluate(() => document.getElementById('region-title').textContent);
+const first = await page.evaluate(() => document.getElementById('region-name').textContent);
 await page.mouse.click(pt.x, pt.y);
 await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
 election.region.afterClick = await page.evaluate(() => ({
-  title: document.getElementById('region-title').textContent,
-  matchesModel: document.getElementById('region-title').textContent
+  title: document.getElementById('region-name').textContent,
+  matchesModel: document.getElementById('region-name').textContent
     === `Region ${window.__shownRegionForTest + 1}`,
 }));
 election.region.first = first;
 await page.click('#view-overall');
 await page.click('#view-region');
 election.region.remembered = await page.evaluate(() =>
-  document.getElementById('region-title').textContent);
+  document.getElementById('region-name').textContent);
 
 // A variable taken off the page takes its block, its readout row and its entry
 // in the results selector with it -- and stops steering, which is the point.
