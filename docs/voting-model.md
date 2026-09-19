@@ -634,10 +634,18 @@ Unique cost of removing each group from all 28:
 | grade | +3.0 ± 1.4 |
 | upbringing | +2.2 ± 0.7 |
 | SDZ detail | +1.3 ± 0.8 |
-| **age** | **+0.2 ± 0.3 → dropped** |
+| **age** | **+0.2 ± 0.3 → dropped** (retested since: [students, by proxy](#students-by-proxy-the-same-null)) |
 
 Age also broke under extrapolation: Botanic, 50% aged 18–29, reached z = 20
 when Belfast was held out.
+
+### Two variables that correlate and still buy nothing
+
+Density and student-age share were both put to the prior, and both failed the
+same way: genuinely outside the existing features, visibly related to the vote,
+and worth nothing out of sample. Recorded together because the pair says
+something the singles do not — the limit is not which variable is chosen but how
+little is left for a twenty-fifth feature to explain, with 80 DEAs to fit on.
 
 ### Density, tested and null
 
@@ -686,6 +694,39 @@ The likely reason: although density itself is not predicted by the existing
 features, the part of it that predicts votes already is. Urban Belfast is
 distinctive in national identity and social grade, the rural west in religion.
 Density describes those places again rather than adding an axis they vary on.
+
+### Students, by proxy: the same null
+
+Students have no table of their own in `data/`, so the closest thing without a
+new download is the **share of a zone's adults aged 18 to 24**, which is nearly
+the same quantity where it matters: the top zone is 84% of that age and 48 zones
+are above 30%, so Botanic and the Holylands are firmly in view.
+
+It is *more* novel than density — the 24 features predict it with R² = 0.27, so
+nearly three quarters of it is outside them — and it does relate to the vote,
+though less strongly: UUP −0.33, SDLP +0.30, PBP +0.30, Alliance −0.27 against a
+DEA's 18–24 share.
+
+| Spec | KL |
+|---|---:|
+| baseline, 24 features | 51.8 |
+| + share aged 18–24 | 51.8 |
+| + four age bands (18–24, 25–39, 40–64, 65+) | 51.6 |
+
+Nil, and the four-band version lands on the same +0.2 as the density bands did:
+that is the noise floor, not a finding.
+
+**This is a reconfirmation rather than a first test.** Age was tried in the
+original feature-group work and dropped, at +0.2 ± 0.3 KL — and by the surviving
+description of that test ("Botanic, 50% aged 18–29, reached z = 20") it was
+already a band share rather than a mean age, so bucketing was not the thing that
+had been missing. What is new here is the retest against the current model,
+three generations on: transfer-matrix ballots, turnout weighting and transparent
+micro-parties all postdate the original.
+
+Fetching NISRA's actual student table would refine the variable at the edges —
+postgraduates in, young non-students out — but it is a refinement of something
+already three-quarters orthogonal and still worth nothing.
 
 ### Individual religion categories
 
