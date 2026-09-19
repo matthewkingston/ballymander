@@ -1021,6 +1021,61 @@ for (const [N, seed] of [[4, 7], [18, 7], [18, 8], [18, 9], [50, 7], [100, 7]]) 
   }
 }
 
+/* --- the collapse guard --------------------------------------------------- */
+/* Extreme mode wants the most extreme regional value it can find, and one Data
+ * Zone reaches values no real region can. Nothing in the model objects -- the
+ * zone's figures are real -- but a constituency of 400 people is not a
+ * constituency, and at extreme weightings the population term is only a
+ * hundredth of the objective and cannot stop it. The guard sits outside the
+ * weighted sum for exactly that reason. */
+console.log('\nthe collapse guard');
+const EXTREME_RUN = { wPop: 0.1, wShape: 0, wPopShape: 0, wCut: 0,
+  demo: { age: { weight: 10, mode: 'extreme', threshold: 41, steepness: 0.5, above: true } } };
+
+const quiet = new RegionModel(graph, pops, geom, demo);
+quiet.start(18, 3, { wPop: 1 });
+while (quiet.buildStep());
+for (let i = 0; i < 50000; i++) quiet.optimiseStep();
+check(quiet.scoreFloor === 0,
+  'silent on a map drawn for equal population, as on any sane map');
+const floorPop = quiet.target * 0.2;
+check(quiet._floorCost(floorPop) === 0 && quiet._floorCost(floorPop * 1.5) === 0,
+  `nothing is charged at or above the floor (${Math.round(floorPop).toLocaleString()} people)`);
+check(quiet._floorCost(floorPop * 0.999) > 1,
+  'crossing it costs a whole charge at once, so the floor is a boundary not a slope');
+check(quiet._floorCost(floorPop * 0.05) > 10 * quiet._floorCost(floorPop * 0.5),
+  'and the charge runs away as the population goes to nothing');
+
+/* The behaviour it exists for, against the model without it. */
+const collapse = (guard) => {
+  const m = new RegionModel(graph, pops, geom, demo);
+  if (!guard) m._floorCost = () => 0;
+  m.start(18, 3, EXTREME_RUN);
+  while (m.buildStep());
+  for (let i = 0; i < 150000; i++) m.optimiseStep();
+  m.restoreBest();
+  return Math.min(...Array.from(m.regionPop)) / m.target;
+};
+const without = collapse(false);
+const withGuard = collapse(true);
+check(without < 0.2,
+  `without it a region collapses (smallest ${(100 * without).toFixed(1)}% of target)`);
+check(withGuard >= 0.2,
+  `with it none goes under the floor (smallest ${(100 * withGuard).toFixed(1)}%)`);
+
+/* The move deltas have to agree with the score, or the optimiser is steering by
+ * one number and being judged by another. */
+const floorModel = new RegionModel(graph, pops, geom, demo);
+floorModel.start(18, 5, EXTREME_RUN);
+while (floorModel.buildStep());
+for (let i = 0; i < 20000; i++) floorModel.optimiseStep();
+const scored = floorModel.score;
+const rebuilt = floorModel._rescore() / floorModel.eD2;
+check(near(floorModel.scorePop, rebuilt, 1e-6 * Math.abs(rebuilt) + 1e-9),
+  'the population term still rebuilds from scratch with the guard in the score');
+check(near(floorModel.score, scored, 1e-9),
+  'and the score is stable across a rescore');
+
 /* --- election terms ------------------------------------------------------ */
 /* The nine parties ride the demographic machinery, so what needs checking is
  * that their sums stay right through every kind of move, and that the

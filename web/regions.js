@@ -232,6 +232,48 @@ const DEMOGRAPHICS = [
  * exists to bring in. */
 const EXTREME_CAP = 5;
 
+/* --- the collapse guard ---------------------------------------------------
+ *
+ * A region can be driven down to a single Data Zone. Nothing in the model is
+ * wrong when that happens -- the zone's figures are real, and a region of 400
+ * people really does have that mean age -- but a constituency of 400 people is
+ * not a constituency, and at extreme weightings it is the best move on the
+ * board: one zone reaches a value no honest region can, and the population term
+ * cannot outvote it.
+ *
+ * It cannot outvote it because every term is a share of one budget. Set a
+ * variable to 10 and population to 0.1, both of which the interface allows, and
+ * population is 1% of the objective. Any guard placed in that same budget is
+ * defeatable the same way, by exactly the weightings that cause the problem. So
+ * this one sits outside it: added to the score after the division, answering to
+ * nothing the user sets.
+ *
+ * Above a fifth of the target population it is silent, so maps that are merely
+ * unequal -- which this tool is for -- are untouched. Below, a region is charged
+ *
+ *     1 + (1 - s)^2 / s          s = pop / floor
+ *
+ * which is two things at once. The 1 is a flat charge for being under at all,
+ * so the floor is a boundary rather than a slope: the optimiser may take a
+ * region right down to it and pays nothing until it crosses. The tail has no
+ * upper bound as the population goes to nothing, so no term at any weighting
+ * can buy its way to the bottom -- a single zone costs about 28 of these, and
+ * the limit is infinity.
+ *
+ * Both halves were chosen by measurement rather than taste, over three
+ * demographics in extreme mode at weight 10 against population 0.1, three
+ * seeds each (see "The collapse guard" in README.md):
+ *
+ *   hinge^2, any constant   soft just under the floor, so regions sat at 15%
+ *   linear or plain barrier holds, but repels: regions ended at 32% of target
+ *                           and the maps lost half the extremity asked for
+ *   step + tail, 300k       holds in 9 of 9, worst region 20.0%, extremity kept
+ *
+ * Inactive during the build, where every region legitimately starts as one
+ * zone and grows. */
+const FLOOR_SHARE = 0.2;         // of the target population
+const FLOOR_PENALTY = 300000;    // its weight, being outside the budget
+
 /* --- the parties --------------------------------------------------------- */
 
 /* A party is scored exactly like a demographic: a vote-weighted mean per
@@ -1751,7 +1793,7 @@ class RegionModel {
       if (cutting) {
         delta += (this.wCut * (leavingCut - (cutTally.get(r) || 0))) / this.sigmaCut;
       }
-      deltas.push(delta / this.weightSum);
+      deltas.push(delta / this.weightSum + this._floorDelta(from, r, dP));
     }
     if (candidates.length === 1) return false;
 
@@ -2177,6 +2219,8 @@ class RegionModel {
     const oldDemo = this.terms.map(
       (d) => this._demoTerm(d, a) + this._demoTerm(d, b));
 
+    const oldFloor = this._floorCost(this.regionPop[a]) + this._floorCost(this.regionPop[b]);
+
     const totPop = this._sPop[0];
 
     const cuts = [-1];          // -1 is the status quo
@@ -2214,7 +2258,10 @@ class RegionModel {
         delta += (this.wCut * (cross - oldCross)) / this.sigmaCut;
       }
       cuts.push(c);
-      deltas.push(delta / this.weightSum);
+      // A split leaving either piece under the floor is charged for it, against
+      // what the two regions were charged before.
+      deltas.push(delta / this.weightSum + (this.assigned < this.n ? 0
+        : this._floorCost(p1) + this._floorCost(p2) - oldFloor));
     }
 
     let min = Infinity;
@@ -2359,6 +2406,35 @@ class RegionModel {
    * relative priority rather than an exchange rate between people and metres. */
   get scorePop() { return this.rawScore / this.eD2; }
 
+  /* What one region is charged for being too small to be a region. Zero for
+   * anything at or above the floor, which is every region on a sane map. */
+  _floorCost(pop) {
+    const floor = this.target * FLOOR_SHARE;
+    if (!(floor > 0) || pop >= floor) return 0;
+    const s = Math.max(pop / floor, 1e-6);
+    const under = 1 - s;
+    return 1 + (under * under) / s;
+  }
+
+  /* Summed over the regions. O(N) and called per score rather than per move:
+   * the moves use the difference directly, since it depends on nothing but the
+   * two populations involved. */
+  get scoreFloor() {
+    if (this.assigned < this.n) return 0;      // the build is allowed its seeds
+    let total = 0;
+    for (let r = 0; r < this.N; r++) total += this._floorCost(this.regionPop[r]);
+    return total;
+  }
+
+  /* What a move costs the guard: the two regions it touches, nothing else. */
+  _floorDelta(from, to, dPop) {
+    if (this.assigned < this.n) return 0;
+    return this._floorCost(this.regionPop[from] - dPop)
+      - this._floorCost(this.regionPop[from])
+      + this._floorCost(this.regionPop[to] + dPop)
+      - this._floorCost(this.regionPop[to]);
+  }
+
   get scoreShape() { return this.shapeRaw / this.sigmaShape; }
 
   get scorePopShape() { return this.popShapeRaw / this.sigmaPopShape; }
@@ -2378,7 +2454,10 @@ class RegionModel {
       + this.wPopShape * this.scorePopShape
       + this.wCut * this.scoreCut
       + this.terms.reduce((a, d) => a + d.weight * (d.raw / d.sigma), 0))
-      / this.weightSum;
+      / this.weightSum
+      // Outside the division on purpose: a guard that could be outweighed by
+      // the weightings that cause the collapse would be no guard.
+      + FLOOR_PENALTY * this.scoreFloor;
   }
 
   /* The legible versions: 1 is a circle for land, and for people it is a region

@@ -400,6 +400,52 @@ and capping it would remove the pull on exactly the outliers it exists to bring
 in. Gerrymander mode needs no cap either, since the logistic already saturates:
 a one-zone region wins one seat, the same as any other.
 
+### The collapse guard
+
+**The cap was not enough.** Push further than the figures above — weight 10
+against population 0.1, both of which the interface allows — and extreme mode
+still strands a region: measured at N=18, a single zone of 748 people, 0.7% of
+target. Two other demographics do the same. Gerrymander mode never does, for the
+saturation reason above, which is why this is an extreme-mode problem wearing a
+general disguise.
+
+The reason no term can be tuned to stop it is that **every term is a share of
+one budget**. The score divides by the sum of the weights, so at 10 against 0.1
+population is 1% of the objective, and any guard placed beside it is diluted by
+exactly the weightings that cause the trouble. So the guard sits **outside the
+division**, added to the score afterwards with a fixed constant, answering to
+nothing the user sets. It is the only thing in the score that cannot be
+weighted, and that is the point of it.
+
+Below a floor of **20% of the target population** a region is charged
+
+    1 + (1 − s)² ⁄ s        where s = population ⁄ floor
+
+and nothing at all above it. The `1` is a flat charge for being under at all, so
+the floor is a boundary rather than a slope — the optimiser may take a region
+right down to it and pay nothing until it crosses. The tail has no upper bound
+as the population goes to nothing: one zone costs about 28 charges, and the
+limit is infinity, so no term at any weighting can buy its way to the bottom.
+
+Both halves were chosen by measurement, over three demographics in extreme mode
+at weight 10 against population 0.1, three seeds each:
+
+| Shape | Held the floor | Smallest region | Extremity kept |
+|---|---|---:|---:|
+| `(1 − s)²`, any constant | 5 of 9 | 2.5% | 12.2 |
+| linear, or a plain barrier | 9 of 9 | 31.9% | 7.8 |
+| **`1 + (1 − s)² ⁄ s`, ×300,000** | **9 of 9** | **20.0%** | **14.9** |
+
+`(1 − s)²` fails because it is soft where it matters: a region at 15% of target
+against a 20% floor is charged 5% of its maximum, so sitting just under the
+floor is nearly free. A linear hinge or a plain barrier holds, but repels — it
+pushes regions to 32% of target and costs half the extremity the run was asked
+for. The step-and-tail holds the floor exactly while leaving the objective
+alone, which is what a guard should do.
+
+It is inactive during the build phase, where every region legitimately begins as
+a single zone and grows.
+
 > The obvious guess for the first line, `sigma = delta^2`, is wrong by a factor
 > of over a hundred, and it is an instructive mistake. It carries over the
 > reasoning that works for population, where the deviation really does settle at
