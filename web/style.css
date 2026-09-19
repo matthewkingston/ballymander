@@ -32,11 +32,11 @@ html, body {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(20, 34, 48, 0.10);
   backdrop-filter: blur(6px);
-  /* Sized so a typical variable head fits on one line -- "Alliance gerrymander
-     0.19 x" wants 205px -- rather than so the longest one does, which cost 29px
-     of empty space on every other row to spare two of them a wrap. Social grade
-     and Orientation now wrap, and the rest do not. */
-  width: 406px;
+  /* Whatever the measured label column needs, plus a 133px column for the
+     sliders and boxes and the padding and gutter around them. The label column
+     is sized for a typical head rather than the longest, so Social grade and
+     Orientation wrap and the rest do not. */
+  width: 398px;
   max-height: calc(100% - 32px);
   overflow-y: auto;
   /* Room for the scrollbar whether or not one is showing: otherwise every
@@ -86,7 +86,9 @@ html, body {
      everything left. The fallback is what that measurement gives here. */
   grid-template-columns: var(--label-col, 210px) 1fr;
   align-items: center;
-  gap: 7px 10px;
+  /* The column is measured to its content, so this gap is the whole buffer
+     between a label and its control -- there is no slack behind it. */
+  gap: 7px 6px;
 }
 .ctl-grid label {
   font-size: 10px;
@@ -363,10 +365,10 @@ html, body {
      keeps it inside the scrollable area -- the reserved scrollbar gutter lies
      beyond, and anything crossing into it counts as overflow, which gives the
      panel a horizontal scrollbar the moment a vertical one appears. */
-  width: calc(100% + 8px);
+  width: calc(100% - 3px);
   max-width: none;
   height: auto;
-  margin-left: -4px;
+  margin: 0 auto;
 }
 
 #results {

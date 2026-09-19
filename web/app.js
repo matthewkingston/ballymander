@@ -1653,10 +1653,14 @@ function sizeLabelColumn() {
     el('span', { class: 'ctl-head-end' },
       el('span', { text: LABEL_REFERENCE.weight }),
       el('button', { class: 'var-remove', type: 'button', text: '×' })));
-  const probe = el('div', { class: 'ctl-grid' }, head);
-  probe.style.cssText = 'position:absolute;visibility:hidden;width:auto;'
-    + 'white-space:nowrap;pointer-events:none';
+  // Not inside a .ctl-grid: that is the very grid whose column is being
+  // measured, and it would stretch the head to the width already set -- the
+  // measurement would just read its own answer back.
+  const probe = el('div', {}, head);
+  probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;'
+    + 'width:max-content;white-space:nowrap';
   head.style.flexWrap = 'nowrap';
+  head.style.width = 'max-content';
   els.variables.append(probe);
   // Round up: a fraction short would wrap the very string being fitted.
   const want = Math.ceil(head.getBoundingClientRect().width) + 1;
