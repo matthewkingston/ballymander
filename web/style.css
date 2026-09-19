@@ -356,14 +356,16 @@ html, body {
    text one and, being an id selector, was quietly zeroing this margin. */
 .results-title img {
   display: block;
-  /* Out past the panel's padding, but only as far as the scrollable area
-     reaches: the reserved scrollbar gutter lies beyond it, and anything
-     crossing into that counts as overflow, which gives the panel a horizontal
-     scrollbar the moment a vertical one appears. */
-  width: calc(100% + 22px);
+  /* Sized so RESULTS stands the same height as BALLYMANDER on the other side:
+     the caps are 110px of this 551-wide drawing and 192px of that 1619-wide
+     one, which at the gable's rendered width puts this one at 195px. That also
+     keeps it inside the scrollable area -- the reserved scrollbar gutter lies
+     beyond, and anything crossing into it counts as overflow, which gives the
+     panel a horizontal scrollbar the moment a vertical one appears. */
+  width: calc(100% + 8px);
   max-width: none;
   height: auto;
-  margin-left: -8px;
+  margin-left: -4px;
 }
 
 #results {
