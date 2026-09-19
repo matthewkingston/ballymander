@@ -493,6 +493,13 @@ await editorPick(['TUV']);
 election.editor.onePicked = (await editorState()).buttons;
 await editorPress('Exclude');
 election.editor.excluded = await editorState();
+// A button is live only when pressing it would change something, so the pair
+// swaps over once the party it is pointing at has been struck off -- and a
+// selection holding one of each gives both something to do.
+await editorPick(['TUV']);
+election.editor.excludedPicked = (await editorState()).buttons;
+await editorPick(['TUV', 'DUP']);
+election.editor.mixedPicked = (await editorState()).buttons;
 await editorPick(['DUP', 'UUP']);
 election.editor.twoPicked = (await editorState()).buttons;
 await editorPress('Merge');
@@ -749,8 +756,15 @@ const ed = election && election.editor;
 if (!ed || ed.start.rows.length !== 9 || ed.start.buttons.some((b) => !b.endsWith(':off'))) {
   problems.push('party editor did not start with nine parties and nothing to do');
 }
-if (!ed || ed.onePicked[0] !== 'Include:on' || ed.onePicked[2] !== 'Merge:off') {
-  problems.push('one selected party should allow include/exclude but not merge');
+if (!ed || ed.onePicked[0] !== 'Include:off' || ed.onePicked[1] !== 'Exclude:on'
+    || ed.onePicked[2] !== 'Merge:off') {
+  problems.push(`one standing party: exclude only, no merge (${ed && ed.onePicked.join(' ')})`);
+}
+if (!ed || ed.excludedPicked[0] !== 'Include:on' || ed.excludedPicked[1] !== 'Exclude:off') {
+  problems.push(`one struck-off party: include only (${ed && ed.excludedPicked.join(' ')})`);
+}
+if (!ed || ed.mixedPicked[0] !== 'Include:on' || ed.mixedPicked[1] !== 'Exclude:on') {
+  problems.push(`a mixed selection: both live (${ed && ed.mixedPicked.join(' ')})`);
 }
 if (!ed || !ed.excluded.rows.includes('TUV(out)') || ed.excluded.selected !== 0) {
   problems.push('excluding a party did not take, or left it selected');

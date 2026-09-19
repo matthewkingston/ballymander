@@ -331,7 +331,7 @@ function buildVariable(entry) {
   const [sMin, sMax, sStep] = entry.isParty ? [0.005, 0.15, 0.005] : entry.def.steepnessRange;
   const t0 = entry.isParty ? 0 : entry.def.threshold;
   const s0 = entry.isParty ? 0.02 : entry.def.steepness;
-  v.tValue = el('span', { text: String(t0) });
+  v.tValue = el('span', { text: entry.isParty ? `${(100 * t0).toFixed(1)}%` : String(t0) });
   v.sValue = el('span', { text: String(s0) });
   v.t = el('input', { id: id('t'), type: 'range', min: tMin, max: tMax, step: tStep, value: t0 });
   v.s = el('input', { id: id('s'), type: 'range', min: sMin, max: sMax, step: sStep, value: s0 });
@@ -625,11 +625,13 @@ function updateEditorButtons() {
   if (!ui) return;
   const chosen = [...ballot.selected];
   const merged = chosen.filter((item) => item.members.length > 1);
-  // Include and exclude work on any selection; merging needs two items, and
-  // unmerging exactly one merged item.
+  // A button is live exactly when pressing it would change something: include
+  // needs something excluded in the selection, exclude needs something
+  // included, and a mixed selection gives both work to do. Merging needs two
+  // items, and unmerging exactly one merged item.
   const unmerge = chosen.length === 1 && merged.length === 1;
-  ui.include.disabled = chosen.length === 0;
-  ui.exclude.disabled = chosen.length === 0;
+  ui.include.disabled = !chosen.some((item) => !item.standing);
+  ui.exclude.disabled = !chosen.some((item) => item.standing);
   ui.merge.disabled = !(chosen.length > 1 || unmerge);
   ui.merge.textContent = unmerge ? 'Unmerge' : 'Merge';
 }
@@ -887,7 +889,11 @@ function wireVariable(v) {
   v.mode.addEventListener('change', () => { sync(); if (run.model) readout(); });
   v.w.addEventListener('input', sync);
   for (const [input, out] of [[v.w, v.wValue], [v.t, v.tValue], [v.s, v.sValue]]) {
-    wireReadout(input, out);
+    // A party's threshold is a winning margin -- a share of the region's votes
+    // -- so it reads as the percentage it is. A demographic's carries its own
+    // units, which are already what they should be.
+    wireReadout(input, out, v.isParty && input === v.t
+      ? (value) => `${(100 * Number(value)).toFixed(1)}%` : null);
   }
   sync();
   applyElectionType();
@@ -1603,9 +1609,10 @@ function drawBars() {
 
 /* Slider to the figure beside its label. Variables are added and removed, so
  * this is per input rather than a list walked once at boot. */
-function wireReadout(input, out) {
+function wireReadout(input, out, format = null) {
   const show = () => {
-    if (input.dataset.weight !== undefined) out.textContent = formatWeight(weightOf(input));
+    if (format) out.textContent = format(input.value);
+    else if (input.dataset.weight !== undefined) out.textContent = formatWeight(weightOf(input));
     else if (input.dataset.interval !== undefined) {
       out.textContent = formatInterval(recomIntervalOf(input));
     } else out.textContent = input.value;
