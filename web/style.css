@@ -681,6 +681,14 @@ html, body {
   text-align: center;
 }
 #pie[hidden] { display: none; }
+/* A LABEL, like every other thing in the panel that names a figure. */
+.pie-title {
+  margin-bottom: 2px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
 #pie-svg {
   width: 132px;
   height: 132px;
