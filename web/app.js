@@ -44,6 +44,7 @@ const els = {
   ttRegionDemo: document.querySelector('.tt-region-demo'),
   n: document.getElementById('ctl-n'),
   seed: document.getElementById('ctl-seed'),
+  seedValue: document.getElementById('ctl-seed-value'),
   temp: document.getElementById('ctl-temp'),
   speed: document.getElementById('ctl-speed'),
   speedValue: document.getElementById('ctl-speed-value'),
@@ -1028,6 +1029,31 @@ function addZoneLayers(map, geojson) {
   });
 }
 
+/* The seed a run will use: whatever is in the box, or a fresh one drawn from
+ * the clock when it is empty. Drawn once per GO rather than per frame, so
+ * pausing and resuming stays on the same map.
+ *
+ * Whichever it is, it goes in the label: an auto seed that vanished with the
+ * run would make a map worth keeping impossible to find again, which is the one
+ * thing the seed is for. */
+function seedForRun() {
+  const typed = els.seed.value.trim();
+  if (typed !== '') return { seed: Number(typed) >>> 0, auto: false };
+  // Six digits rather than the whole clock: it changes every millisecond,
+  // which is all that is wanted, and it is short enough to read off and type
+  // back in. Two runs a quarter of an hour apart could share one, which costs
+  // nothing.
+  return { seed: Date.now() % 1000000, auto: true };
+}
+
+/* Only an automatic seed is reported: one typed into the box is already on
+ * screen, and repeating it in the label would just be the same number twice. */
+function showSeed(chosen) {
+  // Unformatted: this number exists to be read off and typed back into the box
+  // beside it, and the box will not take a thousands separator.
+  els.seedValue.textContent = chosen && chosen.auto ? String(chosen.seed) : '';
+}
+
 /* --- score weights ------------------------------------------------------- */
 
 /* Weight sliders carry log10 of the weight, so 1 sits exactly in the middle
@@ -1460,6 +1486,7 @@ function start(map) {
   // the boundaries stop being the real ones with the first move.
   const fromReal = realLoaded();
   if (fromReal) {
+    showSeed(null);          // no build, so no seed had any part in this map
     run.model.adopt(run.model.assign.slice(), runOptions());
     els.real.value = 'none';
     els.n.disabled = false;
@@ -1486,7 +1513,9 @@ function start(map) {
     run.model.setElection(elect.type(), elect.seatsPer(), elect.bonus(),
       els.tactical.checked, els.standing.checked);
   }
-  run.model.start(n, Number(els.seed.value) || 0, {
+  const chosen = seedForRun();
+  showSeed(chosen);
+  run.model.start(n, chosen.seed, {
     temperature: Number(els.temp.value) || 1,
     wPop: weightOf(els.popw),
     wShape: weightOf(els.shape),

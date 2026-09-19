@@ -71,8 +71,12 @@
       <!-- Which parties are on the ballot, and which have merged. Built by
            app.js; its state outlives a run. -->
       <div id="party-editor" hidden></div>
-      <label for="ctl-seed">Random seed</label>
-      <input id="ctl-seed" type="number" min="0" step="1" value="1">
+      <!-- Empty means a fresh seed every run, which is what the placeholder
+           says. Type a number to pin it; clear the box to go back to auto. The
+           seed actually in use is reported in the label, so a run worth
+           repeating can be. -->
+      <label for="ctl-seed">Random seed <span id="ctl-seed-value"></span></label>
+      <input id="ctl-seed" type="number" min="0" step="1" placeholder="Auto">
       <label for="ctl-temp">Temperature</label>
       <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
       <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>

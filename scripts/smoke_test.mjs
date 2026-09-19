@@ -71,7 +71,7 @@ await page.evaluate(() => {
   speed.value = speed.max;
   speed.dispatchEvent(new Event('input'));
   document.getElementById('ctl-n').value = '12';
-  document.getElementById('ctl-seed').value = '3';
+  document.getElementById('ctl-seed').value = '3';     // fixed, not auto
   // The page opens with one variable, Alliance. Add every demographic to it, in
   // a mix of modes: religion gerrymandering, which is also what opens the
   // sub-block only that mode uses, and the rest in the two modes that share a
@@ -202,6 +202,35 @@ const statSwitch = await page.evaluate(() => {
 });
 
 await page.screenshot({ path: `${OUT}/map-full.png` });
+
+// --- the seed, fixed and automatic --------------------------------------
+// An empty box means a fresh seed every run, reported in the label so a map
+// worth keeping can be found again; a number in the box pins it, and is not
+// repeated in the label.
+const seed = await page.evaluate(async () => {
+  const box = document.getElementById('ctl-seed');
+  const label = document.getElementById('ctl-seed-value');
+  const go = () => new Promise((done) => {
+    document.getElementById('ctl-go').click();
+    const wait = () => (window.__model && window.__model.assigned === window.__model.n
+      ? done() : setTimeout(wait, 100));
+    wait();
+  });
+  const stop = () => new Promise((done) => {
+    document.getElementById('ctl-stop').click();
+    setTimeout(done, 200);
+  });
+  const fixedLabel = label.textContent;         // still on the fixed seed above
+  box.value = '';
+  box.dispatchEvent(new Event('change', { bubbles: true }));
+  await go();
+  const first = label.textContent;
+  await stop();
+  await go();
+  const second = label.textContent;
+  await stop();
+  return { placeholder: box.placeholder, fixedLabel, first, second, boxAfter: box.value };
+});
 
 // --- hover a zone -------------------------------------------------------
 // aim at Belfast (dense zones) rather than the viewport centre
@@ -705,6 +734,18 @@ if (!election || !(election.standing.on.votes < election.standing.off.votes)) {
 if (!election || election.standing.back.votes !== election.standing.on.votes) {
   problems.push('toggling the standing rule did not restore the votes');
 }
+
+if (!seed || seed.placeholder !== 'Auto') problems.push('seed box does not offer Auto');
+if (!seed || seed.fixedLabel !== '') {
+  problems.push(`a typed seed should not be repeated in the label (${seed && seed.fixedLabel})`);
+}
+if (!seed || !/^\d+$/.test(seed.first) || !/^\d+$/.test(seed.second)) {
+  problems.push(`an automatic seed should be reported plainly (${seed && seed.first})`);
+}
+if (!seed || seed.first === seed.second) {
+  problems.push(`automatic seeds should differ run to run (${seed && seed.first})`);
+}
+if (!seed || seed.boxAfter !== '') problems.push('an automatic seed was written into the box');
 
 // Votes are conserved: every voter lands in exactly one region.
 if (!election || Math.abs(election.nationalVotes - election.zoneVotes) > 2) {
