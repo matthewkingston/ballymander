@@ -524,7 +524,6 @@ html, body {
 }
 #results-list[hidden] { display: none; }
 
-/* The statistic selector doubles as the panel's heading. */
 #bars-stat {
   font: inherit;
   font-size: 13px;
@@ -816,7 +815,10 @@ html, body {
 }
 #pie[hidden] { display: none; }
 /* A LABEL, like every other thing in the panel that names a figure. */
-.pie-title {
+/* Names a chart, above it: the pie's subject, and the bars'. The selector
+   under this one picks which statistic the bars show, which is a different
+   question from what the chart is. */
+.chart-title {
   margin-bottom: 2px;
   font-size: 10px;
   text-transform: uppercase;

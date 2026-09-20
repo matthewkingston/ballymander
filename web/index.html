@@ -228,12 +228,16 @@
     <!-- Election mode: seats by party. Filled by app.js; the caption names the
          segment under the pointer, so the chart itself needs no labels. -->
     <div id="pie" hidden>
-      <div class="pie-title">Seats per party</div>
+      <div class="chart-title">Seats per party</div>
       <svg id="pie-svg" viewBox="-1.05 -1.05 2.1 2.1" aria-label="Seats by party"></svg>
       <div id="pie-caption">&nbsp;</div>
     </div>
 
     <div id="results-list" hidden>
+      <!-- The selector names the statistic, not the chart, so it cannot say
+           what the chart is; with a dozen statistics in it, it changes text
+           under the reader as well. -->
+      <div class="chart-title">Stats by region</div>
       <select id="bars-stat">
         <option value="pop" selected>Population</option>
         <option value="land">Land shape</option>
