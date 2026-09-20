@@ -897,6 +897,8 @@ let resultsShown = false;
 function showResults(on) {
   resultsShown = on;
   els.resultsHint.hidden = on;
+  // Held open only while it is empty; with figures in it, it sizes to them.
+  els.results.classList.toggle('is-resting', !on);
   // The view switch has nothing to switch between until there is a count.
   els.viewSwitch.hidden = !on || !voters;
   applyView();
@@ -1882,6 +1884,20 @@ function setGroupOpen(id, open) {
   g.toggle.setAttribute('aria-expanded', String(open));
 }
 
+/* Before a run, the results panel stands at four fifths of the left panel's
+ * height rather than shrinking to its own contents -- two panels of wildly
+ * different size read as one finished and one half-built. Measured rather than
+ * written down, because the left panel's height is whatever its controls come
+ * to, and a constant here would drift the first time one moved. */
+const REST_FRACTION = 0.8;
+
+function sizeRestingResults() {
+  // scrollHeight rather than the rendered box: on a short window the left panel
+  // is capped by max-height, and its box would understate what it wants to be.
+  const want = Math.round(document.getElementById('panel').scrollHeight * REST_FRACTION);
+  document.documentElement.style.setProperty('--results-rest', `${want}px`);
+}
+
 /* Slider to the figure beside its label. Variables are added and removed, so
  * this is per input rather than a list walked once at boot. */
 function wireReadout(input, out, format = null) {
@@ -1982,7 +1998,13 @@ async function main() {
   // empty page would say nothing about what the tool does.
   addVariable(voters ? 'party:Alliance' : DEMOGRAPHICS[0].key);
   applyVariables();
-  applyView();
+  sizeRestingResults();
+  // Again once the artwork has its real dimensions: the gable is most of the
+  // left panel's height, and a measurement taken before it lands is short.
+  window.addEventListener('load', sizeRestingResults);
+  // Empty, and saying so: this is what puts the help text up and holds the
+  // panel open. It calls applyView itself.
+  showResults(false);
 
 
   try {

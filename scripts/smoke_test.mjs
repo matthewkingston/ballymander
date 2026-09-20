@@ -111,6 +111,11 @@ const resultsAtRest = await page.evaluate(() => ({
   hintText: document.getElementById('results-hint').textContent.replace(/\s+/g, ' ').trim(),
   overall: !document.getElementById('overall').hidden,
   viewSwitch: !document.querySelector('.view-switch').hidden,
+  // Held open at four fifths of the left panel rather than collapsing onto the
+  // one paragraph. A ratio, not a pixel count: the left panel decides both.
+  resting: document.getElementById('results').classList.contains('is-resting'),
+  ratio: document.getElementById('results').getBoundingClientRect().height
+    / document.getElementById('panel').scrollHeight,
 }));
 await page.click('#ctl-go');
 await page.waitForFunction(
@@ -754,6 +759,11 @@ if (!resultsAtRest || !resultsAtRest.panel || !resultsAtRest.hint
     || resultsAtRest.overall || resultsAtRest.viewSwitch
     || !resultsAtRest.hintText.startsWith('Select your settings')) {
   problems.push('the results panel was not already there with its help text');
+}
+if (!resultsAtRest || !resultsAtRest.resting
+    || resultsAtRest.ratio < 0.7 || resultsAtRest.ratio > 0.9) {
+  problems.push('the empty results panel was not held near the left panel\'s height: '
+    + (resultsAtRest && resultsAtRest.ratio.toFixed(3)));
 }
 if (!regions || !regions.panelAlwaysUp || !regions.resultsShown) {
   problems.push('the help text did not give way to the results');
