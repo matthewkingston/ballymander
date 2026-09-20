@@ -477,7 +477,12 @@ election.stv = await page.evaluate(() => {
       // Both are fine tuning, so both wait for advanced mode -- and the margin
       // has nothing to tune under STV even then.
       bonus: !document.getElementById('ctl-bonus').hidden,
-      direction: document.querySelector('label[for="ctl-party-dup-a"]').textContent,
+      // The label is 'Goal' whatever the variable; the options carry the
+      // meaning, and a party's are Win/Lose rather than above/below a margin.
+      goalLabel: document.querySelector('label[for="ctl-party-dup-a"]').textContent,
+      goalOptions: [...document.getElementById('ctl-party-dup-a').options]
+        .map((o) => `${o.value}:${o.textContent}`),
+      goal: document.getElementById('ctl-party-dup-a').value,
     },
     seatsPer: m.seatsPerRegion,
     total: m.totalSeats,
@@ -940,7 +945,9 @@ if (!election || election.region.remembered !== election.region.afterClick.title
 
 if (!election || !election.stv.controls.seats || election.stv.controls.margin
     || election.stv.controls.bonus
-    || election.stv.controls.direction !== 'Win seats') {
+    || election.stv.controls.goalLabel !== 'Goal'
+    || election.stv.controls.goal !== 'above'
+    || election.stv.controls.goalOptions.join('|') !== 'above:Win|below:Lose') {
   problems.push('STV gerrymander controls wrong');
 }
 if (!election || election.stv.perRegion.some((n) => n !== election.stv.seatsPer)) {

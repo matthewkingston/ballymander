@@ -371,13 +371,20 @@ function buildVariable(entry) {
   v.sValue = el('span', { text: String(s0) });
   v.t = el('input', { id: id('t'), type: 'range', min: tMin, max: tMax, step: tStep, value: t0 });
   v.s = el('input', { id: id('s'), type: 'range', min: sMin, max: sMax, step: sStep, value: s0 });
-  v.above = el('input', { id: id('a'), type: 'checkbox', checked: true });
+  // Which way the term is being pushed, as the thing itself rather than as a
+  // box to leave ticked: a party is being drawn to win or to lose, a
+  // demographic to land above or below its threshold. A checkbox called "above
+  // margin" made the reader work out what leaving it unticked would mean.
+  v.above = el('select', { id: id('a') },
+    el('option', { value: 'above', selected: true },
+      entry.isParty ? 'Win' : 'Above threshold'),
+    el('option', { value: 'below' },
+      entry.isParty ? 'Lose' : 'Below threshold'));
 
   v.tLabel = el('label', { for: id('t') },
     entry.isParty ? 'Winning margin ' : 'Threshold ', v.tValue);
   v.sLabel = el('label', { for: id('s') }, 'Steepness ', v.sValue);
-  v.dirLabel = el('label', { for: id('a'),
-    text: entry.isParty ? 'Above margin' : 'Above threshold' });
+  v.dirLabel = el('label', { for: id('a'), text: 'Goal' });
   v.gerry = el('div', { id: `${slug}-gerry`, class: 'ctl-grid ctl-sub', hidden: true },
     v.tLabel, v.t, v.sLabel, v.s, v.dirLabel, v.above);
 
@@ -895,6 +902,10 @@ function applyView() {
 
 /* --- steering -------------------------------------------------------------- */
 
+/* The Goal selector as the model wants it: a party drawn to win, or a
+ * demographic pushed above its threshold, is `above`. */
+const goalAbove = (v) => v.above.value === 'above';
+
 /* Weights for every term the model carries: what is not on the page is off, so
  * nothing steers unseen. */
 function termWeights() {
@@ -980,7 +991,6 @@ function applyElectionType() {
     v.t.hidden = v.tLabel.hidden;
     v.sLabel.hidden = !(tunable && advanced);
     v.s.hidden = v.sLabel.hidden;
-    if (v.isParty) v.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
   }
 }
 
@@ -1426,7 +1436,7 @@ function runOptions() {
         mode: v.mode.value,
         threshold: Number(v.t.value),
         steepness: Number(v.s.value),
-        above: v.above.checked,
+        above: goalAbove(v),
       }])),
     },
   };
@@ -1576,7 +1586,7 @@ function tick(map) {
       }
       for (const v of variables) {
         run.model.setDemographic(v.key, v.mode.value, Number(v.t.value),
-          Number(v.s.value), v.above.checked);
+          Number(v.s.value), goalAbove(v));
       }
       const demoWeights = termWeights();
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
@@ -1655,7 +1665,7 @@ function start(map) {
       mode: v.mode.value,
       threshold: Number(v.t.value),
       steepness: Number(v.s.value),
-      above: v.above.checked,
+      above: goalAbove(v),
     }])),
   });
   run.colors = palette(n);

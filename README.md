@@ -661,8 +661,10 @@ There is one page, and what steers the run is a list of **variables** you build
 yourself. A variable is a party or a demographic — the model scores both the
 same way, so nothing distinguishes them but their labels and their units — and
 each carries a weight, an average / extreme / gerrymander mode, and the
-gerrymander controls that mode uses. The page opens with one, Alliance, and
-**Add variable** offers whatever is not already on it.
+gerrymander controls that mode uses — a **Goal** of *Win* or *Lose* for a party,
+*Above threshold* or *Below threshold* for a demographic, plus the threshold
+itself. The page opens with one, Alliance, and **Add variable** offers whatever
+is not already on it.
 
 A party and a demographic can steer at once, and so can two parties: gerrymander
 for Sinn Féin while watching the DUP's margin, or draw for age and religion
@@ -876,8 +878,8 @@ is as many seats as possible — so the score is
 
 from the simulated count, where the seat bonus — how much a seat outweighs
 vote-building — is 2 unless advanced controls are showing, moving it having
-proved to change little. What is left in plain sight is a direction: win seats,
-or deny them. Average and extreme modes work on the party's share in both.
+proved to change little. What is left in plain sight is **Goal**: *Win* or
+*Lose*. Average and extreme modes work on the party's share in both.
 
 The STV count itself is party-level — no candidates, no rankings — using the
 transfer matrix and each party's exhaustion rate. It gets 95% of the seats
