@@ -54,6 +54,8 @@ const initialPanel = await page.evaluate(() => ({
   panelWants: document.getElementById('panel').scrollHeight,
   rest: parseFloat(getComputedStyle(document.documentElement)
     .getPropertyValue('--results-rest')),
+  // The bars open on the variable the page opens with, not on population.
+  barStat: document.getElementById('bars-stat').value,
 }));
 
 // the adjacency graph loads off the critical path, so wait for it separately
@@ -209,13 +211,13 @@ const regions = await page.evaluate(() => {
     relSeats: `${m.demoSeats('rel')}/${m.N}`,
     relShown: document.getElementById('run-var-rel').textContent,
     ageMode: m.demoByKey.age.mode,
-    ageSpread: m.demoSpread('age').toFixed(1),
-    ageShown: document.getElementById('run-var-age').textContent,
+    ageRowGone: document.getElementById('run-var-age').parentElement.hidden,
     demoKeys: m.demographics.map((d) => d.key),
     demoReadouts: m.demographics.map((d) => ({
       key: d.key,
       mode: m.demoByKey[d.key].mode,
       text: document.getElementById(`run-var-${d.key}`).textContent,
+      hidden: document.getElementById(`run-var-${d.key}`).parentElement.hidden,
     })),
     gerryVisible: window.__gerryVisible,
     popsSumToTotal: pops.reduce((a, b) => a + b, 0),
@@ -810,20 +812,25 @@ if (!regions || regions.gerryVisible.blocks !== regions.demoKeys.length + 1) {
 if (!regions || regions.demoKeys.some((k) => !regions.gerryVisible.bars.includes(`demo:${k}`))) {
   problems.push('a demographic is missing from the statistic selector');
 }
-// Gerrymander mode has a real count and names the side it was drawn for; the
-// other modes report nothing on purpose, their spreads being unreadable.
-if (!regions || regions.demoReadouts.some(({ mode, text }) => (mode === 'gerrymander'
-  ? !/^\d+\/\d+ (above|below)$/.test(text) : text !== '\u2014'))) {
+// Gerrymander mode has a real count and names the side it was drawn for. The
+// other modes have nothing to say, so their row is off the list entirely --
+// a row holding a dash claimed a fact and then withheld it.
+if (!regions || regions.demoReadouts.some(({ mode, text, hidden }) => (mode === 'gerrymander'
+  ? hidden || !/^\d+\/\d+ (above|below)$/.test(text) : !hidden))) {
   problems.push('a demographic readout does not match its mode: '
     + (regions && JSON.stringify(regions.demoReadouts)));
 }
 // Gerrymander mode names the side it was aiming at; the goal defaults to above.
+if (!initialPanel || initialPanel.barStat !== 'party:Alliance') {
+  problems.push('the bars did not open on the page\'s own variable: '
+    + (initialPanel && initialPanel.barStat));
+}
 if (!regions || regions.relShown !== `${regions.relSeats} above`) {
   problems.push(`religion readout wrong: ${regions && regions.relShown}`);
 }
-// Age is in extreme mode, whose spread is uninterpretable, so it reports nothing.
-if (!regions || regions.ageShown !== '\u2014') {
-  problems.push(`age readout wrong: ${regions && regions.ageShown}`);
+// Age is in extreme mode, whose spread is uninterpretable, so it has no row.
+if (!regions || !regions.ageRowGone) {
+  problems.push('age kept a readout row with nothing in it');
 }
 // Every weight is up, so every demographic counts as active and should show.
 const wantDemo = regions ? regions.demoKeys.length : 0;

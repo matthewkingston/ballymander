@@ -264,6 +264,12 @@ function addPartyBarStats(parties) {
 const MAP_STATS = { pop: 'Population', land: 'Land shape', people: 'People shape',
                     cut: 'Cut edges' };
 
+/* Whether the reader has picked a statistic for themselves. Until they do, the
+ * bars follow the variables: those are what the run is being steered by, and
+ * they are the reason the map looks the way it does. Population and the shape
+ * measures are the fallback for a page with nothing on it. */
+let barStatChosen = false;
+
 function rebuildBarOptions() {
   const want = els.barsStat.value;
   els.barsStat.textContent = '';
@@ -275,7 +281,13 @@ function rebuildBarOptions() {
       v.isParty ? `${varLabel(v)} votes` : varLabel(v)));
   }
   const offered = [...els.barsStat.options].some((o) => o.value === want);
-  els.barsStat.value = offered ? want : 'pop';
+  const firstVariable = variables.length ? barKey(variables[0]) : null;
+  els.barsStat.value = !barStatChosen && firstVariable ? firstVariable
+    // A chosen statistic stands until it is taken off the page. When it is,
+    // another variable takes its place, and population only once the last
+    // variable has gone.
+    : offered ? want
+      : firstVariable || 'pop';
 }
 
 /* --- variables ------------------------------------------------------------
@@ -408,7 +420,11 @@ function buildVariable(entry) {
   // regions are for average/extreme, how many clear the bar for gerrymander --
   // and for a party, always the seats, since that is the result the map is for.
   v.readout = el('dd', { id: `run-var-${slug}`, text: '\u2014' });
-  v.readoutRow = el('div', {}, el('dt', { text: varLabel(entry) }), v.readout);
+  // Starts off the list. readout() puts it up as soon as there is a figure for
+  // it, which for a party is at once and for a demographic is when it is
+  // gerrymandering.
+  v.readoutRow = el('div', { hidden: true },
+    el('dt', { text: varLabel(entry) }), v.readout);
   document.getElementById('run').append(v.readoutRow);
 
   v.tip = el('div');
@@ -428,6 +444,7 @@ function addVariable(key) {
   varByKey.set(key, v);
   wireVariable(v);
   applyVariables();
+  if (run.model) readout();
   return v;
 }
 
@@ -1561,16 +1578,23 @@ function readout() {
       // Seats won, and only that: it is the outcome being drawn for, and it is
       // a number with a scale to read it against. The spread that used to come
       // with it in average and extreme modes had neither.
+      v.readoutRow.hidden = false;
       v.readout.textContent = `${m.partySeats(v.key)}/${m.totalSeats} won`;
     } else {
-      // Nothing at all in average and extreme modes, for the same reason: a
-      // spread in religion's units against no baseline cannot be read, and a
-      // figure nobody can read is worse than a blank. Gerrymander mode has a
-      // real answer -- how many regions cleared the threshold -- and says
-      // which side of it was the goal, since that changes what the count means.
-      v.readout.textContent = !live || live.weight === 0
-        || live.mode !== 'gerrymander' ? '—'
-        : `${m.demoSeats(v.key)}/${m.N} ${goalAbove(v) ? 'above' : 'below'}`;
+      // A demographic only has an answer when it is gerrymandering: how many
+      // regions cleared the threshold, and which side of it was the goal,
+      // since the same numerator means the opposite thing either way. The
+      // spread the other modes would report is in the term's own units against
+      // no baseline, and cannot be read.
+      //
+      // So the row goes rather than standing there holding a dash. A dash said
+      // two things -- that the variable exists, and that it has nothing to
+      // tell you -- and the list is for the second sort of fact only.
+      const counted = live && live.weight > 0 && live.mode === 'gerrymander';
+      v.readoutRow.hidden = !counted;
+      if (counted) {
+        v.readout.textContent = `${m.demoSeats(v.key)}/${m.N} ${goalAbove(v) ? 'above' : 'below'}`;
+      }
     }
     v.readoutRow.querySelector('dt').textContent = varLabel(v);
   }
@@ -1922,7 +1946,10 @@ async function main() {
 
   // Switching the statistic re-ranks immediately rather than waiting for the
   // next tick, so the panel responds even while paused or stopped.
-  els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
+  els.barsStat.addEventListener('change', () => {
+    barStatChosen = true;
+    if (run.model) drawBars();
+  });
 
   for (const [input, out] of [[els.popw, els.popwValue], [els.shape, els.shapeValue],
                              [els.pshape, els.pshapeValue], [els.cut, els.cutValue],
