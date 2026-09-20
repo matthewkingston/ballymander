@@ -1528,7 +1528,11 @@ function readout() {
   const m = run.model;
   const phase = {
     build: `Building ${nf.format(m.assigned)}/${nf.format(m.n)}`,
-    optimise: 'Optimising',
+    // With the flip count off the page in simple mode it comes here instead,
+    // where it says what it is worth saying: how many versions of the map the
+    // run has tried. Advanced mode has the counter in its own row already.
+    optimise: advanced ? 'Optimising'
+      : `Optimising — ${nf.format(m.moves)} updates made`,
     done: 'Stopped — best shown',
   }[run.phase] || '—';
   els.runPhase.textContent = run.paused ? `${phase} — paused` : phase;
@@ -1538,15 +1542,19 @@ function readout() {
   for (const v of variables) {
     const live = m.demoByKey[v.key];
     if (v.isParty) {
-      // Seats won always, since that is the outcome being drawn for; the spread
-      // comes too in the modes where it is what the term is steering.
-      const seats = `${m.partySeats(v.key)}/${m.totalSeats} won`;
-      v.readout.textContent = !live || live.weight === 0 || live.mode === 'gerrymander'
-        ? seats : `${seats} · spread ${m.demoSpread(v.key).toFixed(3)}`;
+      // Seats won, and only that: it is the outcome being drawn for, and it is
+      // a number with a scale to read it against. The spread that used to come
+      // with it in average and extreme modes had neither.
+      v.readout.textContent = `${m.partySeats(v.key)}/${m.totalSeats} won`;
     } else {
-      v.readout.textContent = !live || live.weight === 0 ? '—'
-        : live.mode === 'gerrymander' ? `${m.demoSeats(v.key)}/${m.N}`
-          : m.demoSpread(v.key).toFixed(v.def.decimals);
+      // Nothing at all in average and extreme modes, for the same reason: a
+      // spread in religion's units against no baseline cannot be read, and a
+      // figure nobody can read is worse than a blank. Gerrymander mode has a
+      // real answer -- how many regions cleared the threshold -- and says
+      // which side of it was the goal, since that changes what the count means.
+      v.readout.textContent = !live || live.weight === 0
+        || live.mode !== 'gerrymander' ? '—'
+        : `${m.demoSeats(v.key)}/${m.N} ${goalAbove(v) ? 'above' : 'below'}`;
     }
     v.readoutRow.querySelector('dt').textContent = varLabel(v);
   }

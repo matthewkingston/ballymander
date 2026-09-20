@@ -207,10 +207,15 @@
            and the cut-edge count were figures the algorithm cares about and
            nobody else; they are still on the model for the tests. -->
       <div class="run-wide"><dt>Phase</dt><dd id="run-phase">&mdash;</dd></div>
-      <div><dt>Flips</dt><dd id="run-moves">&mdash;</dd></div>
-      <div><dt>ReCom</dt><dd id="run-recom">&mdash;</dd></div>
-      <div id="run-score-row"><dt>Score</dt><dd id="run-score">&mdash;</dd></div>
-      <div><dt>Best score</dt><dd id="run-best">&mdash;</dd></div>
+      <!-- Counters and the objective's own value: the run's bookkeeping rather
+           than its result. The flip count is not lost in simple mode -- it goes
+           into the phase line, where it reads as a sense of how many versions
+           have been tried rather than as a figure to watch. -->
+      <div class="advanced-only" hidden><dt>Flips</dt><dd id="run-moves">&mdash;</dd></div>
+      <div class="advanced-only" hidden><dt>ReCom</dt><dd id="run-recom">&mdash;</dd></div>
+      <div id="run-score-row" class="advanced-only" hidden>
+        <dt>Score</dt><dd id="run-score">&mdash;</dd></div>
+      <div class="advanced-only" hidden><dt>Best score</dt><dd id="run-best">&mdash;</dd></div>
       <div><dt>Max pop dev</dt><dd id="run-dev">&mdash;</dd></div>
     </dl>
 

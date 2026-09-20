@@ -530,6 +530,12 @@ const advancedMode = await page.evaluate(() => {
     margin: !document.getElementById('ctl-party-dup-t').hidden,
     recom: !document.getElementById('ctl-recom').hidden,
     branch: !document.getElementById('ctl-branch').closest('.ctl-checks').hidden,
+    // The run's bookkeeping: counters and the objective's own value.
+    runRows: ['run-moves', 'run-recom', 'run-score', 'run-best']
+      .map((id) => !document.getElementById(id).parentElement.hidden),
+    // Always out, whichever mode: the phase and how equal the populations are.
+    runKept: ['run-phase', 'run-dev']
+      .map((id) => !document.getElementById(id).parentElement.hidden),
     // A demographic's threshold stays out in simple mode; its steepness does
     // not. Religion is on the page in gerrymander mode by this point.
     relThreshold: !document.getElementById('ctl-rel-t').hidden,
@@ -761,8 +767,14 @@ if (!regions || regions.demoKeys.some((k) => !regions.gerryVisible.bars.includes
 if (!regions || regions.demoReadouts.some((t) => !t || t === '\u2014')) {
   problems.push('a demographic readout stayed empty');
 }
-if (!regions || regions.relShown !== regions.relSeats) problems.push('religion readout wrong');
-if (!regions || regions.ageShown !== regions.ageSpread) problems.push('age readout wrong');
+// Gerrymander mode names the side it was aiming at; the goal defaults to above.
+if (!regions || regions.relShown !== `${regions.relSeats} above`) {
+  problems.push(`religion readout wrong: ${regions && regions.relShown}`);
+}
+// Age is in extreme mode, whose spread is uninterpretable, so it reports nothing.
+if (!regions || regions.ageShown !== '\u2014') {
+  problems.push(`age readout wrong: ${regions && regions.ageShown}`);
+}
 // Every weight is up, so every demographic counts as active and should show.
 const wantDemo = regions ? regions.demoKeys.length : 0;
 if (!tip || tip.demo.length !== wantDemo) {
@@ -995,6 +1007,12 @@ if (!adv || !adv.simple.compact || adv.simple.parts.some(Boolean) || adv.simple.
 if (!adv || adv.open.compact || !adv.open.parts.every(Boolean) || !adv.open.bonus
     || !adv.open.recom || !adv.open.branch) {
   problems.push('advanced mode did not bring out the fine tuning');
+}
+// The run's counters and its score are bookkeeping; the phase and the
+// population deviation are the result, and stay out in both modes.
+if (!adv || adv.simple.runRows.some(Boolean) || !adv.open.runRows.every(Boolean)
+    || !adv.simple.runKept.every(Boolean) || !adv.open.runKept.every(Boolean)) {
+  problems.push('the run rows showed at the wrong times');
 }
 // A demographic's threshold is the one piece of a gerrymander that is not fine
 // tuning: without it the mode does not say which side of what.
