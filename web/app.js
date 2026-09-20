@@ -1381,6 +1381,11 @@ function clearRealRegions(map) {
 
 /* --- the run ------------------------------------------------------------- */
 
+/* Whether the region controls were locked the last time setButtons ran, so the
+ * group is folded on the change rather than on every call. Starts false: the
+ * page opens idle, with the group open. */
+let regionLocked = false;
+
 function setButtons(state) {   // idle | running | paused
   // One button does all three jobs, because only one of them is ever available:
   // nothing to pause before a run, nothing to start during one.
@@ -1392,14 +1397,24 @@ function setButtons(state) {   // idle | running | paused
   // starting it; once one is going, the button that ends it.
   els.go.classList.toggle('is-primary', state === 'idle');
   els.stop.classList.toggle('is-primary', state !== 'idle');
-  // The number of regions and the seed are fixed once a run starts: changing
-  // either mid-run would mean a different map, not a different reading of this
-  // one. The election controls stay live, so a paused map can be re-counted.
+  // Everything in the region group is fixed once a run starts: changing any of
+  // it mid-run would mean a different map, not a different reading of this one.
+  // Real boundaries are a starting point rather than a state -- from the first
+  // move the map is no longer the real one -- so the selector greys with the
+  // rest instead of vanishing. Hiding is now only for boundaries that never
+  // loaded. The election controls stay live, so a paused map can be re-counted.
   els.n.disabled = state !== 'idle' || realLoaded();
   els.seed.disabled = state !== 'idle';
-  // Real boundaries are a starting point, not a state: once a run is going the
-  // map is no longer the real one, so the selector goes away.
-  for (const node of document.querySelectorAll('.real-only')) node.hidden = state !== 'idle';
+  els.real.disabled = state !== 'idle';
+  // With none of it usable, the group folds itself away for the run and comes
+  // back when the run stops. On the change of state only: a group opened by
+  // hand mid-run -- to read off an automatic seed, say -- stays open, and
+  // pausing does not slam it shut.
+  const locked = state !== 'idle';
+  if (locked !== regionLocked) {
+    regionLocked = locked;
+    setGroupOpen('region-settings', !locked);
+  }
 }
 
 function readout() {
@@ -1716,18 +1731,25 @@ function sizeLabelColumn() {
 
 /* The settings groups fold away under their own headings, as a variable block
  * does. Written in the HTML rather than built here, so this only has to find
- * each heading and the body it names. They start open, and stay open across a
- * run: the state is the page's, not the model's. */
+ * each heading and the body it names. Kept by id because the run folds one of
+ * them itself. */
+const groups = new Map();
+
 function wireGroupToggles() {
   for (const toggle of document.querySelectorAll('.ctl-group-toggle')) {
-    const body = document.getElementById(toggle.getAttribute('aria-controls'));
+    const id = toggle.getAttribute('aria-controls');
+    const body = document.getElementById(id);
     if (!body) continue;
-    toggle.addEventListener('click', () => {
-      const open = body.hidden;
-      body.hidden = !open;
-      toggle.setAttribute('aria-expanded', String(open));
-    });
+    groups.set(id, { toggle, body });
+    toggle.addEventListener('click', () => setGroupOpen(id, body.hidden));
   }
+}
+
+function setGroupOpen(id, open) {
+  const g = groups.get(id);
+  if (!g) return;
+  g.body.hidden = !open;
+  g.toggle.setAttribute('aria-expanded', String(open));
 }
 
 /* Slider to the figure beside its label. Variables are added and removed, so

@@ -295,6 +295,9 @@ const realState = () => page.evaluate(() => {
     regionsBox: document.getElementById('ctl-n').value,
     regionsDisabled: document.getElementById('ctl-n').disabled,
     selectorShown: !document.getElementById('ctl-real').hidden,
+    selectorDisabled: document.getElementById('ctl-real').disabled,
+    // Nothing in the region group is usable during a run, so it folds itself.
+    groupFolded: document.getElementById('region-settings').hidden,
     value: document.getElementById('ctl-real').value,
     results: !document.getElementById('results').hidden,
     bars: document.querySelectorAll('#bars .bar-row').length,
@@ -896,11 +899,18 @@ if (!real || real.westminster.regionsBox !== '18' || !real.westminster.regionsDi
 if (!real || real.council.N !== 80 || real.council.painted !== 3780) {
   problems.push('council boundaries did not load onto the map');
 }
-if (!real || real.running.selectorShown || real.running.value !== 'none') {
-  problems.push('the real-region selector stayed up once a run started');
+// It stays on the page now, greyed rather than gone, but it still resets: the
+// map stopped being the real one with the first move.
+if (!real || !real.running.selectorShown || !real.running.selectorDisabled
+    || real.running.value !== 'none') {
+  problems.push('the real-region selector was not greyed and reset by the run');
 }
-if (!real || !real.stopped.selectorShown || real.stopped.regionsDisabled) {
-  problems.push('the selector did not come back when the run stopped');
+if (!real || !real.running.groupFolded) {
+  problems.push('the region settings group did not fold away for the run');
+}
+if (!real || !real.stopped.selectorShown || real.stopped.selectorDisabled
+    || real.stopped.regionsDisabled || real.stopped.groupFolded) {
+  problems.push('the region settings did not come back when the run stopped');
 }
 if (!real || real.cleared.painted !== 0 || real.cleared.results) {
   problems.push('choosing None did not clear the map');

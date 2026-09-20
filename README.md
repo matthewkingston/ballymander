@@ -685,6 +685,10 @@ its own group of controls above the variables. The panel opens with two:
 
 Both groups fold away under their own heading, the way a variable block does,
 and both start open: a setting you cannot see is one you forget you changed.
+Region settings folds itself on START, since none of it can be touched while a
+run is going, and comes back on STOP — but only on the change, so a group opened
+by hand mid-run (to read off an automatic seed, say) stays open, and pausing
+leaves it alone.
 
 The seats pie is likewise always there: it is the map's result, whatever you
 chose to draw by.
@@ -722,10 +726,11 @@ region count follows and is locked while one is loaded, and the map appears as
 though a run had just stopped — so the results panel, the party editor and the
 region view all work on it.
 
-The selector is only offered while stopped, and disappears once START is pressed,
-because from the first move the map is no longer the real one. START carries on
-from the loaded boundaries rather than starting a fresh build. Choosing None
-clears the map.
+The selector greys out and resets to Custom once START is pressed, because from
+the first move the map is no longer the real one. START carries on from the
+loaded boundaries rather than starting a fresh build. Choosing Custom clears the
+map. The selector is missing altogether only if the boundaries file failed to
+load.
 
 Built by `scripts/build_app_regions.py` into `web/data/dz_regions.json`. Two
 real regions are not connected in our adjacency graph — Belfast West at
