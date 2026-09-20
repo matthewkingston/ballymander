@@ -525,6 +525,10 @@ const advancedMode = await page.evaluate(() => {
     margin: !document.getElementById('ctl-party-dup-t').hidden,
     recom: !document.getElementById('ctl-recom').hidden,
     branch: !document.getElementById('ctl-branch').closest('.ctl-checks').hidden,
+    // A demographic's threshold stays out in simple mode; its steepness does
+    // not. Religion is on the page in gerrymander mode by this point.
+    relThreshold: !document.getElementById('ctl-rel-t').hidden,
+    relSteepness: !document.getElementById('ctl-rel-s').hidden,
   });
   const simple = shown();
   box.click();                                  // into advanced
@@ -984,6 +988,12 @@ if (!adv || !adv.simple.compact || adv.simple.parts.some(Boolean) || adv.simple.
 if (!adv || adv.open.compact || !adv.open.parts.every(Boolean) || !adv.open.bonus
     || !adv.open.recom || !adv.open.branch) {
   problems.push('advanced mode did not bring out the fine tuning');
+}
+// A demographic's threshold is the one piece of a gerrymander that is not fine
+// tuning: without it the mode does not say which side of what.
+if (!adv || !adv.simple.relThreshold || adv.simple.relSteepness
+    || !adv.open.relThreshold || !adv.open.relSteepness) {
+  problems.push("a demographic's threshold and steepness showed at the wrong times");
 }
 const search = searchControls;
 if (!search || search.moved.interval !== '1000' || search.moved.readout !== '1,000'

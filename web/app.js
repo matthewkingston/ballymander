@@ -968,15 +968,18 @@ function applyElectionType() {
   const stv = els.electionType.value === 'stv';
   applyVisibility();
   for (const v of variables) {
-    // A threshold and its steepness are fine tuning wherever they appear, so
-    // they wait for advanced mode. Under STV a party has no margin to tune in
-    // any case: the target is the count itself, and a seat is worth the seat
-    // bonus.
-    const fine = advanced && !(v.isParty && stv);
-    v.tLabel.hidden = !fine;
-    v.t.hidden = !fine;
-    v.sLabel.hidden = !fine;
-    v.s.hidden = !fine;
+    // Under STV a party has nothing to tune here at all: the target is the
+    // count itself, so there is no margin and no slope to put on one.
+    const tunable = !(v.isParty && stv);
+    // A demographic keeps its threshold in plain sight, because gerrymandering
+    // by one means nothing without saying which side of what -- 60% Catholic
+    // and 40% Catholic are opposite instructions. A party's winning margin has
+    // a sensible answer already, zero, meaning "just wins", so it is fine
+    // tuning. Steepness is fine tuning either way.
+    v.tLabel.hidden = !(tunable && (advanced || !v.isParty));
+    v.t.hidden = v.tLabel.hidden;
+    v.sLabel.hidden = !(tunable && advanced);
+    v.s.hidden = v.sLabel.hidden;
     if (v.isParty) v.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
   }
 }

@@ -727,8 +727,11 @@ and brings out the rest of the fine tuning:
 * **Land shape**, **People shape** and **Cut edges** as three sliders, in place
   of Compactness.
 * **Seat bonus** — how much a seat outweighs vote-building under STV, default 2.
-* A variable's **Threshold**/**Winning margin** and **Steepness**, inside its
-  block.
+* A variable's **Steepness**, and a party's **Winning margin**, inside its
+  block. A demographic's **Threshold** stays in plain sight: gerrymandering by
+  one means nothing without saying which side of what, since 60% Catholic and
+  40% Catholic are opposite instructions. A winning margin already has a
+  sensible answer — zero, meaning "just wins".
 * **Flips per ReCom** — how often the large recombination move fires against
   small single-zone flips, 200 by default, with a detent at the right-hand end
   that turns recombination off.
