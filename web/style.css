@@ -440,12 +440,29 @@ html, body {
 }
 /* What the panel holds before there is anything to hold. Larger than the hint
    under the left panel: there it is a footnote to a page of controls, here it
-   is the only thing on the panel. */
+   is the only thing on the panel.
+
+   Centred on the panel rather than tucked under the title. Taken out of the
+   flow to do it: centring it in the room the title leaves would sit it a good
+   two lines lower than the middle, and the middle is where the eye goes
+   looking for the thing that is missing. Directly under the title it read as a
+   subtitle; here it reads as a placeholder, which is what it is.
+
+   Safe to take out of the flow because while the panel is resting this is the
+   only thing in it, and the panel is held open far taller than the text. */
+#results.is-resting #results-hint {
+  position: absolute;
+  top: 50%;
+  left: 16px;                 /* the panel's own side padding */
+  right: 16px;
+  transform: translateY(-50%);
+}
 #results-hint {
   margin: 0;
-  padding: 4px 0 16px;
+  padding: 0 6px;
   font-size: 13px;
   line-height: 1.55;
+  text-align: center;
   color: var(--ink-muted);
 }
 #results-hint[hidden] { display: none; }
