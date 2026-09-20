@@ -34,8 +34,12 @@
     <!-- What the map is made of: how many regions, where they start from, and
          which draw of the dice. Nothing here knows about an election. -->
     <div class="ctl-group">
-      <h2 class="ctl-group-title">Region settings</h2>
-      <div class="ctl-grid">
+      <h2 class="ctl-group-title">
+        <button class="ctl-group-toggle" type="button" aria-expanded="true"
+                aria-controls="region-settings">
+          <span class="chev" aria-hidden="true">&#9656;</span> Region settings</button>
+      </h2>
+      <div id="region-settings" class="ctl-grid">
         <!-- Boundaries that actually exist, as a starting point. Only offered
              while stopped: once a run moves a zone the map is no longer real.
              "Custom" is the absence of one, which is the usual case. -->
@@ -60,8 +64,12 @@
     <!-- The one election every drawn map holds, and the ballot it is fought on:
          who is standing, who has merged, and who votes for someone else. -->
     <div class="ctl-group">
-      <h2 class="ctl-group-title">Election settings</h2>
-      <div class="ctl-grid">
+      <h2 class="ctl-group-title">
+        <button class="ctl-group-toggle" type="button" aria-expanded="true"
+                aria-controls="election-settings">
+          <span class="chev" aria-hidden="true">&#9656;</span> Election settings</button>
+      </h2>
+      <div id="election-settings" class="ctl-grid">
         <!-- The seat count only applies to STV. -->
         <label for="ctl-election-type">Election type</label>
         <select id="ctl-election-type">

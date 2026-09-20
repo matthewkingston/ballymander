@@ -118,15 +118,40 @@ html, body {
   border-top: 1px solid var(--rule);
 }
 /* Stronger than the labels beneath it: this is the CONTROLS face, at full ink,
-   where a row label is 10px and muted. */
+   where a row label is 10px and muted. The gap below belongs to the body rather
+   than the heading, so folding the group away takes the gap with it. */
 .ctl-group-title {
-  margin: 0 0 7px;
+  margin: 0;
   font-size: 11.5px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--ink);
 }
+.ctl-group-title + .ctl-grid { margin-top: 7px; }
+/* The whole heading is the disclosure, folding the group away the same way a
+   variable block folds. Open on load: a setting you cannot see is one you
+   forget you changed. */
+.ctl-group-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+/* The heading is already at full ink, so hovering it goes to the accent --
+   where a demo toggle, being muted, hovers up to full ink instead. */
+.ctl-group-toggle:hover { color: var(--accent); }
+.ctl-group-toggle .chev { display: inline-block; transition: transform 0.12s; }
+.ctl-group-toggle[aria-expanded="true"] .chev { transform: rotate(90deg); }
+/* display: grid would otherwise beat the hidden attribute. */
+.ctl-grid[hidden] { display: none; }
 
 /* Two checkboxes on one line, spanning both columns of the grid. Each label
    wraps its own box so the whole phrase is the hit target. */

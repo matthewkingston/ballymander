@@ -1714,6 +1714,22 @@ function sizeLabelColumn() {
   return want;
 }
 
+/* The settings groups fold away under their own headings, as a variable block
+ * does. Written in the HTML rather than built here, so this only has to find
+ * each heading and the body it names. They start open, and stay open across a
+ * run: the state is the page's, not the model's. */
+function wireGroupToggles() {
+  for (const toggle of document.querySelectorAll('.ctl-group-toggle')) {
+    const body = document.getElementById(toggle.getAttribute('aria-controls'));
+    if (!body) continue;
+    toggle.addEventListener('click', () => {
+      const open = body.hidden;
+      body.hidden = !open;
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  }
+}
+
 /* Slider to the figure beside its label. Variables are added and removed, so
  * this is per input rather than a list walked once at boot. */
 function wireReadout(input, out, format = null) {
@@ -1746,6 +1762,7 @@ async function main() {
   }
   wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));
   wireReadout(els.temp, els.tempValue, () => formatSpeed(temperatureOf()));
+  wireGroupToggles();
   sizeLabelColumn();
 
   els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });

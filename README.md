@@ -683,6 +683,9 @@ its own group of controls above the variables. The panel opens with two:
   exactly that — plus **Standing threshold**, **Tactical voting** and the party
   editor. The ballot, and how it is counted.
 
+Both groups fold away under their own heading, the way a variable block does,
+and both start open: a setting you cannot see is one you forget you changed.
+
 The seats pie is likewise always there: it is the map's result, whatever you
 chose to draw by.
 
