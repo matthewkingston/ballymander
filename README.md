@@ -759,11 +759,11 @@ gets the default, which is off.
 
 ### Simulation speed
 
-One slider, logarithmic, 0.01 to 10, and at 1 the optimiser takes **ten thousand
-steps a second**. The build takes 700 in the same second: a build step claims a
-whole zone and is worth watching, while an optimiser step moves one zone in 3,780
-and is invisible on its own, so the two are locked in that ratio rather than
-offered separately.
+One slider, logarithmic, 0.01 to 10, and at 1 the optimiser takes **8,500 steps
+a second**. The build takes 595 in the same second: a build step claims a whole
+zone and is worth watching, while an optimiser step moves one zone in 3,780 and
+is invisible on its own, so the two are locked in that ratio rather than offered
+separately.
 
 The scale is bent at the middle: two decades in the left half, 0.01 to 1, and
 one in the right, 1 to 10. Three decades spread evenly would put the default at

@@ -196,10 +196,14 @@ const realLoaded = () => Boolean(realRegions) && els.real.value !== 'none';
  * whole zone and is worth watching, an optimiser step moves one zone in 3,780
  * and is invisible on its own, so builds run far slower.
  *
- * Speed 1 is ten thousand optimiser steps a second. */
+ * Speed 1 is 8,500 optimiser steps a second. It was 10,000, which ran a shade
+ * faster than is comfortable to watch; both phases came down by the same 15% so
+ * their ratio is untouched. The slider's default stays at 1, where it sits at
+ * the centre of its track with every other slider on the panel -- what changed
+ * is what 1 does, not where the thumb rests. */
 const FRAME_MS = 100;            // ten frames a second
-const OPT_PER_SEC = 10000;       // at speed 1
-const BUILD_PER_SEC = 700;       // at speed 1
+const OPT_PER_SEC = 8500;        // at speed 1
+const BUILD_PER_SEC = 595;       // at speed 1, the same 100:7 as before
 // Flips between recombinations is not here: it is a choice about the search
 // rather than its pace, and is a slider again under advanced controls.
 /* Work is measured against the clock rather than against frames, so the rate
