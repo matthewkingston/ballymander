@@ -672,7 +672,8 @@ Two consequences worth knowing:
   stops it steering. What is not on the page is off.
 
 The election itself belongs to the map rather than to any variable, so it has
-its own group of controls above the variables. The panel opens with three:
+its own group of controls above the variables. The panel opens with two named
+groups, and a third block of sliders that needs no name:
 
 * **Region settings** — **Pre-defined map** (real boundaries as a starting
   point, or Custom), **No. Regions** and **Random seed**. What the map is made
@@ -682,13 +683,13 @@ its own group of controls above the variables. The panel opens with three:
   everybody is roughly a national list, and No. Regions goes down to 1 for
   exactly that — plus **Standing threshold**, **Tactical voting** and the party
   editor. The ballot, and how it is counted.
-* **Controls** — **Temperature** and **Simulation speed**, then a hairline, then
-  the four weights: **Population**, **Land shape**, **People shape** and **Cut
+* Then, unheaded, **Temperature** and **Simulation speed**, a hairline, and the
+  four weights: **Population**, **Land shape**, **People shape** and **Cut
   edges**. The hairline is the division it looks like — above it, how the search
-  is run; below it, what it is run for.
+  is run; below it, what it is run for — which is all a heading would have said.
 
-All three fold away under their own heading, the way a variable block does,
-and all start open: a setting you cannot see is one you forget you changed.
+Both named groups fold away under their heading, the way a variable block does,
+and both start open: a setting you cannot see is one you forget you changed.
 Region settings folds itself on START, since none of it can be touched while a
 run is going, and comes back on STOP — but only on the change, so a group opened
 by hand mid-run (to read off an automatic seed, say) stays open, and pausing
@@ -708,6 +709,12 @@ steps a second**. The build takes 700 in the same second: a build step claims a
 whole zone and is worth watching, while an optimiser step moves one zone in 3,780
 and is invisible on its own, so the two are locked in that ratio rather than
 offered separately.
+
+The scale is bent at the middle: two decades in the left half, 0.01 to 1, and
+one in the right, 1 to 10. Three decades spread evenly would put the default at
+two thirds along, and with every other slider on the panel resting at its centre,
+the one that did not would read as a setting somebody had moved. The value itself
+still rises smoothly from end to end; only the track is divided unevenly.
 
 Work is measured against the clock, not against frames. The map is redrawn ten
 times a second — fast enough that nothing is missed, slow enough that the fill

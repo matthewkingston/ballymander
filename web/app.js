@@ -1086,11 +1086,17 @@ function weightOf(el) {
   return snapWeight(10 ** v);
 }
 
-/* Flips between recombinations. Log like the weights, but the "never" detent
- * sits at the right-hand end, because in these units right means less often. */
-/* The slider is log10 of the speed, so its ends are 0.01 and 10. */
+/* Log, like the weights and the temperature, but bent at the middle: two
+ * decades in the left half, 0.01 to 1, and one in the right, 1 to 10. A single
+ * scale over three decades would put 1 two thirds of the way along, and with
+ * every other slider on the panel resting at its centre, the one that is not
+ * reads as a setting somebody moved rather than the default it is.
+ *
+ * The kink is in how the track is divided, not in the speed: the value still
+ * rises smoothly and monotonically from one end to the other. */
 function speedOf() {
-  return 10 ** Number(els.speed.value);
+  const s = Number(els.speed.value);
+  return 10 ** (s < 0 ? 2 * s : s);
 }
 
 /* The acceptance rule's temperature. Log like the speed and the weights, since

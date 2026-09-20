@@ -96,39 +96,38 @@
       </div>
     </div>
 
-    <!-- How the search is run, and what it is run for. The hairline inside
-         divides the two: above it, the pace and the willingness to go uphill;
-         below it, the four things being weighed against each other. -->
-    <div class="ctl-group">
-      <h2 class="ctl-group-title">
-        <button class="ctl-group-toggle" type="button" aria-expanded="true"
-                aria-controls="controls">
-          <span class="chev" aria-hidden="true">&#9656;</span> Controls</button>
-      </h2>
-      <div id="controls" class="ctl-grid">
-        <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
-             the interesting range is multiplicative, not additive. -->
-        <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>
-        <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0" data-log>
-        <!-- How fast the run goes, and nothing else: the frame rate, the two
-             step counts and the recombination interval were four ways of saying
-             it, three of which only ever wanted one setting. Logarithmic, 0.01
-             to 10, and 1 is ten thousand optimiser steps a second. -->
-        <label for="ctl-speed">Simulation speed <span id="ctl-speed-value">1</span></label>
-        <input id="ctl-speed" type="range" min="-2" max="1" step="0.02" value="0">
-        <div class="ctl-rule" role="presentation"></div>
-        <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
-        <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
-        <label for="ctl-shape">Land shape <span id="ctl-shape-value">1</span></label>
-        <input id="ctl-shape" type="range" min="-1.02" max="1" step="0.02" value="0"
-               data-weight data-off>
-        <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
-        <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
-               data-weight data-off>
-        <label for="ctl-cut">Cut edges <span id="ctl-cut-value">1</span></label>
-        <input id="ctl-cut" type="range" min="-1.02" max="1" step="0.02" value="0"
-               data-weight data-off>
-      </div>
+    <!-- How the search is run, and what it is run for. No heading: the hairline
+         inside says the only thing a heading would have -- above it, the pace
+         and the willingness to go uphill; below it, the four things being
+         weighed against each other -- and this is the last block before the
+         variables, so it needs no name to be found by. -->
+    <div id="controls" class="ctl-grid ctl-group">
+      <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
+           the interesting range is multiplicative, not additive. -->
+      <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>
+      <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0" data-log>
+      <!-- How fast the run goes, and nothing else: the frame rate, the two step
+           counts and the recombination interval were four ways of saying it,
+           three of which only ever wanted one setting. 0.01 to 10, and 1 is ten
+           thousand optimiser steps a second.
+
+           Log, but bent at the middle so that 1 lands there rather than two
+           thirds along, in line with every other slider on the panel: two
+           decades left of centre, one to the right. See speedOf(). -->
+      <label for="ctl-speed">Simulation speed <span id="ctl-speed-value">1</span></label>
+      <input id="ctl-speed" type="range" min="-1" max="1" step="0.01" value="0">
+      <div class="ctl-rule" role="presentation"></div>
+      <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
+      <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
+      <label for="ctl-shape">Land shape <span id="ctl-shape-value">1</span></label>
+      <input id="ctl-shape" type="range" min="-1.02" max="1" step="0.02" value="0"
+             data-weight data-off>
+      <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
+      <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
+             data-weight data-off>
+      <label for="ctl-cut">Cut edges <span id="ctl-cut-value">1</span></label>
+      <input id="ctl-cut" type="range" min="-1.02" max="1" step="0.02" value="0"
+             data-weight data-off>
     </div>
 
     <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new
