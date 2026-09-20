@@ -594,7 +594,7 @@ const advancedMode = await page.evaluate(() => {
     bonus: !document.getElementById('ctl-bonus').hidden,
     margin: !document.getElementById('ctl-party-dup-t').hidden,
     recom: !document.getElementById('ctl-recom').hidden,
-    branch: !document.getElementById('ctl-branch').closest('.ctl-checks').hidden,
+    branch: !document.getElementById('ctl-branch').hidden,
     // The run's bookkeeping: counters and the objective's own value.
     runRows: ['run-moves', 'run-recom', 'run-score', 'run-best']
       .map((id) => !document.getElementById(id).parentElement.hidden),

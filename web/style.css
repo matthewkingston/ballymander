@@ -20,6 +20,18 @@
 
 * { box-sizing: border-box; }
 
+/* Everything the browser paints in its own accent: the highlight running down
+   an open dropdown, the checkbox and radio fills, the progress bars. Set once
+   at the root rather than per control, and it inherits -- otherwise the app's
+   own blue sits next to the platform's orange, which reads as two designs.
+   The range inputs set it again lower down, harmlessly. */
+:root { accent-color: var(--accent); }
+
+/* Selected text, which the browser also paints in its own colour. Tinted to
+   the same blue rather than filled with it: a solid accent behind dark ink is
+   hard to read, and these are number boxes people retype. */
+::selection { background: rgba(94, 137, 194, 0.32); color: var(--ink); }
+
 html, body {
   margin: 0;
   height: 100%;
@@ -167,8 +179,11 @@ html, body {
 
 /* Two checkboxes on one line, spanning both columns of the grid. Each label
    wraps its own box so the whole phrase is the hit target. */
+/* A checkbox with its name beside it rather than in the label column. Only the
+   advanced switch wears this now, standing on its own at the foot of the panel
+   outside any grid -- the checkboxes inside the grid are ordinary rows, named
+   on the left like everything else, so their boxes line up under the sliders. */
 .ctl-checks {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;

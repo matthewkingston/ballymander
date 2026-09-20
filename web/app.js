@@ -285,7 +285,7 @@ function rebuildBarOptions() {
   }
   for (const v of variables) {
     els.barsStat.append(el('option', { value: barKey(v) },
-      v.isParty ? `${varLabel(v)} votes` : varLabel(v)));
+      v.isParty ? `${varFullLabel(v)} votes` : varFullLabel(v)));
   }
   const offered = [...els.barsStat.options].some((o) => o.value === want);
   const firstVariable = variables.length ? barKey(variables[0]) : null;
@@ -338,6 +338,11 @@ function catalogue() {
 }
 
 const varLabel = (v) => (v.isParty ? entityLabel(v.party) : v.def.label);
+/* The name in full, for everywhere the label is not sitting in the variable's
+ * own head with its mode and weight beside it. Most read the same either way;
+ * age is 'Average age' here, being a mean rather than a band. */
+const varFullLabel = (v) => (v.isParty ? entityLabel(v.party)
+  : v.def.longLabel || v.def.label);
 /* The results selector keys demographics apart from the model's own keys. */
 const barKey = (v) => (v.isParty ? v.key : `demo:${v.key}`);
 
@@ -365,8 +370,8 @@ function buildVariable(entry) {
     'aria-controls': bodyId,
   }, el('span', { class: 'chev', 'aria-hidden': 'true', text: '\u25B8' }), ' ', v.toggleName);
   v.remove = el('button', {
-    class: 'var-remove', type: 'button', title: `Remove ${varLabel(entry)}`,
-    'aria-label': `Remove ${varLabel(entry)}`, text: '\u00D7',
+    class: 'var-remove', type: 'button', title: `Remove ${varFullLabel(entry)}`,
+    'aria-label': `Remove ${varFullLabel(entry)}`, text: '\u00D7',
   });
   v.w = el('input', {
     id: id('w'), type: 'range', min: -1.02, max: 1, step: 0.02, value: -1.02,
@@ -431,7 +436,7 @@ function buildVariable(entry) {
   // it, which for a party is at once and for a demographic is when it is
   // gerrymandering.
   v.readoutRow = el('div', { hidden: true },
-    el('dt', { text: varLabel(entry) }), v.readout);
+    el('dt', { text: varFullLabel(entry) }), v.readout);
   document.getElementById('run').append(v.readoutRow);
 
   v.tip = el('div');
@@ -479,7 +484,7 @@ function rebuildAddMenu() {
     if (taken.has(entry.key) || !canSteer(entry)) continue;
     const item = el('button', {
       class: 'add-item', type: 'button', role: 'menuitem', 'data-key': entry.key,
-      text: entry.isParty ? entityLabel(entry.party) : entry.def.label,
+      text: varFullLabel(entry),
     });
     item.addEventListener('click', () => chooseVariable(entry.key));
     els.add.append(item);
@@ -680,7 +685,7 @@ function refreshPartyVariables() {
     if (v.isParty && !canSteer(v)) removeVariable(v);
   }
   sync();
-  for (const v of variables) v.readoutRow.querySelector('dt').textContent = varLabel(v);
+  for (const v of variables) v.readoutRow.querySelector('dt').textContent = varFullLabel(v);
   applyVariables();
 }
 
@@ -1339,14 +1344,14 @@ function showTooltip(point, props) {
     if (v.isParty) {
       const share = elect.share(props.code, v.party);
       const votes = Math.round(elect.votes(props.code) * share);
-      v.tip.textContent = show ? `${varLabel(v)} ${nf.format(votes)} `
+      v.tip.textContent = show ? `${varFullLabel(v)} ${nf.format(votes)} `
         + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(share)})` : '';
       v.tip.hidden = !show;
     } else {
       const value = props[v.def.field];
       const ok = show && typeof value === 'number';
       v.tip.textContent = ok
-        ? `${v.def.label.toLowerCase()} ${value.toFixed(v.def.decimals)}` : '';
+        ? `${varFullLabel(v).toLowerCase()} ${value.toFixed(v.def.decimals)}` : '';
       v.tip.hidden = !ok;
     }
   }
@@ -1364,7 +1369,7 @@ function showTooltip(point, props) {
       if (v.isParty) continue;
       const show = shown.has(v) && run.model.demoByKey[v.key] !== undefined;
       v.regionTip.textContent = show
-        ? `${v.def.label.toLowerCase()} `
+        ? `${varFullLabel(v).toLowerCase()} `
           + `${run.model.regionDemo(v.key, region).toFixed(v.def.decimals)}`
         : '';
       v.regionTip.hidden = !show;
@@ -1607,7 +1612,7 @@ function readout() {
         v.readout.textContent = `${m.demoSeats(v.key)}/${m.N} ${goalAbove(v) ? 'above' : 'below'}`;
       }
     }
-    v.readoutRow.querySelector('dt').textContent = varLabel(v);
+    v.readoutRow.querySelector('dt').textContent = varFullLabel(v);
   }
   els.runScore.textContent = m.score.toFixed(1);
   els.runBest.textContent = m.bestScore === Infinity ? '—' : m.bestScore.toFixed(1);

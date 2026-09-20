@@ -161,6 +161,10 @@ const DEMOGRAPHICS = [
     // region could reach however the lines were drawn.
     key: 'age',
     label: 'Age',
+    // What the term actually measures. The short form is for the variable's own
+    // head, where "Average age gerrymander 0.85" would outrun the label column;
+    // everywhere the word stands alone, it says which statistic it is.
+    longLabel: 'Average age',
     field: 'age',
     countField: 'age_n',
     vSpread: 5.1,

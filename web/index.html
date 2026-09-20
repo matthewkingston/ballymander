@@ -89,15 +89,15 @@
           id="ctl-bonus-value">2</span></label>
         <input id="ctl-bonus" class="stv-only advanced-only" type="range" min="1" max="5"
                step="0.5" value="2" hidden>
-        <!-- Both of the ways a ballot differs from the voters behind it, on one
-             line: who is not on the ballot at all (standing v0, a threshold per
-             party per election), and who deserts a party that cannot win. -->
-        <div class="ctl-checks">
-          <label for="ctl-standing">
-            <input id="ctl-standing" type="checkbox" checked> Standing threshold</label>
-          <label class="fptp-only" for="ctl-tactical">
-            <input id="ctl-tactical" type="checkbox" checked> Tactical voting</label>
-        </div>
+        <!-- Both of the ways a ballot differs from the voters behind it: who is
+             not on the ballot at all (standing v0, a threshold per party per
+             election), and who deserts a party that cannot win. A row each,
+             named in the label column like every other control, so the boxes
+             line up under the sliders. -->
+        <label for="ctl-standing">Standing threshold</label>
+        <input id="ctl-standing" type="checkbox" checked>
+        <label class="fptp-only" for="ctl-tactical">Tactical voting</label>
+        <input id="ctl-tactical" class="fptp-only" type="checkbox" checked>
         <!-- Which parties are on the ballot, and which have merged. Built by
              app.js; its state outlives a run. -->
         <div id="party-editor" hidden></div>
@@ -135,10 +135,8 @@
       <!-- Whether a zone whose departure would split its region may go anyway,
            taking the smaller branch with it. On, and an algorithm choice rather
            than a dial, but not one most people want to make. -->
-      <div class="ctl-checks advanced-only" hidden>
-        <label for="ctl-branch">
-          <input id="ctl-branch" type="checkbox" checked> Branch moves</label>
-      </div>
+      <label for="ctl-branch" class="advanced-only" hidden>Branch moves</label>
+      <input id="ctl-branch" class="advanced-only" type="checkbox" checked hidden>
       <div class="ctl-rule" role="presentation"></div>
       <label for="ctl-popw">Equal populations <span id="ctl-popw-value">1</span></label>
       <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
