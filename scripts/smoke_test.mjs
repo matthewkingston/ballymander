@@ -79,13 +79,7 @@ await page.waitForFunction(
 // let the WebGL frames settle
 await page.evaluate(() => new Promise(r => setTimeout(r, 2500)));
 
-// The resting height of the results panel is four fifths of the left panel as
-// the page OPENS -- one variable, nothing added. Captured here because the run
-// below puts four more on, which makes the left panel half as tall again.
 const initialPanel = await page.evaluate(() => ({
-  panelWants: document.getElementById('panel').scrollHeight,
-  rest: parseFloat(getComputedStyle(document.documentElement)
-    .getPropertyValue('--results-rest')),
   // The bars open on the variable the page opens with, not on population.
   barStat: document.getElementById('bars-stat').value,
 }));
@@ -158,8 +152,8 @@ const resultsAtRest = await page.evaluate(() => ({
   // one paragraph. A ratio, not a pixel count: the left panel decides both.
   resting: document.getElementById('results').classList.contains('is-resting'),
   height: document.getElementById('results').getBoundingClientRect().height,
-  rest: parseFloat(getComputedStyle(document.documentElement)
-    .getPropertyValue('--results-rest')),
+  fitsWindow: document.getElementById('results').getBoundingClientRect().bottom
+    <= window.innerHeight,
 }));
 await page.click('#ctl-go');
 await page.waitForFunction(
@@ -817,15 +811,12 @@ if (!statSwitch || ['land', 'people', 'cut'].some((v) => statSwitch.basicOptions
   problems.push('the shape statistics were offered in basic mode: '
     + (statSwitch && statSwitch.basicOptions.join(', ')));
 }
-const restRatio = initialPanel && initialPanel.rest / initialPanel.panelWants;
-if (!initialPanel || !(restRatio > 0.7 && restRatio < 0.9)) {
-  problems.push('the resting height was not measured at four fifths of the left panel: '
-    + (initialPanel && `${initialPanel.rest} of ${initialPanel.panelWants}`));
-}
-if (!resultsAtRest || !resultsAtRest.resting
-    || Math.abs(resultsAtRest.height - resultsAtRest.rest) > 2) {
-  problems.push('the empty results panel did not stand at its measured height: '
-    + (resultsAtRest && `${resultsAtRest.height} vs ${resultsAtRest.rest}`));
+// A written-down height, not a measured one, so this checks the panel is held
+// open at roughly what the CSS says and still fits the window.
+if (!resultsAtRest || !resultsAtRest.resting || !resultsAtRest.fitsWindow
+    || resultsAtRest.height < 600 || resultsAtRest.height > 760) {
+  problems.push('the empty results panel was not held open: '
+    + (resultsAtRest && `${Math.round(resultsAtRest.height)}px`));
 }
 if (!regions || !regions.panelAlwaysUp || !regions.resultsShown) {
   problems.push('the help text did not give way to the results');

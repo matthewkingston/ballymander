@@ -693,9 +693,10 @@ groups, each folding away under its own heading:
   editor. The ballot, and how it is counted.
 * **Simulation settings** — **Temperature** and **Simulation speed**. How the
   search is run: its pace, and its willingness to go uphill.
-* **Simulation weights** — **Equal populations** and **Compactness**. What it is
-  run for. The variables below carry weights of the same kind, weighed in the
-  same budget.
+* **Simulation weights** — **Equal populations** and **Compactness**, and the
+  variables themselves. What it is run for: the variables carry weights of the
+  same kind against the same budget, so they live under this heading and fold
+  away with it.
 
 Each folds away under its heading, the way a variable block does, and all start
 open: a setting you cannot see is one you forget you changed.
@@ -831,8 +832,11 @@ What an excluded party's voters do, and what a merger keeps, is described in
 
 The results panel sits on the right from the moment the page loads, holding its
 title and a line saying what to do; a panel that appeared the instant a run
-began read as something going wrong. Once there is a map to report on — from
-START or from a pre-defined one — the help gives way to the figures, and the
+began read as something going wrong. Standing empty it holds a fixed 683px
+rather than shrinking onto the one paragraph — two panels of wildly different
+size read as one finished and one half-built — capped by the window on a short
+screen. Once there is a map to report on — from START or from a pre-defined
+one — the help gives way to the figures, and the
 panel switches between **Overall** and **Region**. Region shows a
 single region's election in detail, and the map picks it: click any zone while
 that view is open. The choice is remembered for the run and starts at region 1.

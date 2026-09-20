@@ -153,7 +153,8 @@
                 aria-controls="sim-weights">
           <span class="chev" aria-hidden="true">&#9656;</span> Simulation weights</button>
       </h2>
-      <div id="sim-weights" class="ctl-grid">
+      <div id="sim-weights">
+        <div class="ctl-grid">
         <label for="ctl-popw">Equal populations <span id="ctl-popw-value">1</span></label>
         <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
         <!-- Land shape, people shape and cut edges under one knob. They are three
@@ -179,18 +180,23 @@
           id="ctl-cut-value">1</span></label>
         <input id="ctl-cut" class="advanced-only" type="range" min="-1.02" max="1"
                step="0.02" value="0" data-weight data-off hidden>
-      </div>
-    </div>
+        </div>
 
-    <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new
-         demographic is its data plus one entry there, and needs no markup. -->
-    <!-- What the run is steered by: as many or as few as are wanted, each one
-         a party or a demographic. Built by app.js; the page starts with one. -->
-    <div id="variables"></div>
-    <div class="add-variable">
-      <button id="ctl-add-open" type="button" class="add-open">
-        <span class="add-plus" aria-hidden="true">+</span>Add variable</button>
-      <div id="ctl-add" class="add-menu" role="menu" aria-label="Add variable" hidden></div>
+        <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A
+             new demographic is its data plus one entry there, and needs no
+             markup. What the run is steered by: as many or as few as are
+             wanted, each one a party or a demographic. The page starts with one.
+
+             Inside the weights group, because that is what they are -- terms in
+             the same score, sharing the same budget -- so they fold away with
+             it rather than being left behind by a heading they belong under. -->
+        <div id="variables"></div>
+        <div class="add-variable">
+          <button id="ctl-add-open" type="button" class="add-open">
+            <span class="add-plus" aria-hidden="true">+</span>Add variable</button>
+          <div id="ctl-add" class="add-menu" role="menu" aria-label="Add variable" hidden></div>
+        </div>
+      </div>
     </div>
 
     <!-- Everything that was taken off the page for being fine tuning rather

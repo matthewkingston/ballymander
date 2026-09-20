@@ -437,12 +437,15 @@ html, body {
 .results-title {
   margin: 0 0 16px;
 }
-/* Standing empty, the panel holds four fifths of the left one's height rather
-   than collapsing onto one paragraph -- see sizeRestingResults, which measures
-   it. Capped by the window on a short screen, where min-height would otherwise
-   beat the max-height above and push the panel off the bottom. */
+/* Standing empty, the panel holds its height rather than collapsing onto one
+   paragraph: two panels of wildly different size read as one finished and one
+   half-built. The figure came from four fifths of the left panel and is written
+   down rather than measured -- a height that moved whenever a control was added
+   over there was a surprise waiting to happen, and this one only has to look
+   right. Capped by the window on a short screen, where min-height would
+   otherwise beat the max-height above and push the panel off the bottom. */
 #results.is-resting {
-  min-height: min(var(--results-rest, 620px), calc(100% - 32px));
+  min-height: min(683px, calc(100% - 32px));
 }
 /* What the panel holds before there is anything to hold. Larger than the hint
    under the left panel: there it is a footnote to a page of controls, here it
