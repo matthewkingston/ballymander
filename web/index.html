@@ -79,8 +79,10 @@
            repeating can be. -->
       <label for="ctl-seed">Random seed <span id="ctl-seed-value"></span></label>
       <input id="ctl-seed" type="number" min="0" step="1" placeholder="Auto">
-      <label for="ctl-temp">Temperature</label>
-      <input id="ctl-temp" type="number" min="0.01" max="100" step="0.1" value="1">
+      <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
+           the interesting range is multiplicative, not additive. -->
+      <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>
+      <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0" data-log>
       <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
       <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
       <label for="ctl-shape">Land shape <span id="ctl-shape-value">1</span></label>

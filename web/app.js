@@ -46,6 +46,7 @@ const els = {
   seed: document.getElementById('ctl-seed'),
   seedValue: document.getElementById('ctl-seed-value'),
   temp: document.getElementById('ctl-temp'),
+  tempValue: document.getElementById('ctl-temp-value'),
   speed: document.getElementById('ctl-speed'),
   speedValue: document.getElementById('ctl-speed-value'),
   popw: document.getElementById('ctl-popw'),
@@ -1090,6 +1091,13 @@ function speedOf() {
   return 10 ** Number(els.speed.value);
 }
 
+/* The acceptance rule's temperature. Log like the speed and the weights, since
+ * what matters is the factor rather than the difference: 0.1 to 10. */
+function temperatureOf() {
+  const t = 10 ** Number(els.temp.value);
+  return t > 0 ? t : 1;
+}
+
 /* Steps to take for the time that has passed, carrying the fraction left over
  * so that rates below one step a frame still advance. */
 function stepsForElapsed(phase, perSecond, elapsed) {
@@ -1308,7 +1316,7 @@ function wireHover(map) {
 /* The options the model needs whichever way a map arrives. */
 function runOptions() {
   return {
-    temperature: Number(els.temp.value) || 1,
+    temperature: temperatureOf(),
     wPop: weightOf(els.popw),
     wShape: weightOf(els.shape),
     wPopShape: weightOf(els.pshape),
@@ -1434,8 +1442,7 @@ function tick(map) {
       // The shape weight is part of the score, so changing it makes anything
       // recorded under the old weight incomparable -- setShapeWeight re-bases
       // best-so-far on the current state rather than leaving a stale one.
-      const t = Number(els.temp.value);
-      run.model.temperature = t > 0 ? t : 1;
+      run.model.temperature = temperatureOf();
       // Modes first: turning one off zeroes that term's weight, and setWeights
       // then reapplies the rest against the right total.
       if (voters) {
@@ -1523,7 +1530,7 @@ function start(map) {
   const chosen = seedForRun();
   showSeed(chosen);
   run.model.start(n, chosen.seed, {
-    temperature: Number(els.temp.value) || 1,
+    temperature: temperatureOf(),
     wPop: weightOf(els.popw),
     wShape: weightOf(els.shape),
     wPopShape: weightOf(els.pshape),
@@ -1737,6 +1744,7 @@ async function main() {
     wireReadout(input, out);
   }
   wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));
+  wireReadout(els.temp, els.tempValue, () => formatSpeed(temperatureOf()));
   sizeLabelColumn();
 
   els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });
