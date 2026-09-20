@@ -5,7 +5,10 @@ import path from 'node:path';
 // puppeteer lives in .tools/pptr (gitignored), not next to this script, so
 // resolve it from there rather than relying on ESM's script-relative lookup.
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const require = createRequire(path.join(ROOT, '.tools/pptr/'));
+// .tools/ is gitignored, so it exists only in the main checkout: running this
+// copy of the script from a worktree resolves puppeteer from there.
+const TOOLS = process.env.SMOKE_TOOLS_ROOT || ROOT;
+const require = createRequire(path.join(TOOLS, '.tools/pptr/'));
 const puppeteer = require('puppeteer');
 
 const URL = 'http://127.0.0.1:8765/';
@@ -24,6 +27,35 @@ const browser = await puppeteer.launch({
 
 const page = await browser.newPage();
 await page.setViewport({ width: 1400, height: 900, deviceScaleFactor: 2 });
+
+// The server is the user's and serves the main checkout, so a change on a
+// branch cannot otherwise be tested until it is merged -- which has put a
+// failing assertion on main more than once. Point SMOKE_OVERRIDE_DIR at a
+// worktree and the page, its script and its stylesheet are served from there
+// instead; everything else (data, artwork, vendor) still comes from the server,
+// none of it being what a UI branch changes.
+const OVERRIDE = process.env.SMOKE_OVERRIDE_DIR;
+if (OVERRIDE) {
+  const { readFileSync } = await import('node:fs');
+  const from = {
+    '/': ['web/index.html', 'text/html'],
+    '/index.html': ['web/index.html', 'text/html'],
+    '/app.js': ['web/app.js', 'text/javascript'],
+    '/style.css': ['web/style.css', 'text/css'],
+    '/regions.js': ['web/regions.js', 'text/javascript'],
+    '/graph.js': ['web/graph.js', 'text/javascript'],
+  };
+  await page.setRequestInterception(true);
+  page.on('request', (r) => {
+    if (r.isInterceptResolutionHandled()) return;
+    const hit = from[new global.URL(r.url()).pathname];
+    if (hit) {
+      r.respond({ status: 200, contentType: hit[1],
+                  body: readFileSync(path.join(OVERRIDE, hit[0])) });
+    } else r.continue();
+  });
+  console.error(`serving web/ from ${OVERRIDE}`);
+}
 
 const errors = [], failed = [], external = [];
 page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
@@ -785,10 +817,6 @@ if (!statSwitch || ['land', 'people', 'cut'].some((v) => statSwitch.basicOptions
   problems.push('the shape statistics were offered in basic mode: '
     + (statSwitch && statSwitch.basicOptions.join(', ')));
 }
-if (!adv || adv.simple.shapeStats !== 0 || adv.open.shapeStats !== 3) {
-  problems.push('the shape statistics did not follow the advanced switch: '
-    + (adv && `${adv.simple.shapeStats} then ${adv.open.shapeStats}`));
-}
 const restRatio = initialPanel && initialPanel.rest / initialPanel.panelWants;
 if (!initialPanel || !(restRatio > 0.7 && restRatio < 0.9)) {
   problems.push('the resting height was not measured at four fifths of the left panel: '
@@ -1081,6 +1109,10 @@ if (!adv || !adv.simple.compact || adv.simple.parts.some(Boolean) || adv.simple.
 if (!adv || adv.open.compact || !adv.open.parts.every(Boolean) || !adv.open.bonus
     || !adv.open.recom || !adv.open.branch) {
   problems.push('advanced mode did not bring out the fine tuning');
+}
+if (!adv || adv.simple.shapeStats !== 0 || adv.open.shapeStats !== 3) {
+  problems.push('the shape statistics did not follow the advanced switch: '
+    + (adv && `${adv.simple.shapeStats} then ${adv.open.shapeStats}`));
 }
 // The run's counters and its score are bookkeeping; the phase and the
 // population deviation are the result, and stay out in both modes.

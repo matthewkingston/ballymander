@@ -944,6 +944,23 @@ exactly that, so the number is a bound on a known artifact rather than a fudge.
 no failed requests and no external requests, hovers a Belfast zone to confirm
 the tooltip, and writes `map-full.png` / `map-hover.png` (override with `OUTDIR=`).
 
+It needs `run.sh` serving already, and that server serves the main checkout — so
+testing a branch used to mean merging it first, which has put a failing
+assertion on main more than once. Run it from inside a worktree, or name one,
+and it tests that instead:
+
+```bash
+.claude/worktrees/my-branch/scripts/smoke_test.sh
+./scripts/smoke_test.sh .claude/worktrees/my-branch
+```
+
+The branch's `index.html`, `app.js`, `style.css`, `regions.js` and `graph.js`
+are served to the browser in place of the running server's, and the branch's own
+copy of the test is the one that runs — so a change to the app and a change to
+its assertions are checked together. Data, artwork and vendor files still come
+from the server, none of them being what a branch like that touches. The browser
+itself always comes from the main checkout, `.tools/` being gitignored.
+
 ### Headless verification setup
 
 This box has no browser, no GPU libs and **no fonts**, all of which were
