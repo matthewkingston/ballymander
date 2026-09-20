@@ -233,11 +233,14 @@ const statSwitch = await page.evaluate(() => {
   sel.value = 'demo:age';
   sel.dispatchEvent(new Event('change'));
   const demo = max();
-  sel.value = 'cut';
+  // Population, not cut edges: the shape statistics are behind advanced
+  // controls now, and this runs in the mode the page opens in.
+  sel.value = 'pop';
   sel.dispatchEvent(new Event('change'));
   return {
     before,
     demo,
+    basicOptions: [...sel.options].map((o) => o.value),
     after: { max: max(), rows: rows() },
     filled: [...document.querySelectorAll('.bar-fill')]
       .filter((b) => parseFloat(b.style.width) > 0).length,
@@ -570,6 +573,9 @@ const advancedMode = await page.evaluate(() => {
     // not. Religion is on the page in gerrymander mode by this point.
     relThreshold: !document.getElementById('ctl-rel-t').hidden,
     relSteepness: !document.getElementById('ctl-rel-s').hidden,
+    // The shape charts follow the sliders they belong to.
+    shapeStats: [...document.getElementById('bars-stat').options]
+      .map((o) => o.value).filter((v) => ['land', 'people', 'cut'].includes(v)).length,
   });
   const simple = shown();
   box.click();                                  // into advanced
@@ -771,6 +777,17 @@ if (!resultsAtRest || !resultsAtRest.panel || !resultsAtRest.hint
     || resultsAtRest.overall || resultsAtRest.viewSwitch
     || !resultsAtRest.hintText.startsWith('Select your settings')) {
   problems.push('the results panel was not already there with its help text');
+}
+// Three of the four map statistics belong to sliders that wait for advanced
+// mode, so their charts wait with them.
+if (!statSwitch || ['land', 'people', 'cut'].some((v) => statSwitch.basicOptions.includes(v))
+    || !statSwitch.basicOptions.includes('pop')) {
+  problems.push('the shape statistics were offered in basic mode: '
+    + (statSwitch && statSwitch.basicOptions.join(', ')));
+}
+if (!adv || adv.simple.shapeStats !== 0 || adv.open.shapeStats !== 3) {
+  problems.push('the shape statistics did not follow the advanced switch: '
+    + (adv && `${adv.simple.shapeStats} then ${adv.open.shapeStats}`));
 }
 const restRatio = initialPanel && initialPanel.rest / initialPanel.panelWants;
 if (!initialPanel || !(restRatio > 0.7 && restRatio < 0.9)) {

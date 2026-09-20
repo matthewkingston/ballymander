@@ -258,11 +258,17 @@ function addPartyBarStats(parties) {
   }
 }
 
-/* The map's own four always, then one entry per variable being steered -- so
- * the results offer exactly what was asked for. Keeps the current choice if it
- * is still on the list. */
+/* The map's own measures, then one entry per variable being steered -- so the
+ * results offer exactly what was asked for. Keeps the current choice if it is
+ * still on the list.
+ *
+ * The three shape measures follow their sliders behind advanced controls: on
+ * the left they are one knob called Compactness, and offering them here as
+ * three separate charts would contradict that. Population equality has a
+ * slider of its own in both modes, so its chart stays in both. */
 const MAP_STATS = { pop: 'Population', land: 'Land shape', people: 'People shape',
                     cut: 'Cut edges' };
+const BASIC_STATS = ['pop'];
 
 /* Whether the reader has picked a statistic for themselves. Until they do, the
  * bars follow the variables: those are what the run is being steered by, and
@@ -274,6 +280,7 @@ function rebuildBarOptions() {
   const want = els.barsStat.value;
   els.barsStat.textContent = '';
   for (const [key, label] of Object.entries(MAP_STATS)) {
+    if (!advanced && !BASIC_STATS.includes(key)) continue;
     els.barsStat.append(el('option', { value: key }, label));
   }
   for (const v of variables) {
@@ -1063,6 +1070,10 @@ function setAdvanced(on) {
     localStorage.setItem(ADVANCED_KEY, on ? '1' : '0');
   } catch { /* a private window refuses; the mode still works for this visit */ }
   if (leaving) flattenCompactness();
+  // The shape statistics come and go with the sliders they belong to, and a
+  // chart showing one that has just left the list falls back like any other.
+  rebuildBarOptions();
+  if (run.model) drawBars();
   applyElectionType();
 }
 

@@ -734,6 +734,9 @@ and brings out the rest of the fine tuning:
   one means nothing without saying which side of what, since 60% Catholic and
   40% Catholic are opposite instructions. A winning margin already has a
   sensible answer — zero, meaning "just wins".
+* **Land shape**, **People shape** and **Cut edges** as charts in the results
+  panel's **Stats by region**, alongside the sliders. Population equality keeps
+  its chart in both modes, as it keeps its slider.
 * **Flips per ReCom** — how often the large recombination move fires against
   small single-zone flips, 200 by default, with a detent at the right-hand end
   that turns recombination off.
