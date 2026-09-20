@@ -175,6 +175,9 @@ html, body {
   gap: 4px 16px;
 }
 .ctl-checks[hidden] { display: none; }
+/* The advanced switch stands apart from everything it governs: it is a fact
+   about the panel rather than about the map. */
+.ctl-advanced { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
 .ctl-checks label {
   display: flex;
   align-items: center;

@@ -81,6 +81,14 @@
              to look at, and is roughly what a national PR list would do. -->
         <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
                value="5" hidden>
+        <!-- How much a seat is worth against a quota of leftover votes, when a
+             party variable is drawing for seats. Moving it off 2 changes little,
+             so it is advanced-only rather than gone: fine tuning for anyone who
+             wants to see for themselves. -->
+        <label for="ctl-bonus" class="stv-only advanced-only" hidden>Seat bonus <span
+          id="ctl-bonus-value">2</span></label>
+        <input id="ctl-bonus" class="stv-only advanced-only" type="range" min="1" max="5"
+               step="0.5" value="2" hidden>
         <!-- Both of the ways a ballot differs from the voters behind it, on one
              line: who is not on the ballot at all (standing v0, a threshold per
              party per election), and who deserts a party that cannot win. -->
@@ -119,15 +127,29 @@
       <div class="ctl-rule" role="presentation"></div>
       <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
       <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
-      <label for="ctl-shape">Land shape <span id="ctl-shape-value">1</span></label>
-      <input id="ctl-shape" type="range" min="-1.02" max="1" step="0.02" value="0"
-             data-weight data-off>
-      <label for="ctl-pshape">People shape <span id="ctl-pshape-value">1</span></label>
-      <input id="ctl-pshape" type="range" min="-1.02" max="1" step="0.02" value="0"
-             data-weight data-off>
-      <label for="ctl-cut">Cut edges <span id="ctl-cut-value">1</span></label>
-      <input id="ctl-cut" type="range" min="-1.02" max="1" step="0.02" value="0"
-             data-weight data-off>
+      <!-- Land shape, people shape and cut edges under one knob. They are three
+           terms in the score, but wanting a region rounder without also wanting
+           its border shorter is a fine distinction: the usual question is just
+           how much a sane-looking region is worth against everything else.
+           Advanced mode splits them again. The three below stay the real
+           controls -- this one writes into them -- so nothing downstream knows
+           the difference. -->
+      <label for="ctl-compact" class="simple-only">Compactness <span
+        id="ctl-compact-value">1</span></label>
+      <input id="ctl-compact" class="simple-only" type="range" min="-1.02" max="1"
+             step="0.02" value="0" data-weight data-off>
+      <label for="ctl-shape" class="advanced-only" hidden>Land shape <span
+        id="ctl-shape-value">1</span></label>
+      <input id="ctl-shape" class="advanced-only" type="range" min="-1.02" max="1"
+             step="0.02" value="0" data-weight data-off hidden>
+      <label for="ctl-pshape" class="advanced-only" hidden>People shape <span
+        id="ctl-pshape-value">1</span></label>
+      <input id="ctl-pshape" class="advanced-only" type="range" min="-1.02" max="1"
+             step="0.02" value="0" data-weight data-off hidden>
+      <label for="ctl-cut" class="advanced-only" hidden>Cut edges <span
+        id="ctl-cut-value">1</span></label>
+      <input id="ctl-cut" class="advanced-only" type="range" min="-1.02" max="1"
+             step="0.02" value="0" data-weight data-off hidden>
     </div>
 
     <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new
@@ -139,6 +161,14 @@
       <button id="ctl-add-open" type="button" class="add-open">
         <span class="add-plus" aria-hidden="true">+</span>Add variable</button>
       <div id="ctl-add" class="add-menu" role="menu" aria-label="Add variable" hidden></div>
+    </div>
+
+    <!-- Everything that was taken off the page for being fine tuning rather
+         than a choice. Last, because it is about the panel rather than about
+         the map, and remembered between visits. -->
+    <div class="ctl-checks ctl-advanced">
+      <label for="ctl-advanced">
+        <input id="ctl-advanced" type="checkbox"> Advanced controls</label>
     </div>
 
     <p class="hint">Hover a zone for its figures, and its region's.</p>

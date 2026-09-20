@@ -474,8 +474,9 @@ election.stv = await page.evaluate(() => {
     controls: {
       seats: !document.getElementById('ctl-seats').hidden,
       margin: !document.getElementById('ctl-party-dup-t').hidden,
-      // The seat bonus is a constant now, not a control.
-      bonus: Boolean(document.getElementById('ctl-bonus')),
+      // Both are fine tuning, so both wait for advanced mode -- and the margin
+      // has nothing to tune under STV even then.
+      bonus: !document.getElementById('ctl-bonus').hidden,
       direction: document.querySelector('label[for="ctl-party-dup-a"]').textContent,
     },
     seatsPer: m.seatsPerRegion,
@@ -508,6 +509,40 @@ election.standing = await page.evaluate(() => {
   const off = { rule: m.standingRule, votes: cast(), absent: absent() };
   box.click();
   return { on, off, back: { rule: m.standingRule, votes: cast() } };
+});
+
+// Advanced mode: Compactness stands for three sliders, which come out on the
+// switch and are flattened back to their mean when it goes off again.
+const advancedMode = await page.evaluate(() => {
+  const box = document.getElementById('ctl-advanced');
+  const parts = ['ctl-shape', 'ctl-pshape', 'ctl-cut'].map((id) =>
+    document.getElementById(id));
+  const compact = document.getElementById('ctl-compact');
+  const shown = () => ({
+    compact: !compact.hidden,
+    parts: parts.map((p) => !p.hidden),
+    bonus: !document.getElementById('ctl-bonus').hidden,
+    margin: !document.getElementById('ctl-party-dup-t').hidden,
+  });
+  const simple = shown();
+  box.click();                                  // into advanced
+  const open = shown();
+  // Three different values, then back: all four must agree on their mean.
+  const set = (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+  set(parts[0], '0.5'); set(parts[1], '0'); set(parts[2], '-0.5');
+  box.click();                                  // back to simple
+  const flat = {
+    values: parts.map((p) => Number(p.value)),
+    compact: Number(compact.value),
+    readout: document.getElementById('ctl-compact-value').textContent,
+    stored: (() => { try { return localStorage.getItem('ballymander.advanced'); }
+                     catch { return null; } })(),
+  };
+  // And the one knob drives all three.
+  set(compact, '0.4');
+  const spread = parts.map((p) => Number(p.value));
+  set(compact, '0');
+  return { simple, open, flat, spread };
 });
 
 // The party editor: exclude a party, merge two, and put them back.
@@ -911,6 +946,21 @@ if (!real || !real.running.groupFolded) {
 if (!real || !real.stopped.selectorShown || real.stopped.selectorDisabled
     || real.stopped.regionsDisabled || real.stopped.groupFolded) {
   problems.push('the region settings did not come back when the run stopped');
+}
+const adv = advancedMode;
+if (!adv || !adv.simple.compact || adv.simple.parts.some(Boolean) || adv.simple.bonus) {
+  problems.push('simple mode showed more than Compactness');
+}
+if (!adv || adv.open.compact || !adv.open.parts.every(Boolean) || !adv.open.bonus) {
+  problems.push('advanced mode did not bring out the fine tuning');
+}
+// Mean of 0.5, 0 and -0.5 is 0, and all four must be sitting on it.
+if (!adv || adv.flat.compact !== 0 || adv.flat.values.some((v) => v !== 0)
+    || adv.flat.readout !== '1' || adv.flat.stored !== '0') {
+  problems.push('leaving advanced mode did not flatten the three to their mean');
+}
+if (!adv || adv.spread.some((v) => v !== 0.4)) {
+  problems.push('Compactness did not drive the three sliders it stands for');
 }
 if (!real || real.cleared.painted !== 0 || real.cleared.results) {
   problems.push('choosing None did not clear the map');

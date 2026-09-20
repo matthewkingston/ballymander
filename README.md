@@ -684,9 +684,9 @@ groups, and a third block of sliders that needs no name:
   exactly that — plus **Standing threshold**, **Tactical voting** and the party
   editor. The ballot, and how it is counted.
 * Then, unheaded, **Temperature** and **Simulation speed**, a hairline, and the
-  four weights: **Population**, **Land shape**, **People shape** and **Cut
-  edges**. The hairline is the division it looks like — above it, how the search
-  is run; below it, what it is run for — which is all a heading would have said.
+  weights: **Population** and **Compactness**. The hairline is the division it
+  looks like — above it, how the search is run; below it, what it is run for —
+  which is all a heading would have said.
 
 Both named groups fold away under their heading, the way a variable block does,
 and both start open: a setting you cannot see is one you forget you changed.
@@ -701,6 +701,37 @@ chose to draw by.
 No. Regions is fixed for the life of a run, since changing it means a different
 map; the election settings stay live, so a paused or stopped map can be
 re-counted under other rules.
+
+### Compactness, and advanced controls
+
+**Compactness** is one slider standing for three score terms — land shape,
+people shape and cut edges — all held at the same weight. They are separate
+terms because they measure different things, but wanting a region rounder
+without also wanting its border shorter is a distinction almost nobody needs.
+The usual question is just how much a sane-looking region is worth against
+population equality and the variables, and that is one number.
+
+Because the score divides by the total weight, moving all three together is not
+a no-op: it changes their share against Population and against every variable on
+the page. One knob, one meaning.
+
+**Advanced controls**, the checkbox at the foot of the panel, splits them again
+and brings out the rest of the fine tuning:
+
+* **Land shape**, **People shape** and **Cut edges** as three sliders, in place
+  of Compactness.
+* **Seat bonus** — how much a seat outweighs vote-building under STV, default 2.
+* A variable's **Threshold**/**Winning margin** and **Steepness**, inside its
+  block.
+
+Turning it off again flattens the three shape weights to the mean of their
+slider positions — the geometric mean of the weights, which is the right average
+on a log scale — so the single figure is the truth again rather than a summary
+of three things it no longer controls.
+
+The setting is remembered in `localStorage` under `ballymander.advanced`, which
+is the only browser storage the app uses. A private window that refuses it just
+gets the default, which is off.
 
 ### Simulation speed
 
@@ -827,9 +858,9 @@ is as many seats as possible — so the score is
     seat bonus × seats won + leftover votes ÷ quota
 
 from the simulated count, where the seat bonus — how much a seat outweighs
-vote-building — is fixed at 2, having proved not to be worth a control. What is
-left is a direction: win seats, or deny them. Average and extreme modes work on
-the party's share in both.
+vote-building — is 2 unless advanced controls are showing, moving it having
+proved to change little. What is left in plain sight is a direction: win seats,
+or deny them. Average and extreme modes work on the party's share in both.
 
 The STV count itself is party-level — no candidates, no rankings — using the
 transfer matrix and each party's exhaustion rate. It gets 95% of the seats

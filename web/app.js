@@ -55,6 +55,9 @@ const els = {
   shapeValue: document.getElementById('ctl-shape-value'),
   pshape: document.getElementById('ctl-pshape'),
   pshapeValue: document.getElementById('ctl-pshape-value'),
+  compact: document.getElementById('ctl-compact'),
+  compactValue: document.getElementById('ctl-compact-value'),
+  advanced: document.getElementById('ctl-advanced'),
   cut: document.getElementById('ctl-cut'),
   cutValue: document.getElementById('ctl-cut-value'),
   variables: document.getElementById('variables'),
@@ -95,6 +98,8 @@ const els = {
   results: document.getElementById('results'),
   resultsList: document.getElementById('results-list'),
   barsStat: document.getElementById('bars-stat'),
+  bonus: document.getElementById('ctl-bonus'),
+  bonusValue: document.getElementById('ctl-bonus-value'),
   bars: document.getElementById('bars'),
   barsMin: document.getElementById('bars-min'),
   barsMax: document.getElementById('bars-max'),
@@ -131,22 +136,28 @@ const PARTY_COLORS = {
   PBP: '#ef5a7a',
 };
 
+/* Fine tuning, off by default and remembered between visits: a control that is
+ * a choice stays on the page, a control that is a dial waits behind the
+ * checkbox. Reading storage throws in a private window, so a failure is simply
+ * the default. */
+const ADVANCED_KEY = 'ballymander.advanced';
+let advanced = false;
+try {
+  advanced = localStorage.getItem(ADVANCED_KEY) === '1';
+} catch { advanced = false; }
+
 /* Which half of the results panel is showing: the whole map, or one region's
  * election in detail. */
 let panelView = 'overall';
 let voters = null;        // web/data/dz_voters.json, once loaded
 
-/* How much a seat is worth against a quota of leftover votes, when a party
- * variable is drawing for seats under STV. It was a slider for a while and
- * moving it changed very little, so it is a constant. */
-const SEAT_BONUS = 2;
-
 /* The election every drawn map holds. One election, so these are the page's,
- * not any one variable's. */
+ * not any one variable's -- including the seat bonus, which scores the count
+ * itself rather than a party. */
 const elect = {
   type: () => els.electionType.value,
   seatsPer: () => Math.max(1, Number(els.seats.value) || 1),
-  bonus: () => SEAT_BONUS,
+  bonus: () => Number(els.bonus.value) || 2,
   // A zone's ballots: its electorate, its turnout index, and the level of
   // whichever election is being simulated.
   votes: (code) => {
@@ -923,24 +934,86 @@ function wireVariable(v) {
   applyElectionType();
 }
 
-/* Which of a party's gerrymander controls apply depends on the election being
- * simulated, so this runs whenever either changes. */
-function applyElectionType() {
+/* Every rule that can hide a control, in one place. Two loops each setting
+ * `hidden` on the same node would only take turns winning, and the seat bonus
+ * answers to both the election type and the advanced flag. A node carrying any
+ * of these classes is hidden as soon as one of its conditions is unmet.
+ *
+ * `.real-only` is not here: it is set once, if the boundaries file fails to
+ * load, and nothing toggles it afterwards. */
+function applyVisibility() {
   const stv = els.electionType.value === 'stv';
-  for (const node of document.querySelectorAll('.stv-only')) node.hidden = !stv;
   // Tactical voting is a first-past-the-post affair; under STV a lower
   // preference costs a voter nothing.
-  for (const node of document.querySelectorAll('.fptp-only')) node.hidden = stv;
-  for (const v of variables) {
-    if (!v.isParty) continue;
-    // Under STV the target is the count itself, so the margin and its steepness
-    // give way; how much a seat is worth is SEAT_BONUS.
-    v.tLabel.hidden = stv;
-    v.t.hidden = stv;
-    v.sLabel.hidden = stv;
-    v.s.hidden = stv;
-    v.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
+  const on = {
+    'stv-only': stv,
+    'fptp-only': !stv,
+    'advanced-only': advanced,
+    'simple-only': !advanced,
+  };
+  for (const node of document.querySelectorAll(
+    '.stv-only, .fptp-only, .advanced-only, .simple-only')) {
+    node.hidden = [...node.classList].some((c) => on[c] === false);
   }
+}
+
+/* Which of a variable's gerrymander controls apply depends on the election
+ * being simulated and on whether the fine tuning is out, so this runs whenever
+ * either changes. */
+function applyElectionType() {
+  const stv = els.electionType.value === 'stv';
+  applyVisibility();
+  for (const v of variables) {
+    // A threshold and its steepness are fine tuning wherever they appear, so
+    // they wait for advanced mode. Under STV a party has no margin to tune in
+    // any case: the target is the count itself, and a seat is worth the seat
+    // bonus.
+    const fine = advanced && !(v.isParty && stv);
+    v.tLabel.hidden = !fine;
+    v.t.hidden = !fine;
+    v.sLabel.hidden = !fine;
+    v.s.hidden = !fine;
+    if (v.isParty) v.dirLabel.textContent = stv ? 'Win seats' : 'Above margin';
+  }
+}
+
+/* The three shape penalties are one knob until they are asked for separately.
+ * The three real sliders stay the source of truth -- the run reads them every
+ * frame -- so Compactness writes into them and nothing downstream of weightOf()
+ * knows the difference. */
+const shapeParts = () => [els.shape, els.pshape, els.cut];
+
+/* Moving the one knob moves all three. The readouts are wired to `input`, so
+ * they are told rather than left showing the old figure. */
+function spreadCompactness() {
+  for (const part of shapeParts()) {
+    part.value = els.compact.value;
+    part.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
+/* Going back to the one knob, the three it stands for are made equal to the
+ * mean of their positions -- the geometric mean of the weights, which is the
+ * right average on a log slider -- so the single figure is the truth again. */
+function flattenCompactness() {
+  const parts = shapeParts();
+  const mean = parts.reduce((a, part) => a + Number(part.value), 0) / parts.length;
+  els.compact.value = String(mean);
+  els.compact.dispatchEvent(new Event('input', { bubbles: true }));
+  // Read back rather than reused: the slider has snapped it to a step, and all
+  // four must agree exactly.
+  spreadCompactness();
+}
+
+function setAdvanced(on) {
+  const leaving = advanced && !on;
+  advanced = on;
+  els.advanced.checked = on;
+  try {
+    localStorage.setItem(ADVANCED_KEY, on ? '1' : '0');
+  } catch { /* a private window refuses; the mode still works for this visit */ }
+  if (leaving) flattenCompactness();
+  applyElectionType();
 }
 
 /* --- data ---------------------------------------------------------------- */
@@ -1785,9 +1858,15 @@ async function main() {
   els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
 
   for (const [input, out] of [[els.popw, els.popwValue], [els.shape, els.shapeValue],
-                             [els.pshape, els.pshapeValue], [els.cut, els.cutValue]]) {
+                             [els.pshape, els.pshapeValue], [els.cut, els.cutValue],
+                             [els.compact, els.compactValue], [els.bonus, els.bonusValue]]) {
     wireReadout(input, out);
   }
+  // The one knob drives the three, and the checkbox decides which is showing.
+  els.compact.addEventListener('input', spreadCompactness);
+  els.advanced.addEventListener('change', () => setAdvanced(els.advanced.checked));
+  // Whatever was remembered, applied before anything is on screen.
+  setAdvanced(advanced);
   wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));
   wireReadout(els.temp, els.tempValue, () => formatSpeed(temperatureOf()));
   wireGroupToggles();
@@ -1844,6 +1923,7 @@ async function main() {
     els.seats.addEventListener('change', recount);
     els.tactical.addEventListener('change', recount);
     els.standing.addEventListener('change', recount);
+    els.bonus.addEventListener('change', recount);
     els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
   }
 
