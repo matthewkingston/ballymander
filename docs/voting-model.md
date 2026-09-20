@@ -1198,8 +1198,9 @@ about: vote management, running mates and individual candidates.
 both taken from the count. The staircase dominates, so a seat always beats
 vote-building, while the leftover pile gives the optimiser a gradient pointing
 at the next seat — including the transfers the party would pick up on the way,
-since that pile is the count's own. The seat bonus defaults to 2. Average and
-extreme modes still work on the party's share.
+since that pile is the count's own. The seat bonus is fixed at 2: it was a
+control for a while, and moving it changed too little to be worth the row.
+Average and extreme modes still work on the party's share.
 
 ## Not built yet
 

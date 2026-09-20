@@ -471,7 +471,8 @@ election.stv = await page.evaluate(() => {
     controls: {
       seats: !document.getElementById('ctl-seats').hidden,
       margin: !document.getElementById('ctl-party-dup-t').hidden,
-      bonus: !document.getElementById('ctl-bonus').hidden,
+      // The seat bonus is a constant now, not a control.
+      bonus: Boolean(document.getElementById('ctl-bonus')),
       direction: document.querySelector('label[for="ctl-party-dup-a"]').textContent,
     },
     seatsPer: m.seatsPerRegion,
@@ -867,7 +868,7 @@ if (!election || election.region.remembered !== election.region.afterClick.title
 }
 
 if (!election || !election.stv.controls.seats || election.stv.controls.margin
-    || !election.stv.controls.bonus
+    || election.stv.controls.bonus
     || election.stv.controls.direction !== 'Win seats') {
   problems.push('STV gerrymander controls wrong');
 }

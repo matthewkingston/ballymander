@@ -31,54 +31,64 @@
       <button id="ctl-stop" type="button" disabled>STOP</button>
     </div>
 
-    <div class="ctl-grid">
-      <!-- Boundaries that actually exist, as a starting point. Only offered
-           while stopped: once a run moves a zone the map is no longer real. -->
-      <label for="ctl-real" class="real-only">Real-life regions</label>
-      <select id="ctl-real" class="real-only">
-        <option value="none" selected>None</option>
-        <option value="westminster">Westminster</option>
-        <option value="assembly">Assembly</option>
-        <option value="council">Council</option>
-      </select>
-      <!-- The election every drawn map holds. The seat count and the seat bonus
-           only apply to STV. -->
-      <label for="ctl-election-type">Election type</label>
-      <select id="ctl-election-type">
-        <option value="fptp" selected>FPTP</option>
-        <option value="stv">STV</option>
-      </select>
-      <label for="ctl-n">Regions</label>
-      <input id="ctl-n" type="number" min="1" max="500" step="1" value="18">
-      <label for="ctl-seats" class="stv-only" hidden>Elected/Region</label>
-      <!-- No upper bound: one region electing everyone is a legitimate thing to
-           look at, and is roughly what a national PR list would do. -->
-      <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
-             value="5" hidden>
-      <!-- How much a seat is worth against a quota of leftover votes, when a
-           party variable is drawing for seats. One election, one bonus. -->
-      <label for="ctl-bonus" class="stv-only" hidden>Seat bonus <span
-        id="ctl-bonus-value">2</span></label>
-      <input id="ctl-bonus" class="stv-only" type="range" min="1" max="5" step="0.5"
-             value="2" hidden>
-      <!-- Both of the ways a ballot differs from the voters behind it, on one
-           line: who deserts a party that cannot win, and who is not on the
-           ballot at all (standing v0, a threshold per party per election). -->
-      <div class="ctl-checks">
-        <label class="fptp-only" for="ctl-tactical">
-          <input id="ctl-tactical" type="checkbox" checked> Tactical voting</label>
-        <label for="ctl-standing">
-          <input id="ctl-standing" type="checkbox" checked> Standing threshold</label>
+    <!-- What the map is made of: how many regions, where they start from, and
+         which draw of the dice. Nothing here knows about an election. -->
+    <div class="ctl-group">
+      <h2 class="ctl-group-title">Region settings</h2>
+      <div class="ctl-grid">
+        <!-- Boundaries that actually exist, as a starting point. Only offered
+             while stopped: once a run moves a zone the map is no longer real.
+             "Custom" is the absence of one, which is the usual case. -->
+        <label for="ctl-real" class="real-only">Pre-defined map</label>
+        <select id="ctl-real" class="real-only">
+          <option value="none" selected>Custom</option>
+          <option value="westminster">Westminster</option>
+          <option value="assembly">Assembly</option>
+          <option value="council">Council</option>
+        </select>
+        <label for="ctl-n">No. Regions</label>
+        <input id="ctl-n" type="number" min="1" max="500" step="1" value="18">
+        <!-- Empty means a fresh seed every run, which is what the placeholder
+             says. Type a number to pin it; clear the box to go back to auto. The
+             seed actually in use is reported in the label, so a run worth
+             repeating can be. -->
+        <label for="ctl-seed">Random seed <span id="ctl-seed-value"></span></label>
+        <input id="ctl-seed" type="number" min="0" step="1" placeholder="Auto">
       </div>
-      <!-- Which parties are on the ballot, and which have merged. Built by
-           app.js; its state outlives a run. -->
-      <div id="party-editor" hidden></div>
-      <!-- Empty means a fresh seed every run, which is what the placeholder
-           says. Type a number to pin it; clear the box to go back to auto. The
-           seed actually in use is reported in the label, so a run worth
-           repeating can be. -->
-      <label for="ctl-seed">Random seed <span id="ctl-seed-value"></span></label>
-      <input id="ctl-seed" type="number" min="0" step="1" placeholder="Auto">
+    </div>
+
+    <!-- The one election every drawn map holds, and the ballot it is fought on:
+         who is standing, who has merged, and who votes for someone else. -->
+    <div class="ctl-group">
+      <h2 class="ctl-group-title">Election settings</h2>
+      <div class="ctl-grid">
+        <!-- The seat count only applies to STV. -->
+        <label for="ctl-election-type">Election type</label>
+        <select id="ctl-election-type">
+          <option value="fptp" selected>FPTP</option>
+          <option value="stv">STV</option>
+        </select>
+        <label for="ctl-seats" class="stv-only" hidden>Elected/Region</label>
+        <!-- No upper bound: one region electing everyone is a legitimate thing
+             to look at, and is roughly what a national PR list would do. -->
+        <input id="ctl-seats" class="stv-only" type="number" min="1" step="1"
+               value="5" hidden>
+        <!-- Both of the ways a ballot differs from the voters behind it, on one
+             line: who is not on the ballot at all (standing v0, a threshold per
+             party per election), and who deserts a party that cannot win. -->
+        <div class="ctl-checks">
+          <label for="ctl-standing">
+            <input id="ctl-standing" type="checkbox" checked> Standing threshold</label>
+          <label class="fptp-only" for="ctl-tactical">
+            <input id="ctl-tactical" type="checkbox" checked> Tactical voting</label>
+        </div>
+        <!-- Which parties are on the ballot, and which have merged. Built by
+             app.js; its state outlives a run. -->
+        <div id="party-editor" hidden></div>
+      </div>
+    </div>
+
+    <div class="ctl-grid ctl-group">
       <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
            the interesting range is multiplicative, not additive. -->
       <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>

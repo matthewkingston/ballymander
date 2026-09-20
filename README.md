@@ -671,16 +671,23 @@ Two consequences worth knowing:
   block, its readout row and its entry in the results selector with it, and
   stops it steering. What is not on the page is off.
 
-The election itself belongs to the map rather than to any variable, so its
-controls sit with the rest above Regions: **Election type** (first past the post
-or STV), for STV **Elected/Region**, which has no upper limit — one region
-electing everybody is roughly a national list, and Regions goes down to 1 for
-exactly that — plus **Seat bonus**, **Tactical voting** and **Standing
-threshold**. The seats pie is likewise always there: it is the map's result,
-whatever you chose to draw by.
+The election itself belongs to the map rather than to any variable, so it has
+its own group of controls above the variables. The panel opens with two:
 
-Regions is fixed for the life of a run, since changing it means a different
-map; the election controls stay live, so a paused or stopped map can be
+* **Region settings** — **Pre-defined map** (real boundaries as a starting
+  point, or Custom), **No. Regions** and **Random seed**. What the map is made
+  of; none of it knows there is an election.
+* **Election settings** — **Election type** (first past the post or STV), for
+  STV **Elected/Region**, which has no upper limit — one region electing
+  everybody is roughly a national list, and No. Regions goes down to 1 for
+  exactly that — plus **Standing threshold**, **Tactical voting** and the party
+  editor. The ballot, and how it is counted.
+
+The seats pie is likewise always there: it is the map's result, whatever you
+chose to draw by.
+
+No. Regions is fixed for the life of a run, since changing it means a different
+map; the election settings stay live, so a paused or stopped map can be
 re-counted under other rules.
 
 ### Simulation speed
@@ -702,9 +709,10 @@ followed by a burst long enough to cause another.
 It replaced four controls — frame rate, build steps per frame, optimiser steps
 per frame, flips per recombination — three of which only ever wanted one setting.
 
-### Real-life regions
+### Pre-defined map
 
-The first control loads boundaries that actually exist, as a starting point:
+The first control loads boundaries that actually exist, as a starting point —
+**Custom**, the default, is the absence of one:
 **Westminster** (the 18 constituencies of 2024), **Assembly** (the 18 of 2008,
 which it still uses) or **Council** (the 80 District Electoral Areas). The
 region count follows and is locked while one is loaded, and the map appears as
@@ -799,9 +807,10 @@ is as many seats as possible — so the score is
 
     seat bonus × seats won + leftover votes ÷ quota
 
-from the simulated count, and the controls become a **seat bonus** (how much a
-seat outweighs vote-building, default 2) and a direction: win seats, or deny
-them. Average and extreme modes work on the party's share in both.
+from the simulated count, where the seat bonus — how much a seat outweighs
+vote-building — is fixed at 2, having proved not to be worth a control. What is
+left is a direction: win seats, or deny them. Average and extreme modes work on
+the party's share in both.
 
 The STV count itself is party-level — no candidates, no rankings — using the
 transfer matrix and each party's exhaustion rate. It gets 95% of the seats

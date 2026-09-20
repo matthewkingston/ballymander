@@ -95,8 +95,6 @@ const els = {
   results: document.getElementById('results'),
   resultsList: document.getElementById('results-list'),
   barsStat: document.getElementById('bars-stat'),
-  bonus: document.getElementById('ctl-bonus'),
-  bonusValue: document.getElementById('ctl-bonus-value'),
   bars: document.getElementById('bars'),
   barsMin: document.getElementById('bars-min'),
   barsMax: document.getElementById('bars-max'),
@@ -138,13 +136,17 @@ const PARTY_COLORS = {
 let panelView = 'overall';
 let voters = null;        // web/data/dz_voters.json, once loaded
 
+/* How much a seat is worth against a quota of leftover votes, when a party
+ * variable is drawing for seats under STV. It was a slider for a while and
+ * moving it changed very little, so it is a constant. */
+const SEAT_BONUS = 2;
+
 /* The election every drawn map holds. One election, so these are the page's,
- * not any one variable's -- including the seat bonus, which scores the count
- * itself rather than a party. */
+ * not any one variable's. */
 const elect = {
   type: () => els.electionType.value,
   seatsPer: () => Math.max(1, Number(els.seats.value) || 1),
-  bonus: () => Number(els.bonus.value) || 2,
+  bonus: () => SEAT_BONUS,
   // A zone's ballots: its electorate, its turnout index, and the level of
   // whichever election is being simulated.
   votes: (code) => {
@@ -932,7 +934,7 @@ function applyElectionType() {
   for (const v of variables) {
     if (!v.isParty) continue;
     // Under STV the target is the count itself, so the margin and its steepness
-    // give way; how much a seat is worth is the election's seat bonus.
+    // give way; how much a seat is worth is SEAT_BONUS.
     v.tLabel.hidden = stv;
     v.t.hidden = stv;
     v.sLabel.hidden = stv;
@@ -1739,8 +1741,7 @@ async function main() {
   els.barsStat.addEventListener('change', () => { if (run.model) drawBars(); });
 
   for (const [input, out] of [[els.popw, els.popwValue], [els.shape, els.shapeValue],
-                             [els.pshape, els.pshapeValue], [els.cut, els.cutValue],
-                             [els.bonus, els.bonusValue]]) {
+                             [els.pshape, els.pshapeValue], [els.cut, els.cutValue]]) {
     wireReadout(input, out);
   }
   wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));
@@ -1798,7 +1799,6 @@ async function main() {
     els.seats.addEventListener('change', recount);
     els.tactical.addEventListener('change', recount);
     els.standing.addEventListener('change', recount);
-    els.bonus.addEventListener('change', recount);
     els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
   }
 

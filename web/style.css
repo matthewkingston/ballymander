@@ -109,6 +109,25 @@ html, body {
 }
 .ctl-more { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
 
+/* Settings gathered under a heading -- what the map is, and what election it
+   holds -- divided by the same rule a demographic block carries. The first
+   group has the buttons above it, which are their own divider. */
+.ctl-group + .ctl-group {
+  margin-top: 11px;
+  padding-top: 11px;
+  border-top: 1px solid var(--rule);
+}
+/* Stronger than the labels beneath it: this is the CONTROLS face, at full ink,
+   where a row label is 10px and muted. */
+.ctl-group-title {
+  margin: 0 0 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
 /* Two checkboxes on one line, spanning both columns of the grid. Each label
    wraps its own box so the whole phrase is the hit target. */
 .ctl-checks {
