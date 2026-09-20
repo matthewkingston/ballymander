@@ -47,6 +47,15 @@ await page.waitForFunction(
 // let the WebGL frames settle
 await page.evaluate(() => new Promise(r => setTimeout(r, 2500)));
 
+// The resting height of the results panel is four fifths of the left panel as
+// the page OPENS -- one variable, nothing added. Captured here because the run
+// below puts four more on, which makes the left panel half as tall again.
+const initialPanel = await page.evaluate(() => ({
+  panelWants: document.getElementById('panel').scrollHeight,
+  rest: parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--results-rest')),
+}));
+
 // the adjacency graph loads off the critical path, so wait for it separately
 await page.waitForFunction(() => window.__graph, { timeout: 30000 }).catch(() => {});
 
@@ -114,8 +123,9 @@ const resultsAtRest = await page.evaluate(() => ({
   // Held open at four fifths of the left panel rather than collapsing onto the
   // one paragraph. A ratio, not a pixel count: the left panel decides both.
   resting: document.getElementById('results').classList.contains('is-resting'),
-  ratio: document.getElementById('results').getBoundingClientRect().height
-    / document.getElementById('panel').scrollHeight,
+  height: document.getElementById('results').getBoundingClientRect().height,
+  rest: parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--results-rest')),
 }));
 await page.click('#ctl-go');
 await page.waitForFunction(
@@ -760,10 +770,15 @@ if (!resultsAtRest || !resultsAtRest.panel || !resultsAtRest.hint
     || !resultsAtRest.hintText.startsWith('Select your settings')) {
   problems.push('the results panel was not already there with its help text');
 }
+const restRatio = initialPanel && initialPanel.rest / initialPanel.panelWants;
+if (!initialPanel || !(restRatio > 0.7 && restRatio < 0.9)) {
+  problems.push('the resting height was not measured at four fifths of the left panel: '
+    + (initialPanel && `${initialPanel.rest} of ${initialPanel.panelWants}`));
+}
 if (!resultsAtRest || !resultsAtRest.resting
-    || resultsAtRest.ratio < 0.7 || resultsAtRest.ratio > 0.9) {
-  problems.push('the empty results panel was not held near the left panel\'s height: '
-    + (resultsAtRest && resultsAtRest.ratio.toFixed(3)));
+    || Math.abs(resultsAtRest.height - resultsAtRest.rest) > 2) {
+  problems.push('the empty results panel did not stand at its measured height: '
+    + (resultsAtRest && `${resultsAtRest.height} vs ${resultsAtRest.rest}`));
 }
 if (!regions || !regions.panelAlwaysUp || !regions.resultsShown) {
   problems.push('the help text did not give way to the results');
