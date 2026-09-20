@@ -523,6 +523,8 @@ const advancedMode = await page.evaluate(() => {
     parts: parts.map((p) => !p.hidden),
     bonus: !document.getElementById('ctl-bonus').hidden,
     margin: !document.getElementById('ctl-party-dup-t').hidden,
+    recom: !document.getElementById('ctl-recom').hidden,
+    branch: !document.getElementById('ctl-branch').closest('.ctl-checks').hidden,
   });
   const simple = shown();
   box.click();                                  // into advanced
@@ -543,6 +545,33 @@ const advancedMode = await page.evaluate(() => {
   const spread = parts.map((p) => Number(p.value));
   set(compact, '0');
   return { simple, open, flat, spread };
+});
+
+// The two restored search controls reach the model, which reads them per frame.
+const searchControls = await page.evaluate(async () => {
+  const box = document.getElementById('ctl-advanced');
+  box.click();
+  const recom = document.getElementById('ctl-recom');
+  const branch = document.getElementById('ctl-branch');
+  const set = (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+  const readout = () => document.getElementById('ctl-recom-value').textContent;
+  // Infinity does not survive the JSON hop out of the page, so it goes as text.
+  const start = { interval: String(window.__model.recomInterval),
+                  branch: window.__model.allowBranchMoves, readout: readout() };
+  set(recom, '3');                       // 10^3
+  branch.click();
+  document.getElementById('ctl-go').click();
+  await new Promise((r) => setTimeout(r, 600));
+  const moved = { interval: String(window.__model.recomInterval),
+                  branch: window.__model.allowBranchMoves, readout: readout() };
+  set(recom, recom.max);                 // the detent past the end: never
+  await new Promise((r) => setTimeout(r, 400));
+  const off = { interval: String(window.__model.recomInterval), readout: readout() };
+  document.getElementById('ctl-stop').click();
+  set(recom, '2.3');
+  branch.click();
+  box.click();
+  return { start, moved, off };
 });
 
 // The party editor: exclude a party, merge two, and put them back.
@@ -948,11 +977,21 @@ if (!real || !real.stopped.selectorShown || real.stopped.selectorDisabled
   problems.push('the region settings did not come back when the run stopped');
 }
 const adv = advancedMode;
-if (!adv || !adv.simple.compact || adv.simple.parts.some(Boolean) || adv.simple.bonus) {
+if (!adv || !adv.simple.compact || adv.simple.parts.some(Boolean) || adv.simple.bonus
+    || adv.simple.recom || adv.simple.branch) {
   problems.push('simple mode showed more than Compactness');
 }
-if (!adv || adv.open.compact || !adv.open.parts.every(Boolean) || !adv.open.bonus) {
+if (!adv || adv.open.compact || !adv.open.parts.every(Boolean) || !adv.open.bonus
+    || !adv.open.recom || !adv.open.branch) {
   problems.push('advanced mode did not bring out the fine tuning');
+}
+const search = searchControls;
+if (!search || search.moved.interval !== '1000' || search.moved.readout !== '1,000'
+    || search.moved.branch !== false) {
+  problems.push('the restored search controls did not reach the model');
+}
+if (!search || search.off.interval !== 'Infinity' || search.off.readout !== 'off') {
+  problems.push('the ReCom detent did not turn recombination off');
 }
 // Mean of 0.5, 0 and -0.5 is 0, and all four must be sitting on it.
 if (!adv || adv.flat.compact !== 0 || adv.flat.values.some((v) => v !== 0)

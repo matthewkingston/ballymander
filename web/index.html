@@ -113,17 +113,32 @@
       <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
            the interesting range is multiplicative, not additive. -->
       <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>
-      <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0" data-log>
-      <!-- How fast the run goes, and nothing else: the frame rate, the two step
-           counts and the recombination interval were four ways of saying it,
-           three of which only ever wanted one setting. 0.01 to 10, and 1 is ten
-           thousand optimiser steps a second.
+      <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0">
+      <!-- How fast the run goes, and nothing else: the frame rate and the two
+           step counts were three ways of saying it, all of which only ever
+           wanted one setting. 0.01 to 10, and 1 is ten thousand optimiser steps
+           a second.
 
            Log, but bent at the middle so that 1 lands there rather than two
            thirds along, in line with every other slider on the panel: two
            decades left of centre, one to the right. See speedOf(). -->
       <label for="ctl-speed">Simulation speed <span id="ctl-speed-value">1</span></label>
       <input id="ctl-speed" type="range" min="-1" max="1" step="0.01" value="0">
+      <!-- How often the large move fires against the small ones. Log like the
+           weights, but the "never" detent sits at the right-hand end, because
+           in these units right means less often. A choice about the search
+           rather than its pace, so it waits for advanced controls. -->
+      <label for="ctl-recom" class="advanced-only" hidden>Flips per ReCom <span
+        id="ctl-recom-value">200</span></label>
+      <input id="ctl-recom" class="advanced-only" type="range" min="1.4" max="5.02"
+             step="0.02" value="2.3" data-interval hidden>
+      <!-- Whether a zone whose departure would split its region may go anyway,
+           taking the smaller branch with it. On, and an algorithm choice rather
+           than a dial, but not one most people want to make. -->
+      <div class="ctl-checks advanced-only" hidden>
+        <label for="ctl-branch">
+          <input id="ctl-branch" type="checkbox" checked> Branch moves</label>
+      </div>
       <div class="ctl-rule" role="presentation"></div>
       <label for="ctl-popw">Population <span id="ctl-popw-value">1</span></label>
       <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>

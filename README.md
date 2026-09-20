@@ -208,11 +208,15 @@ continues exactly where it left off; **STOP** is what restores the best state
 and shows the results table.
 
 Controls: number of regions, random seed (same seed gives the same map),
-temperature, the three score weights, whether branch moves are allowed, frames
-per second, and how many model steps run per frame. The two
-phases get separate step controls because they want very different rates -- a
-build step claims a whole zone and is worth watching, while an optimisation step
-moves one zone in 3,780 and is invisible on its own.
+temperature, simulation speed, and the score weights — population equality and
+compactness, plus one per variable. Behind **Advanced controls** are the three
+weights compactness stands for, the seat bonus, a variable's threshold and
+steepness, how often recombination fires, and whether branch moves are allowed.
+
+There is one speed rather than a rate per phase, because the two phases want a
+fixed ratio rather than separate settings: a build step claims a whole zone and
+is worth watching, while an optimisation step moves one zone in 3,780 and is
+invisible on its own.
 
 The algorithm is in `web/regions.js`, deliberately free of DOM and MapLibre so it
 can be driven headlessly — `web/app.js` only animates it and paints the result,
@@ -570,8 +574,9 @@ sometimes by 2–3×, and finishing the build in ~2,350 steps instead of ~3,760.
 **Optimisation phase.** Sample a zone on a region boundary, then reassign it
 among its neighbouring regions weighted by `exp(-delta / T)`.
 
-If removing the zone would split its region in two, **branch moves** (a checkbox,
-on by default) let it go anyway, taking the smaller piece with it. That set is
+If removing the zone would split its region in two, **branch moves** (a checkbox
+under advanced controls, on by default) let it go anyway, taking the smaller
+piece with it. That set is
 the unique smallest one whose departure leaves the region whole: every piece cut
 off by removing the zone must touch that zone, and the zone touches the
 destination, so both regions stay contiguous for free. Three-way splits keep the
@@ -581,8 +586,9 @@ The set's totals are computed once and shared across candidate destinations, so
 each candidate's delta stays O(1) however big the branch. Turning it off restores
 the plain single-zone rule.
 
-**Recombination** is the large move. Every 200 flips, instead of nudging one
-zone it takes two adjacent regions, merges them,
+**Recombination** is the large move. Every 200 flips by default — **Flips per
+ReCom** under advanced controls, with a detent at the right-hand end that turns
+it off — instead of nudging one zone it takes two adjacent regions, merges them,
 draws a random spanning tree over the union and cuts a single edge of it. A tree
 splits into exactly two pieces when any edge is removed, and every tree edge is a
 real adjacency edge, so **both pieces are connected in the graph: contiguity is
@@ -723,6 +729,14 @@ and brings out the rest of the fine tuning:
 * **Seat bonus** — how much a seat outweighs vote-building under STV, default 2.
 * A variable's **Threshold**/**Winning margin** and **Steepness**, inside its
   block.
+* **Flips per ReCom** — how often the large recombination move fires against
+  small single-zone flips, 200 by default, with a detent at the right-hand end
+  that turns recombination off.
+* **Branch moves** — whether a zone whose departure would split its region may
+  go anyway, taking the smaller branch with it. On.
+
+The last two are choices about the search rather than dials on it, which is why
+they sit above the hairline with Temperature and Simulation speed.
 
 Turning it off again flattens the three shape weights to the mean of their
 slider positions — the geometric mean of the weights, which is the right average

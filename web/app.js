@@ -58,6 +58,9 @@ const els = {
   compact: document.getElementById('ctl-compact'),
   compactValue: document.getElementById('ctl-compact-value'),
   advanced: document.getElementById('ctl-advanced'),
+  recom: document.getElementById('ctl-recom'),
+  recomValue: document.getElementById('ctl-recom-value'),
+  branch: document.getElementById('ctl-branch'),
   cut: document.getElementById('ctl-cut'),
   cutValue: document.getElementById('ctl-cut-value'),
   variables: document.getElementById('variables'),
@@ -196,7 +199,8 @@ const realLoaded = () => Boolean(realRegions) && els.real.value !== 'none';
 const FRAME_MS = 100;            // ten frames a second
 const OPT_PER_SEC = 10000;       // at speed 1
 const BUILD_PER_SEC = 700;       // at speed 1
-const RECOM_INTERVAL = 200;      // flips between recombinations, fixed
+// Flips between recombinations is not here: it is a choice about the search
+// rather than its pace, and is a slider again under advanced controls.
 /* Work is measured against the clock rather than against frames, so the rate
  * holds when the browser cannot keep ten frames a second -- which it often
  * cannot, since painting 3,780 zones is the expensive part. A frame that
@@ -1189,6 +1193,17 @@ function stepsForElapsed(phase, perSecond, elapsed) {
   return whole;
 }
 
+/* Flips between recombinations. Log like the weights, but the "never" detent
+ * sits at the right-hand end, because in these units right means less often. */
+function recomIntervalOf() {
+  const v = Number(els.recom.value);
+  return v >= Number(els.recom.max) - 1e-9 ? Infinity : Math.round(10 ** v);
+}
+
+function formatInterval(v) {
+  return v === Infinity ? 'off' : nf.format(v);
+}
+
 /* Two significant figures is plenty for a speed: 0.01, 0.35, 1, 10. */
 function formatSpeed(v) {
   return String(Number(v.toPrecision(2)));
@@ -1563,9 +1578,10 @@ function tick(map) {
       const demoWeights = termWeights();
       run.model.setWeights(weightOf(els.popw), weightOf(els.shape),
         weightOf(els.pshape), weightOf(els.cut), demoWeights);
-      // Changes the move set rather than the score, so best-so-far stays
-      // comparable and this needs no re-base.
-      run.model.recomInterval = RECOM_INTERVAL;
+      // Both change the move set rather than the score, so best-so-far stays
+      // comparable and neither needs a re-base.
+      run.model.recomInterval = recomIntervalOf();
+      run.model.allowBranchMoves = els.branch.checked;
 
       if (run.phase === 'build') {
         const steps = stepsForElapsed('build', BUILD_PER_SEC, elapsed);
@@ -1837,8 +1853,8 @@ function wireReadout(input, out, format = null) {
   const show = () => {
     if (format) out.textContent = format(input.value);
     else if (input.dataset.weight !== undefined) out.textContent = formatWeight(weightOf(input));
-    else if (input.dataset.speed !== undefined) {
-      out.textContent = formatSpeed(speedOf());
+    else if (input.dataset.interval !== undefined) {
+      out.textContent = formatInterval(recomIntervalOf());
     } else out.textContent = input.value;
   };
   input.addEventListener('input', show);
@@ -1859,7 +1875,8 @@ async function main() {
 
   for (const [input, out] of [[els.popw, els.popwValue], [els.shape, els.shapeValue],
                              [els.pshape, els.pshapeValue], [els.cut, els.cutValue],
-                             [els.compact, els.compactValue], [els.bonus, els.bonusValue]]) {
+                             [els.compact, els.compactValue], [els.bonus, els.bonusValue],
+                             [els.recom, els.recomValue]]) {
     wireReadout(input, out);
   }
   // The one knob drives the three, and the checkbox decides which is showing.
