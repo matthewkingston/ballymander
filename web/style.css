@@ -111,7 +111,15 @@ html, body {
   letter-spacing: 0.06em;
   color: var(--ink-muted);
 }
-.ctl-more { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
+/* A hairline within a group, spanning both columns. In Controls it divides how
+   the search is run -- its pace and its willingness to go uphill -- from the
+   four things it is weighing. The grid's own row gap is the only space it
+   needs, so the divider is the line and nothing else. */
+.ctl-rule {
+  grid-column: 1 / -1;
+  height: 0;
+  border-top: 1px solid var(--rule);
+}
 
 /* Settings gathered under a heading -- what the map is, and what election it
    holds -- divided by the same rule a demographic block carries. The first
