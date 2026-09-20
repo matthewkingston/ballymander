@@ -189,11 +189,17 @@
     <p class="hint">Hover a zone for its figures, and its region's.</p>
   </div>
 
-  <div id="results" hidden>
+  <!-- On the page from the start, rather than appearing the moment a run
+       begins: a panel that pops into existence beside the map reads as
+       something going wrong. Until there is a result it holds its title and a
+       line saying what to do. -->
+  <div id="results">
     <!-- The panel's name is in the artwork, as the app's own is. -->
     <h2 class="results-title">
       <img src="img/results-title.png" alt="Results" width="551" height="220">
     </h2>
+    <p id="results-hint">Select your settings, then press &lsquo;START&rsquo; to
+      begin simulating. Alternatively you can select a pre-defined map.</p>
     <!-- The whole map, or one region's count in detail. -->
     <div class="view-switch" role="group" aria-label="View" hidden>
       <button id="view-overall" type="button" class="is-active" aria-pressed="true">
@@ -201,7 +207,7 @@
       <button id="view-region" type="button" aria-pressed="false">Region</button>
     </div>
 
-    <div id="overall">
+    <div id="overall" hidden>
     <dl id="run">
       <!-- What a person can actually read something into. The shape penalties
            and the cut-edge count were figures the algorithm cares about and

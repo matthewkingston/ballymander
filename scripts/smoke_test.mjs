@@ -103,6 +103,15 @@ const gerryVisible = await page.evaluate(() => ({
   blocks: document.querySelectorAll('#variables .demo-block').length,
   bars: [...document.querySelectorAll('#bars-stat option')].map((o) => o.value),
 }));
+// Before anything has run the panel is already there, holding its title and a
+// line of help -- it used to appear the instant GO was pressed.
+const resultsAtRest = await page.evaluate(() => ({
+  panel: !document.getElementById('results').hidden,
+  hint: !document.getElementById('results-hint').hidden,
+  hintText: document.getElementById('results-hint').textContent.replace(/\s+/g, ' ').trim(),
+  overall: !document.getElementById('overall').hidden,
+  viewSwitch: !document.querySelector('.view-switch').hidden,
+}));
 await page.click('#ctl-go');
 await page.waitForFunction(
   () => document.getElementById('run-phase').textContent.startsWith('Optimising'),
@@ -166,7 +175,8 @@ const regions = await page.evaluate(() => {
            document.getElementById('bars-max').textContent],
     barsFilled: [...document.querySelectorAll('.bar-fill')]
       .filter((b) => parseFloat(b.style.width) > 0).length,
-    resultsShown: !document.getElementById('results').hidden,
+    panelAlwaysUp: !document.getElementById('results').hidden,
+    resultsShown: document.getElementById('results-hint').hidden,
     phase: document.getElementById('run-phase').textContent,
     maxDev: document.getElementById('run-dev').textContent,
     meanPenalty: Number(m.meanPenalty.toFixed(3)),
@@ -302,7 +312,7 @@ const realState = () => page.evaluate(() => {
     // Nothing in the region group is usable during a run, so it folds itself.
     groupFolded: document.getElementById('region-settings').hidden,
     value: document.getElementById('ctl-real').value,
-    results: !document.getElementById('results').hidden,
+    results: document.getElementById('results-hint').hidden,
     bars: document.querySelectorAll('#bars .bar-row').length,
   };
 });
@@ -739,6 +749,14 @@ if (!statSwitch || statSwitch.before.max === statSwitch.demo
 }
 if (!regions || regions.movesShown !== regions.moves.toLocaleString('en-GB')) {
   problems.push('flips readout does not match the model');
+}
+if (!resultsAtRest || !resultsAtRest.panel || !resultsAtRest.hint
+    || resultsAtRest.overall || resultsAtRest.viewSwitch
+    || !resultsAtRest.hintText.startsWith('Select your settings')) {
+  problems.push('the results panel was not already there with its help text');
+}
+if (!regions || !regions.panelAlwaysUp || !regions.resultsShown) {
+  problems.push('the help text did not give way to the results');
 }
 const WANT_STATS = ['Phase', 'Flips', 'ReCom', 'Score', 'Best score', 'Max pop dev'];
 if (!regions || WANT_STATS.some((label, i) => regions.statLabels[i] !== label)) {

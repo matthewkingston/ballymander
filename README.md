@@ -825,7 +825,11 @@ What an excluded party's voters do, and what a merger keeps, is described in
 
 ### One region's election
 
-The results panel switches between **Overall** and **Region**. Region shows a
+The results panel sits on the right from the moment the page loads, holding its
+title and a line saying what to do; a panel that appeared the instant a run
+began read as something going wrong. Once there is a map to report on — from
+START or from a pre-defined one — the help gives way to the figures, and the
+panel switches between **Overall** and **Region**. Region shows a
 single region's election in detail, and the map picks it: click any zone while
 that view is open. The choice is remembered for the run and starts at region 1.
 

@@ -76,6 +76,7 @@ const els = {
   viewOverall: document.getElementById('view-overall'),
   viewRegion: document.getElementById('view-region'),
   overall: document.getElementById('overall'),
+  resultsHint: document.getElementById('results-hint'),
   regionView: document.getElementById('region-view'),
   regionTitle: document.getElementById('region-title'),
   regionName: document.getElementById('region-name'),
@@ -888,10 +889,23 @@ function drawRegion() {
   }
 }
 
+/* Whether there is anything to show yet. The panel itself is on the page from
+ * the start -- one that appeared the moment a run began read as a fault -- so
+ * this is what stands between the line of help and the figures. */
+let resultsShown = false;
+
+function showResults(on) {
+  resultsShown = on;
+  els.resultsHint.hidden = on;
+  // The view switch has nothing to switch between until there is a count.
+  els.viewSwitch.hidden = !on || !voters;
+  applyView();
+}
+
 function applyView() {
   const region = panelView === 'region' && Boolean(voters);
-  els.overall.hidden = Boolean(region);
-  els.regionView.hidden = !region;
+  els.overall.hidden = !resultsShown || Boolean(region);
+  els.regionView.hidden = !resultsShown || !region;
   els.viewOverall.classList.toggle('is-active', !region);
   els.viewRegion.classList.toggle('is-active', Boolean(region));
   els.viewOverall.setAttribute('aria-pressed', String(!region));
@@ -1461,7 +1475,7 @@ function showRealRegions(map, key) {
   run.phase = 'done';
   run.paused = false;
   setButtons('idle');
-  els.results.hidden = false;
+  showResults(true);
   els.resultsList.hidden = false;
   els.pie.hidden = !voters;
   shownRegion = 0;
@@ -1480,7 +1494,7 @@ function clearRealRegions(map) {
   run.phase = 'idle';
   run.paused = false;
   clearRegions(map);
-  els.results.hidden = true;
+  showResults(false);
   els.resultsList.hidden = true;
   els.pie.hidden = true;
   setButtons('idle');
@@ -1642,7 +1656,7 @@ function start(map) {
     run.lastDraw = 0;
     run.lastBars = 0;
     setButtons('running');
-    els.results.hidden = false;
+    showResults(true);
     els.resultsList.hidden = false;
     els.pie.hidden = !voters;
     readout();
@@ -1684,7 +1698,7 @@ function start(map) {
   run.lastDraw = 0;
   run.lastBars = 0;
   setButtons('running');
-  els.results.hidden = false;
+  showResults(true);
   els.resultsList.hidden = false;  // bars are live from the first build step
   els.pie.hidden = !voters;
   shownRegion = 0;                 // a new map, so back to the first region
@@ -1944,7 +1958,6 @@ async function main() {
     // hidden until a mode revealed them. With one page they are simply there,
     // for as long as there are parties to have an election between.
     els.partyEditor.hidden = false;
-    els.viewSwitch.hidden = false;
     // Both re-count the map as it stands, so the panel is right whether the run
     // is going, paused or stopped.
     const recount = () => {
