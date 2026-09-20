@@ -1532,7 +1532,7 @@ function readout() {
     // where it says what it is worth saying: how many versions of the map the
     // run has tried. Advanced mode has the counter in its own row already.
     optimise: advanced ? 'Optimising'
-      : `Optimising — ${nf.format(m.moves)} updates made`,
+      : `Optimising — ${nf.format(m.moves)} updates`,
     done: 'Stopped — best shown',
   }[run.phase] || '—';
   els.runPhase.textContent = run.paused ? `${phase} — paused` : phase;

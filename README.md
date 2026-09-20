@@ -692,9 +692,9 @@ groups, and a third block of sliders that needs no name:
   exactly that — plus **Standing threshold**, **Tactical voting** and the party
   editor. The ballot, and how it is counted.
 * Then, unheaded, **Temperature** and **Simulation speed**, a hairline, and the
-  weights: **Population** and **Compactness**. The hairline is the division it
-  looks like — above it, how the search is run; below it, what it is run for —
-  which is all a heading would have said.
+  weights: **Equal populations** and **Compactness**. The hairline is the
+  division it looks like — above it, how the search is run; below it, what it
+  is run for — which is all a heading would have said.
 
 Both named groups fold away under their heading, the way a variable block does,
 and both start open: a setting you cannot see is one you forget you changed.
