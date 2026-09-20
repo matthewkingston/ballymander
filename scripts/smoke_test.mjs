@@ -187,8 +187,11 @@ const regions = await page.evaluate(() => {
     ageSpread: m.demoSpread('age').toFixed(1),
     ageShown: document.getElementById('run-var-age').textContent,
     demoKeys: m.demographics.map((d) => d.key),
-    demoReadouts: m.demographics.map((d) =>
-      document.getElementById(`run-var-${d.key}`).textContent),
+    demoReadouts: m.demographics.map((d) => ({
+      key: d.key,
+      mode: m.demoByKey[d.key].mode,
+      text: document.getElementById(`run-var-${d.key}`).textContent,
+    })),
     gerryVisible: window.__gerryVisible,
     popsSumToTotal: pops.reduce((a, b) => a + b, 0),
   };
@@ -764,8 +767,12 @@ if (!regions || regions.gerryVisible.blocks !== regions.demoKeys.length + 1) {
 if (!regions || regions.demoKeys.some((k) => !regions.gerryVisible.bars.includes(`demo:${k}`))) {
   problems.push('a demographic is missing from the statistic selector');
 }
-if (!regions || regions.demoReadouts.some((t) => !t || t === '\u2014')) {
-  problems.push('a demographic readout stayed empty');
+// Gerrymander mode has a real count and names the side it was drawn for; the
+// other modes report nothing on purpose, their spreads being unreadable.
+if (!regions || regions.demoReadouts.some(({ mode, text }) => (mode === 'gerrymander'
+  ? !/^\d+\/\d+ (above|below)$/.test(text) : text !== '\u2014'))) {
+  problems.push('a demographic readout does not match its mode: '
+    + (regions && JSON.stringify(regions.demoReadouts)));
 }
 // Gerrymander mode names the side it was aiming at; the goal defaults to above.
 if (!regions || regions.relShown !== `${regions.relSeats} above`) {
