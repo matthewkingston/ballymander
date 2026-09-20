@@ -104,65 +104,82 @@
       </div>
     </div>
 
-    <!-- How the search is run, and what it is run for. No heading: the hairline
-         inside says the only thing a heading would have -- above it, the pace
-         and the willingness to go uphill; below it, the four things being
-         weighed against each other -- and this is the last block before the
-         variables, so it needs no name to be found by. -->
-    <div id="controls" class="ctl-grid ctl-group">
-      <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
-           the interesting range is multiplicative, not additive. -->
-      <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>
-      <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0">
-      <!-- How fast the run goes, and nothing else: the frame rate and the two
-           step counts were three ways of saying it, all of which only ever
-           wanted one setting. 0.01 to 10, and 1 is ten thousand optimiser steps
-           a second.
+    <!-- How the search is run: its pace, and its willingness to go uphill.
+         Named, like the two above it -- a hairline said as much to anyone who
+         already knew what these were for, and nothing to anyone who did not. -->
+    <div class="ctl-group">
+      <h2 class="ctl-group-title">
+        <button class="ctl-group-toggle" type="button" aria-expanded="true"
+                aria-controls="sim-settings">
+          <span class="chev" aria-hidden="true">&#9656;</span> Simulation settings</button>
+      </h2>
+      <div id="sim-settings" class="ctl-grid">
+        <!-- Logarithmic, 0.1 to 10, like the simulation speed and the weights:
+             the interesting range is multiplicative, not additive. -->
+        <label for="ctl-temp">Temperature <span id="ctl-temp-value">1</span></label>
+        <input id="ctl-temp" type="range" min="-1" max="1" step="0.02" value="0">
+        <!-- How fast the run goes, and nothing else: the frame rate and the two
+             step counts were three ways of saying it, all of which only ever
+             wanted one setting. 0.01 to 10, and 1 is ten thousand optimiser steps
+             a second.
 
-           Log, but bent at the middle so that 1 lands there rather than two
-           thirds along, in line with every other slider on the panel: two
-           decades left of centre, one to the right. See speedOf(). -->
-      <label for="ctl-speed">Simulation speed <span id="ctl-speed-value">1</span></label>
-      <input id="ctl-speed" type="range" min="-1" max="1" step="0.01" value="0">
-      <!-- How often the large move fires against the small ones. Log like the
-           weights, but the "never" detent sits at the right-hand end, because
-           in these units right means less often. A choice about the search
-           rather than its pace, so it waits for advanced controls. -->
-      <label for="ctl-recom" class="advanced-only" hidden>Flips per ReCom <span
-        id="ctl-recom-value">200</span></label>
-      <input id="ctl-recom" class="advanced-only" type="range" min="1.4" max="5.02"
-             step="0.02" value="2.3" data-interval hidden>
-      <!-- Whether a zone whose departure would split its region may go anyway,
-           taking the smaller branch with it. On, and an algorithm choice rather
-           than a dial, but not one most people want to make. -->
-      <label for="ctl-branch" class="advanced-only" hidden>Branch moves</label>
-      <input id="ctl-branch" class="advanced-only" type="checkbox" checked hidden>
-      <div class="ctl-rule" role="presentation"></div>
-      <label for="ctl-popw">Equal populations <span id="ctl-popw-value">1</span></label>
-      <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
-      <!-- Land shape, people shape and cut edges under one knob. They are three
-           terms in the score, but wanting a region rounder without also wanting
-           its border shorter is a fine distinction: the usual question is just
-           how much a sane-looking region is worth against everything else.
-           Advanced mode splits them again. The three below stay the real
-           controls -- this one writes into them -- so nothing downstream knows
-           the difference. -->
-      <label for="ctl-compact" class="simple-only">Compactness <span
-        id="ctl-compact-value">1</span></label>
-      <input id="ctl-compact" class="simple-only" type="range" min="-1.02" max="1"
-             step="0.02" value="0" data-weight data-off>
-      <label for="ctl-shape" class="advanced-only" hidden>Land shape <span
-        id="ctl-shape-value">1</span></label>
-      <input id="ctl-shape" class="advanced-only" type="range" min="-1.02" max="1"
-             step="0.02" value="0" data-weight data-off hidden>
-      <label for="ctl-pshape" class="advanced-only" hidden>People shape <span
-        id="ctl-pshape-value">1</span></label>
-      <input id="ctl-pshape" class="advanced-only" type="range" min="-1.02" max="1"
-             step="0.02" value="0" data-weight data-off hidden>
-      <label for="ctl-cut" class="advanced-only" hidden>Cut edges <span
-        id="ctl-cut-value">1</span></label>
-      <input id="ctl-cut" class="advanced-only" type="range" min="-1.02" max="1"
-             step="0.02" value="0" data-weight data-off hidden>
+             Log, but bent at the middle so that 1 lands there rather than two
+             thirds along, in line with every other slider on the panel: two
+             decades left of centre, one to the right. See speedOf(). -->
+        <label for="ctl-speed">Simulation speed <span id="ctl-speed-value">1</span></label>
+        <input id="ctl-speed" type="range" min="-1" max="1" step="0.01" value="0">
+        <!-- How often the large move fires against the small ones. Log like the
+             weights, but the "never" detent sits at the right-hand end, because
+             in these units right means less often. A choice about the search
+             rather than its pace, so it waits for advanced controls. -->
+        <label for="ctl-recom" class="advanced-only" hidden>Flips per ReCom <span
+          id="ctl-recom-value">200</span></label>
+        <input id="ctl-recom" class="advanced-only" type="range" min="1.4" max="5.02"
+               step="0.02" value="2.3" data-interval hidden>
+        <!-- Whether a zone whose departure would split its region may go anyway,
+             taking the smaller branch with it. On, and an algorithm choice rather
+             than a dial, but not one most people want to make. -->
+        <label for="ctl-branch" class="advanced-only" hidden>Branch moves</label>
+        <input id="ctl-branch" class="advanced-only" type="checkbox" checked hidden>
+      </div>
+    </div>
+
+    <!-- What the search is run for: the terms of the score, and how much each
+         is worth against the others. The variables below carry weights of the
+         same kind, and are weighed in the same budget. -->
+    <div class="ctl-group">
+      <h2 class="ctl-group-title">
+        <button class="ctl-group-toggle" type="button" aria-expanded="true"
+                aria-controls="sim-weights">
+          <span class="chev" aria-hidden="true">&#9656;</span> Simulation weights</button>
+      </h2>
+      <div id="sim-weights" class="ctl-grid">
+        <label for="ctl-popw">Equal populations <span id="ctl-popw-value">1</span></label>
+        <input id="ctl-popw" type="range" min="-1" max="1" step="0.02" value="0" data-weight>
+        <!-- Land shape, people shape and cut edges under one knob. They are three
+             terms in the score, but wanting a region rounder without also wanting
+             its border shorter is a fine distinction: the usual question is just
+             how much a sane-looking region is worth against everything else.
+             Advanced mode splits them again. The three below stay the real
+             controls -- this one writes into them -- so nothing downstream knows
+             the difference. -->
+        <label for="ctl-compact" class="simple-only">Compactness <span
+          id="ctl-compact-value">1</span></label>
+        <input id="ctl-compact" class="simple-only" type="range" min="-1.02" max="1"
+               step="0.02" value="0" data-weight data-off>
+        <label for="ctl-shape" class="advanced-only" hidden>Land shape <span
+          id="ctl-shape-value">1</span></label>
+        <input id="ctl-shape" class="advanced-only" type="range" min="-1.02" max="1"
+               step="0.02" value="0" data-weight data-off hidden>
+        <label for="ctl-pshape" class="advanced-only" hidden>People shape <span
+          id="ctl-pshape-value">1</span></label>
+        <input id="ctl-pshape" class="advanced-only" type="range" min="-1.02" max="1"
+               step="0.02" value="0" data-weight data-off hidden>
+        <label for="ctl-cut" class="advanced-only" hidden>Cut edges <span
+          id="ctl-cut-value">1</span></label>
+        <input id="ctl-cut" class="advanced-only" type="range" min="-1.02" max="1"
+               step="0.02" value="0" data-weight data-off hidden>
+      </div>
     </div>
 
     <!-- One collapsible block per entry in DEMOGRAPHICS, built by app.js. A new

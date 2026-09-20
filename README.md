@@ -680,8 +680,8 @@ Two consequences worth knowing:
   stops it steering. What is not on the page is off.
 
 The election itself belongs to the map rather than to any variable, so it has
-its own group of controls above the variables. The panel opens with two named
-groups, and a third block of sliders that needs no name:
+its own group of controls above the variables. The panel opens with four named
+groups, each folding away under its own heading:
 
 * **Region settings** — **Pre-defined map** (real boundaries as a starting
   point, or Custom), **No. Regions** and **Random seed**. What the map is made
@@ -691,13 +691,14 @@ groups, and a third block of sliders that needs no name:
   everybody is roughly a national list, and No. Regions goes down to 1 for
   exactly that — plus **Standing threshold**, **Tactical voting** and the party
   editor. The ballot, and how it is counted.
-* Then, unheaded, **Temperature** and **Simulation speed**, a hairline, and the
-  weights: **Equal populations** and **Compactness**. The hairline is the
-  division it looks like — above it, how the search is run; below it, what it
-  is run for — which is all a heading would have said.
+* **Simulation settings** — **Temperature** and **Simulation speed**. How the
+  search is run: its pace, and its willingness to go uphill.
+* **Simulation weights** — **Equal populations** and **Compactness**. What it is
+  run for. The variables below carry weights of the same kind, weighed in the
+  same budget.
 
-Both named groups fold away under their heading, the way a variable block does,
-and both start open: a setting you cannot see is one you forget you changed.
+Each folds away under its heading, the way a variable block does, and all start
+open: a setting you cannot see is one you forget you changed.
 Region settings folds itself on START, since none of it can be touched while a
 run is going, and comes back on STOP — but only on the change, so a group opened
 by hand mid-run (to read off an automatic seed, say) stays open, and pausing
@@ -744,7 +745,7 @@ and brings out the rest of the fine tuning:
   go anyway, taking the smaller branch with it. On.
 
 The last two are choices about the search rather than dials on it, which is why
-they sit above the hairline with Temperature and Simulation speed.
+they sit under Simulation settings with Temperature and the speed.
 
 Turning it off again flattens the three shape weights to the mean of their
 slider positions — the geometric mean of the weights, which is the right average
