@@ -941,11 +941,16 @@ html, body {
 .tt-region[hidden] { display: none; }
 
 /* The rule sits above the zone rather than above the region, the region having
-   moved to the top -- and only when there is a region up there to divide from. */
+   moved to the top -- and only when there is a region up there to divide from.
+
+   Strong enough to be told apart from the one inside each half: 18% against
+   10% was a distinction on paper and not on screen, so this end of it moves to
+   32% and takes a little more air with it. The two are now three times apart
+   rather than not quite twice. */
 .tt-region:not([hidden]) + .tt-zone {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
 }
 
 .tt-region-name { font-weight: 600; }
@@ -965,7 +970,7 @@ html, body {
   display: flex;
   gap: 8px;
   margin-top: 2px;
-  font-size: 11.5px;
+  font-size: 11px;               /* the size every figure in the box is set at */
   font-variant-numeric: tabular-nums;
   color: #cfd8e2;
 }

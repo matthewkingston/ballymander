@@ -1307,6 +1307,22 @@ front of the panel. Average and extreme modes still work on the party's share.
     other every N steps; one greedy pass in random order avoids it.
   * Saving budget by standing aside is a separate question -- standing is
     driven by pacts and principle too, and the party editor already covers it.
+* **Getting Data Zone names out of the tooltip** (owner's idea). A name like
+  `Botanic_A1` is an internal identifier with an underscore in it, shown to the
+  reader because the tooltip had to call the zone something. It is the wrong
+  register for the box it sits in, and it names a unit nobody outside NISRA
+  thinks in.
+
+  Deferred because it is currently load-bearing. The zone name is the only
+  thing on the map that says *where you are*: `Botanic_A1` is how a reader
+  works out they are hovering over south Belfast rather than somewhere else,
+  since the map itself carries no labels. Removing the name without replacing
+  that would make the map harder to read, not easier.
+
+  So the real fix is upstream of the tooltip: **labels on the map**, for towns
+  and for the larger settlements, at which point the tooltip can drop the
+  identifier and the reader still knows where the pointer is. Until then the
+  underscore stays, doing a job it was never meant for.
 
 * **Party compatibility from the transfer matrix** (owner's suggestion): rank
   how close parties are by how freely their voters transfer, and use that to
