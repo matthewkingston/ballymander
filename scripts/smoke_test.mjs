@@ -859,6 +859,35 @@ election.region.afterClick = await page.evaluate(() => ({
     === `Region ${window.__shownRegionForTest + 1}`,
 }));
 election.region.first = first;
+
+// Pointing at the region's name or its swatch lights that region on the map.
+// Dispatched rather than pointed at: the element is static, so there is no
+// position to get wrong, and the swatch sits inside the title either way.
+election.region.titleVeil = await page.evaluate(async () => {
+  const m = window.__model;
+  const title = document.getElementById('region-title');
+  const lit = () => {
+    const on = m.codes.filter((c) => window.__map.getFeatureState({ source: 'dz', id: c }).veil);
+    const regions = [...new Set(on.map((c) => m.regionOf(c)))];
+    return { n: on.length, regions };
+  };
+  title.dispatchEvent(new MouseEvent('mouseenter'));
+  await new Promise((r) => setTimeout(r, 250));
+  const on = lit();
+  title.dispatchEvent(new MouseEvent('mouseleave'));
+  await new Promise((r) => setTimeout(r, 250));
+  const shown = Number(document.getElementById('region-name').textContent
+    .replace(/\D/g, '')) - 1;
+  return {
+    shown,
+    litRegions: on.regions,
+    whole: on.regions.length === 1
+      && on.n === m.codes.filter((c) => m.regionOf(c) === shown).length,
+    clearedOnLeaving: lit().n === 0,
+    swatchInsideTitle: title.contains(document.getElementById('region-swatch')),
+  };
+});
+
 await page.click('#view-overall');
 await page.click('#view-region');
 election.region.remembered = await page.evaluate(() =>
@@ -1192,6 +1221,13 @@ if (!election || election.region.fptp.wedges < 2 || election.region.fptp.stagesS
     || election.region.fptp.wedges !== election.region.fptp.standing
     || !/^Winner: /.test(election.region.fptp.seats)) {
   problems.push('FPTP region view missing its pie');
+}
+{
+  const v = election && election.region && election.region.titleVeil;
+  if (!v || !v.whole || v.litRegions[0] !== v.shown || !v.clearedOnLeaving
+      || !v.swatchInsideTitle) {
+    problems.push(`region title hover did not light its region: ${JSON.stringify(v)}`);
+  }
 }
 if (!election || election.region.remembered !== election.region.afterClick.title) {
   problems.push('region view forgot which region was shown');

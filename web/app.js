@@ -2264,6 +2264,16 @@ async function main() {
   wireGroupToggles();
   sizeLabelColumn();
 
+  // The region view names one region and paints its colour; pointing at either
+  // lights it on the map, as pointing at its bar does. The name answers "which
+  // one is this?" and until now the only way to ask was to find the same number
+  // in the bars and hover that instead.
+  els.regionTitle.addEventListener('mouseenter', () => {
+    const m = run.model;
+    if (m && m.N && shownRegion < m.N) veilRegion(map, shownRegion);
+  });
+  els.regionTitle.addEventListener('mouseleave', () => veilRegion(map, null));
+
   els.viewOverall.addEventListener('click', () => { panelView = 'overall'; applyView(); });
   els.viewRegion.addEventListener('click', () => {
     if (!voters) return;

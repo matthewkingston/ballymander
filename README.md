@@ -853,6 +853,11 @@ the layer's paint expression invalidates its paint buffers, which MapLibre
 rebuilds tile by tile, so a region lights up in pieces and late. Feature-state
 touches only the features that changed, which is the whole point of it.
 
+In the region view, pointing at the region's name or its colour swatch lights
+that region on the map, as pointing at its bar does. The name answers "which
+one is this?", and until it did, the only way to ask was to find the same
+number among the bars and hover that instead.
+
 The results panel sits on the right from the moment the page loads, holding its
 title and a line saying what to do; a panel that appeared the instant a run
 began read as something going wrong. Standing empty it holds a fixed 683px
