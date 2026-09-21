@@ -913,10 +913,13 @@ html, body {
    cent of its target by construction, and a Data Zone is built to hold about
    what every other one holds.
 
-   One rule for all four -- both halves, population and demographics alike --
-   so that "population 565" and "average age 41.2" are the same kind of line
-   wherever they appear. */
-.tt-pop, .tt-demo div, .tt-region-pop, .tt-region-demo div {
+   One rule for all of them -- both halves, population, demographics and the
+   zone's party votes alike -- so that "population 565", "average age 41.2" and
+   "Alliance 17 votes (18.36%)" are the same kind of line wherever they appear.
+   The vote lines were the only figures in the box with no rule of their own,
+   so they sat at the tooltip's 12.5px base while everything around them was
+   11px, which read as emphasis nobody had asked for. */
+.tt-pop, .tt-demo div, .tt-region-pop, .tt-region-demo div, .tt-party div {
   margin-top: 2px;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
