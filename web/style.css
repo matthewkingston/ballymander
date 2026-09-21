@@ -511,11 +511,9 @@ html, body {
                                   off the bottom of the screen */
 }
 
-/* Carries the flex chain from the panel down to the bars, so they keep their
-   own scrolling area when there is room for one. */
+/* The panel is the only thing that scrolls, so nothing below it is asked to
+   shrink: each block stands at its natural height and the panel carries them. */
 #overall {
-  flex: 1 1 auto;
-  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -523,8 +521,6 @@ html, body {
 #results[hidden] { display: none; }
 
 #results-list {
-  flex: 1 1 auto;
-  min-height: 0;
   margin-top: 12px;
   padding-top: 11px;
   border-top: 1px solid var(--rule);
@@ -546,16 +542,13 @@ html, body {
 }
 #bars-stat:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* Not a scrolling box any more, just the space the bars occupy. It used to
+   scroll on its own so the axis below it stayed on screen, but that meant two
+   reserved scrollbar gutters in a 236px panel, one inside the other, for 30px
+   of width spent on a bar nobody needed twice. The panel scrolls; the axis
+   stays put by sticking. */
 #results-scroll {
-  min-height: 0;
   margin-top: 8px;
-  overflow-y: auto;
-  /* The gutter is reserved whether or not the list scrolls, so the bars keep
-     their length either way. The padding then holds them off it: a winning
-     region's outline sits a pixel outside its track, and with the bars running
-     to the very edge that pixel went under the scrollbar. */
-  scrollbar-gutter: stable;
-  padding-right: 4px;
 }
 
 /* --- population bars ---------------------------------------------------- */
@@ -644,11 +637,17 @@ html, body {
   display: flex;
   justify-content: space-between;
   margin-top: 7px;
-  /* 26px lines the min label up with the track's left edge; 19px lines the max
-     up with its right -- the 15px of reserved scrollbar gutter next door, plus
-     the 4px the bars are held off it. The axis is outside the scrolling box, so
-     it has to be told what that box's edges came to. */
-  padding: 5px 19px 0 26px;
+  /* Sticks to the foot of the panel while the bars it labels scroll past, which
+     is the one thing the inner scrollbar was buying. Painted, or the bars would
+     run under it; the panel's own colour, over the panel's own background, so
+     it reads as solid. */
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  background: var(--panel-bg);
+  /* 26px lines the min label up with the track's left edge. Both ends now sit
+     in the same box as the bars, so the right needs nothing. */
+  padding: 5px 0 0 26px;
   border-top: 1px solid var(--rule);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
