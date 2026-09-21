@@ -1745,7 +1745,7 @@ function showRealRegions(map, key) {
   els.resultsList.hidden = false;
   els.pie.hidden = !voters;
   shownRegion = 0;
-  buildBars(n);
+  buildBars(map, n);
   drawBars();
   pieShown = '';
   drawPie();
@@ -1989,7 +1989,7 @@ function start(map) {
   els.resultsList.hidden = false;  // bars are live from the first build step
   els.pie.hidden = !voters;
   shownRegion = 0;                 // a new map, so back to the first region
-  buildBars(n);
+  buildBars(map, n);
   drawBars();
   pieShown = '';
   drawPie();
@@ -2036,7 +2036,7 @@ function stop(map, { silent = false } = {}) {
 /* One row per region, built once per run. drawBars() afterwards only writes a
  * transform, a width and a string -- never rebuilds -- so hovering a bar is not
  * destroyed mid-read and the cost does not grow with the update rate. */
-function buildBars(n) {
+function buildBars(map, n) {
   els.bars.textContent = '';
   els.bars.style.height = `${n * BAR_ROW_H}px`;
   run.bars = Array.from({ length: n }, (_, region) => {
@@ -2060,6 +2060,12 @@ function buildBars(n) {
     const seats = document.createElement('span');
     seats.className = 'bar-seats';
     seats.hidden = true;
+
+    // Pointing at a row lights its region on the map, the same veil the map's
+    // own hover uses. The bars are a list of regions; this is what says which
+    // is which, without a colour key or a hunt for a number.
+    row.addEventListener('mouseenter', () => veilRegion(map, region));
+    row.addEventListener('mouseleave', () => veilRegion(map, null));
 
     row.append(label, track, seats);
     els.bars.appendChild(row);
