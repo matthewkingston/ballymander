@@ -679,6 +679,12 @@ Two consequences worth knowing:
   block, its readout row and its entry in the results selector with it, and
   stops it steering. What is not on the page is off.
 
+The burger in the corner of the gable turns the left panel into a list of the
+app's pages; pressing it again, or Escape, brings the map's controls back. Only
+one of those pages is written so far — the map itself — and the other two are
+stubs, there to show the shape of the thing. **Advanced controls** lives there
+too, being a fact about what the app shows you rather than about the map.
+
 The election itself belongs to the map rather than to any variable, so it has
 its own group of controls above the variables. The panel opens with four named
 groups, each folding away under its own heading:
@@ -725,7 +731,7 @@ Because the score divides by the total weight, moving all three together is not
 a no-op: it changes their share against Population and against every variable on
 the page. One knob, one meaning.
 
-**Advanced controls**, the checkbox at the foot of the panel, splits them again
+**Advanced controls**, the checkbox in the menu, splits them again
 and brings out the rest of the fine tuning:
 
 * **Land shape**, **People shape** and **Cut edges** as three sliders, in place

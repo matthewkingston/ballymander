@@ -64,6 +64,9 @@ const els = {
   compact: document.getElementById('ctl-compact'),
   compactValue: document.getElementById('ctl-compact-value'),
   advanced: document.getElementById('ctl-advanced'),
+  menuToggle: document.getElementById('menu-toggle'),
+  panelMenu: document.getElementById('panel-menu'),
+  panelBody: document.getElementById('panel-body'),
   recom: document.getElementById('ctl-recom'),
   recomValue: document.getElementById('ctl-recom-value'),
   branch: document.getElementById('ctl-branch'),
@@ -2105,6 +2108,16 @@ function sizeLabelColumn() {
   return want;
 }
 
+/* The panel is either the map's controls or the list of pages, never both: at
+ * 398px there is no room to put one beside the other, and the burger is the
+ * only way in or out, so there is nothing to hunt for. The gable stays either
+ * way, which is what says the panel is still the panel. */
+function showMenu(open) {
+  els.menuToggle.setAttribute('aria-expanded', String(open));
+  els.panelMenu.hidden = !open;
+  els.panelBody.hidden = open;
+}
+
 /* The settings groups fold away under their own headings, as a variable block
  * does. Written in the HTML rather than built here, so this only has to find
  * each heading and the body it names. Kept by id because the run folds one of
@@ -2166,6 +2179,11 @@ async function main() {
   // The one knob drives the three, and the checkbox decides which is showing.
   els.compact.addEventListener('input', spreadCompactness);
   els.advanced.addEventListener('change', () => setAdvanced(els.advanced.checked));
+  els.menuToggle.addEventListener('click', () => showMenu(els.panelMenu.hidden));
+  // Escape closes it, as it closes the add-variable menu.
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !els.panelMenu.hidden) showMenu(false);
+  });
   // Whatever was remembered, applied before anything is on screen.
   setAdvanced(advanced);
   wireReadout(els.speed, els.speedValue, () => formatSpeed(speedOf()));

@@ -17,11 +17,43 @@
   <div id="map"></div>
 
   <div id="panel">
+    <!-- Opens the panel's other pages. In the corner of the gable rather than
+         in a bar of its own: the panel has no room to spare and the artwork has
+         nothing in that corner. -->
+    <button id="menu-toggle" class="burger" type="button" aria-expanded="false"
+            aria-controls="panel-menu" aria-label="Menu" title="Menu">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+
     <!-- The name is in the artwork, so the heading is the image: the alt text
          is the wordmark it draws. -->
     <h1 class="brand">
       <img src="img/ballymander-wide.png" alt="Ballymander" width="1619" height="978">
     </h1>
+
+    <!-- What the panel becomes while the menu is open. The pages are stubs for
+         now; the point is the shape, and somewhere for the things that are
+         about the app rather than about the map. -->
+    <nav id="panel-menu" hidden>
+      <ul class="menu-list">
+        <li><button class="menu-item is-current" type="button"
+                    aria-current="page">The map</button></li>
+        <li><button class="menu-item" type="button" disabled>How it works</button></li>
+        <li><button class="menu-item" type="button" disabled>Where the numbers
+          come from</button></li>
+      </ul>
+      <!-- Everything that was taken off the map's own page for being fine
+           tuning rather than a choice. It belongs here: it is about what the
+           app shows you, not about the map. Remembered between visits. -->
+      <div class="ctl-checks menu-switch">
+        <label for="ctl-advanced">
+          <input id="ctl-advanced" type="checkbox"> Advanced controls</label>
+      </div>
+    </nav>
+
+    <div id="panel-body">
 
     <div class="ctl-buttons">
       <!-- Two, not three: the same button starts the run and then holds it,
@@ -199,15 +231,8 @@
       </div>
     </div>
 
-    <!-- Everything that was taken off the page for being fine tuning rather
-         than a choice. Last, because it is about the panel rather than about
-         the map, and remembered between visits. -->
-    <div class="ctl-checks ctl-advanced">
-      <label for="ctl-advanced">
-        <input id="ctl-advanced" type="checkbox"> Advanced controls</label>
-    </div>
-
     <p class="hint">Hover a zone for its figures, and its region's.</p>
+    </div>
   </div>
 
   <!-- On the page from the start, rather than appearing the moment a run
