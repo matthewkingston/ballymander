@@ -862,6 +862,11 @@ regions it wins — with the seat count alongside when a region returns several
 — a pie gives the seats every party took (hover a wedge to name it), and the
 tooltip lists a region's top five parties with the selected one highlighted.
 
+The tooltip accents a line whenever the run is weighting that term, which is
+the same thing the party highlight means. Population is one of those lines —
+written "population 105,250", set like "religion 0.705" beside it, and always
+accented, its weight slider having no off.
+
 Under first past the post, **Tactical voting** moves voters from parties that
 cannot win the seat to ones that can. Nothing is ranked: each party has a
 viability, desertion rises as viability falls and as the seat is more in doubt,

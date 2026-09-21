@@ -39,6 +39,8 @@ const els = {
   ttPop: document.querySelector('.tt-pop-value'),
   ttDemo: document.querySelector('.tt-demo'),
   ttRegion: document.querySelector('.tt-region'),
+  ttPopLine: document.querySelector('.tt-pop'),
+  ttRegionPopLine: document.querySelector('.tt-region-pop'),
   ttRegionName: document.querySelector('.tt-region-name'),
   ttRegionPop: document.querySelector('.tt-region-pop-value'),
   ttRegionDemo: document.querySelector('.tt-region-demo'),
@@ -1393,9 +1395,18 @@ function activeVars() {
 function showTooltip(point, props) {
   els.ttName.textContent = props.name || props.code;
   els.ttPop.textContent = props.pop == null ? '—' : nf.format(props.pop);
+  // Accented when the run is weighting that term. Population's slider has no
+  // off, so in practice it is always lit; the check is here so the rule reads
+  // as one rule rather than as an exception written into the markup.
+  const popSteered = weightOf(els.popw) > 0;
+  els.ttPopLine.classList.toggle('is-steered', popSteered);
+  els.ttRegionPopLine.classList.toggle('is-steered', popSteered);
   const shown = new Set(activeVars());
   for (const v of variables) {
     const show = shown.has(v);
+    const steered = weightOf(v.w) > 0;
+    v.tip.classList.toggle('is-steered', steered);
+    v.regionTip.classList.toggle('is-steered', steered);
     if (v.isParty) {
       const share = elect.share(props.code, v.party);
       const votes = Math.round(elect.votes(props.code) * share);
