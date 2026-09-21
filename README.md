@@ -839,9 +839,11 @@ with one region and be invisible on another. Both veils leave the region's own
 colour showing through, which is the point: the highlight says *where*, and the
 colour underneath still says *which*.
 
-Both layers are filtered to the zones they are about rather than covering the
-map and painting most of it at zero opacity — two full-coverage layers cost four
-frames a second of a ten-frame budget, whether or not anything was hovered.
+Both tiers are driven by feature-state — a cheap per-feature write — and the
+region tier by one paint-property update when the pointer crosses a boundary.
+Not by `setFilter`: on a GeoJSON source that re-parses the source's tiles, and
+at one call per zone the pointer crosses the map comes apart and redraws itself
+low-poly, with gaps, for as long as the pointer keeps moving.
 
 The results panel sits on the right from the moment the page loads, holding its
 title and a line saying what to do; a panel that appeared the instant a run

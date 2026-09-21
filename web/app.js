@@ -1210,16 +1210,13 @@ function addZoneLayers(map, geojson) {
     },
   });
 
-  // Above the colours and below the borders, so the borders stay crisp through
-  // it. Opacity zero everywhere until something is hovered.
   map.addLayer({
     id: 'dz-veil',
     type: 'fill',
     source: SRC,
-    filter: MATCH_NONE,
     paint: {
       'fill-color': CONFIG.colors.veil,
-      'fill-opacity': veilOpacity(),
+      'fill-opacity': veilOpacity(null),
     },
   });
 
@@ -1240,17 +1237,20 @@ function addZoneLayers(map, geojson) {
   });
 
   // The hovered zone's own edge, dark and a layer of its own so no neighbour's
-  // border can draw over it. A veil alone leaves a small zone ambiguous, and a
-  // zone on a region boundary ambiguous whichever side it is on.
+  // border can draw over it -- borders are drawn once per zone, so a shared
+  // edge is drawn twice and the thin grey one would win half the time. A veil
+  // alone leaves a small zone ambiguous, and a zone on a region boundary
+  // ambiguous whichever side of it the pointer is on.
+  //
+  // Width zero where it is not wanted, rather than a filter: see veilAmount.
   map.addLayer({
     id: 'dz-hover-line',
     type: 'line',
     source: SRC,
-    filter: MATCH_NONE,
     paint: {
       'line-color': CONFIG.colors.veilLine,
-      'line-width': 1.6,
-      'line-opacity': 0.9,
+      'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 1.6, 0],
+      'line-opacity': ['case', ['boolean', ['feature-state', 'hover'], false], 0.9, 0],
     },
   });
 }
@@ -1393,18 +1393,36 @@ function fillExpression(colors) {
  * the fill with orange, so a zone told you nothing about which region it was
  * in and could land on a colour it was indistinguishable from.
  *
- * Both layers are filtered to the handful of zones they are about rather than
- * covering all 3,780 and painting most of them at zero. A layer that draws
- * nothing still costs something to rasterise, and two of them over the whole
- * map cost 4 frames a second of a 10-frame budget. Filters cannot read
- * feature-state, but they can read the id, which is all this needs. */
+ * Mixed into the fill's own colour rather than laid over it, so the highlight
+ * costs no extra pass over 3,780 polygons: interpolate carries the base colour
+ * some fraction of the way to white.
+ *
+ * Everything here is driven by feature-state, which is a cheap per-feature
+ * write. Doing it with setFilter instead -- one call per zone the pointer
+ * crosses -- re-parses the source's tiles on a GeoJSON layer, which on a real
+ * map is dozens of re-tiles a second: the map goes to pieces and redraws itself
+ * low-poly, with gaps, for as long as the pointer keeps moving. */
 const VEIL_REGION = 0.16;
 const VEIL_ZONE = 0.4;
-const MATCH_NONE = ['in', ['id'], ['literal', []]];
 
-const veilOpacity = () => [
-  'case', ['boolean', ['feature-state', 'hover'], false], VEIL_ZONE, VEIL_REGION,
-];
+/* A layer of its own, above the colours and below the borders. It could instead
+ * be mixed into the fill's own colour, which saves a pass -- but that colour is
+ * re-evaluated for every zone whose region changes, which during a run is most
+ * of them every frame, and tripling the work in that expression costs more than
+ * the extra layer ever did.
+ *
+ * Opacity zero for everything but the region under the pointer, rather than a
+ * filter naming its zones: setFilter on a GeoJSON source re-parses its tiles,
+ * and at one call per zone the pointer crosses the map comes apart and redraws
+ * itself low-poly, with gaps, for as long as the pointer is moving. */
+function veilOpacity(region) {
+  return [
+    'case',
+    ['boolean', ['feature-state', 'hover'], false], VEIL_ZONE,
+    region == null ? false : ['==', ['feature-state', 'region'], region], VEIL_REGION,
+    0,
+  ];
+}
 
 /* Push only the zones whose region changed since the last redraw. Zones are
  * only ever unset by clearRegions(), so this never has to write a null. */
@@ -1561,27 +1579,15 @@ function showTooltip(point, props) {
 
 function wireHover(map) {
   let hovered = null;
-  let veiledRegion = null;
 
-  // Only when the pointer crosses into another region, not on every move. The
-  // scan over the zones is 3,780 comparisons against an Int32Array, which is
-  // nothing beside re-filtering the layer, and it happens at walking pace.
+  // One paint-property update, and only when the pointer crosses a region
+  // boundary -- not on every move, and never a walk over the region's zones,
+  // since the expression asks each zone for its own region as it draws.
+  let veiledRegion = null;
   const veilRegion = (region) => {
     if (region === veiledRegion) return;
     veiledRegion = region;
-    if (region == null) {
-      map.setFilter('dz-veil', MATCH_NONE);
-      return;
-    }
-    const m = run.model;
-    const codes = [];
-    for (let i = 0; i < m.n; i++) if (m.assign[i] === region) codes.push(m.codes[i]);
-    map.setFilter('dz-veil', ['in', ['id'], ['literal', codes]]);
-  };
-
-  const veilZone = (code) => {
-    map.setFilter('dz-hover-line',
-      code == null ? MATCH_NONE : ['==', ['id'], code]);
+    map.setPaintProperty('dz-veil', 'fill-opacity', veilOpacity(region));
   };
 
   const clear = () => {
@@ -1589,7 +1595,6 @@ function wireHover(map) {
       map.setFeatureState({ source: SRC, id: hovered }, { hover: false });
       hovered = null;
     }
-    veilZone(null);
     veilRegion(null);
     els.tooltip.hidden = true;
   };
@@ -1603,7 +1608,6 @@ function wireHover(map) {
       }
       hovered = f.id;
       map.setFeatureState({ source: SRC, id: hovered }, { hover: true });
-      veilZone(hovered);
     }
     // Null while the map is still being built, or where a zone has no region
     // yet: then only the zone is veiled, which is all there is to say.
