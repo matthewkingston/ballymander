@@ -698,7 +698,18 @@ const advancedMode = await page.evaluate(() => {
 });
 
 // The two restored search controls reach the model, which reads them per frame.
+// Waits are on the value rather than on the clock: the model picks these up
+// once a frame, and a fixed sleep that is enough at ten frames a second is not
+// enough at five. A real regression still fails here -- the wait times out and
+// the value it returns is the wrong one.
 const searchControls = await page.evaluate(async () => {
+  const until = async (pred, ms = 4000) => {
+    const t0 = performance.now();
+    while (performance.now() - t0 < ms) {
+      if (pred()) return;
+      await new Promise((r) => setTimeout(r, 40));
+    }
+  };
   const box = document.getElementById('ctl-advanced');
   box.click();
   const recom = document.getElementById('ctl-recom');
@@ -710,12 +721,16 @@ const searchControls = await page.evaluate(async () => {
                   branch: window.__model.allowBranchMoves, readout: readout() };
   set(recom, '3');                       // 10^3
   branch.click();
+  // Whatever state the tests above left behind: stop, then start. Clicking GO
+  // on a run that is already going pauses it, and a paused run reads nothing.
+  document.getElementById('ctl-stop').click();
+  await until(() => document.getElementById('ctl-go').textContent === 'START');
   document.getElementById('ctl-go').click();
-  await new Promise((r) => setTimeout(r, 600));
+  await until(() => String(window.__model.recomInterval) === '1000');
   const moved = { interval: String(window.__model.recomInterval),
                   branch: window.__model.allowBranchMoves, readout: readout() };
   set(recom, recom.max);                 // the detent past the end: never
-  await new Promise((r) => setTimeout(r, 400));
+  await until(() => String(window.__model.recomInterval) === 'Infinity');
   const off = { interval: String(window.__model.recomInterval), readout: readout() };
   document.getElementById('ctl-stop').click();
   set(recom, '2.3');
