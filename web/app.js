@@ -1426,7 +1426,7 @@ function showTooltip(point, props) {
       const value = props[v.def.field];
       const ok = typeof value === 'number';
       v.tip.textContent = ok
-        ? `${varFullLabel(v).toLowerCase()} ${value.toFixed(v.def.decimals)}` : '';
+        ? `${varFullLabel(v)} ${value.toFixed(v.def.decimals)}` : '';
       v.tip.hidden = !ok;
     }
   }
@@ -1446,7 +1446,7 @@ function showTooltip(point, props) {
       if (v.isParty) continue;
       const show = run.model.demoByKey[v.key] !== undefined;
       v.regionTip.textContent = show
-        ? `${varFullLabel(v).toLowerCase()} `
+        ? `${varFullLabel(v)} `
           + `${run.model.regionDemo(v.key, region).toFixed(v.def.decimals)}`
         : '';
       v.regionTip.hidden = !show;
