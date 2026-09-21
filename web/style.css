@@ -569,9 +569,12 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
-  /* Must stay under the 200ms redraw interval, or every bar spends its life
-     chasing a target it never reaches. */
-  transition: transform 160ms ease;
+  /* 160ms read as a twitch once the redraws slowed: a row would arrive at its
+     new place and then sit still, so the move was all the eye saw. Longer and
+     the move is a glide instead, and still finishes well inside the 1,000ms
+     between redraws -- a bar that is still travelling when the next draw lands
+     spends its life chasing a target it never reaches. */
+  transition: transform 240ms ease;
 }
 
 .bar-n {
@@ -598,7 +601,7 @@ html, body {
   bottom: 0;
   left: 0;
   border-radius: 2px;
-  transition: width 160ms ease;
+  transition: width 240ms ease;   /* with the row's glide, above */
 }
 
 .bar-value {
