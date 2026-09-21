@@ -589,10 +589,10 @@ function buildPie(parties) {
  * next entity down the pie's own order, a party off the ballot having no seats
  * to report. The search stops only at a party that stands for itself, so it
  * cannot land back inside the merger it has just left. */
-function trackedEntity() {
-  if (!pieTracked || !voters) return null;
+function trackedEntity(tracked) {
+  if (!tracked || !voters) return null;
   const order = voters.parties;
-  const start = order.indexOf(pieTracked);
+  const start = order.indexOf(tracked);
   if (start < 0) return null;
   for (let i = 0; i < order.length; i++) {
     const party = order[(start + i) % order.length];
@@ -604,7 +604,7 @@ function trackedEntity() {
 }
 
 function showPieCaption() {
-  const host = trackedEntity();
+  const host = trackedEntity(pieTracked);
   if (!host || !run.model) {
     els.pieCaption.textContent = PIE_HINT;
     return;
@@ -880,6 +880,30 @@ function regionCaption(text) {
   els.regionCaption.textContent = text || '\u00a0';
 }
 
+/* The region pie follows a party for good, as the seats pie does: the figure
+ * you asked for stays while the map moves under it, rather than going the
+ * instant the pointer leaves the wedge. Tracked separately from the seats pie,
+ * being a different question -- one party's votes here against every party's
+ * seats everywhere -- but resolved the same way through merges and exclusions.
+ *
+ * The party carries across a change of region: having asked what the SDLP were
+ * doing in one, the question about the next one is usually the same. */
+let regionPieTracked = null;
+
+function showRegionCaption(m, r) {
+  const host = trackedEntity(regionPieTracked);
+  if (!host) {
+    regionCaption(PIE_HINT);
+    return;
+  }
+  // Zero is a reading here too: a party still standing that this region gives
+  // nothing to is exactly what somebody would be watching the map for.
+  const votes = m.regionPartyVotes(`party:${host}`, r);
+  const share = m.regionPartyShare(`party:${host}`, r);
+  regionCaption(`${entityLabel(host)} — ${nf.format(Math.round(votes))} `
+    + `${Math.round(votes) === 1 ? 'vote' : 'votes'} (${pct.format(share)})`);
+}
+
 /* First past the post: the region's votes as a pie, hover for the figures. */
 function drawRegionPie(m, r) {
   const parties = voters.parties;   // slots; merged ones hold nothing
@@ -893,13 +917,14 @@ function drawRegionPie(m, r) {
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('fill', partyColour(party));
     path.setAttribute('d', wedgePath(from, to));
-    path.addEventListener('mouseenter', () => regionCaption(
-      `${entityLabel(party)} — ${nf.format(Math.round(votes[i]))} votes `
-      + `(${pct.format(votes[i] / total)})`));
-    path.addEventListener('mouseleave', () => regionCaption(''));
+    path.addEventListener('mouseenter', () => {
+      regionPieTracked = party;
+      showRegionCaption(m, r);
+    });
     els.regionPie.append(path);
     from = to;
   });
+  showRegionCaption(m, r);
   const winner = m.regionWinner(r);
   els.regionSeats.textContent = winner ? `Winner: ${entityLabel(winner.slice(6))}` : '—';
 }

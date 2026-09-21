@@ -286,7 +286,12 @@ const barVeil = await page.evaluate(() => {
   const m = window.__model;
   const on = m.codes.filter((c) => window.__map.getFeatureState({ source: 'dz', id: c }).veil);
   const regions = [...new Set(on.map((c) => m.regionOf(c)))];
+  // Which row the pointer actually landed on, read back rather than assumed:
+  // rows keep their place in the DOM and are moved by transform as the ranking
+  // changes, so the one at a remembered position may not be the one measured.
+  const under = document.querySelector('#bars .bar-row:hover');
   return { lit: on.length, regions,
+           row: under ? Number(under.querySelector('.bar-n').textContent) : null,
            whole: regions.length === 1
              && on.length === m.codes.filter((c) => m.regionOf(c) === regions[0]).length };
 });
@@ -294,7 +299,6 @@ await page.mouse.move(8, 8);
 await page.evaluate(() => new Promise(r => setTimeout(r, 400)));
 barVeil.clearedOnLeaving = await page.evaluate(() => window.__model.codes.every(
   (c) => !window.__map.getFeatureState({ source: 'dz', id: c }).veil));
-barVeil.row = barRow.label;
 
 await page.screenshot({ path: `${OUT}/map-full.png` });
 
@@ -910,7 +914,7 @@ if (!statSwitch || statSwitch.before.max === statSwitch.demo
 if (!regions || regions.movesShown !== regions.moves.toLocaleString('en-GB')) {
   problems.push('flips readout does not match the model');
 }
-if (!barVeil || !barVeil.whole || barVeil.regions[0] !== barVeil.row - 1
+if (!barVeil || !barVeil.row || !barVeil.whole || barVeil.regions[0] !== barVeil.row - 1
     || !barVeil.clearedOnLeaving) {
   problems.push(`hovering a bar did not light its region alone: ${JSON.stringify(barVeil)}`);
 }

@@ -864,8 +864,11 @@ panel switches between **Overall** and **Region**. Region shows a
 single region's election in detail, and the map picks it: click any zone while
 that view is open. The choice is remembered for the run and starts at region 1.
 
-* **First past the post:** the region's votes as a pie, hover for each party's
-  votes and share.
+* **First past the post:** the region's votes as a pie. Its caption behaves as
+  the seats pie's does — it says what to do until a wedge is pointed at, then
+  follows that party for good, live, through merges and exclusions and across a
+  change of region. Having asked what the SDLP were doing in one region, the
+  question about the next one is usually the same.
 * **STV:** one bar per stage of the count, parties always in the same order. A
   party's block is what it holds at that point — the quotas it has already
   spent on seats, plus whatever is still live — so seats stay in the chart
