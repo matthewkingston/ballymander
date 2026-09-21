@@ -292,11 +292,12 @@
 
   <div id="status" role="status">Loading zones&hellip;</div>
 
+  <!-- The region first. It is what the run is drawing and what the reader is
+       usually checking; the zone under the pointer is the thing they happened
+       to point at to ask about it. Each half runs name, people, demographics,
+       then a rule and the election, so the two kinds of figure never blur into
+       one column. -->
   <div id="tooltip" hidden>
-    <div class="tt-name"></div>
-    <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
-    <div class="tt-demo"></div>
-    <div class="tt-party"></div>
     <div class="tt-region" hidden>
       <div class="tt-region-name"></div>
       <div class="tt-region-pop">
@@ -304,6 +305,12 @@
       </div>
       <div class="tt-region-demo"></div>
       <div class="tt-region-party"></div>
+    </div>
+    <div class="tt-zone">
+      <div class="tt-name"></div>
+      <div class="tt-pop"><span class="tt-pop-value"></span> <span class="tt-unit">people</span></div>
+      <div class="tt-demo"></div>
+      <div class="tt-party"></div>
     </div>
   </div>
 

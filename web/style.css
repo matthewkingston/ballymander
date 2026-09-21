@@ -902,11 +902,18 @@ html, body {
 }
 #tooltip[hidden] { display: none; }
 
-.tt-name { font-weight: 600; }
+/* The zone's name, now the second thing here: dimmed to the weight the region
+   block used to carry, the two having changed places. */
+.tt-name { font-weight: 600; color: #d8e0e8; }
 
-.tt-pop {
+/* Both population figures at the tooltip's own size. They were set two sizes
+   up, which made the loudest line the one that varies least: a region holds
+   within a few per cent of its target by construction, and a zone is a Data
+   Zone, which is what those are for. Still bold and tabular, so the digits
+   line up and the eye can find them, but no longer shouting. */
+.tt-pop, .tt-region-pop {
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 12.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: #bcd6f2;
@@ -920,23 +927,25 @@ html, body {
   color: #a8b4c0;
 }
 
-/* The region block mirrors the zone block above it, a size down, so the zone
-   under the cursor stays the primary thing. */
-.tt-region {
+.tt-region[hidden] { display: none; }
+
+/* The rule sits above the zone rather than above the region, the region having
+   moved to the top -- and only when there is a region up there to divide from. */
+.tt-region:not([hidden]) + .tt-zone {
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
-.tt-region[hidden] { display: none; }
 
-.tt-region-name { font-weight: 600; color: #d8e0e8; }
+.tt-region-name { font-weight: 600; }
 
-.tt-region-pop {
-  margin-top: 1px;
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: #bcd6f2;
+/* Lighter than the rule between the two halves: this one separates two kinds
+   of figure inside one half, not one place from another. The name and the
+   people above it are of a piece with the demographics; the election is not. */
+.tt-party:not([hidden]), .tt-region-party:not([hidden]) {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 /* Election mode: the region's standings, strongest first. The selected party
