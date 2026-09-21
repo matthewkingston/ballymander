@@ -1483,10 +1483,14 @@ function showTooltip(point, props) {
       const keep = new Set();
       standings.forEach((row, i) => { if (targets.has(row.key)) keep.add(i); });
       for (let i = 0; i < standings.length && keep.size < 5; i++) keep.add(i);
-      const rows = [...keep].sort((a, b) => a - b)
-        // The rank is worth printing only where the order is not obvious from
-        // the rows above it -- that is, below the natural top five.
-        .map((i) => (i < 5 ? standings[i] : { ...standings[i], rank: i + 1 }));
+      // A rank is worth printing only where a row does not follow the one above
+      // it -- that is, where something has been left out in between. A list
+      // that runs 1st to 6th unbroken says so by being in order, and numbering
+      // the last row 6. only repeats what the five rows above it already said.
+      const order = [...keep].sort((a, b) => a - b);
+      const rows = order.map((i, k) => (i === (k === 0 ? 0 : order[k - 1] + 1)
+        ? standings[i]
+        : { ...standings[i], rank: i + 1 }));
       els.ttRegionParty.textContent = '';
       for (const row of rows) {
         els.ttRegionParty.append(el('div', {

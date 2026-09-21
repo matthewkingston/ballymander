@@ -1031,18 +1031,20 @@ if (!election || !election.tip || election.tip.rows.length !== 5) {
 if (!election || !election.tip || election.tip.targets !== 1) {
   problems.push('tooltip did not highlight exactly one party');
 }
-// A rank is printed exactly where a listed party stands below the natural top
-// five: the unranked rows lead, every printed rank is above five, and they
-// ascend. Which party that is depends on the map, so the invariant is checked
-// rather than a name -- the old form assumed only the steered party could be
-// promoted, which stopped being true once every party on the page could be.
+// A rank is printed exactly where a row does not follow the one above it. Walk
+// the list keeping the standing each row must be at: an unprinted rank means
+// "one more than the last", a printed one must be a genuine jump past that, or
+// it is telling the reader what the row above already told them. Which party
+// is promoted depends on the map, so this checks the rule rather than a name.
 {
   const ranks = election && election.tip ? election.tip.ranks : null;
-  const plain = ranks ? ranks.filter((r) => r === null).length : -1;
-  const shown = ranks ? ranks.slice(plain) : [];
-  const bad = !ranks
-    || ranks.slice(0, plain).some((r) => r !== null)
-    || shown.some((r, i) => r === null || r <= 5 || (i > 0 && r <= shown[i - 1]));
+  let at = 0;
+  let bad = !ranks || !ranks.length;
+  for (const r of ranks || []) {
+    if (r === null) at += 1;
+    else if (r <= at + 1) { bad = true; break; }
+    else at = r;
+  }
   if (bad) problems.push(`tooltip rank numbers wrong: ${JSON.stringify(ranks)}`);
 }
 if (!election || election.tip.demoHidden) {

@@ -867,10 +867,11 @@ it:
   one variable's readout, so the region's standings are there whenever there is
   an election, exactly as the seats pie is.
 * **Every variable on the page is always in it**, a party's own row included —
-  promoted into the standings with its rank if it falls outside the top five.
-  Putting a variable on the page is the act of asking about it. Five is a floor
-  rather than a ceiling: six parties on the page means six rows, because the
-  alternative is dropping one you asked about.
+  promoted into the standings wherever it stands. Putting a variable on the page
+  is the act of asking about it. Five is a floor rather than a ceiling: six
+  parties on the page means six rows, because the alternative is dropping one
+  you asked about. A row carries its rank only where it does not follow the row
+  above — a list running 1st to 6th unbroken says so by being in order.
 * **A variable being steered is accented.** Weights are read off the sliders
   rather than the model, so the colour follows one being dragged, run or no run.
 
