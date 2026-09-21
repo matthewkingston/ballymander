@@ -23,8 +23,12 @@ const CONFIG = {
   colors: {
     background: '#dfe7ee',
     fill: '#f4f1ea',
-    fillHover: '#d9622b',
     line: '#a9b6c2',
+    // The hover highlight is white and its outline near-black, deliberately
+    // colourless: the regions already use every hue the app has, so anything
+    // tinted would clash with one region and match another.
+    veil: '#ffffff',
+    veilLine: '#1c2530',
   },
 };
 
@@ -1203,12 +1207,19 @@ function addZoneLayers(map, geojson) {
     source: SRC,
     paint: {
       'fill-color': fillExpression([]),
-      'fill-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        0.85,
-        1,
-      ],
+    },
+  });
+
+  // Above the colours and below the borders, so the borders stay crisp through
+  // it. Opacity zero everywhere until something is hovered.
+  map.addLayer({
+    id: 'dz-veil',
+    type: 'fill',
+    source: SRC,
+    filter: MATCH_NONE,
+    paint: {
+      'fill-color': CONFIG.colors.veil,
+      'fill-opacity': veilOpacity(),
     },
   });
 
@@ -1225,6 +1236,21 @@ function addZoneLayers(map, geojson) {
         11, 0.7,
         14, 1.2,
       ],
+    },
+  });
+
+  // The hovered zone's own edge, dark and a layer of its own so no neighbour's
+  // border can draw over it. A veil alone leaves a small zone ambiguous, and a
+  // zone on a region boundary ambiguous whichever side it is on.
+  map.addLayer({
+    id: 'dz-hover-line',
+    type: 'line',
+    source: SRC,
+    filter: MATCH_NONE,
+    paint: {
+      'line-color': CONFIG.colors.veilLine,
+      'line-width': 1.6,
+      'line-opacity': 0.9,
     },
   });
 }
@@ -1356,13 +1382,29 @@ function fillExpression(colors) {
     colors.forEach((color, i) => base.push(i, color));
     base.push(CONFIG.colors.fill);
   }
-  return [
-    'case',
-    ['boolean', ['feature-state', 'hover'], false],
-    CONFIG.colors.fillHover,
-    base,
-  ];
+  return base;
 }
+
+/* The hover highlight, in two tiers over the top of the colours rather than in
+ * place of them: the whole region under a thin veil so it can be picked out at
+ * a glance, the zone under the pointer under a thicker one so it can be picked
+ * out of the region. Both white, and both leaving the region's own colour
+ * showing through, which is what the old treatment could not do -- it replaced
+ * the fill with orange, so a zone told you nothing about which region it was
+ * in and could land on a colour it was indistinguishable from.
+ *
+ * Both layers are filtered to the handful of zones they are about rather than
+ * covering all 3,780 and painting most of them at zero. A layer that draws
+ * nothing still costs something to rasterise, and two of them over the whole
+ * map cost 4 frames a second of a 10-frame budget. Filters cannot read
+ * feature-state, but they can read the id, which is all this needs. */
+const VEIL_REGION = 0.16;
+const VEIL_ZONE = 0.4;
+const MATCH_NONE = ['in', ['id'], ['literal', []]];
+
+const veilOpacity = () => [
+  'case', ['boolean', ['feature-state', 'hover'], false], VEIL_ZONE, VEIL_REGION,
+];
 
 /* Push only the zones whose region changed since the last redraw. Zones are
  * only ever unset by clearRegions(), so this never has to write a null. */
@@ -1519,12 +1561,36 @@ function showTooltip(point, props) {
 
 function wireHover(map) {
   let hovered = null;
+  let veiledRegion = null;
+
+  // Only when the pointer crosses into another region, not on every move. The
+  // scan over the zones is 3,780 comparisons against an Int32Array, which is
+  // nothing beside re-filtering the layer, and it happens at walking pace.
+  const veilRegion = (region) => {
+    if (region === veiledRegion) return;
+    veiledRegion = region;
+    if (region == null) {
+      map.setFilter('dz-veil', MATCH_NONE);
+      return;
+    }
+    const m = run.model;
+    const codes = [];
+    for (let i = 0; i < m.n; i++) if (m.assign[i] === region) codes.push(m.codes[i]);
+    map.setFilter('dz-veil', ['in', ['id'], ['literal', codes]]);
+  };
+
+  const veilZone = (code) => {
+    map.setFilter('dz-hover-line',
+      code == null ? MATCH_NONE : ['==', ['id'], code]);
+  };
 
   const clear = () => {
     if (hovered !== null) {
       map.setFeatureState({ source: SRC, id: hovered }, { hover: false });
       hovered = null;
     }
+    veilZone(null);
+    veilRegion(null);
     els.tooltip.hidden = true;
   };
 
@@ -1537,7 +1603,12 @@ function wireHover(map) {
       }
       hovered = f.id;
       map.setFeatureState({ source: SRC, id: hovered }, { hover: true });
+      veilZone(hovered);
     }
+    // Null while the map is still being built, or where a zone has no region
+    // yet: then only the zone is veiled, which is all there is to say.
+    const region = run.model ? run.model.regionOf(f.id) : null;
+    veilRegion(region == null || region < 0 ? null : region);
     showTooltip(e.point, f.properties);
   });
 

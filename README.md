@@ -830,6 +830,19 @@ What an excluded party's voters do, and what a merger keeps, is described in
 
 ### One region's election
 
+Hovering the map veils two things in white: the whole region the pointer is in,
+thinly, so it can be picked out at a glance however scattered it is; and the
+zone under the pointer, more heavily and with a dark outline, so a small zone or
+one on a region boundary is unambiguous. White rather than a hue, because the
+regions already use every colour the app has — a tinted highlight would clash
+with one region and be invisible on another. Both veils leave the region's own
+colour showing through, which is the point: the highlight says *where*, and the
+colour underneath still says *which*.
+
+Both layers are filtered to the zones they are about rather than covering the
+map and painting most of it at zero opacity — two full-coverage layers cost four
+frames a second of a ten-frame budget, whether or not anything was hovered.
+
 The results panel sits on the right from the moment the page loads, holding its
 title and a line saying what to do; a panel that appeared the instant a run
 began read as something going wrong. Standing empty it holds a fixed 683px
