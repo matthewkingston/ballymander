@@ -839,11 +839,13 @@ with one region and be invisible on another. Both veils leave the region's own
 colour showing through, which is the point: the highlight says *where*, and the
 colour underneath still says *which*.
 
-Both tiers are driven by feature-state — a cheap per-feature write — and the
-region tier by one paint-property update when the pointer crosses a boundary.
-Not by `setFilter`: on a GeoJSON source that re-parses the source's tiles, and
-at one call per zone the pointer crosses the map comes apart and redraws itself
-low-poly, with gaps, for as long as the pointer keeps moving.
+Both tiers are feature-state and nothing else: a flag on the hovered zone, a
+flag on every zone of its region. Neither of the other two ways works. A
+`setFilter` per zone re-parses the source's tiles, so the map comes apart and
+redraws itself low-poly, with gaps, for as long as the pointer moves. Rewriting
+the layer's paint expression invalidates its paint buffers, which MapLibre
+rebuilds tile by tile, so a region lights up in pieces and late. Feature-state
+touches only the features that changed, which is the whole point of it.
 
 The results panel sits on the right from the moment the page loads, holding its
 title and a line saying what to do; a panel that appeared the instant a run

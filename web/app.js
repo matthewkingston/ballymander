@@ -1216,7 +1216,7 @@ function addZoneLayers(map, geojson) {
     source: SRC,
     paint: {
       'fill-color': CONFIG.colors.veil,
-      'fill-opacity': veilOpacity(null),
+      'fill-opacity': VEIL_OPACITY,
     },
   });
 
@@ -1415,13 +1415,40 @@ const VEIL_ZONE = 0.4;
  * filter naming its zones: setFilter on a GeoJSON source re-parses its tiles,
  * and at one call per zone the pointer crosses the map comes apart and redraws
  * itself low-poly, with gaps, for as long as the pointer is moving. */
-function veilOpacity(region) {
-  return [
-    'case',
-    ['boolean', ['feature-state', 'hover'], false], VEIL_ZONE,
-    region == null ? false : ['==', ['feature-state', 'region'], region], VEIL_REGION,
-    0,
-  ];
+const VEIL_OPACITY = [
+  'case',
+  ['boolean', ['feature-state', 'hover'], false], VEIL_ZONE,
+  ['boolean', ['feature-state', 'veil'], false], VEIL_REGION,
+  0,
+];
+
+/* Which zones are wearing the region veil. Kept rather than recomputed, so they
+ * can be taken off again without asking the model -- its assignment may have
+ * moved underneath in the meantime. */
+let veiledRegion = null;
+let veiledZones = [];
+
+/* The veil goes on and comes off by feature-state, one write per zone.
+ *
+ * Not by rewriting the layer's paint property, which was the first attempt:
+ * changing a paint expression invalidates the layer's paint buffers and
+ * MapLibre rebuilds them tile by tile, so a region lights up in pieces, late,
+ * and differently each time. Not by setFilter either, which re-parses the whole
+ * source. Feature-state is the one that touches only what changed. */
+function veilRegion(map, region) {
+  if (region === veiledRegion) return;
+  veiledRegion = region;
+  for (const code of veiledZones) {
+    map.setFeatureState({ source: SRC, id: code }, { veil: false });
+  }
+  veiledZones = [];
+  if (region == null || !run.model) return;
+  const m = run.model;
+  for (let i = 0; i < m.n; i++) {
+    if (m.assign[i] !== region) continue;
+    veiledZones.push(m.codes[i]);
+    map.setFeatureState({ source: SRC, id: m.codes[i] }, { veil: true });
+  }
 }
 
 /* Push only the zones whose region changed since the last redraw. Zones are
@@ -1439,6 +1466,10 @@ function paintRegions(map) {
 function clearRegions(map) {
   map.removeFeatureState({ source: SRC });   // also drops hover; it re-sets on move
   run.shadow.fill(-1);
+  // The veil went with it, so the record of who was wearing it must go too, or
+  // the next hover over the same region number would think it was already on.
+  veiledRegion = null;
+  veiledZones = [];
 }
 
 /* --- interaction --------------------------------------------------------- */
@@ -1583,19 +1614,12 @@ function wireHover(map) {
   // One paint-property update, and only when the pointer crosses a region
   // boundary -- not on every move, and never a walk over the region's zones,
   // since the expression asks each zone for its own region as it draws.
-  let veiledRegion = null;
-  const veilRegion = (region) => {
-    if (region === veiledRegion) return;
-    veiledRegion = region;
-    map.setPaintProperty('dz-veil', 'fill-opacity', veilOpacity(region));
-  };
-
   const clear = () => {
     if (hovered !== null) {
       map.setFeatureState({ source: SRC, id: hovered }, { hover: false });
       hovered = null;
     }
-    veilRegion(null);
+    veilRegion(map, null);
     els.tooltip.hidden = true;
   };
 
@@ -1612,7 +1636,7 @@ function wireHover(map) {
     // Null while the map is still being built, or where a zone has no region
     // yet: then only the zone is veiled, which is all there is to say.
     const region = run.model ? run.model.regionOf(f.id) : null;
-    veilRegion(region == null || region < 0 ? null : region);
+    veilRegion(map, region == null || region < 0 ? null : region);
     showTooltip(e.point, f.properties);
   });
 
