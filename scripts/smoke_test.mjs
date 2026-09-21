@@ -517,6 +517,10 @@ election.tip = await page.evaluate(() => {
     rows: rows.map((r) => r.innerText.replace(/\n/g, ' ')),
     targets: rows.filter((r) => r.classList.contains('is-target')).length,
     ranked: rows.filter((r) => r.querySelector('.tt-party-rank')).length,
+    ranks: rows.map((r) => {
+      const n = r.querySelector('.tt-party-rank');
+      return n ? Number(n.textContent.replace('.', '')) : null;
+    }),
     demoHidden: t.querySelector('.tt-demo')?.innerText.trim() === '',
   };
 });
@@ -546,6 +550,42 @@ election.unsteered = await page.evaluate(() => {
   };
 });
 await dupWeight('0');            // log10, so back to weight 1
+
+// More parties on the page than the list's five rows. Five is a floor: the
+// list grows rather than swapping out parties that are themselves on the page,
+// which used to leave the first and the last four and nothing between.
+const EXTRA = ['Sinn Féin', 'UUP', 'SDLP', 'TUV', 'Green'];
+await page.evaluate((names) => {
+  for (const name of names) {
+    document.getElementById('ctl-add-open').click();
+    const item = document.querySelector(`#ctl-add [data-key="party:${name}"]`);
+    if (item) item.click();
+    else document.getElementById('ctl-add-open').click();
+  }
+}, EXTRA);
+await page.mouse.move(pt.x - 30, pt.y - 30);
+await page.mouse.move(pt.x, pt.y, { steps: 8 });
+await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
+election.manyParties = await page.evaluate(() => {
+  const t = document.getElementById('tooltip');
+  const rows = [...t.querySelectorAll('.tt-party-row')];
+  const onPage = [...document.querySelectorAll('#bars-stat option')]
+    .filter((o) => o.value.startsWith('party:'))
+    .map((o) => o.value.slice(6).replace(/\s+/g, ''));
+  const listed = rows.map((r) => r.querySelector('.tt-party-name').textContent
+    .replace(/\s+/g, ''));
+  return { rows: rows.length, onPage: onPage.length,
+           allListed: onPage.every((n) => listed.includes(n)),
+           listed, missing: onPage.filter((n) => !listed.includes(n)) };
+});
+await page.evaluate((names) => {
+  for (const name of names) {
+    const block = [...document.querySelectorAll('#variables .demo-block')]
+      .find((x) => x.querySelector('.demo-toggle').textContent
+        .replace(/[\u25B8\s]+/g, '') === name.replace(/\s+/g, ''));
+    if (block) block.querySelector('.var-remove').click();
+  }
+}, EXTRA);
 
 // Switching to STV re-counts the regions already on the map, so this needs no
 // second run: the same lines, counted a different way.
@@ -991,12 +1031,27 @@ if (!election || !election.tip || election.tip.rows.length !== 5) {
 if (!election || !election.tip || election.tip.targets !== 1) {
   problems.push('tooltip did not highlight exactly one party');
 }
-if (!election || !election.tip
-    || election.tip.ranked !== (election.tip.rows.findIndex((r) => /DUP/.test(r)) === 4 ? 1 : 0)) {
-  problems.push('tooltip rank number shown in the wrong case');
+// A rank is printed exactly where a listed party stands below the natural top
+// five: the unranked rows lead, every printed rank is above five, and they
+// ascend. Which party that is depends on the map, so the invariant is checked
+// rather than a name -- the old form assumed only the steered party could be
+// promoted, which stopped being true once every party on the page could be.
+{
+  const ranks = election && election.tip ? election.tip.ranks : null;
+  const plain = ranks ? ranks.filter((r) => r === null).length : -1;
+  const shown = ranks ? ranks.slice(plain) : [];
+  const bad = !ranks
+    || ranks.slice(0, plain).some((r) => r !== null)
+    || shown.some((r, i) => r === null || r <= 5 || (i > 0 && r <= shown[i - 1]));
+  if (bad) problems.push(`tooltip rank numbers wrong: ${JSON.stringify(ranks)}`);
 }
 if (!election || election.tip.demoHidden) {
   problems.push('tooltip dropped the demographic lines, which now share it with the parties');
+}
+if (!election || !election.manyParties || !election.manyParties.allListed
+    || election.manyParties.rows < election.manyParties.onPage) {
+  problems.push('tooltip dropped a party that was on the page: '
+    + JSON.stringify(election && election.manyParties));
 }
 if (!election || !election.unsteered || election.unsteered.rows !== 5
     || election.unsteered.lit !== 0 || !election.unsteered.keptDup

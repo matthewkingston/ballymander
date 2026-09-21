@@ -868,7 +868,9 @@ it:
   an election, exactly as the seats pie is.
 * **Every variable on the page is always in it**, a party's own row included —
   promoted into the standings with its rank if it falls outside the top five.
-  Putting a variable on the page is the act of asking about it.
+  Putting a variable on the page is the act of asking about it. Five is a floor
+  rather than a ceiling: six parties on the page means six rows, because the
+  alternative is dropping one you asked about.
 * **A variable being steered is accented.** Weights are read off the sliders
   rather than the model, so the colour follows one being dragged, run or no run.
 

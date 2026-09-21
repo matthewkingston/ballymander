@@ -1471,11 +1471,22 @@ function showTooltip(point, props) {
         share: run.model.regionPartyShare(`party:${name}`, region),
         seats: run.model.regionPartySeats(`party:${name}`, region),
       })).sort((a, b) => b.votes - a.votes);
-      const missing = [...targets].map((k) => standings.findIndex((row) => row.key === k))
-        .filter((i) => i >= 5).sort((a, b) => a - b);
-      const rows = !missing.length ? standings.slice(0, 5)
-        : [...standings.slice(0, 5 - missing.length),
-           ...missing.map((i) => ({ ...standings[i], rank: i + 1 }))];
+      // Every party on the page keeps its place, then the strongest of the rest
+      // fill the list up to five. It used to take the top five and swap the
+      // weakest of them out for each promoted party, which works while at most
+      // four need promoting but evicts parties that are themselves on the page
+      // once more than one is down the order: all nine on the page left the
+      // top four swapped out for the bottom four, showing 1st and 6th to 9th.
+      //
+      // So the five is a floor rather than a ceiling. Six parties on the page
+      // means six rows; that is what asking about six parties looks like.
+      const keep = new Set();
+      standings.forEach((row, i) => { if (targets.has(row.key)) keep.add(i); });
+      for (let i = 0; i < standings.length && keep.size < 5; i++) keep.add(i);
+      const rows = [...keep].sort((a, b) => a - b)
+        // The rank is worth printing only where the order is not obvious from
+        // the rows above it -- that is, below the natural top five.
+        .map((i) => (i < 5 ? standings[i] : { ...standings[i], rank: i + 1 }));
       els.ttRegionParty.textContent = '';
       for (const row of rows) {
         els.ttRegionParty.append(el('div', {
