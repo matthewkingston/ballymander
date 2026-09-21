@@ -550,7 +550,12 @@ html, body {
   min-height: 0;
   margin-top: 8px;
   overflow-y: auto;
+  /* The gutter is reserved whether or not the list scrolls, so the bars keep
+     their length either way. The padding then holds them off it: a winning
+     region's outline sits a pixel outside its track, and with the bars running
+     to the very edge that pixel went under the scrollbar. */
   scrollbar-gutter: stable;
+  padding-right: 4px;
 }
 
 /* --- population bars ---------------------------------------------------- */
@@ -639,7 +644,11 @@ html, body {
   display: flex;
   justify-content: space-between;
   margin-top: 7px;
-  padding: 5px 0 0 26px;      /* 26px lines the labels up with the track */
+  /* 26px lines the min label up with the track's left edge; 19px lines the max
+     up with its right -- the 15px of reserved scrollbar gutter next door, plus
+     the 4px the bars are held off it. The axis is outside the scrolling box, so
+     it has to be told what that box's edges came to. */
+  padding: 5px 19px 0 26px;
   border-top: 1px solid var(--rule);
   font-size: 10px;
   font-variant-numeric: tabular-nums;
