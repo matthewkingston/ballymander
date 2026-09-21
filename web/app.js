@@ -1425,11 +1425,16 @@ const VEIL_OPACITY = [
   0,
 ];
 
-/* Which zones are wearing the region veil. Kept rather than recomputed, so they
- * can be taken off again without asking the model -- its assignment may have
- * moved underneath in the meantime. */
+/* Which region is veiled, and which zones are currently wearing it. The record
+ * is kept so that neither the pointer moving nor the map moving under it has to
+ * write a state that is already right. */
 let veiledRegion = null;
-let veiledZones = [];
+let veilShadow = null;
+
+function veilRoom(n) {
+  if (!veilShadow || veilShadow.length !== n) veilShadow = new Uint8Array(n);
+  return veilShadow;
+}
 
 /* The veil goes on and comes off by feature-state, one write per zone.
  *
@@ -1441,28 +1446,36 @@ let veiledZones = [];
 function veilRegion(map, region) {
   if (region === veiledRegion) return;
   veiledRegion = region;
-  for (const code of veiledZones) {
-    map.setFeatureState({ source: SRC, id: code }, { veil: false });
-  }
-  veiledZones = [];
-  if (region == null || !run.model) return;
   const m = run.model;
-  for (let i = 0; i < m.n; i++) {
-    if (m.assign[i] !== region) continue;
-    veiledZones.push(m.codes[i]);
-    map.setFeatureState({ source: SRC, id: m.codes[i] }, { veil: true });
+  if (!m) return;
+  const worn = veilRoom(m.n);
+  // Walks every zone but writes only the ones that change: the region being
+  // left and the region being entered, a few hundred of 3,780.
+  for (let z = 0; z < m.n; z++) {
+    const veil = m.assign[z] === region;
+    if (worn[z] === (veil ? 1 : 0)) continue;
+    worn[z] = veil ? 1 : 0;
+    map.setFeatureState({ source: SRC, id: m.codes[z] }, { veil });
   }
 }
 
 /* Push only the zones whose region changed since the last redraw. Zones are
- * only ever unset by clearRegions(), so this never has to write a null. */
+ * only ever unset by clearRegions(), so this never has to write a null.
+ *
+ * The veil is set here too, because it belongs to the region rather than to the
+ * zone: a zone that leaves the region under the pointer must lose it and one
+ * that joins must gain it, whether or not the pointer has moved. Doing it in
+ * the same write costs nothing -- these are the zones that changed. */
 function paintRegions(map) {
   const { model, shadow } = run;
+  const worn = veilRoom(model.n);
   for (let z = 0; z < model.n; z++) {
     const region = model.assign[z];
     if (shadow[z] === region || region < 0) continue;
     shadow[z] = region;
-    map.setFeatureState({ source: SRC, id: model.codes[z] }, { region });
+    const veil = region === veiledRegion;
+    worn[z] = veil ? 1 : 0;
+    map.setFeatureState({ source: SRC, id: model.codes[z] }, { region, veil });
   }
 }
 
@@ -1472,7 +1485,7 @@ function clearRegions(map) {
   // The veil went with it, so the record of who was wearing it must go too, or
   // the next hover over the same region number would think it was already on.
   veiledRegion = null;
-  veiledZones = [];
+  if (veilShadow) veilShadow.fill(0);
 }
 
 /* --- interaction --------------------------------------------------------- */
