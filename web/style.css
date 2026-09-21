@@ -538,6 +538,9 @@ html, body {
 }
 #results-list[hidden] { display: none; }
 
+/* The one thing on this panel that can be changed, so it is drawn as changeable
+   rather than as another framed figure: an accent edge, quiet enough not to
+   shout over the bars below it. */
 #bars-stat {
   font: inherit;
   font-size: 13px;
@@ -546,9 +549,10 @@ html, body {
   padding: 3px 4px;
   color: var(--ink);
   background: #fff;
-  border: 1px solid var(--rule);
+  border: 1px solid rgba(94, 137, 194, 0.55);
   border-radius: 5px;
 }
+#bars-stat:hover { border-color: var(--accent); }
 #bars-stat:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* Not a scrolling box any more, just the space the bars occupy. It used to
@@ -746,11 +750,16 @@ html, body {
   border-radius: 4px;
   cursor: pointer;
 }
+/* The accent, as START and STOP wear it on the other side: this is a control,
+   so it can carry the colour without being mistaken for a region's or a
+   party's. It was white on grey, which said which tab was current but put no
+   colour on a panel whose only other accent is conditional. */
 .view-switch button.is-active {
-  color: var(--ink);
-  background: #fff;
+  color: #fff;
+  background: var(--accent);
   box-shadow: 0 1px 3px rgba(20, 34, 48, 0.12);
 }
+.view-switch button:hover:not(.is-active) { color: var(--ink); }
 #region-view[hidden], #region-stages[hidden], #region-pie[hidden] { display: none; }
 /* A VALUE, like the phase in the other view -- it is a figure the panel is
    reporting, not a heading over it. The swatch carries the colour the map
