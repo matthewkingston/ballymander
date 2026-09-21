@@ -119,6 +119,7 @@ const run = {
   paused: false,
   lastDraw: 0,
   lastBars: 0,
+  lastPie: 0,
   shadow: null,
   colors: [],
   bars: [],               // one {row, fill, value} per region, never reordered
@@ -214,12 +215,18 @@ const BUILD_PER_SEC = 595;       // at speed 1, the same 100:7 as before
 const MAX_FRAME_MS = 250;
 
 const BAR_ROW_H = 18;     // must match .bar-row height in style.css
-/* The results panel's own clock, slower than the map's. Five redraws a second
- * made the bars jump about: the rows are re-ranked on every draw, so a region
- * that has barely moved can still cross two neighbours and slide up the list,
- * and at that rate the whole column shimmers. Once a second is slow enough to
- * read a row while it moves, and still keeps up with anything worth watching.
- * The pie and the region view keep time with it, being the same panel. */
+/* Two clocks for the results panel, by what the thing being drawn does when it
+ * changes rather than by which panel it is in.
+ *
+ * A pie only turns: a wedge grows, its neighbours give way, and the shape is
+ * legible at any speed. Those keep the map's own pace, and look better for it.
+ *
+ * A list reorders. The bars are re-ranked on every draw, so a region that has
+ * barely moved can still cross two neighbours and jump up the column; the STV
+ * stages are rebuilt row by row and shuffle the same way. At five draws a
+ * second neither can be followed. Once a second is slow enough to read a row
+ * while it moves and still keeps up with anything worth watching. */
+const PIE_INTERVAL = 200;  // five redraws a second, with the map
 const BAR_INTERVAL = 1000; // one redraw a second
 
 /* What the bars can show: one per score term that has a weight slider. Each
@@ -1719,12 +1726,19 @@ function tick(map) {
       }
       paintRegions(map);
       readout();
-      // The results panel redraws on its own slower clock, and is bounded by
-      // the frame rate: below one frame a second it follows that instead.
-      if (now - run.lastBars >= BAR_INTERVAL) {
-        run.lastBars = now;
-        if (panelView === 'region') drawRegion();
-        else { drawBars(); drawPie(); }
+      // Both clocks are bounded by the frame rate: neither can outpace it.
+      const slow = now - run.lastBars >= BAR_INTERVAL;
+      const fast = now - run.lastPie >= PIE_INTERVAL;
+      if (slow) run.lastBars = now;
+      if (fast) run.lastPie = now;
+      if (panelView === 'region') {
+        // One call draws whichever the election calls for, so it answers to
+        // whichever clock that one keeps: the votes pie to the fast one, the
+        // STV stages to the slow one.
+        if (run.model.electionType === 'stv' ? slow : fast) drawRegion();
+      } else {
+        if (fast) drawPie();
+        if (slow) drawBars();
       }
     }
     run.raf = requestAnimationFrame(frame);
@@ -1745,6 +1759,7 @@ function start(map) {
     run.paused = false;
     run.lastDraw = 0;
     run.lastBars = 0;
+    run.lastPie = 0;
     setButtons('running');
     showResults(true);
     els.resultsList.hidden = false;
@@ -1787,6 +1802,7 @@ function start(map) {
   run.paused = false;
   run.lastDraw = 0;
   run.lastBars = 0;
+  run.lastPie = 0;
   setButtons('running');
   showResults(true);
   els.resultsList.hidden = false;  // bars are live from the first build step
