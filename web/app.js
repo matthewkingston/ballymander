@@ -1431,6 +1431,22 @@ const VEIL_OPACITY = [
 let veiledRegion = null;
 let veilShadow = null;
 
+/* Where the pointer is and what was under it when it last moved. The map moves
+ * under a still pointer all through a run, so the hover has to be recomputed
+ * from this rather than only when the mouse does something. */
+let hoverAt = null;
+
+/* Re-answer the question the pointer is asking, without it having to ask again:
+ * which region the zone under it belongs to now, and what that region's figures
+ * come to now. The zone's own properties do not change during a run, so they
+ * are reused rather than queried. */
+function refreshHover(map) {
+  if (!hoverAt) return;
+  const region = run.model ? run.model.regionOf(hoverAt.id) : null;
+  veilRegion(map, region == null || region < 0 ? null : region);
+  showTooltip(hoverAt.point, hoverAt.props);
+}
+
 function veilRoom(n) {
   if (!veilShadow || veilShadow.length !== n) veilShadow = new Uint8Array(n);
   return veilShadow;
@@ -1469,6 +1485,7 @@ function veilRegion(map, region) {
 function paintRegions(map) {
   const { model, shadow } = run;
   const worn = veilRoom(model.n);
+  let underPointer = false;
   for (let z = 0; z < model.n; z++) {
     const region = model.assign[z];
     if (shadow[z] === region || region < 0) continue;
@@ -1476,7 +1493,12 @@ function paintRegions(map) {
     const veil = region === veiledRegion;
     worn[z] = veil ? 1 : 0;
     map.setFeatureState({ source: SRC, id: model.codes[z] }, { region, veil });
+    if (hoverAt && model.codes[z] === hoverAt.id) underPointer = true;
   }
+  // The zone the pointer is on changed hands. The veil belongs to its new
+  // region now, and everything the tooltip says about a region is about a
+  // different region. Done after the loop, since re-veiling walks the zones.
+  if (underPointer) refreshHover(map);
 }
 
 function clearRegions(map) {
@@ -1635,6 +1657,7 @@ function wireHover(map) {
       map.setFeatureState({ source: SRC, id: hovered }, { hover: false });
       hovered = null;
     }
+    hoverAt = null;
     veilRegion(map, null);
     els.tooltip.hidden = true;
   };
@@ -1649,11 +1672,8 @@ function wireHover(map) {
       hovered = f.id;
       map.setFeatureState({ source: SRC, id: hovered }, { hover: true });
     }
-    // Null while the map is still being built, or where a zone has no region
-    // yet: then only the zone is veiled, which is all there is to say.
-    const region = run.model ? run.model.regionOf(f.id) : null;
-    veilRegion(map, region == null || region < 0 ? null : region);
-    showTooltip(e.point, f.properties);
+    hoverAt = { id: f.id, point: e.point, props: f.properties };
+    refreshHover(map);
   });
 
   // Clicking a zone chooses the region shown in detail. Only while that view
@@ -1896,6 +1916,11 @@ function tick(map) {
         if (fast) drawPie();
         if (slow) drawBars();
       }
+      // The tooltip reports a region's population, its demographics and its
+      // standings, all of which move every frame. Keeping the pointer still is
+      // not a request to freeze them, so they keep the results panel's own
+      // slower clock -- fast enough to be live, slow enough to read.
+      if (slow) refreshHover(map);
     }
     run.raf = requestAnimationFrame(frame);
   };
