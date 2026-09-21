@@ -500,7 +500,11 @@ html, body {
   flex-direction: column;
   width: 236px;
   max-height: calc(100% - 32px);
-  padding: 14px 16px 12px;
+  /* No bottom padding: a scroll container clips at its padding box, so
+     whatever sits in the bottom padding is inside the scrolling area and the
+     bars showed through it under the sticky axis. The gap below the panel's
+     content is given to the content instead, where it scrolls with it. */
+  padding: 14px 16px 0;
   background: var(--panel-bg);
   border: 1px solid var(--rule);
   border-radius: 8px;
@@ -512,7 +516,12 @@ html, body {
 }
 
 /* The panel is the only thing that scrolls, so nothing below it is asked to
-   shrink: each block stands at its natural height and the panel carries them. */
+   shrink: each block stands at its natural height and the panel carries them.
+   The bottom gap belongs to whichever view is showing, the panel having given
+   its own away so the sticky axis can reach the foot of the scrolling area. */
+#overall, #region-view {
+  padding-bottom: 12px;
+}
 #overall {
   display: flex;
   flex-direction: column;
