@@ -481,6 +481,8 @@ election.pie = await page.evaluate(() => {
     regions: m.N,
     lastRowIsParty: document.getElementById('run').lastElementChild
       .querySelector('#run-var-party-dup') !== null,
+    // Says what to do until a wedge has been pointed at.
+    caption: document.getElementById('pie-caption').textContent.trim(),
   };
 });
 const biggest = await page.evaluate(() => {
@@ -494,7 +496,13 @@ const biggest = await page.evaluate(() => {
 });
 await page.mouse.move(biggest.x, biggest.y);
 await page.evaluate(() => new Promise(r => setTimeout(r, 250)));
-election.pie.caption = await page.evaluate(() =>
+election.pie.hovered = await page.evaluate(() =>
+  document.getElementById('pie-caption').textContent.trim());
+// And it stays on that party once the pointer has gone: a reading you can only
+// have while hovering is one you cannot read while the map moves under it.
+await page.mouse.move(biggest.x - 400, biggest.y - 200);
+await page.evaluate(() => new Promise(r => setTimeout(r, 300)));
+election.pie.afterLeaving = await page.evaluate(() =>
   document.getElementById('pie-caption').textContent.trim());
 
 await page.mouse.move(pt.x - 30, pt.y - 30);
@@ -973,8 +981,15 @@ if (!election || election.pie.drawn !== election.pie.withSeats) {
 if (!election || election.pie.total !== election.pie.regions) {
   problems.push('pie seats do not add up to the regions');
 }
-if (!election || !/\u2014 \d+ seats?$/.test(election.pie.caption || '')) {
-  problems.push(`pie caption wrong on hover (${election && election.pie.caption})`);
+if (!election || election.pie.caption !== 'Scroll over to see individual results') {
+  problems.push(`pie caption should say what to do first (${election && election.pie.caption})`);
+}
+if (!election || !/\u2014 \d+ seats?$/.test(election.pie.hovered || '')) {
+  problems.push(`pie caption wrong on hover (${election && election.pie.hovered})`);
+}
+if (!election || election.pie.afterLeaving !== election.pie.hovered) {
+  problems.push('pie caption did not stay on the party once the pointer left ('
+    + (election && `${election.pie.hovered} -> ${election.pie.afterLeaving}`) + ')');
 }
 if (!election || !election.pie.lastRowIsParty) {
   problems.push('party readout is not last in the results block');

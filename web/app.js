@@ -541,20 +541,57 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 let pieWedges = [];
 let pieShown = '';
 
+/* The caption says what to do until it has something to say. After the first
+ * wedge is pointed at it follows that party for good, live, rather than going
+ * blank the moment the pointer leaves -- a figure that vanishes when you look
+ * away is a figure you cannot read while the map moves under it. */
+const PIE_HINT = 'Scroll over to see individual results';
+let pieTracked = null;
+
 function buildPie(parties) {
   els.pieSvg.textContent = '';
   pieWedges = parties.map((party) => {
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('fill', PARTY_COLORS[party] || '#9aa7b4');
     path.addEventListener('mouseenter', () => {
-      const seats = run.model ? run.model.partySeats(`party:${party}`) : 0;
-      els.pieCaption.textContent =
-        `${entityLabel(party)} — ${seats} ${seats === 1 ? 'seat' : 'seats'}`;
+      pieTracked = party;
+      showPieCaption();
     });
-    path.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
     els.pieSvg.append(path);
     return { party, path, seats: 0 };
   });
+}
+
+/* Which party the caption should be reading. The tracked one while it is still
+ * an entity; its host if it has since been merged into one; and otherwise the
+ * next entity down the pie's own order, a party off the ballot having no seats
+ * to report. The search stops only at a party that stands for itself, so it
+ * cannot land back inside the merger it has just left. */
+function trackedEntity() {
+  if (!pieTracked || !voters) return null;
+  const order = voters.parties;
+  const start = order.indexOf(pieTracked);
+  if (start < 0) return null;
+  for (let i = 0; i < order.length; i++) {
+    const party = order[(start + i) % order.length];
+    const item = entityFor(party);
+    if (!item || !item.standing) continue;
+    if (i === 0 || itemHost(item) === party) return itemHost(item);
+  }
+  return null;
+}
+
+function showPieCaption() {
+  const host = trackedEntity();
+  if (!host || !run.model) {
+    els.pieCaption.textContent = PIE_HINT;
+    return;
+  }
+  // Zero is a reading, not a blank: a party still on the ballot that has been
+  // drawn out of every seat is exactly what somebody would be watching for.
+  const seats = run.model.partySeats(`party:${host}`);
+  els.pieCaption.textContent =
+    `${entityLabel(host)} — ${seats} ${seats === 1 ? 'seat' : 'seats'}`;
 }
 
 /* A wedge from `from` to `to` radians, clockwise from twelve o'clock. A single
@@ -584,6 +621,7 @@ function drawPie() {
     wedge.path.setAttribute('d', seats[i] > 0 ? wedgePath(from, to) : '');
     from = to;
   });
+  showPieCaption();
 }
 
 /* --- the party editor ---------------------------------------------------- */
@@ -2024,7 +2062,6 @@ async function main() {
     els.tactical.addEventListener('change', recount);
     els.standing.addEventListener('change', recount);
     els.bonus.addEventListener('change', recount);
-    els.pieSvg.addEventListener('mouseleave', () => { els.pieCaption.innerHTML = '&nbsp;'; });
   }
 
   // The page opens with one variable, which is what a variable is for: an

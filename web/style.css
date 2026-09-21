@@ -845,11 +845,16 @@ html, body {
   cursor: default;
 }
 #pie-svg path:hover { stroke: var(--ink); stroke-width: 0.03; }
+/* The instruction is longer than any party's line, so this wraps rather than
+   truncating -- an ellipsised instruction is no instruction -- and holds two
+   lines' height either way, so the pie does not jump when the sentence gives
+   way to a figure. Party names still get the ellipsis, being one line. */
 #pie-caption {
   margin-top: 4px;
+  min-height: 2.9em;
   font-size: 11.5px;
+  line-height: 1.45;
   color: var(--ink-muted);
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
