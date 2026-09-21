@@ -981,7 +981,7 @@ if (!election || election.pie.drawn !== election.pie.withSeats) {
 if (!election || election.pie.total !== election.pie.regions) {
   problems.push('pie seats do not add up to the regions');
 }
-if (!election || election.pie.caption !== 'Scroll over to see individual results') {
+if (!election || election.pie.caption !== 'Hover over to see individual results') {
   problems.push(`pie caption should say what to do first (${election && election.pie.caption})`);
 }
 if (!election || !/\u2014 \d+ seats?$/.test(election.pie.hovered || '')) {

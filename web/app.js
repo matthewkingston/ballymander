@@ -545,7 +545,7 @@ let pieShown = '';
  * wedge is pointed at it follows that party for good, live, rather than going
  * blank the moment the pointer leaves -- a figure that vanishes when you look
  * away is a figure you cannot read while the map moves under it. */
-const PIE_HINT = 'Scroll over to see individual results';
+const PIE_HINT = 'Hover over to see individual results';
 let pieTracked = null;
 
 function buildPie(parties) {
