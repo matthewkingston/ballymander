@@ -1405,8 +1405,12 @@ function fillExpression(colors) {
  * crosses -- re-parses the source's tiles on a GeoJSON layer, which on a real
  * map is dozens of re-tiles a second: the map goes to pieces and redraws itself
  * low-poly, with gaps, for as long as the pointer keeps moving. */
-const VEIL_REGION = 0.16;
-const VEIL_ZONE = 0.4;
+/* The region's veil was 0.16 and read as barely there. The zone's goes up with
+ * it, keeping the step between them roughly what it was -- the two tiers have
+ * to stay apart, and the zone's dark outline is not on its own enough to say
+ * which zone when the region around it is this light. */
+const VEIL_REGION = 0.28;
+const VEIL_ZONE = 0.52;
 
 /* A layer of its own, above the colours and below the borders. It could instead
  * be mixed into the fill's own colour, which saves a pass -- but that colour is
