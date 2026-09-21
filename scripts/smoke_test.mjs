@@ -522,6 +522,31 @@ election.tip = await page.evaluate(() => {
 });
 await page.screenshot({ path: `${OUT}/map-election.png` });
 
+// The election is reported whether or not anything is steering it, and a party
+// on the page keeps its row without keeping its colour. Turning DUP's weight
+// off used to take the whole standings block away with it.
+const dupWeight = (v) => page.evaluate((x) => {
+  const w = document.getElementById('ctl-party-dup-w');
+  w.value = x === 'off' ? w.min : x;
+  w.dispatchEvent(new Event('input', { bubbles: true }));
+}, v);
+await dupWeight('off');
+await page.mouse.move(pt.x - 30, pt.y - 30);
+await page.mouse.move(pt.x, pt.y, { steps: 8 });
+await page.evaluate(() => new Promise(r => setTimeout(r, 600)));
+election.unsteered = await page.evaluate(() => {
+  const t = document.getElementById('tooltip');
+  const rows = [...t.querySelectorAll('.tt-party-row')];
+  return {
+    rows: rows.length,
+    lit: rows.filter((r) => r.classList.contains('is-target')).length,
+    keptDup: rows.some((r) => /DUP/.test(r.innerText)),
+    demoLines: [...t.querySelectorAll('.tt-demo div')].filter((e) => !e.hidden).length,
+    zoneParty: t.querySelector('.tt-party')?.innerText.trim(),
+  };
+});
+await dupWeight('0');            // log10, so back to weight 1
+
 // Switching to STV re-counts the regions already on the map, so this needs no
 // second run: the same lines, counted a different way.
 await page.evaluate(() => {
@@ -972,6 +997,12 @@ if (!election || !election.tip
 }
 if (!election || election.tip.demoHidden) {
   problems.push('tooltip dropped the demographic lines, which now share it with the parties');
+}
+if (!election || !election.unsteered || election.unsteered.rows !== 5
+    || election.unsteered.lit !== 0 || !election.unsteered.keptDup
+    || !election.unsteered.demoLines || !/votes?\b/.test(election.unsteered.zoneParty || '')) {
+  problems.push('tooltip did not keep the election and the variables with nothing steered: '
+    + JSON.stringify(election && election.unsteered));
 }
 if (!election || !election.pie.shown) problems.push('seats pie missing in election mode');
 if (!election || election.pie.wedges !== 9) problems.push('a party is missing from the pie');

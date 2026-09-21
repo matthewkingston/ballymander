@@ -855,15 +855,25 @@ A party can be excluded after winning a seat: at party level its leftover pile
 is what remains once a quota is spent, and that pile can be the smallest left
 in the count.
 
-The hidden mode's terms are switched off rather than left steering unseen, and
-the results panel, the statistic selector and the tooltip all show only the
-active mode's figures. The bars show a party's votes per region and mark the
+The bars show a party's votes per region and mark the
 regions it wins — with the seat count alongside when a region returns several
 — a pie gives the seats every party took (hover a wedge to name it), and the
 tooltip lists a region's top five parties with the selected one highlighted.
 
-The tooltip accents a line whenever the run is weighting that term, which is
-the same thing the party highlight means. Population is one of those lines —
+Three rules hold across the tooltip, and between them they decide everything in
+it:
+
+* **The election is always reported.** It is the map's result rather than any
+  one variable's readout, so the region's standings are there whenever there is
+  an election, exactly as the seats pie is.
+* **Every variable on the page is always in it**, a party's own row included —
+  promoted into the standings with its rank if it falls outside the top five.
+  Putting a variable on the page is the act of asking about it.
+* **A variable being steered is accented.** Weights are read off the sliders
+  rather than the model, so the colour follows one being dragged, run or no run.
+
+The first two are about what is shown and the third about how, which is why a
+party can be listed without being lit. Population is one of those lines —
 written "population 105,250", set like "religion 0.705" beside it, and always
 accented, its weight slider having no off.
 

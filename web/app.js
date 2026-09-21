@@ -1383,14 +1383,23 @@ function clearRegions(map) {
 
 /* --- interaction --------------------------------------------------------- */
 
-/* The tooltip shows the variables being steered -- falling back to all of them
- * when none is, since an idle map should still let you read a zone's figures.
- * Read off the sliders rather than the model so it follows a weight being
- * dragged, run or no run. */
-function activeVars() {
-  const on = variables.filter((v) => weightOf(v.w) > 0);
-  return on.length ? on : variables;
-}
+/* Three rules hold across the whole tooltip.
+ *
+ *   The election is always reported, as the seats pie always is -- it is the
+ *   map's result, not one variable's readout, and it used to vanish the moment
+ *   a demographic outvoted a party for the panel's attention.
+ *
+ *   Every variable on the page is always here, a party's own row included:
+ *   putting one on the page is the act of asking about it.
+ *
+ *   A variable being steered is accented. Weights are read off the sliders
+ *   rather than the model, so the colour follows one being dragged, run or no
+ *   run.
+ *
+ * The first two are about what is shown and the third about how, which is why
+ * a party can be listed without being lit.
+ */
+const steering = (v) => weightOf(v.w) > 0;
 
 function showTooltip(point, props) {
   els.ttName.textContent = props.name || props.code;
@@ -1401,28 +1410,30 @@ function showTooltip(point, props) {
   const popSteered = weightOf(els.popw) > 0;
   els.ttPopLine.classList.toggle('is-steered', popSteered);
   els.ttRegionPopLine.classList.toggle('is-steered', popSteered);
-  const shown = new Set(activeVars());
   for (const v of variables) {
-    const show = shown.has(v);
-    const steered = weightOf(v.w) > 0;
+    const steered = steering(v);
     v.tip.classList.toggle('is-steered', steered);
     v.regionTip.classList.toggle('is-steered', steered);
     if (v.isParty) {
       const share = elect.share(props.code, v.party);
       const votes = Math.round(elect.votes(props.code) * share);
-      v.tip.textContent = show ? `${varFullLabel(v)} ${nf.format(votes)} `
-        + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(share)})` : '';
-      v.tip.hidden = !show;
+      v.tip.textContent = `${varFullLabel(v)} ${nf.format(votes)} `
+        + `${votes === 1 ? 'vote' : 'votes'} (${pct.format(share)})`;
+      v.tip.hidden = false;
     } else {
+      // A demographic can still be missing its figure for a zone, which is a
+      // fact about the data rather than about what is being steered.
       const value = props[v.def.field];
-      const ok = show && typeof value === 'number';
+      const ok = typeof value === 'number';
       v.tip.textContent = ok
         ? `${varFullLabel(v).toLowerCase()} ${value.toFixed(v.def.decimals)}` : '';
       v.tip.hidden = !ok;
     }
   }
-  const party = Boolean(voters) && variables.some((v) => v.isParty && shown.has(v));
-  els.ttParty.hidden = !variables.some((v) => v.isParty && shown.has(v));
+  // The election is the map's result, so it is reported wherever there is one
+  // to report; the zone's per-party lines need a party on the page to be about.
+  const party = Boolean(voters);
+  els.ttParty.hidden = !variables.some((v) => v.isParty);
 
   const region = run.model && run.model.regionOf(props.code);
   if (region == null) {
@@ -1433,7 +1444,7 @@ function showTooltip(point, props) {
     els.ttRegionPop.textContent = nf.format(Math.round(run.model.regionPop[region]));
     for (const v of variables) {
       if (v.isParty) continue;
-      const show = shown.has(v) && run.model.demoByKey[v.key] !== undefined;
+      const show = run.model.demoByKey[v.key] !== undefined;
       v.regionTip.textContent = show
         ? `${varFullLabel(v).toLowerCase()} `
           + `${run.model.regionDemo(v.key, region).toFixed(v.def.decimals)}`
@@ -1445,8 +1456,12 @@ function showTooltip(point, props) {
       // The region's result, strongest first, so the winner is the top row.
       // The parties being steered are highlighted; if one misses the top five,
       // the fifth row gives way to it and carries its rank.
-      const targets = new Set(variables.filter((v) => v.isParty && shown.has(v))
-        .map((v) => v.key));
+      // On the page is what earns a row -- promoted with its rank if it is
+      // outside the top five. Being steered is what earns the colour. A party
+      // sitting at zero weight is still one you asked about.
+      const onPage = variables.filter((v) => v.isParty);
+      const targets = new Set(onPage.map((v) => v.key));
+      const lit = new Set(onPage.filter(steering).map((v) => v.key));
       const standings = voters.parties
         .filter((name) => entityHost(name) === name)
         .map((name) => ({
@@ -1464,7 +1479,7 @@ function showTooltip(point, props) {
       els.ttRegionParty.textContent = '';
       for (const row of rows) {
         els.ttRegionParty.append(el('div', {
-          class: targets.has(row.key) ? 'tt-party-row is-target' : 'tt-party-row',
+          class: lit.has(row.key) ? 'tt-party-row is-target' : 'tt-party-row',
         }, ...(row.rank ? [el('span', { class: 'tt-party-rank', text: `${row.rank}.` })] : []),
            el('span', { class: 'tt-party-name', text: row.name }),
            el('span', { class: 'tt-party-votes',
