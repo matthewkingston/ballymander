@@ -603,20 +603,26 @@ function toggleNote(marker, note) {
 
 /* Give every labelled row in the panel a marker, skipping the ones that have
  * one already, so this can be called again whenever rows are added. */
+/* A marker and the note it opens, as a pair. */
+function makeInfo() {
+  const marker = el('button', {
+    class: 'info-mark', type: 'button', 'aria-expanded': 'false',
+    'aria-label': 'About this setting', text: 'i',
+  });
+  const note = el('div', { class: 'info-note', hidden: true },
+    INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
+  infoCount += 1;
+  marker.addEventListener('click', () => toggleNote(marker, note));
+  return { marker, note };
+}
+
 function addInfoMarkers() {
   // Direct children only. A label nested deeper is somebody else's -- the party
   // editor names each party with one -- and giving those a marker put an "i"
   // inside every party's name.
   for (const label of els.panelBody.querySelectorAll('.ctl-grid > label')) {
     if (label.querySelector('.info-mark')) continue;
-    const marker = el('button', {
-      class: 'info-mark', type: 'button', 'aria-expanded': 'false',
-      'aria-label': 'About this setting', text: 'i',
-    });
-    const note = el('div', { class: 'info-note', hidden: true },
-      INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
-    infoCount += 1;
-    marker.addEventListener('click', () => toggleNote(marker, note));
+    const { marker, note } = makeInfo();
     // Before the readout, not after it. A slider's label ends in a number that
     // changes as it is dragged, and a marker sitting after it slides about with
     // every digit; before it, the marker holds still and the number moves on
@@ -632,6 +638,16 @@ function addInfoMarkers() {
     // rather than between the label and the thing it labels.
     const control = label.nextElementSibling;
     (control || label).after(note);
+  }
+
+  // The party editor heads its own block rather than sitting in a labelled
+  // row, so the walk above does not reach it. Its note goes in the same grid,
+  // which puts it under the head and above the list of parties.
+  const head = els.partyEditor.querySelector('.ctl-head');
+  if (head && !head.querySelector('.info-mark')) {
+    const { marker, note } = makeInfo();
+    head.append(marker);
+    head.parentElement.append(note);
   }
 }
 
