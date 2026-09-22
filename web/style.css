@@ -204,7 +204,12 @@ html, body {
   border: 1px solid currentColor;
   border-radius: 50%;
   cursor: pointer;
+  /* The circle is 13px against an 11px line box and shares its top edge, so it
+     hangs below the text -- further below the capitals, which sit higher again
+     in the line. Lifted to put its middle where the eye expects it. Transform,
+     so the row's height is unchanged. */
   vertical-align: baseline;
+  transform: translateY(-2px);
   opacity: 0.6;
 }
 .info-mark:hover, .info-mark[aria-expanded="true"] {

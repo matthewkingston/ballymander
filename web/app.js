@@ -617,7 +617,17 @@ function addInfoMarkers() {
       INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
     infoCount += 1;
     marker.addEventListener('click', () => toggleNote(marker, note));
-    label.append(' ', marker);
+    // Before the readout, not after it. A slider's label ends in a number that
+    // changes as it is dragged, and a marker sitting after it slides about with
+    // every digit; before it, the marker holds still and the number moves on
+    // its own as it always did.
+    const readout = label.querySelector('span');
+    if (readout) {
+      label.insertBefore(marker, readout);
+      label.insertBefore(document.createTextNode(' '), readout);
+    } else {
+      label.append(' ', marker);
+    }
     // After the control the label names, so the note reads under its own row
     // rather than between the label and the thing it labels.
     const control = label.nextElementSibling;
