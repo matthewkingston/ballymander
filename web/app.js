@@ -603,12 +603,18 @@ function toggleNote(marker, note) {
 
 /* Give every labelled row in the panel a marker, skipping the ones that have
  * one already, so this can be called again whenever rows are added. */
-/* A marker and the note it opens, as a pair. */
-function makeInfo() {
-  const marker = el('button', {
+/* The marker on its own, so the width measurement can build one that is not
+ * attached to anything. */
+function infoMark() {
+  return el('button', {
     class: 'info-mark', type: 'button', 'aria-expanded': 'false',
     'aria-label': 'About this setting', text: 'i',
   });
+}
+
+/* A marker and the note it opens, as a pair. */
+function makeInfo() {
+  const marker = infoMark();
   const note = el('div', { class: 'info-note', hidden: true },
     INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
   infoCount += 1;
@@ -640,13 +646,20 @@ function addInfoMarkers() {
     (control || label).after(note);
   }
 
-  // The party editor heads its own block rather than sitting in a labelled
-  // row, so the walk above does not reach it. Its note goes in the same grid,
-  // which puts it under the head and above the list of parties.
-  const head = els.partyEditor.querySelector('.ctl-head');
-  if (head && !head.querySelector('.info-mark')) {
+  // A block that heads itself -- the party editor, and every variable -- has a
+  // .ctl-head where the others have a label, so the walk above does not reach
+  // it. The note goes at the end of the same grid, which for the editor puts it
+  // above the list of parties and for a variable below its weight slider:
+  // under its own row either way, as with the labels.
+  for (const head of els.panelBody.querySelectorAll('.ctl-grid > .ctl-head')) {
+    if (head.querySelector('.info-mark')) continue;
     const { marker, note } = makeInfo();
-    head.append(marker);
+    // Before the weight and the remove button for the same reason the labels
+    // put it before their readout: the figure changes width as the slider
+    // moves, and anything after it would shift with every digit.
+    const end = head.querySelector('.ctl-head-end');
+    if (end) head.insertBefore(marker, end);
+    else head.append(marker);
     head.parentElement.append(note);
   }
 }
@@ -2260,6 +2273,10 @@ function sizeLabelColumn() {
     el('button', { class: 'demo-toggle', type: 'button' },
       el('span', { class: 'chev', text: '▸' }), ` ${LABEL_REFERENCE.name}`),
     el('span', { class: 'demo-mode-label', text: LABEL_REFERENCE.mode }),
+    // The real heads carry a marker, so the reference has to carry one too --
+    // measured without it, the column is about 19px short and the typical head
+    // wraps, which is exactly what this reference exists to prevent.
+    infoMark(),
     el('span', { class: 'ctl-head-end' },
       el('span', { text: LABEL_REFERENCE.weight }),
       el('button', { class: 'var-remove', type: 'button', text: '×' })));

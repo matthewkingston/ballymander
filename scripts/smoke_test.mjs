@@ -924,7 +924,33 @@ election.removed = await page.evaluate(() => {
 });
 election.electionOptions = electionOptions;
 
-console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, real, painted, errors, failed, external }, null, 2));
+// Every line of the panel offers a note, whether it is a labelled row or a
+// block that heads itself. The walk that attaches them is easy to break from
+// either end: too narrow a selector misses the heads, too broad a one put an
+// "i" inside every party's name in the editor.
+const markers = await page.evaluate(() => {
+  const seen = (sel) => [...document.querySelectorAll(sel)]
+    .filter((e) => e.getBoundingClientRect().height > 0);
+  const count = (e) => e.querySelectorAll(':scope > .info-mark').length;
+  return {
+    labels: seen('#panel-body .ctl-grid > label').length,
+    labelsBare: seen('#panel-body .ctl-grid > label').filter((l) => count(l) !== 1).length,
+    heads: seen('#panel-body .ctl-grid > .ctl-head').length,
+    headsBare: seen('#panel-body .ctl-grid > .ctl-head').filter((h) => count(h) !== 1).length,
+    // The marker goes before the weight and the remove button, so a readout
+    // changing width does not shove it sideways.
+    headsOutOfOrder: seen('#panel-body .ctl-grid > .ctl-head').filter((h) => {
+      const end = h.querySelector('.ctl-head-end');
+      const mark = h.querySelector('.info-mark');
+      return end && mark
+        && !(mark.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING);
+    }).length,
+    inPartyNames: document.querySelectorAll('.pe-name .info-mark').length,
+    notes: document.querySelectorAll('.info-note').length,
+  };
+});
+
+console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, markers, real, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to
@@ -1335,6 +1361,10 @@ if (!pause || !pause.primary || pause.primary.idle !== 'ctl-go'
     + `(${pause && JSON.stringify(pause.primary)})`);
 }
 if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('resume did not restart the run');
+if (!markers || !markers.labels || !markers.heads || markers.labelsBare || markers.headsBare
+    || markers.headsOutOfOrder || markers.inPartyNames) {
+  problems.push(`info markers did not reach every line: ${JSON.stringify(markers)}`);
+}
 if (problems.length) {
   console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);
   process.exit(1);
