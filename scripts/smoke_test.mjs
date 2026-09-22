@@ -638,7 +638,13 @@ election.stv = await page.evaluate(() => {
       bonus: !document.getElementById('ctl-bonus').hidden,
       // The label is 'Goal' whatever the variable; the options carry the
       // meaning, and a party's are Win/Lose rather than above/below a margin.
-      goalLabel: document.querySelector('label[for="ctl-party-dup-a"]').textContent,
+      // Without the info marker, which every control label now carries.
+      goalLabel: (() => {
+        const l = document.querySelector('label[for="ctl-party-dup-a"]').cloneNode(true);
+        const mark = l.querySelector('.info-mark');
+        if (mark) mark.remove();
+        return l.textContent.trim();
+      })(),
       goalOptions: [...document.getElementById('ctl-party-dup-a').options]
         .map((o) => `${o.value}:${o.textContent}`),
       goal: document.getElementById('ctl-party-dup-a').value,

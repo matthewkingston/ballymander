@@ -552,6 +552,77 @@ function applyVariables() {
   rebuildAddMenu();
   rebuildBarOptions();
   applyElectionType();
+  addInfoMarkers();
+}
+
+/* --- info markers -------------------------------------------------------- */
+
+/* A marker beside every labelled control, opening a longer note under the row
+ * it belongs to. Deliberately not a hover tooltip: this is for the paragraph
+ * you read once when you first meet a control, which a tooltip you have to
+ * keep a pointer inside is a poor place for.
+ *
+ * PLACEHOLDER. Every note below is lorem ipsum, and the three lengths exist
+ * only so that the layout is exercised at its messiest -- what the notes
+ * actually say is not written yet and is not for this file to decide.
+ *
+ * The markers are attached by walking the panel rather than written into the
+ * markup twenty-odd times, because the rows are half static and half generated
+ * from the variables, and this way both get one from the same line of code. */
+const INFO_PLACEHOLDER = [
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod '
+  + 'tempor incididunt ut labore et dolore magna aliqua.',
+  'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut '
+  + 'aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit '
+  + 'in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+  'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia '
+  + 'deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste '
+  + 'natus error sit voluptatem accusantium doloremque laudantium, totam rem '
+  + 'aperiam eaque ipsa quae ab illo inventore veritatis.',
+];
+let infoCount = 0;
+let openNote = null;
+
+function closeNote() {
+  if (!openNote) return;
+  openNote.note.hidden = true;
+  openNote.marker.setAttribute('aria-expanded', 'false');
+  openNote = null;
+}
+
+/* One at a time: two open notes in a 398px column is a wall of text, and the
+ * question being asked is always about one control. */
+function toggleNote(marker, note) {
+  const wasOpen = openNote && openNote.note === note;
+  closeNote();
+  if (wasOpen) return;
+  note.hidden = false;
+  marker.setAttribute('aria-expanded', 'true');
+  openNote = { marker, note };
+}
+
+/* Give every labelled row in the panel a marker, skipping the ones that have
+ * one already, so this can be called again whenever rows are added. */
+function addInfoMarkers() {
+  // Direct children only. A label nested deeper is somebody else's -- the party
+  // editor names each party with one -- and giving those a marker put an "i"
+  // inside every party's name.
+  for (const label of els.panelBody.querySelectorAll('.ctl-grid > label')) {
+    if (label.querySelector('.info-mark')) continue;
+    const marker = el('button', {
+      class: 'info-mark', type: 'button', 'aria-expanded': 'false',
+      'aria-label': 'About this setting', text: 'i',
+    });
+    const note = el('div', { class: 'info-note', hidden: true },
+      INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
+    infoCount += 1;
+    marker.addEventListener('click', () => toggleNote(marker, note));
+    label.append(' ', marker);
+    // After the control the label names, so the note reads under its own row
+    // rather than between the label and the thing it labels.
+    const control = label.nextElementSibling;
+    (control || label).after(note);
+  }
 }
 
 /* --- seats pie ----------------------------------------------------------- */
@@ -1091,6 +1162,7 @@ function wireVariable(v) {
  * `.real-only` is not here: it is set once, if the boundaries file fails to
  * load, and nothing toggles it afterwards. */
 function applyVisibility() {
+  closeNote();
   const stv = els.electionType.value === 'stv';
   // Tactical voting is a first-past-the-post affair; under STV a lower
   // preference costs a voter nothing.

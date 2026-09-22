@@ -181,6 +181,53 @@ html, body {
   gap: 4px 16px;
 }
 .ctl-checks[hidden] { display: none; }
+/* --- info markers --------------------------------------------------------- */
+/* A small circled i at the end of a control's label, opening the note below the
+   row. Quiet by default: there is one on every row, and twenty markers shouting
+   at once would be worse than no markers at all. */
+.info-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  padding: 0;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-muted);
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  cursor: pointer;
+  vertical-align: baseline;
+  opacity: 0.6;
+}
+.info-mark:hover, .info-mark[aria-expanded="true"] {
+  color: var(--accent);
+  opacity: 1;
+}
+.info-mark:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* The note runs the full width under the row it belongs to, rather than in the
+   control column, because it is prose and the control column is 133px. */
+.info-note {
+  grid-column: 1 / -1;
+  margin: 1px 0 3px;
+  padding: 7px 9px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: rgba(94, 137, 194, 0.08);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+}
+.info-note[hidden] { display: none; }
+
 /* --- the menu ------------------------------------------------------------ */
 /* Three bars in the corner of the gable. The artwork has nothing there, and the
    panel has no room for a bar of its own. */
