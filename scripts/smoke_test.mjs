@@ -947,6 +947,18 @@ const markers = await page.evaluate(() => {
     }).length,
     inPartyNames: document.querySelectorAll('.pe-name .info-mark').length,
     notes: document.querySelectorAll('.info-note').length,
+    // A control whose copy was never written falls back to lorem ipsum. In
+    // basic mode nothing should: every row on offer there has copy, so a new
+    // row arriving without any is meant to fail here rather than ship.
+    advanced: document.getElementById('ctl-advanced').checked,
+    loremShowing: [...document.querySelectorAll('#panel-body .info-note')]
+      .filter((n) => /Lorem ipsum|Ut enim ad minim|Excepteur sint/.test(n.textContent))
+      .filter((n) => {
+        // The note itself is hidden until opened; it is the row it belongs to
+        // that says whether this control is on offer.
+        const row = n.previousElementSibling;
+        return row && row.getBoundingClientRect().height > 0;
+      }).length,
   };
 });
 
@@ -1364,6 +1376,10 @@ if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('
 if (!markers || !markers.labels || !markers.heads || markers.labelsBare || markers.headsBare
     || markers.headsOutOfOrder || markers.inPartyNames) {
   problems.push(`info markers did not reach every line: ${JSON.stringify(markers)}`);
+}
+if (markers && !markers.advanced && markers.loremShowing) {
+  problems.push(`${markers.loremShowing} control(s) on offer in basic mode still `
+    + `show placeholder copy`);
 }
 if (problems.length) {
   console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);

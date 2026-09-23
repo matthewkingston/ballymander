@@ -562,13 +562,14 @@ function applyVariables() {
  * you read once when you first meet a control, which a tooltip you have to
  * keep a pointer inside is a poor place for.
  *
- * PLACEHOLDER. Every note below is lorem ipsum, and the three lengths exist
- * only so that the layout is exercised at its messiest -- what the notes
- * actually say is not written yet and is not for this file to decide.
- *
  * The markers are attached by walking the panel rather than written into the
  * markup twenty-odd times, because the rows are half static and half generated
- * from the variables, and this way both get one from the same line of code. */
+ * from the variables, and this way both get one from the same line of code.
+ *
+ * The copy is Matt's and is reproduced verbatim, asterisks and all: those mark
+ * the longer pages it wants to link to, which are not written yet. The
+ * advanced-only controls have no copy yet either and keep the placeholder
+ * below until they do. */
 const INFO_PLACEHOLDER = [
   'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod '
   + 'tempor incididunt ut labore et dolore magna aliqua.',
@@ -580,6 +581,141 @@ const INFO_PLACEHOLDER = [
   + 'natus error sit voluptatem accusantium doloremque laudantium, totam rem '
   + 'aperiam eaque ipsa quae ab illo inventore veritatis.',
 ];
+
+/* One note per static control, keyed by the id its label already points at. */
+const INFO_NOTES = {
+  'ctl-real':
+    "'Custom' starts a new map from scratch, seeding and growing regions "
+    + 'randomly, and optimising for the set outcomes as it goes. Alternatively '
+    + 'you can apply an approximation of real-life electoral boundaries from '
+    + 'the 2024 Westminster; 2022 Assembly; or 2023 local council elections. '
+    + 'You can see statistics and manipulate things (like changing which '
+    + 'parties stand, or merging parties) with those boundaries as-is, or run '
+    + 'the simulation and use them as a starting point from which to draw new '
+    + 'electoral regions.',
+  'ctl-n':
+    "Sets the number of simulated regions. Once the simulation starts, this "
+    + "can't be changed.",
+  'ctl-seed':
+    "Seeds random number generator - in 'Auto' mode this resets each run. Can "
+    + 'be manually set to reproduce a given result predictably.',
+  'ctl-election-type':
+    "Structure of the election run in the regions. 'FPTP' - First Past the "
+    + "Post. 'STV' - Single Transferable Vote.",
+  'ctl-seats': 'Number of seats awarded per region.',
+  'ctl-standing':
+    "When on, parties won't necessarily stand in elections where they will get "
+    + 'votes below the threshold. Threshold values are an approximation, set by '
+    + 'party and election type based on their past behaviour.',
+  'ctl-tactical':
+    'When on, voters have a tendency to switch party allegiance in elections '
+    + 'where both:\n'
+    + '1. Their own preferred party has no chance of winning.\n'
+    + '2. The race is close between other parties at the top.\n'
+    + 'The party they switch to is determined from their existing simulated '
+    + 'party preferences and the viability of the other parties. Only available '
+    + 'in FPTP elections.',
+  'ctl-temp':
+    "Informally, sets how 'randomly' the simulation behaves when optimising. At "
+    + 'high temperatures, it will change more dramatically and explore a '
+    + 'broader space of possibilities. At lower temperatures, it will stabilise '
+    + 'around its local optimal solution. For more details see *****.',
+  'ctl-speed':
+    'Scales how fast the underlying simulation process runs. Lower to see the '
+    + 'optimisations happening more clearly, or if the simulation is laggy.',
+  'ctl-popw':
+    'Sets how strongly the simulation attempts to keep the population of each '
+    + "region equal. Can't be turned off entirely.",
+  'ctl-compact':
+    'Very broadly, this sets how strongly the simulation attempts to keep the '
+    + "regions looking 'plausible' in terms of their shape and internal "
+    + 'population distribution. For a more complete explanation see ***.',
+};
+
+const INFO_EDITOR =
+  'Adjusts which parties are available to stand in the election; by default '
+  + 'all are included. Parties can also be merged. Actions are applied based '
+  + 'on checkbox selection.';
+
+/* A variable's own rows, keyed by the tail of the control id. {name} is the
+ * variable's name as its head shows it -- the party for a party, the short
+ * label for a demographic, so "the same average Age" rather than "the same
+ * average Average age". */
+const INFO_PARTY = {
+  w: 'Sets how strongly the simulation manipulates votes for {name}, in the '
+    + 'manner set by the controls below.',
+  mode: "Selects what the simulation's aim is. 'Gerrymander' aims to draw "
+    + 'regions so that {name} wins/loses as many seats as possible. For more '
+    + "info on gerrymandering see ***. 'Average' tries to make each region have "
+    + "the same share of {name} voters. 'Extreme' tries to make a map where "
+    + 'regions either have a very high or very low concentration of {name} '
+    + 'voters.',
+  a: 'Sets whether the simulation attempts to draw a map where {name} wins as '
+    + 'many, or as few, seats as possible.',
+};
+
+const INFO_DEMO = {
+  mode: "Selects what the simulation's aim is. 'Gerrymander' aims to draw "
+    + 'regions so that {name} is above/below the threshold in as many regions '
+    + "as possible. For more info on gerrymandering see ***. 'Average' tries to "
+    + "make each region have the same average {name}. 'Extreme' tries to make a "
+    + 'map where regions either have a very high or very low average {name}.',
+  t: 'Sets the value which the simulation tries to get above or below in as '
+    + 'many regions as possible. For an explanation of the parameterisation see '
+    + 'the info for the variable header.',
+  a: 'Sets whether the simulation aims to have regions above or below the '
+    + 'threshold you set above.',
+};
+
+/* Each demographic's head says what the variable is and where it came from, so
+ * there is no shared form for these the way there is for the parties. */
+const INFO_DEMO_HEAD = {
+  rel:
+    "Sets how strongly the simulation manipulates the 'average religious "
+    + "tendency'(?) per region, in the manner set by the controls below. Data "
+    + "from 2021 census 'Religion or Religion Brought Up In', parameterised as "
+    + "'Protestant and Other Christian (including Christian related)'=0; 'Other "
+    + "religions'='None'=0.5; 'Catholic'=1. Please don't read into which is 0 "
+    + 'and which 1. Overall the most NI variable.',
+  age:
+    'Sets how strongly the simulation manipulates the average age per region, '
+    + 'in the manner set by the controls below. Data from 2021 census.',
+  orient:
+    'Sets how strongly the simulation manipulates the average sexual '
+    + 'orientation per region, in the manner set by the controls below. In a '
+    + 'nutshell: the higher the value, the higher the fraction of self-reported '
+    + "non-straight people. Data from 2021 census 'Sexual Orientation', "
+    + "parameterised as 'Straight or heterosexual'=0; 'Gay, lesbian, bisexual, "
+    + "other sexual orientation'=1; other answers discarded.",
+  grade:
+    'Sets how strongly the simulation manipulates the average approximated '
+    + 'social grade per region, in the manner set by the controls below. Put '
+    + 'crudely, a larger number is a rough proxy for general wealth and '
+    + "middle-class status. Data from 2021 census 'Approximated Social Grade', "
+    + "parameterised as 'Semi-skilled and unskilled manual occupations; "
+    + "unemployed and lowest grade occupations'=0; 'C2: Skilled manual "
+    + "occupations'=1/3; 'C1: Supervisory, clerical, and junior managerial, "
+    + "administrative and professional occupations'=2/3; 'AB: Higher and "
+    + "intermediate managerial, administrative and professional "
+    + "occupations'=1; other answers discarded.",
+};
+
+/* Which note belongs to this label or head. A variable's rows are found by
+ * whose block they sit in rather than by parsing the slug out of the id, since
+ * a party slug carries dashes of its own (ctl-party-sinn-fein-mode). */
+function infoTextFor(node) {
+  const id = node.getAttribute('for');
+  const owner = variables.find((v) => v.block && v.block.contains(node));
+  if (owner) {
+    const part = id ? id.slice(id.lastIndexOf('-') + 1) : 'w';
+    const text = owner.isParty ? INFO_PARTY[part]
+      : (part === 'w' ? INFO_DEMO_HEAD[owner.key] : INFO_DEMO[part]);
+    return text ? text.replace(/\{name\}/g, varLabel(owner)) : null;
+  }
+  if (els.partyEditor && els.partyEditor.contains(node)) return INFO_EDITOR;
+  return (id && INFO_NOTES[id]) || null;
+}
+
 let infoCount = 0;
 let openNote = null;
 
@@ -612,12 +748,13 @@ function infoMark() {
   });
 }
 
-/* A marker and the note it opens, as a pair. */
-function makeInfo() {
+/* A marker and the note it opens, as a pair. A control with no copy written
+ * for it yet falls back to the placeholder rather than to an empty note. */
+function makeInfo(text) {
   const marker = infoMark();
   const note = el('div', { class: 'info-note', hidden: true },
-    INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
-  infoCount += 1;
+    text || INFO_PLACEHOLDER[infoCount % INFO_PLACEHOLDER.length]);
+  if (!text) infoCount += 1;
   marker.addEventListener('click', () => toggleNote(marker, note));
   return { marker, note };
 }
@@ -628,7 +765,7 @@ function addInfoMarkers() {
   // inside every party's name.
   for (const label of els.panelBody.querySelectorAll('.ctl-grid > label')) {
     if (label.querySelector('.info-mark')) continue;
-    const { marker, note } = makeInfo();
+    const { marker, note } = makeInfo(infoTextFor(label));
     // Before the readout, not after it. A slider's label ends in a number that
     // changes as it is dragged, and a marker sitting after it slides about with
     // every digit; before it, the marker holds still and the number moves on
@@ -653,7 +790,7 @@ function addInfoMarkers() {
   // under its own row either way, as with the labels.
   for (const head of els.panelBody.querySelectorAll('.ctl-grid > .ctl-head')) {
     if (head.querySelector('.info-mark')) continue;
-    const { marker, note } = makeInfo();
+    const { marker, note } = makeInfo(infoTextFor(head));
     // Before the weight and the remove button for the same reason the labels
     // put it before their readout: the figure changes width as the slider
     // moves, and anything after it would shift with every digit.

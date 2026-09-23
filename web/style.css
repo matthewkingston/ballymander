@@ -226,6 +226,9 @@ html, body {
   padding: 7px 9px;
   font-size: 11.5px;
   line-height: 1.5;
+  /* Newlines in a note are kept -- the tactical voting note numbers its two
+     conditions a line each -- while ordinary wrapping is left alone. */
+  white-space: pre-line;
   color: var(--ink);
   background: rgba(94, 137, 194, 0.08);
   border-left: 2px solid var(--accent);
