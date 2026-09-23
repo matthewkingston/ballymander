@@ -659,9 +659,11 @@ const INFO_PARTY = {
 const INFO_DEMO = {
   // {lower} rather than {name}: here the variable is a descriptor in the middle
   // of a sentence -- "the same average religion" -- not the title of the
-  // control, which is what it is in the head above.
+  // control, which is what it is in the head above. {subject} is the one place
+  // that wants a phrase of its own per variable rather than the bare name; see
+  // INFO_DEMO_SUBJECT.
   mode: "Selects what the simulation's aim is. 'Gerrymander' aims to draw "
-    + 'regions so that {lower} is above/below the threshold in as many regions '
+    + 'regions so that {subject} is above/below the threshold in as many regions '
     + "as possible. For more info on gerrymandering see ***. 'Average' tries to "
     + "make each region have the same average {lower}. 'Extreme' tries to make a "
     + 'map where regions either have a very high or very low average {lower}.',
@@ -670,6 +672,18 @@ const INFO_DEMO = {
     + 'the info for the variable header.',
   a: 'Sets whether the simulation aims to have regions above or below the '
     + 'threshold you set above.',
+};
+
+/* What the gerrymander clause calls the quantity it is pushing above or below
+ * the threshold. Three of the four are an index rather than a measurement of
+ * anything, and say so; age is a real average and does not. Carries its own
+ * article, since "the average age" and "the religion score" do not take one
+ * the same way. */
+const INFO_DEMO_SUBJECT = {
+  rel: 'the religion score',
+  age: 'the average age',
+  orient: 'the sexual orientation score',
+  grade: 'the social grade score',
 };
 
 /* Each demographic's head says what the variable is and where it came from, so
@@ -718,7 +732,8 @@ function infoTextFor(node) {
     if (!text) return null;
     const name = varLabel(owner);
     return text.replace(/\{name\}/g, name)
-      .replace(/\{lower\}/g, name.toLowerCase());
+      .replace(/\{lower\}/g, name.toLowerCase())
+      .replace(/\{subject\}/g, INFO_DEMO_SUBJECT[owner.key] || name.toLowerCase());
   }
   if (els.partyEditor && els.partyEditor.contains(node)) return INFO_EDITOR;
   return (id && INFO_NOTES[id]) || null;
