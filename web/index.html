@@ -33,25 +33,37 @@
       <img src="img/ballymander-wide.png" alt="Ballymander" width="1619" height="978">
     </h1>
 
-    <!-- What the panel becomes while the menu is open. The pages are stubs for
-         now; the point is the shape, and somewhere for the things that are
-         about the app rather than about the map. -->
-    <nav id="panel-menu" hidden>
-      <ul class="menu-list">
-        <li><button class="menu-item is-current" type="button"
-                    aria-current="page">The map</button></li>
-        <li><button class="menu-item" type="button" disabled>How it works</button></li>
-        <li><button class="menu-item" type="button" disabled>Where the numbers
-          come from</button></li>
-      </ul>
-      <!-- Everything that was taken off the map's own page for being fine
-           tuning rather than a choice. It belongs here: it is about what the
-           app shows you, not about the map. Remembered between visits. -->
-      <div class="ctl-checks menu-switch">
-        <label for="ctl-advanced">
-          <input id="ctl-advanced" type="checkbox"> Advanced controls</label>
-      </div>
-    </nav>
+    <!-- What the panel becomes while the menu is open. Two columns once a page
+         is being read: the list stays put on the left so the other pages are
+         still in sight, and the page itself takes the rest. With no page open
+         the list has the panel to itself at its usual width. -->
+    <div id="panel-nav" hidden>
+      <nav id="panel-menu">
+        <ul class="menu-list">
+          <li><button class="menu-item is-current" type="button"
+                      aria-current="page" data-page="map">The map</button></li>
+          <li><button class="menu-item" type="button"
+                      data-page="gerrymandering">What's Gerrymandering?</button></li>
+          <li><button class="menu-item" type="button"
+                      data-page="how">How it Works</button></li>
+          <li><button class="menu-item" type="button"
+                      data-page="accuracy">Accuracy</button></li>
+        </ul>
+        <!-- Everything that was taken off the map's own page for being fine
+             tuning rather than a choice. It belongs here: it is about what the
+             app shows you, not about the map. Remembered between visits. -->
+        <div class="ctl-checks menu-switch">
+          <label for="ctl-advanced">
+            <input id="ctl-advanced" type="checkbox"> Advanced controls</label>
+        </div>
+      </nav>
+      <!-- Filled by app.js from the page it was asked for. PLACEHOLDER text
+           throughout: what these say is not for this file to decide. -->
+      <article id="panel-page" hidden>
+        <h2 id="panel-page-title"></h2>
+        <div id="panel-page-body"></div>
+      </article>
+    </div>
 
     <div id="panel-body">
 

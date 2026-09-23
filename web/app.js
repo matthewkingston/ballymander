@@ -65,7 +65,12 @@ const els = {
   compactValue: document.getElementById('ctl-compact-value'),
   advanced: document.getElementById('ctl-advanced'),
   menuToggle: document.getElementById('menu-toggle'),
+  panel: document.getElementById('panel'),
+  panelNav: document.getElementById('panel-nav'),
   panelMenu: document.getElementById('panel-menu'),
+  panelPage: document.getElementById('panel-page'),
+  panelPageTitle: document.getElementById('panel-page-title'),
+  panelPageBody: document.getElementById('panel-page-body'),
   panelBody: document.getElementById('panel-body'),
   recom: document.getElementById('ctl-recom'),
   recomValue: document.getElementById('ctl-recom-value'),
@@ -2517,14 +2522,62 @@ function sizeLabelColumn() {
   return want;
 }
 
-/* The panel is either the map's controls or the list of pages, never both: at
- * 398px there is no room to put one beside the other, and the burger is the
- * only way in or out, so there is nothing to hunt for. The gable stays either
- * way, which is what says the panel is still the panel. */
-function showMenu(open) {
+/* The explanation pages. PLACEHOLDER: every paragraph below is lorem ipsum and
+ * the lengths exist only to exercise the reading column -- what these pages
+ * actually say is not for this file to decide.
+ *
+ * Keyed by the data-page on each menu item, so adding one is an entry here and
+ * a line in the markup. */
+const PAGE_FILLER = [
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod '
+  + 'tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim '
+  + 'veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea '
+  + 'commodo consequat.',
+  'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum '
+  + 'dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non '
+  + 'proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+  'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium '
+  + 'doloremque laudantium, totam rem aperiam eaque ipsa quae ab illo '
+  + 'inventore veritatis et quasi architecto beatae vitae dicta sunt '
+  + 'explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut '
+  + 'odit aut fugit.',
+  'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis '
+  + 'praesentium voluptatum deleniti atque corrupti quos dolores et quas '
+  + 'molestias excepturi sint occaecati cupiditate non provident.',
+];
+const PAGES = {
+  gerrymandering: { title: "What's Gerrymandering?", body: PAGE_FILLER },
+  how: { title: 'How it Works', body: PAGE_FILLER },
+  accuracy: { title: 'Accuracy', body: PAGE_FILLER },
+};
+let openPage = null;
+
+/* The panel is the map's controls, the list of pages, or a page being read.
+ * The gable and the burger stay through all three, and the map keeps running
+ * underneath -- widening the panel rather than replacing the view is what says
+ * you are still in the same place. */
+function showMenu(open, page = null) {
   els.menuToggle.setAttribute('aria-expanded', String(open));
-  els.panelMenu.hidden = !open;
+  els.panelNav.hidden = !open;
   els.panelBody.hidden = open;
+  openPage = open ? page : null;
+
+  const chosen = openPage ? PAGES[openPage] : null;
+  els.panelPage.hidden = !chosen;
+  els.panel.classList.toggle('is-page', Boolean(chosen));
+  if (chosen) {
+    els.panelPageTitle.textContent = chosen.title;
+    els.panelPageBody.replaceChildren(
+      ...chosen.body.map((text) => el('p', {}, text)));
+    // A page is read from its top, however far down the last one was scrolled.
+    els.panel.scrollTop = 0;
+  }
+  for (const item of els.panelMenu.querySelectorAll('.menu-item')) {
+    const here = (item.dataset.page || 'map') === (openPage || 'map');
+    item.classList.toggle('is-current', here);
+    if (here) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
+  }
 }
 
 /* The settings groups fold away under their own headings, as a variable block
@@ -2588,10 +2641,21 @@ async function main() {
   // The one knob drives the three, and the checkbox decides which is showing.
   els.compact.addEventListener('input', spreadCompactness);
   els.advanced.addEventListener('change', () => setAdvanced(els.advanced.checked));
-  els.menuToggle.addEventListener('click', () => showMenu(els.panelMenu.hidden));
-  // Escape closes it, as it closes the add-variable menu.
+  els.menuToggle.addEventListener('click', () => showMenu(els.panelNav.hidden));
+  // 'The map' is the way back rather than a page of its own, so it closes the
+  // menu the way the burger does.
+  for (const item of els.panelMenu.querySelectorAll('.menu-item')) {
+    item.addEventListener('click', () => {
+      const page = item.dataset.page;
+      if (!page || page === 'map') showMenu(false);
+      else showMenu(true, page);
+    });
+  }
+  // Escape closes it, as it closes the add-variable menu. From a page that is
+  // the whole way out, not back to the list: the list is still on screen
+  // beside it, so there is nothing to step back to.
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !els.panelMenu.hidden) showMenu(false);
+    if (e.key === 'Escape' && !els.panelNav.hidden) showMenu(false);
   });
   // Whatever was remembered, applied before anything is on screen.
   setAdvanced(advanced);

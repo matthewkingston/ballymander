@@ -304,6 +304,51 @@ html, body {
 
 /* Settings about the app rather than about the map live under the pages. */
 .menu-switch { margin-top: 14px; }
+
+/* --- the pages ----------------------------------------------------------- */
+/* An explanation needs a reading measure the map's own column cannot give, so
+   the panel widens for one. It widens rather than being replaced: the gable,
+   the burger and the map underneath all stay where they were, which is what
+   says you are still on the same page and not somewhere else. */
+#panel-nav { display: flex; gap: 18px; }
+#panel-nav[hidden] { display: none; }
+#panel.is-page { width: min(680px, calc(100% - 32px)); }
+/* Fills the panel on its own -- stated, because a flex child sizes to its
+   content otherwise, and the items' underlines would stop halfway across. */
+#panel-menu { flex: 1; min-width: 0; }
+/* Only once a page is open does the list become a column of its own. */
+#panel.is-page #panel-menu {
+  flex: 0 0 150px;
+  padding-right: 17px;
+  border-right: 1px solid var(--rule);
+}
+#panel-page { flex: 1; min-width: 0; }
+#panel-page[hidden] { display: none; }
+#panel-page h2 {
+  margin: 2px 0 10px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+/* Bigger and looser than anything on the map's page: this is read, not
+   glanced at. */
+#panel-page-body {
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--ink);
+}
+#panel-page-body p { margin: 0 0 11px; }
+#panel-page-body p:last-child { margin-bottom: 2px; }
+/* Ready for the pictures that will come, without one having to be here yet. */
+#panel-page-body img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 14px 0;
+  border-radius: 5px;
+}
 .ctl-checks label {
   display: flex;
   align-items: center;
