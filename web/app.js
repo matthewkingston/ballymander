@@ -630,7 +630,61 @@ const INFO_NOTES = {
     'Very broadly, this sets how strongly the simulation attempts to keep the '
     + "regions looking 'plausible' in terms of their shape and internal "
     + 'population distribution. For a more complete explanation see ***.',
+  'ctl-bonus':
+    "Affects the scaling for the simulation's scoring function when "
+    + 'gerrymandering STV elections. The scoring considers both the total '
+    + 'number of seats and the residual votes for the party after seats are '
+    + "assigned. 'Seat bonus' sets the scaling between these, with a higher "
+    + 'value meaning the number of seats is weighted more heavily relatively '
+    + 'speaking.',
+  'ctl-recom':
+    'Controls the ratio between flip moves (potentially reassigning a Data '
+    + 'Zone on the boundary with another region) and recombination moves '
+    + '(redrawing the boundary between two regions). For more detail see '
+    + '*****.',
+  'ctl-branch':
+    'Controls whether branch moves are allowed when performing flip moves. A '
+    + 'branch is a group of Data Zones (DZs) connected to the rest of their '
+    + 'region by a single DZ, where the branch includes that connecting DZ. In '
+    + 'the case where the connecting DZ splits the region into more than 2 '
+    + 'groups, everything except the largest leftover group acts as the '
+    + 'branch. In a branch move, the entire branch is taken as one unit and is '
+    + 'able to be flipped. Allowing branch moves prevents situations where, '
+    + 'due to the requirement for regions to stay contiguous, an unfavourable '
+    + "branch can't easily be removed by the simulation.",
+  'ctl-shape':
+    'Sets how strongly the simulation attempts to minimise the moment of '
+    + "inertia of a region's geographic shape, independent of its area. "
+    + 'Intuitively, this is a preference for regions to be broadly circular '
+    + 'and geographically compact rather than sprawling, spidery and full of '
+    + "gaps. Without advanced controls, this is part of the 'Compactness' "
+    + 'slider.',
+  'ctl-pshape':
+    'Sets how strongly the simulation attempts to minimise the moment of '
+    + "inertia of a region's population distribution, independent of its area "
+    + 'or absolute population number. Intuitively, this is a preference for '
+    + 'regions to have major population clusters at their geographic centre, '
+    + 'or at least fairly evenly spread, rather than lopsided with a large '
+    + 'city at their edge and a sprawling rural hinterland. Without advanced '
+    + "controls, this is part of the 'Compactness' slider.",
+  'ctl-cut':
+    'Sets how strongly the simulation attempts to minimise the number of cut '
+    + 'edges in the underlying Data Zone (DZ) adjacency graph. In practice, '
+    + 'this acts to steer the simulation away from putting region boundaries '
+    + 'through dense urban areas when possible. This in turn helps to prevent '
+    + 'cases where small or medium towns are unnaturally split between '
+    + 'regions, with boundaries instead going through rural areas. It also has '
+    + 'a secondary effect of reducing ragged, zig-zagging region boundaries. '
+    + "Without advanced controls, this is part of the 'Compactness' slider.",
 };
+
+/* Steepness reads the same whichever kind of variable it sits under, so both
+ * tables below point at this rather than keeping a copy each. */
+const INFO_STEEPNESS =
+  "In gerrymander mode, the simulation's scoring uses a logistic (sigmoid) "
+  + 'function. This means that meeting the threshold value gives a large '
+  + 'bonus, but there is also an incentive to move the value in the right '
+  + 'direction. This control sets the steepness of the logistic function.';
 
 const INFO_EDITOR =
   'Adjusts which parties are available to stand in the election; by default '
@@ -652,6 +706,15 @@ const INFO_PARTY = {
     + 'voters.',
   a: 'Sets whether the simulation attempts to draw a map where {name} wins as '
     + 'many, or as few, seats as possible.',
+  s: INFO_STEEPNESS,
+  // A party's threshold is a winning margin rather than a level to clear,
+  // which is why this is not the demographic's threshold note.
+  t: 'Sets the targeted margin for the party to win/lose by, as a percentage '
+    + 'of the region\'s vote. So a value of 10% means that the simulation '
+    + 'attempts, in as many regions as possible, to get the party\'s vote '
+    + 'share at least 10% above/below the biggest party other than itself in '
+    + 'that region. In effect, this allows the definition of winning a seat to '
+    + 'be adjusted.',
 };
 
 const INFO_DEMO = {
@@ -669,6 +732,7 @@ const INFO_DEMO = {
     + 'the info for the variable header.',
   a: 'Sets whether the simulation aims to have regions above or below the '
     + 'threshold you set above.',
+  s: INFO_STEEPNESS,
 };
 
 /* What the mode note calls the quantity it is steering. Three of the four are

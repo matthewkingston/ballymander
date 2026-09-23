@@ -947,19 +947,37 @@ const markers = await page.evaluate(() => {
     }).length,
     inPartyNames: document.querySelectorAll('.pe-name .info-mark').length,
     notes: document.querySelectorAll('.info-note').length,
-    // A control whose copy was never written falls back to lorem ipsum. In
-    // basic mode nothing should: every row on offer there has copy, so a new
-    // row arriving without any is meant to fail here rather than ship.
     advanced: document.getElementById('ctl-advanced').checked,
-    loremShowing: [...document.querySelectorAll('#panel-body .info-note')]
-      .filter((n) => /Lorem ipsum|Ut enim ad minim|Excepteur sint/.test(n.textContent))
-      .filter((n) => {
-        // The note itself is hidden until opened; it is the row it belongs to
-        // that says whether this control is on offer.
-        const row = n.previousElementSibling;
-        return row && row.getBoundingClientRect().height > 0;
-      }).length,
   };
+});
+
+// Every control on the panel has copy now, in both modes, so the placeholder
+// should be reachable by nothing. A new control arriving without any is meant
+// to fail here rather than ship with lorem ipsum behind its marker. Counted
+// with advanced on, since that is where most of the rows live; nothing reads
+// the page after this.
+markers.loremShowing = await page.evaluate(async () => {
+  const count = () => [...document.querySelectorAll('#panel-body .info-note')]
+    .filter((n) => /Lorem ipsum|Ut enim ad minim|Excepteur sint/.test(n.textContent))
+    // The note itself is hidden until opened; it is the row above it that says
+    // whether this control is on offer.
+    .filter((n) => {
+      const row = n.previousElementSibling;
+      return row && row.getBoundingClientRect().height > 0;
+    }).length;
+  const box = document.getElementById('ctl-advanced');
+  const basic = count();
+  const was = box.checked;
+  if (!was) {
+    box.click();
+    await new Promise((r) => setTimeout(r, 400));
+  }
+  const advanced = count();
+  if (!was) {
+    box.click();
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  return { basic, advanced, rows: document.querySelectorAll('#panel-body .info-note').length };
 });
 
 console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, markers, real, painted, errors, failed, external }, null, 2));
@@ -1377,9 +1395,10 @@ if (!markers || !markers.labels || !markers.heads || markers.labelsBare || marke
     || markers.headsOutOfOrder || markers.inPartyNames) {
   problems.push(`info markers did not reach every line: ${JSON.stringify(markers)}`);
 }
-if (markers && !markers.advanced && markers.loremShowing) {
-  problems.push(`${markers.loremShowing} control(s) on offer in basic mode still `
-    + `show placeholder copy`);
+if (!markers || !markers.loremShowing || !markers.loremShowing.rows
+    || markers.loremShowing.basic || markers.loremShowing.advanced) {
+  problems.push(`controls are still showing placeholder copy: `
+    + `${JSON.stringify(markers && markers.loremShowing)}`);
 }
 if (problems.length) {
   console.error(`\nSMOKE TEST FAILED: ${problems.join('; ')}`);
