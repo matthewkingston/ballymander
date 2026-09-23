@@ -639,10 +639,8 @@ const INFO_EDITOR =
 
 /* A variable's own rows, keyed by the tail of the control id. {name} is the
  * variable's name as its head shows it -- the party for a party, the short
- * label for a demographic, so "the same average age" rather than "the same
- * average Average age". {lower} is the same name in lower case, for where it
- * reads as a descriptor mid-sentence rather than as the control's title. A
- * party never uses it: those names are proper nouns whichever way they sit. */
+ * label for a demographic. A demographic's mode note uses {quantity} instead,
+ * which names the thing being steered rather than the control. */
 const INFO_PARTY = {
   w: 'Sets how strongly the simulation manipulates votes for {name}, in the '
     + 'manner set by the controls below.',
@@ -657,16 +655,15 @@ const INFO_PARTY = {
 };
 
 const INFO_DEMO = {
-  // {lower} rather than {name}: here the variable is a descriptor in the middle
-  // of a sentence -- "the same average religion" -- not the title of the
-  // control, which is what it is in the head above. {subject} is the one place
-  // that wants a phrase of its own per variable rather than the bare name; see
-  // INFO_DEMO_SUBJECT.
+  // Every clause names the quantity the same way, per variable: see
+  // INFO_DEMO_QUANTITY. The article is the template's, since the three clauses
+  // want it differently.
   mode: "Selects what the simulation's aim is. 'Gerrymander' aims to draw "
-    + 'regions so that {subject} is above/below the threshold in as many regions '
-    + "as possible. For more info on gerrymandering see ***. 'Average' tries to "
-    + "make each region have the same average {lower}. 'Extreme' tries to make a "
-    + 'map where regions either have a very high or very low average {lower}.',
+    + 'regions so that the {quantity} is above/below the threshold in as many '
+    + "regions as possible. For more info on gerrymandering see ***. 'Average' "
+    + 'tries to make each region have the same {quantity}. '
+    + "'Extreme' tries to make a map where regions either have a very high or "
+    + 'very low {quantity}.',
   t: 'Sets the value which the simulation tries to get above or below in as '
     + 'many regions as possible. For an explanation of the parameterisation see '
     + 'the info for the variable header.',
@@ -674,28 +671,29 @@ const INFO_DEMO = {
     + 'threshold you set above.',
 };
 
-/* What the gerrymander clause calls the quantity it is pushing above or below
- * the threshold. Three of the four are an index rather than a measurement of
- * anything, and say so; age is a real average and does not. Carries its own
- * article, since "the average age" and "the religion score" do not take one
- * the same way. */
-const INFO_DEMO_SUBJECT = {
-  rel: 'the religion score',
-  age: 'the average age',
-  orient: 'the sexual orientation score',
-  grade: 'the social grade score',
+/* What the mode note calls the quantity it is steering. Three of the four are
+ * an index rather than a measurement of anything, and say so; age is a real
+ * average and does not. No article here -- each clause supplies its own, since
+ * "the same social grade score" and "so that the social grade score" do not
+ * take one the same way. */
+const INFO_DEMO_QUANTITY = {
+  rel: 'religion score',
+  age: 'average age',
+  orient: 'sexual orientation score',
+  grade: 'social grade score',
 };
 
 /* Each demographic's head says what the variable is and where it came from, so
  * there is no shared form for these the way there is for the parties. */
 const INFO_DEMO_HEAD = {
   rel:
-    "Sets how strongly the simulation manipulates the 'average religious "
-    + "tendency'(?) per region, in the manner set by the controls below. Data "
-    + "from 2021 census 'Religion or Religion Brought Up In', parameterised as "
-    + "'Protestant and Other Christian (including Christian related)'=0; 'Other "
-    + "religions'='None'=0.5; 'Catholic'=1. Please don't read into which is 0 "
-    + 'and which 1. Overall the most NI variable.',
+    'Sets how strongly the simulation manipulates the average religious '
+    + 'tendency per region, in the manner set by the controls below. Put '
+    + 'simply: the higher the number the more Catholic, the lower the number '
+    + "the more Protestant. Data from 2021 census 'Religion or Religion Brought "
+    + "Up In', parameterised as 'Protestant and Other Christian (including "
+    + "Christian related)'=0; 'Other religions'='None'=0.5; 'Catholic'=1. "
+    + "Please don't read into which is 0 and which 1.",
   age:
     'Sets how strongly the simulation manipulates the average age per region, '
     + 'in the manner set by the controls below. Data from 2021 census.',
@@ -732,8 +730,7 @@ function infoTextFor(node) {
     if (!text) return null;
     const name = varLabel(owner);
     return text.replace(/\{name\}/g, name)
-      .replace(/\{lower\}/g, name.toLowerCase())
-      .replace(/\{subject\}/g, INFO_DEMO_SUBJECT[owner.key] || name.toLowerCase());
+      .replace(/\{quantity\}/g, INFO_DEMO_QUANTITY[owner.key] || name.toLowerCase());
   }
   if (els.partyEditor && els.partyEditor.contains(node)) return INFO_EDITOR;
   return (id && INFO_NOTES[id]) || null;
