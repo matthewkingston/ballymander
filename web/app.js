@@ -639,8 +639,10 @@ const INFO_EDITOR =
 
 /* A variable's own rows, keyed by the tail of the control id. {name} is the
  * variable's name as its head shows it -- the party for a party, the short
- * label for a demographic, so "the same average Age" rather than "the same
- * average Average age". */
+ * label for a demographic, so "the same average age" rather than "the same
+ * average Average age". {lower} is the same name in lower case, for where it
+ * reads as a descriptor mid-sentence rather than as the control's title. A
+ * party never uses it: those names are proper nouns whichever way they sit. */
 const INFO_PARTY = {
   w: 'Sets how strongly the simulation manipulates votes for {name}, in the '
     + 'manner set by the controls below.',
@@ -655,11 +657,14 @@ const INFO_PARTY = {
 };
 
 const INFO_DEMO = {
+  // {lower} rather than {name}: here the variable is a descriptor in the middle
+  // of a sentence -- "the same average religion" -- not the title of the
+  // control, which is what it is in the head above.
   mode: "Selects what the simulation's aim is. 'Gerrymander' aims to draw "
-    + 'regions so that {name} is above/below the threshold in as many regions '
+    + 'regions so that {lower} is above/below the threshold in as many regions '
     + "as possible. For more info on gerrymandering see ***. 'Average' tries to "
-    + "make each region have the same average {name}. 'Extreme' tries to make a "
-    + 'map where regions either have a very high or very low average {name}.',
+    + "make each region have the same average {lower}. 'Extreme' tries to make a "
+    + 'map where regions either have a very high or very low average {lower}.',
   t: 'Sets the value which the simulation tries to get above or below in as '
     + 'many regions as possible. For an explanation of the parameterisation see '
     + 'the info for the variable header.',
@@ -710,7 +715,10 @@ function infoTextFor(node) {
     const part = id ? id.slice(id.lastIndexOf('-') + 1) : 'w';
     const text = owner.isParty ? INFO_PARTY[part]
       : (part === 'w' ? INFO_DEMO_HEAD[owner.key] : INFO_DEMO[part]);
-    return text ? text.replace(/\{name\}/g, varLabel(owner)) : null;
+    if (!text) return null;
+    const name = varLabel(owner);
+    return text.replace(/\{name\}/g, name)
+      .replace(/\{lower\}/g, name.toLowerCase());
   }
   if (els.partyEditor && els.partyEditor.contains(node)) return INFO_EDITOR;
   return (id && INFO_NOTES[id]) || null;
