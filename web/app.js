@@ -689,7 +689,7 @@ const INFO_DEMO_HEAD = {
   rel:
     'Sets how strongly the simulation manipulates the average religious '
     + 'tendency per region, in the manner set by the controls below. Put '
-    + 'simply: the higher the number the more Catholic, the lower the number '
+    + 'simply: the higher the number, the more Catholic; the lower the number, '
     + "the more Protestant. Data from 2021 census 'Religion or Religion Brought "
     + "Up In', parameterised as 'Protestant and Other Christian (including "
     + "Christian related)'=0; 'Other religions'='None'=0.5; 'Catholic'=1. "
