@@ -66,6 +66,7 @@ const els = {
   advanced: document.getElementById('ctl-advanced'),
   menuToggle: document.getElementById('menu-toggle'),
   panel: document.getElementById('panel'),
+  brandImg: document.querySelector('.brand img'),
   panelNav: document.getElementById('panel-nav'),
   panelMenu: document.getElementById('panel-menu'),
   panelPage: document.getElementById('panel-page'),
@@ -2522,6 +2523,25 @@ function sizeLabelColumn() {
   return want;
 }
 
+/* The gable is sized as a share of the panel, and the panel widens to hold a
+ * page, so without this it would grow by half again on the way in. Its width
+ * and its inset are taken from the panel as the map leaves it and pinned, so
+ * the one fixed thing on the panel stays fixed.
+ *
+ * Measured rather than written down for the same reason the label column is:
+ * the width it comes from is the panel less its border and its reserved
+ * scrollbar gutter, and the gutter is not the same on every platform. */
+function pinGable() {
+  const img = els.brandImg;
+  if (!img) return;
+  const host = img.parentElement.getBoundingClientRect();
+  const box = img.getBoundingClientRect();
+  if (!box.width) return;       // not laid out yet; called again on load
+  const style = document.documentElement.style;
+  style.setProperty('--gable-w', `${box.width.toFixed(2)}px`);
+  style.setProperty('--gable-left', `${(box.left - host.left).toFixed(2)}px`);
+}
+
 /* The explanation pages. PLACEHOLDER: every paragraph below is lorem ipsum and
  * the lengths exist only to exercise the reading column -- what these pages
  * actually say is not for this file to decide.
@@ -2546,8 +2566,8 @@ const PAGE_FILLER = [
   + 'molestias excepturi sint occaecati cupiditate non provident.',
 ];
 const PAGES = {
-  gerrymandering: { title: "What's Gerrymandering?", body: PAGE_FILLER },
-  how: { title: 'How it Works', body: PAGE_FILLER },
+  gerrymandering: { title: "What's gerrymandering?", body: PAGE_FILLER },
+  how: { title: 'How it works', body: PAGE_FILLER },
   accuracy: { title: 'Accuracy', body: PAGE_FILLER },
 };
 let openPage = null;
@@ -2557,6 +2577,10 @@ let openPage = null;
  * underneath -- widening the panel rather than replacing the view is what says
  * you are still in the same place. */
 function showMenu(open, page = null) {
+  // Taken while the panel is still the map's width, which is the only moment
+  // the gable's own size can be read. Re-taken each time rather than once at
+  // boot, so a resized window or a late-loading font cannot leave it stale.
+  if (!els.panel.classList.contains('is-page')) pinGable();
   els.menuToggle.setAttribute('aria-expanded', String(open));
   els.panelNav.hidden = !open;
   els.panelBody.hidden = open;
@@ -2573,7 +2597,7 @@ function showMenu(open, page = null) {
     els.panel.scrollTop = 0;
   }
   for (const item of els.panelMenu.querySelectorAll('.menu-item')) {
-    const here = (item.dataset.page || 'map') === (openPage || 'map');
+    const here = (item.dataset.page || 'home') === (openPage || 'home');
     item.classList.toggle('is-current', here);
     if (here) item.setAttribute('aria-current', 'page');
     else item.removeAttribute('aria-current');
@@ -2642,12 +2666,12 @@ async function main() {
   els.compact.addEventListener('input', spreadCompactness);
   els.advanced.addEventListener('change', () => setAdvanced(els.advanced.checked));
   els.menuToggle.addEventListener('click', () => showMenu(els.panelNav.hidden));
-  // 'The map' is the way back rather than a page of its own, so it closes the
+  // 'Home' is the way back rather than a page of its own, so it closes the
   // menu the way the burger does.
   for (const item of els.panelMenu.querySelectorAll('.menu-item')) {
     item.addEventListener('click', () => {
       const page = item.dataset.page;
-      if (!page || page === 'map') showMenu(false);
+      if (!page || page === 'home') showMenu(false);
       else showMenu(true, page);
     });
   }

@@ -49,11 +49,16 @@ html, body {
 
 /* --- info panel --------------------------------------------------------- */
 #panel {
+  /* The map's own width, kept as a number even when the panel is wider than it
+     for a page: the gable is sized and placed off this rather than off
+     whatever the panel currently is, so opening a page does not move it. */
+  --panel-w: 398px;
+  --panel-pad: 18px;
   position: absolute;
   top: 16px;
   left: 16px;
   z-index: 2;
-  padding: 14px 18px 12px;
+  padding: 14px var(--panel-pad) 12px;
   background: var(--panel-bg);
   border: 1px solid var(--rule);
   border-radius: 8px;
@@ -63,7 +68,7 @@ html, body {
      sliders and boxes and the padding and gutter around them. The label column
      is sized for a typical head rather than the longest, so Social grade and
      Orientation wrap and the rest do not. */
-  width: 398px;
+  width: var(--panel-w);
   max-height: calc(100% - 32px);
   overflow-y: auto;
   /* Room for the scrollbar whether or not one is showing: otherwise every
@@ -91,10 +96,21 @@ html, body {
 .brand img {
   display: block;
   /* Just short of the full width, so the gable reads as a sign hung on the
-     panel rather than as the panel's own top edge. */
+     panel rather than as the panel's own top edge. Capped at what that comes
+     to on the map's panel, so a page widening the panel does not blow the
+     gable up with it. */
   width: 90%;
   height: auto;
   margin: 0 auto;
+}
+/* Pinned to the size and the place it has on the map's panel, rather than
+   taking 90% of the wider one and growing with it. Both numbers are measured
+   at boot by pinGable() rather than written here: the width they come from
+   depends on the scrollbar gutter, which is not the same on every platform. */
+#panel.is-page .brand img {
+  width: var(--gable-w, 90%);
+  margin-left: var(--gable-left, auto);
+  margin-right: auto;
 }
 
 
