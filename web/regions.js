@@ -149,9 +149,9 @@ const DEMOGRAPHICS = [
     vSpread: 0.2,
     rSpread: 0.15,
     threshold: 0.6,
-    steepness: 0.05,
+    steepness: 20,
     thresholdRange: [0.05, 0.95, 0.01],
-    steepnessRange: [0.01, 0.3, 0.01],
+    steepnessRange: [3, 100, 1],
     decimals: 3,
   },
   {
@@ -170,9 +170,9 @@ const DEMOGRAPHICS = [
     vSpread: 5.1,
     rSpread: 1.6,
     threshold: 41,
-    steepness: 0.5,
+    steepness: 2,
     thresholdRange: [34, 46, 0.25],
-    steepnessRange: [0.1, 3, 0.05],
+    steepnessRange: [0.3, 10, 0.1],
     decimals: 1,
   },
   {
@@ -187,9 +187,9 @@ const DEMOGRAPHICS = [
     vSpread: 0.019,
     rSpread: 0.011,
     threshold: 0.03,
-    steepness: 0.004,
+    steepness: 250,
     thresholdRange: [0.005, 0.1, 0.001],
-    steepnessRange: [0.001, 0.02, 0.001],
+    steepnessRange: [50, 1000, 10],
     decimals: 4,
   },
   {
@@ -202,9 +202,9 @@ const DEMOGRAPHICS = [
     vSpread: 0.16,
     rSpread: 0.04,
     threshold: 0.51,
-    steepness: 0.015,
+    steepness: 65,
     thresholdRange: [0.25, 0.75, 0.005],
-    steepnessRange: [0.005, 0.1, 0.005],
+    steepnessRange: [10, 200, 5],
     decimals: 3,
   },
 ];
@@ -312,9 +312,9 @@ function partyTerms(voters) {
       rSpread: spread.rSpread || 0.05,
       // The gerrymander threshold is a margin, so zero means "just wins".
       threshold: 0,
-      steepness: 0.02,
+      steepness: 50,
       thresholdRange: [-0.3, 0.3, 0.005],
-      steepnessRange: [0.005, 0.15, 0.005],
+      steepnessRange: [7, 200, 1],
       decimals: 3,
     };
   });
@@ -1075,8 +1075,8 @@ class RegionModel {
       return Math.max(1e-9, delta * (this.seatsPerRegion + 1));
     }
     if (d.mode === 'gerrymander') {
-      // The logistic's steepest slope, at the threshold, is 1/(4s).
-      return delta / (4 * Math.max(1e-6, d.steepness));
+      // The logistic's steepest slope, at the threshold, is k/4.
+      return (delta * Math.max(0, d.steepness)) / 4;
     }
     // (x - mu)^2 changes by 2|x - mu| * delta, so the scale is set by how far
     // regions actually sit from the mean -- NOT by delta itself.
@@ -1095,10 +1095,14 @@ class RegionModel {
    * values, the other maximises it. */
   _demoTermFrom(d, x) {
     if (d.mode === 'gerrymander') {
-      const s = Math.max(1e-6, d.steepness);
+      // Steepness multiplies rather than divides: the control is the slope
+      // itself, so turning it up makes the curve steeper, which is what its
+      // name says. It used to be the logistic's width, sitting in the
+      // denominator, and turning it up flattened the curve instead.
+      const k = Math.max(0, d.steepness);
       // Saturates above the threshold, still pulls below it, steepest at it.
       // exp() overflowing to Infinity gives 0 here, which is the right limit.
-      const u = d.above ? (x - d.threshold) / s : (d.threshold - x) / s;
+      const u = (d.above ? x - d.threshold : d.threshold - x) * k;
       return 1 / (1 + Math.exp(u));
     }
     const gap = x - d.mean;

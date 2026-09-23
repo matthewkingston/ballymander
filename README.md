@@ -333,7 +333,9 @@ values split into a clean gap: `0.21 … 0.39 │ 0.66 … 0.75`.
 
 **Steepness has a sweet spot in both directions.** Too sharp and the term is a
 step function with no gradient to climb; too soft and it degenerates into average
-mode. At N=18, `s = 0.05` wins 9 seats where `s = 0.15` wins 6.
+mode. At N=18, `k = 20` wins 9 seats where `k = 6.7` wins 6. (Measured when the
+control was the logistic's width, at `s = 0.05` and `s = 0.15`; the control is
+now the slope itself, so those readings are its reciprocals.)
 
 Sigma is closed form rather than measured. The value is *intensive* — a ratio,
 not a sum — so one move shifts it by about `(zone n / region n) × (zone value −
@@ -342,7 +344,7 @@ region value)`, which **scales with N** where the population term's does not:
 ```
 delta(N) = vSpread * N / 3780
 average, extreme:  sigma = 2 * rSpread * delta
-gerrymander:       sigma = delta / (4s)
+gerrymander:       sigma = delta * k / 4
 ```
 
 `vSpread` is how far a boundary zone sits from its own region's value; `rSpread`

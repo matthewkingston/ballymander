@@ -415,9 +415,9 @@ function buildVariable(entry) {
   // winning margin instead: its share minus the best other party's, because
   // that, not a fixed share, is what takes a seat under first past the post.
   const [tMin, tMax, tStep] = entry.isParty ? [-0.3, 0.3, 0.005] : entry.def.thresholdRange;
-  const [sMin, sMax, sStep] = entry.isParty ? [0.005, 0.15, 0.005] : entry.def.steepnessRange;
+  const [sMin, sMax, sStep] = entry.isParty ? [7, 200, 1] : entry.def.steepnessRange;
   const t0 = entry.isParty ? 0 : entry.def.threshold;
-  const s0 = entry.isParty ? 0.02 : entry.def.steepness;
+  const s0 = entry.isParty ? 50 : entry.def.steepness;
   v.tValue = el('span', { text: entry.isParty ? `${(100 * t0).toFixed(1)}%` : String(t0) });
   v.sValue = el('span', { text: String(s0) });
   v.t = el('input', { id: id('t'), type: 'range', min: tMin, max: tMax, step: tStep, value: t0 });
@@ -489,7 +489,7 @@ function addVariable(key) {
 function removeVariable(v) {
   // Off, not merely unweighted: a term left in gerrymander mode would still be
   // recomputed on every move for nothing.
-  if (run.model) run.model.setDemographic(v.key, 'off', 0, 0.02, true);
+  if (run.model) run.model.setDemographic(v.key, 'off', 0, 1, true);
   v.block.remove();
   v.readoutRow.remove();
   v.tip.remove();
@@ -2168,12 +2168,12 @@ function tick(map) {
       // Off, not merely unweighted: a term left in gerrymander mode would still
       // be recomputed on every move for nothing.
       for (const def of DEMOGRAPHICS) {
-        if (!varByKey.has(def.key)) run.model.setDemographic(def.key, 'off', 0, 0.02, true);
+        if (!varByKey.has(def.key)) run.model.setDemographic(def.key, 'off', 0, 1, true);
       }
       if (voters) {
         for (const party of voters.parties) {
           const key = `party:${party}`;
-          if (!varByKey.has(key)) run.model.setDemographic(key, 'off', 0, 0.02, true);
+          if (!varByKey.has(key)) run.model.setDemographic(key, 'off', 0, 1, true);
         }
       }
       for (const v of variables) {
