@@ -93,24 +93,60 @@ html, body {
 .brand {
   margin: 0 0 11px;
 }
-.brand img {
+/* The window the drawing is seen through. On the map it is the width the gable
+   has always been, which shows the front and clips the side off; for a page it
+   opens to the whole drawing. Just short of the panel's full width either way,
+   so the gable reads as a sign hung on the panel rather than as its top edge. */
+.brand-frame {
+  position: relative;
   display: block;
-  /* Just short of the full width, so the gable reads as a sign hung on the
-     panel rather than as the panel's own top edge. Capped at what that comes
-     to on the map's panel, so a page widening the panel does not blow the
-     gable up with it. */
   width: 90%;
-  height: auto;
   margin: 0 auto;
+  overflow: hidden;
 }
-/* Pinned to the size and the place it has on the map's panel, rather than
-   taking 90% of the wider one and growing with it. Both numbers are measured
-   at boot by pinGable() rather than written here: the width they come from
-   depends on the scrollbar gutter, which is not the same on every platform. */
-#panel.is-page .brand img {
-  width: var(--gable-w, 90%);
+/* Wider than its frame by exactly the ratio of the whole drawing to the front,
+   so the front fills the frame and the side waits outside it. Stated as a
+   percentage here so it is right before any script runs, and in pixels once a
+   page has widened the frame, when a percentage of it would be wrong. */
+.brand-frame img {
+  display: block;
+  width: calc(100% * var(--art-ratio, 1));
+  height: auto;
+}
+/* The measured numbers, from pinGable(): the frame's own width on the map's
+   panel and the inset it sits at. Both are measured rather than written down,
+   because the width they come from is the panel less its border and its
+   reserved scrollbar gutter, and the gutter differs between platforms. */
+#panel.is-page .brand-frame {
+  width: var(--art-w);
   margin-left: var(--gable-left, auto);
   margin-right: auto;
+}
+#panel.is-page .brand-frame img { width: var(--art-w); }
+
+/* The article title, set in the drawn letters over the blank wall. Placed from
+   the bounds of the marker rectangle the artwork carried, so moving it in
+   Inkscape and rebuilding moves the type. */
+.brand-title {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: var(--ink);
+}
+.brand-title[hidden] { display: none; }
+
+/* The heading stays for anything reading the page rather than looking at it;
+   the gable is what carries the title on screen. */
+#panel-page-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 
@@ -350,7 +386,11 @@ html, body {
    says you are still on the same page and not somewhere else. */
 #panel-nav { display: flex; gap: 18px; }
 #panel-nav[hidden] { display: none; }
-#panel.is-page { width: min(680px, calc(100% - 32px)); }
+/* Wide enough for the whole gable, measured by pinGable(), but never narrower
+   than the reading column the pages were sized for. */
+#panel.is-page {
+  width: min(max(680px, var(--page-w, 680px)), calc(100% - 32px));
+}
 /* Fills the panel on its own -- stated, because a flex child sizes to its
    content otherwise, and the items' underlines would stop halfway across. */
 #panel-menu { flex: 1; min-width: 0; }

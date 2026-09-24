@@ -66,7 +66,9 @@ const els = {
   advanced: document.getElementById('ctl-advanced'),
   menuToggle: document.getElementById('menu-toggle'),
   panel: document.getElementById('panel'),
+  brandFrame: document.querySelector('.brand-frame'),
   brandImg: document.querySelector('.brand img'),
+  brandTitle: document.getElementById('brand-title'),
   panelNav: document.getElementById('panel-nav'),
   panelMenu: document.getElementById('panel-menu'),
   panelPage: document.getElementById('panel-page'),
@@ -2584,14 +2586,124 @@ function setDrawnText(host, text, height) {
  * the width it comes from is the panel less its border and its reserved
  * scrollbar gutter, and the gutter is not the same on every platform. */
 function pinGable() {
-  const img = els.brandImg;
-  if (!img) return;
-  const host = img.parentElement.getBoundingClientRect();
-  const box = img.getBoundingClientRect();
-  if (!box.width) return;       // not laid out yet; called again on load
+  const frame = els.brandFrame;
+  if (!frame || typeof GABLE === 'undefined') return;
+  const host = frame.parentElement.getBoundingClientRect();
+  const box = frame.getBoundingClientRect();
+  if (!box.width) return;       // not laid out yet; called again later
+  const ratio = GABLE.width / GABLE.front;
   const style = document.documentElement.style;
+  style.setProperty('--art-ratio', ratio.toFixed(5));
   style.setProperty('--gable-w', `${box.width.toFixed(2)}px`);
   style.setProperty('--gable-left', `${(box.left - host.left).toFixed(2)}px`);
+  style.setProperty('--art-w', `${(box.width * ratio).toFixed(2)}px`);
+  // Wide enough to show the whole drawing at the size the front already has,
+  // plus the inset the gable keeps. The panel's chrome -- its border, padding
+  // and reserved scrollbar gutter -- is measured rather than assumed, since
+  // the gutter is what an arithmetic version of this got wrong before.
+  const chrome = els.panel.getBoundingClientRect().width - host.width;
+  const want = chrome + (box.left - host.left) + box.width * ratio;
+  style.setProperty('--page-w', `${want.toFixed(2)}px`);
+}
+
+/* Two lines look better than one squeezed to fit, and the box has room for
+ * them. A line's leading is a quarter of its cap height. */
+const TITLE_LEADING = 0.25;
+
+/* How wide a string sets, as a multiple of its cap height. The tracking sits
+ * between every box including the spaces, which is how setDrawnText lays them
+ * out, so the two agree by construction. */
+function drawnRatio(text) {
+  const font = typeof BALLYSANSER === 'undefined' ? null : BALLYSANSER;
+  if (!font) return 0;
+  let width = 0;
+  let boxes = 0;
+  for (const raw of text) {
+    const ch = raw.toLowerCase();
+    if (ch === ' ') {
+      width += font.wordSpace;
+      boxes += 1;
+    } else if (font.glyphs[ch]) {
+      width += font.glyphs[ch].w / font.band;
+      boxes += 1;
+    }
+  }
+  return boxes > 1 ? width + font.tracking * (boxes - 1) : width;
+}
+
+/* Every way of breaking a title across at most two lines, shortest first. */
+function titleSplits(text) {
+  const words = text.split(' ');
+  const out = [[text]];
+  for (let i = 1; i < words.length; i++) {
+    out.push([words.slice(0, i).join(' '), words.slice(i).join(' ')]);
+  }
+  return out;
+}
+
+/* The biggest the title can be set in the box it was given. Tried every way
+ * round rather than wrapped greedily: "what's / gerrymandering?" sets half as
+ * big again as the same words broken anywhere else. */
+function fitTitle(text, boxW, boxH) {
+  let best = null;
+  for (const lines of titleSplits(text)) {
+    const widest = Math.max(...lines.map(drawnRatio));
+    if (!widest) continue;
+    const tall = lines.length + (lines.length - 1) * TITLE_LEADING;
+    const height = Math.min(boxW / widest, boxH / tall);
+    if (!best || height > best.height + 0.01) best = { lines, height };
+  }
+  return best;
+}
+
+/* One size for every page, set by whichever title is worst off. Sizing each
+ * to its own box would run from 27px to 49px between pages, and a heading that
+ * changes size with its own length reads as an accident rather than a design.
+ * The longest one is the constraint, so it is the one that decides. */
+function sharedTitleHeight(boxW, boxH) {
+  let height = Infinity;
+  for (const page of Object.values(PAGES)) {
+    const fit = fitTitle(page.title, boxW, boxH);
+    if (fit) height = Math.min(height, fit.height);
+  }
+  return Number.isFinite(height) ? height : null;
+}
+
+/* At that shared size, the fewest lines the title will go in. */
+function titleLines(text, boxW, height) {
+  for (const lines of titleSplits(text)) {
+    if (Math.max(...lines.map(drawnRatio)) * height <= boxW + 0.5) return lines;
+  }
+  return [text];
+}
+
+/* The title, set over the blank wall of the gable's side. The box came from
+ * the marker rectangle in the artwork, as fractions of the image, so it
+ * follows the drawing rather than being written down here. */
+function drawGableTitle(text) {
+  const host = els.brandTitle;
+  if (!host || typeof GABLE === 'undefined') return null;
+  const art = els.brandImg.getBoundingClientRect();
+  if (!art.width) return null;
+  const box = GABLE.title;
+  const boxW = box.w * art.width;
+  const boxH = box.h * art.height;
+  const height = sharedTitleHeight(boxW, boxH);
+  if (!height) return null;
+  const lines = titleLines(text, boxW, height);
+  host.style.left = `${(box.x * art.width).toFixed(2)}px`;
+  host.style.top = `${(box.y * art.height).toFixed(2)}px`;
+  host.style.width = `${boxW.toFixed(2)}px`;
+  host.style.height = `${boxH.toFixed(2)}px`;
+  host.style.gap = `${(height * TITLE_LEADING).toFixed(2)}px`;
+  host.replaceChildren(...lines.map((line) => {
+    const row = el('div', { 'data-line': line });
+    setDrawnText(row, line, height);
+    row.removeAttribute('aria-label');     // the heading carries the words
+    return row;
+  }));
+  host.hidden = false;
+  return { lines, height };
 }
 
 /* The explanation pages. PLACEHOLDER: every paragraph below is lorem ipsum and
@@ -2641,8 +2753,10 @@ function showMenu(open, page = null) {
   const chosen = openPage ? PAGES[openPage] : null;
   els.panelPage.hidden = !chosen;
   els.panel.classList.toggle('is-page', Boolean(chosen));
+  if (!chosen) els.brandTitle.hidden = true;
   if (chosen) {
     els.panelPageTitle.textContent = chosen.title;
+    drawGableTitle(chosen.title);
     els.panelPageBody.replaceChildren(
       ...chosen.body.map((text) => el('p', {}, text)));
     // A page is read from its top, however far down the last one was scrolled.
@@ -2739,6 +2853,10 @@ async function main() {
   wireReadout(els.temp, els.tempValue, () => formatSpeed(temperatureOf()));
   wireGroupToggles();
   sizeLabelColumn();
+  // Before anything is drawn, not just before a page opens: the frame sizes
+  // the drawing by a ratio this sets, and without it the whole gable would
+  // squeeze into the front's width for a frame.
+  pinGable();
 
   // The region view names one region and paints its colour; pointing at either
   // lights it on the map, as pointing at its bar does. The name answers "which

@@ -28,9 +28,19 @@
     </button>
 
     <!-- The name is in the artwork, so the heading is the image: the alt text
-         is the wordmark it draws. -->
+         is the wordmark it draws.
+
+         The building's front and its side, in one drawing. The frame shows
+         only the front at the map's width and opens to the whole of it for a
+         page, so the mural neither moves nor changes size -- the side is
+         revealed rather than the gable redrawn. The title is set live over the
+         blank wall, which is why the drawing has no words in it. -->
     <h1 class="brand">
-      <img src="img/ballymander-wide.png" alt="Ballymander" width="1619" height="978">
+      <span class="brand-frame">
+        <img src="img/ballymander-article.png" alt="Ballymander"
+             width="3228" height="978">
+        <span id="brand-title" class="brand-title" aria-hidden="true" hidden></span>
+      </span>
     </h1>
 
     <!-- What the panel becomes while the menu is open. Two columns once a page
@@ -353,6 +363,8 @@
   <script src="graph.js"></script>
   <!-- Generated from the drawn letters by scripts/build_typeface.py. -->
   <script src="ballysanser.js"></script>
+  <!-- Generated from the artwork by scripts/build_gable.py. -->
+  <script src="gable.js"></script>
   <script src="regions.js"></script>
   <script src="app.js"></script>
 </body>
