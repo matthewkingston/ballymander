@@ -2697,7 +2697,14 @@ function drawGableTitle(text) {
   const height = sharedTitleHeight(boxW, boxH);
   if (!height) return null;
   const lines = titleLines(text, boxW, height);
-  host.style.left = `${(box.x * art.width).toFixed(2)}px`;
+  // Centred on the wall rather than in the marker rectangle. The rectangle
+  // still says how wide the title may run and where it sits vertically, but
+  // the eye reads the type against the wall it is painted on, and a rectangle
+  // drawn by hand is never quite centred on it -- this one is 5.7px out.
+  const wallCentre = art.left
+    + (art.width * (GABLE.front / GABLE.width + 1)) / 2
+    - els.brandFrame.getBoundingClientRect().left;
+  host.style.left = `${(wallCentre - boxW / 2).toFixed(2)}px`;
   host.style.top = `${(box.y * art.height).toFixed(2)}px`;
   host.style.width = `${boxW.toFixed(2)}px`;
   host.style.height = `${boxH.toFixed(2)}px`;
