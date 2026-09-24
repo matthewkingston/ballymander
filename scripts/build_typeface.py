@@ -57,6 +57,12 @@ INK_FLOOR = 255 * 4
 # A row this white, right across the sheet, is one of the two rules.
 RULE_WHITE = 0.5
 
+# Transparent columns between the glyphs on the sheet, so that scaling it down
+# blends each one's edge with nothing rather than with its neighbour. Generous:
+# it costs 700px of sheet width and a few KB, and too little would show as a
+# smear along the side of every letter.
+GUTTER = 24
+
 # Spacing, as a fraction of the band height, since that is the one dimension
 # every glyph shares. Neither is measurable from the drawing: the gaps in it
 # are layout, not tracking, and there is no space character to measure. Both
@@ -128,11 +134,18 @@ def main() -> int:
                          f'either the order is wrong or two letters are touching')
 
     # --- the sheet ----------------------------------------------------------
+    # Packed with a transparent gutter between the glyphs, not edge to edge.
+    # The page scales the whole sheet down and shows one glyph's width of it
+    # through a clipping box; with the glyphs touching, the filter at each
+    # boundary samples the neighbouring letter and smears a sliver of it into
+    # the box. The gutter gives it transparency to blend with instead, and has
+    # to be wider than the filter reaches -- at the smallest size the sheet is
+    # shown at, that is around thirteen source pixels.
     widths = [x1 - x0 + 1 for x0, x1 in groups]
-    sheet_w = sum(widths)
+    sheet_w = sum(widths) + GUTTER * (len(widths) + 1)
     out = bytearray(sheet_w * band * 4)
     glyphs = {}
-    at = 0
+    at = GUTTER
     for ch, (x0, x1) in zip(ORDER, groups):
         gw = x1 - x0 + 1
         for y in range(band):
@@ -140,11 +153,10 @@ def main() -> int:
             dst = (y * sheet_w + at) * 4
             for x in range(gw):
                 alpha = ink[src + x0 + x]
-                # Black, with the drawing's darkness as its alpha. The colour
-                # is a stand-in: used as a mask, only the alpha is read.
+                # Black, with the drawing's darkness as its alpha.
                 out[dst + x * 4 + 3] = alpha
         glyphs[ch] = {'x': at, 'w': gw}
-        at += gw
+        at += gw + GUTTER
 
     os.makedirs(os.path.dirname(OUT_PNG), exist_ok=True)
     save_rgba(OUT_PNG, sheet_w, band, out)
