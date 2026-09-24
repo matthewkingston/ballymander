@@ -67,7 +67,8 @@ const els = {
   menuToggle: document.getElementById('menu-toggle'),
   panel: document.getElementById('panel'),
   brandFrame: document.querySelector('.brand-frame'),
-  brandImg: document.querySelector('.brand img'),
+  gableFront: document.querySelector('.gable-front'),
+  gableWide: document.querySelector('.gable-wide'),
   brandTitle: document.getElementById('brand-title'),
   panelNav: document.getElementById('panel-nav'),
   panelMenu: document.getElementById('panel-menu'),
@@ -2557,15 +2558,21 @@ function setDrawnText(host, text, height) {
       missing.push(raw);
       continue;
     }
+    // A scaled <img> behind a clipping span, rather than the sheet as a
+    // background or a mask. All three put the same pixels in the same place,
+    // but Chrome filters an <img> when it scales it and does not filter a
+    // background-size or a mask-size: measured on this line at 27px, the share
+    // of edge pixels carrying an intermediate value is 0.34 this way against
+    // 0.04 either of the others, which is the difference between drawn line
+    // work and a staircase. Real antialiased text scores 0.30.
     const span = el('span', { class: 'bs-glyph', 'aria-hidden': 'true' });
     span.style.width = `${(g.w * scale).toFixed(2)}px`;
     span.style.height = `${height.toFixed(2)}px`;
-    const size = `${(font.sheetWidth * scale).toFixed(2)}px ${height.toFixed(2)}px`;
-    const at = `-${(g.x * scale).toFixed(2)}px 0`;
-    span.style.maskSize = size;
-    span.style.webkitMaskSize = size;
-    span.style.maskPosition = at;
-    span.style.webkitMaskPosition = at;
+    const ink = el('img', { src: font.sheet, alt: '' });
+    ink.style.width = `${(font.sheetWidth * scale).toFixed(2)}px`;
+    ink.style.height = `${height.toFixed(2)}px`;
+    ink.style.left = `${(-g.x * scale).toFixed(2)}px`;
+    span.append(ink);
     frag.append(span);
   }
   host.classList.add('bs-line');
@@ -2593,7 +2600,6 @@ function pinGable() {
   if (!box.width) return;       // not laid out yet; called again later
   const ratio = GABLE.width / GABLE.front;
   const style = document.documentElement.style;
-  style.setProperty('--art-ratio', ratio.toFixed(5));
   style.setProperty('--gable-w', `${box.width.toFixed(2)}px`);
   style.setProperty('--gable-left', `${(box.left - host.left).toFixed(2)}px`);
   style.setProperty('--art-w', `${(box.width * ratio).toFixed(2)}px`);
@@ -2683,7 +2689,7 @@ function titleLines(text, boxW, height) {
 function drawGableTitle(text) {
   const host = els.brandTitle;
   if (!host || typeof GABLE === 'undefined') return null;
-  const art = els.brandImg.getBoundingClientRect();
+  const art = els.gableWide.getBoundingClientRect();
   if (!art.width) return null;
   const box = GABLE.title;
   const boxW = box.w * art.width;
@@ -2753,6 +2759,10 @@ function showMenu(open, page = null) {
   const chosen = openPage ? PAGES[openPage] : null;
   els.panelPage.hidden = !chosen;
   els.panel.classList.toggle('is-page', Boolean(chosen));
+  // The mural on its own for the map and the menu; the side and the roof only
+  // once there is room for them.
+  els.gableFront.hidden = Boolean(chosen);
+  els.gableWide.hidden = !chosen;
   if (!chosen) els.brandTitle.hidden = true;
   if (chosen) {
     els.panelPageTitle.textContent = chosen.title;
