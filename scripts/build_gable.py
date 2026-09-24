@@ -41,9 +41,22 @@ OUT_PNG = os.path.join(ROOT, 'web', 'img', 'ballymander-article.png')
 OUT_JS = os.path.join(ROOT, 'web', 'gable.js')
 
 
-def is_magenta(r, g, b, a):
-    """Loose: the rectangle is flat, but its edge blends into the wall."""
-    return a > 128 and r > 180 and b > 180 and g < 100
+def is_flat_magenta(r, g, b, a):
+    """The marker's own colour, for finding where it was drawn."""
+    return a > 0 and r > 180 and b > 180 and g < 100
+
+
+def is_tinted(r, g, b, a, margin=24):
+    """Any magenta at all, at any alpha: red and blue both well above green.
+
+    The marker is anti-aliased against what is behind it, so its edge is the
+    colour at a fraction of its opacity -- which an earlier version of this
+    missed by demanding the pixel be mostly opaque, and left a one-pixel
+    magenta line round the text box. Matching on hue instead catches the edge
+    however faint it is. The drawing's own colours are blues and greys, where
+    red sits at or below green, so none of them match.
+    """
+    return a > 0 and r > g + margin and b > g + margin
 
 
 def main() -> int:
@@ -61,7 +74,7 @@ def main() -> int:
         base = y * w
         for x in range(w):
             i = (base + x) * 4
-            if is_magenta(px[i], px[i + 1], px[i + 2], px[i + 3]):
+            if is_flat_magenta(px[i], px[i + 1], px[i + 2], px[i + 3]):
                 found += 1
                 xs0, xs1 = min(xs0, x), max(xs1, x)
                 ys0, ys1 = min(ys0, y), max(ys1, y)
@@ -77,15 +90,32 @@ def main() -> int:
                          f'(which ends at {fw}) -- it belongs on the side')
 
     # Erased rather than left to be covered: the marker must not ship even if
-    # the title is one day not drawn over it.
-    for y in range(ys0, ys1 + 1):
+    # the title is one day not drawn over it. By hue across the whole image
+    # rather than by the rectangle's bounds, so the anti-aliased edge goes with
+    # it -- that edge sits outside the flat fill, so anything working from the
+    # bounds leaves exactly the one-pixel line this used to.
+    stray = 0
+    wiped = 0
+    for y in range(h):
         base = y * w
-        for x in range(xs0, xs1 + 1):
+        for x in range(w):
             i = (base + x) * 4
-            if is_magenta(px[i], px[i + 1], px[i + 2], px[i + 3]):
-                px[i] = px[i + 1] = px[i + 2] = px[i + 3] = 0
+            if not is_tinted(px[i], px[i + 1], px[i + 2], px[i + 3]):
+                continue
+            # Anything far from the rectangle is not its edge, and erasing it
+            # would be erasing the drawing.
+            if not (xs0 - 4 <= x <= xs1 + 4 and ys0 - 4 <= y <= ys1 + 4):
+                stray += 1
+                continue
+            px[i] = px[i + 1] = px[i + 2] = px[i + 3] = 0
+            wiped += 1
+    if stray:
+        raise SystemExit(f'{stray} magenta pixels sit away from the marker -- '
+                         f'the colour is meant to appear nowhere else in the art')
+    # Checked at a far lower threshold than it was erased at: a tint too weak
+    # to match at 24 would still be visible against the wall.
     left = sum(1 for y in range(h) for x in range(w)
-               if is_magenta(*(px[((y * w + x) * 4) + k] for k in range(4))))
+               if is_tinted(*(px[((y * w + x) * 4) + k] for k in range(4)), margin=8))
     if left:
         raise SystemExit(f'{left} magenta pixels survived the key')
 
@@ -112,6 +142,7 @@ def main() -> int:
         fh_.write(';\n')
 
     print(f'gable {w}x{h}, front {fw} ({w / fw:.5f}x wider)')
+    print(f'{wiped} magenta pixels erased, {found} of them the flat fill')
     print(f'text box {bw}x{bh} at {xs0},{ys0} -- '
           f'{meta["title"]["w"]:.4f} of the width, {meta["title"]["h"]:.4f} of the height')
     print(f'wrote {os.path.relpath(OUT_PNG, ROOT)} '
