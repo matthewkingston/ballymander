@@ -2523,6 +2523,58 @@ function sizeLabelColumn() {
   return want;
 }
 
+/* --- setting text in the drawn letters ----------------------------------- */
+
+/* The drawn alphabet, set as a line of text rather than placed by hand. Each
+ * glyph is a box masked by its own slice of one sheet, so the ink takes
+ * whatever colour the line is asked for -- the sheet carries alpha only.
+ *
+ * Not a real font: no kerning pairs, no hinting, no wrapping, and only the
+ * characters that were drawn. What it does have is the thing the hand-placing
+ * was for -- every glyph sits in the same band, so a line of them is aligned
+ * by construction and a word can change without anything being moved.
+ *
+ * `missing` comes back rather than being swallowed: a character nobody drew
+ * should be visible as a gap in the build, not as a silent hole on the page. */
+function setDrawnText(host, text, height) {
+  const font = typeof BALLYSANSER === 'undefined' ? null : BALLYSANSER;
+  if (!font) return { missing: [] };
+  const scale = height / font.band;
+  const missing = [];
+  const frag = document.createDocumentFragment();
+  for (const raw of text) {
+    const ch = raw.toLowerCase();
+    if (ch === ' ') {
+      const gap = el('span', { class: 'bs-space', 'aria-hidden': 'true' });
+      gap.style.width = `${(font.wordSpace * height).toFixed(2)}px`;
+      frag.append(gap);
+      continue;
+    }
+    const g = font.glyphs[ch];
+    if (!g) {
+      missing.push(raw);
+      continue;
+    }
+    const span = el('span', { class: 'bs-glyph', 'aria-hidden': 'true' });
+    span.style.width = `${(g.w * scale).toFixed(2)}px`;
+    span.style.height = `${height.toFixed(2)}px`;
+    const size = `${(font.sheetWidth * scale).toFixed(2)}px ${height.toFixed(2)}px`;
+    const at = `-${(g.x * scale).toFixed(2)}px 0`;
+    span.style.maskSize = size;
+    span.style.webkitMaskSize = size;
+    span.style.maskPosition = at;
+    span.style.webkitMaskPosition = at;
+    frag.append(span);
+  }
+  host.classList.add('bs-line');
+  host.style.gap = `${(font.tracking * height).toFixed(2)}px`;
+  // The real text stays on the element: the glyphs are pictures of it, and a
+  // screen reader should hear the words rather than nothing at all.
+  host.setAttribute('aria-label', text);
+  host.replaceChildren(frag);
+  return { missing };
+}
+
 /* The gable is sized as a share of the panel, and the panel widens to hold a
  * page, so without this it would grow by half again on the way in. Its width
  * and its inset are taken from the panel as the map leaves it and pinned, so

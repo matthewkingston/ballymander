@@ -36,23 +36,30 @@ await page.setViewport({ width: 1400, height: 900, deviceScaleFactor: 2 });
 // none of it being what a UI branch changes.
 const OVERRIDE = process.env.SMOKE_OVERRIDE_DIR;
 if (OVERRIDE) {
-  const { readFileSync } = await import('node:fs');
-  const from = {
-    '/': ['web/index.html', 'text/html'],
-    '/index.html': ['web/index.html', 'text/html'],
-    '/app.js': ['web/app.js', 'text/javascript'],
-    '/style.css': ['web/style.css', 'text/css'],
-    '/regions.js': ['web/regions.js', 'text/javascript'],
-    '/graph.js': ['web/graph.js', 'text/javascript'],
+  const { readFileSync, existsSync } = await import('node:fs');
+  // Anything the branch has under web/ is served from the branch; anything it
+  // does not -- the data, the vendored map library, both gitignored and so
+  // absent from a worktree -- falls through to the server. Written this way
+  // rather than as a list of filenames because the list went stale the first
+  // time a branch added a file, and did it by 404ing rather than by saying so.
+  const TYPES = {
+    '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
+    '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml',
+    '.woff2': 'font/woff2', '.txt': 'text/plain',
   };
   await page.setRequestInterception(true);
   page.on('request', (r) => {
     if (r.isInterceptResolutionHandled()) return;
-    const hit = from[new global.URL(r.url()).pathname];
-    if (hit) {
-      r.respond({ status: 200, contentType: hit[1],
-                  body: readFileSync(path.join(OVERRIDE, hit[0])) });
-    } else r.continue();
+    let name = new global.URL(r.url()).pathname;
+    if (name === '/') name = '/index.html';
+    const file = path.join(OVERRIDE, 'web', name);
+    if (!file.startsWith(path.join(OVERRIDE, 'web')) || !existsSync(file)
+        || !TYPES[path.extname(file)]) {
+      r.continue();
+      return;
+    }
+    r.respond({ status: 200, contentType: TYPES[path.extname(file)],
+                body: readFileSync(file) });
   });
   console.error(`serving web/ from ${OVERRIDE}`);
 }
@@ -951,6 +958,29 @@ const markers = await page.evaluate(() => {
   };
 });
 
+// The drawn alphabet: that the generated file is there at all, and that a line
+// set in it comes out on one baseline. Nothing on the page uses it yet, so
+// without this a stale or missing build would go unnoticed until it did.
+const typeface = await page.evaluate(() => {
+  if (typeof BALLYSANSER === 'undefined') return { loaded: false };
+  const host = document.createElement('div');
+  host.style.cssText = 'position:absolute;left:0;top:0';
+  document.body.append(host);
+  const { missing } = setDrawnText(host, "what's gerrymandering?", 60);
+  const boxes = [...host.children].map((e) => e.getBoundingClientRect())
+    .filter((r) => r.height > 0);
+  const out = {
+    loaded: true,
+    glyphs: Object.keys(BALLYSANSER.glyphs).length,
+    band: BALLYSANSER.band,
+    missing,
+    baselines: [...new Set(boxes.map((r) => Math.round(r.bottom)))].length,
+    width: Math.round(host.getBoundingClientRect().width),
+  };
+  host.remove();
+  return out;
+});
+
 // Every control on the panel has copy now, in both modes, so the placeholder
 // should be reachable by nothing. A new control arriving without any is meant
 // to fail here rather than ship with lorem ipsum behind its marker. Counted
@@ -980,7 +1010,7 @@ markers.loremShowing = await page.evaluate(async () => {
   return { basic, advanced, rows: document.querySelectorAll('#panel-body .info-note').length };
 });
 
-console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, markers, real, painted, errors, failed, external }, null, 2));
+console.log(JSON.stringify({ graph, regions, statSwitch, pause, tip, election, markers, typeface, real, painted, errors, failed, external }, null, 2));
 await browser.close();
 
 // Report *and* fail: a console error that only shows up in the JSON is easy to
@@ -1394,6 +1424,10 @@ if (!pause || !pause.advanced || pause.resumedLabel !== 'PAUSE') problems.push('
 if (!markers || !markers.labels || !markers.heads || markers.labelsBare || markers.headsBare
     || markers.headsOutOfOrder || markers.inPartyNames) {
   problems.push(`info markers did not reach every line: ${JSON.stringify(markers)}`);
+}
+if (!typeface || !typeface.loaded || typeface.glyphs !== 28 || typeface.missing.length
+    || typeface.baselines !== 1 || !typeface.width) {
+  problems.push(`the drawn alphabet did not set a line: ${JSON.stringify(typeface)}`);
 }
 if (!markers || !markers.loremShowing || !markers.loremShowing.rows
     || markers.loremShowing.basic || markers.loremShowing.advanced) {

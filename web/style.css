@@ -321,6 +321,28 @@ html, body {
 /* Settings about the app rather than about the map live under the pages. */
 .menu-switch { margin-top: 14px; }
 
+/* --- text set in the drawn letters --------------------------------------- */
+/* One box per glyph, masked by its slice of the sheet. The ink is the box's
+   own background, so a line takes the colour of whatever it sits in rather
+   than the black it was drawn in; the sheet carries alpha and nothing else.
+   Bottom-aligned, since every glyph is cut to the same band and it is the
+   baseline they share. */
+.bs-line {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: nowrap;
+}
+.bs-glyph {
+  display: block;
+  flex: none;
+  background: currentColor;
+  -webkit-mask-image: url(img/ballysanser.png);
+  mask-image: url(img/ballysanser.png);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.bs-space { display: block; flex: none; }
+
 /* --- the pages ----------------------------------------------------------- */
 /* An explanation needs a reading measure the map's own column cannot give, so
    the panel widens for one. It widens rather than being replaced: the gable,
