@@ -2802,7 +2802,8 @@ const PAGES = {
             + 'probably not, just a bit of fun.'] },
     ],
   },
-  how: { title: 'How it works', body: PAGE_FILLER },
+  simulation: { title: 'How the simulation works', body: PAGE_FILLER },
+  voters: { title: 'How voters are modelled', body: PAGE_FILLER },
   accuracy: { title: 'Accuracy', body: PAGE_FILLER },
 };
 let openPage = null;
