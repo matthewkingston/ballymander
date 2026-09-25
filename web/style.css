@@ -426,14 +426,31 @@ html, body {
 }
 #panel-page-body p { margin: 0 0 11px; }
 #panel-page-body p:last-child { margin-bottom: 2px; }
-/* Ready for the pictures that will come, without one having to be here yet. */
+#panel-page-body figure { margin: 14px 0; }
 #panel-page-body img {
   display: block;
   width: 100%;
   height: auto;
-  margin: 14px 0;
   border-radius: 5px;
 }
+#panel-page-body figcaption {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+/* Emphasis in the middle of a sentence: the terms of art the page is teaching,
+   so it names rather than shouts. */
+#panel-page-body em {
+  font-style: normal;
+  font-weight: 600;
+}
+#panel-page-body a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+#panel-page-body a:hover { text-decoration-thickness: 2px; }
 .ctl-checks label {
   display: flex;
   align-items: center;

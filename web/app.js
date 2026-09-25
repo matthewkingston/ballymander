@@ -2742,12 +2742,84 @@ const PAGE_FILLER = [
   + 'praesentium voluptatum deleniti atque corrupti quos dolores et quas '
   + 'molestias excepturi sint occaecati cupiditate non provident.',
 ];
+/* A page's body is a list of blocks. A bare string is a paragraph of plain
+ * text; { p: [...] } is a paragraph whose parts may be emphasised or linked;
+ * { img } is a figure, with a caption if it has one. Spelled out rather than
+ * written as markup and parsed, so there is no syntax to get wrong in the one
+ * place the words live.
+ *
+ * The prose is Matt's, verbatim. Where he drafted a run of sentences on their
+ * own lines they are joined into a paragraph here, which is the only liberty
+ * taken with it. */
 const PAGES = {
-  gerrymandering: { title: "What's gerrymandering?", body: PAGE_FILLER },
+  gerrymandering: {
+    title: "What's gerrymandering?",
+    body: [
+      'Gerrymandering is the practice of drawing electoral borders to favour '
+      + 'one group over another, especially in the context of elections. The '
+      + 'word, first used 1812, is a portmanteau of Gerry (for Elbridge Gerry, '
+      + 'at the time the Governor of Massachusets) and salamander. It stems '
+      + 'from the unmistakably amphibian shape of one of the election '
+      + 'districts drawn under his leadership.',
+      'Here the example of a first-past-the-post (FPTP) election will be used, '
+      + 'with just 2 parties: the blue and yellow; and 5 voters per region. '
+      + 'The voters are 60% blue, so naively you could say the fair outcome is '
+      + '3 blue and 2 yellow regions.',
+      { img: 'img/gerrymander-even.png', alt: 'Even' },
+      { p: ['However the blue party decides to go full on gerrymander all over '
+            + 'the shop. They use ', { em: 'cracking' }, ': splitting up the '
+            + "yellows so they don't get a majority in any of the 5 regions: a "
+            + 'blue sweep.'] },
+      { img: 'img/gerrymander-crack.png', alt: 'Cracking' },
+      { p: ['Miraculously, following a scandal the yellows manage to get '
+            + "enough power back to draw their own boundaries. They can't "
+            + 'sweep back, but they can get 3 out of  5 seats through ',
+            { em: 'packing' }, '. They cram all the blue voters together, '
+            + 'until the remainder is small enough to crack.'] },
+      { img: 'img/gerrymander-pack.png', alt: 'Packing' },
+      'If voters and seats are infinitely divisible and fluid in an N party '
+      + 'FPTP election, though judicious packing and cracking a party can '
+      + 'multiply their seats by almost a factor of N in ideal conditions, '
+      + 'compared to their vote share.',
+      { p: ['So is this relevant to the real world? Fortunately this '
+            + 'simulation focuses on Northern Ireland: a place without any ',
+            { link: { text: 'history',
+                      href: 'https://www.bbc.co.uk/bitesize/articles/ztyp7v4' } },
+            " of using the mechanisms of the state against the 'other'. So "
+            + 'probably not, just a light but of fun.'] },
+    ],
+  },
   how: { title: 'How it works', body: PAGE_FILLER },
   accuracy: { title: 'Accuracy', body: PAGE_FILLER },
 };
 let openPage = null;
+
+/* One run of a paragraph: plain text, emphasised, or a link out. */
+function pageInline(part) {
+  if (typeof part === 'string') return part;
+  if (part.em) return el('em', {}, part.em);
+  if (part.link) {
+    // Somebody else's site, so a new tab, and rel=noopener because a link that
+    // hands the opener over is a link that can navigate this page away.
+    return el('a', { href: part.link.href, target: '_blank', rel: 'noopener' },
+      part.link.text);
+  }
+  return '';
+}
+
+/* One block of a page. */
+function pageBlock(block) {
+  if (typeof block === 'string') return el('p', {}, block);
+  if (block.p) return el('p', {}, ...block.p.map(pageInline));
+  if (block.img) {
+    const img = el('img', { src: block.img, alt: block.alt || '',
+                            loading: 'lazy' });
+    return block.caption
+      ? el('figure', {}, img, el('figcaption', {}, block.caption))
+      : el('figure', {}, img);
+  }
+  return el('p', {}, '');
+}
 
 /* The panel is the map's controls, the list of pages, or a page being read.
  * The gable and the burger stay through all three, and the map keeps running
@@ -2774,8 +2846,7 @@ function showMenu(open, page = null) {
   if (chosen) {
     els.panelPageTitle.textContent = chosen.title;
     drawGableTitle(chosen.title);
-    els.panelPageBody.replaceChildren(
-      ...chosen.body.map((text) => el('p', {}, text)));
+    els.panelPageBody.replaceChildren(...chosen.body.map(pageBlock));
     // A page is read from its top, however far down the last one was scrolled.
     els.panel.scrollTop = 0;
   }
