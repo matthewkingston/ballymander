@@ -2762,6 +2762,7 @@ const PAGES = {
       + 'stems from the unmistakably amphibian shape of one of the election '
       + 'districts drawn under his leadership.',
       { img: 'img/gerry-mander-cartoon.png', alt: '1812 Gerry-mander cartoon',
+        width: '75%',
         caption: "1812 cartoon satirising the original 'Gerry-mander': "
           + 'definitely a dragon.' },
       'Here the example of a first-past-the-post (FPTP) election will be used, '
@@ -2789,7 +2790,7 @@ const PAGES = {
             { link: { text: 'history',
                       href: 'https://www.bbc.co.uk/bitesize/articles/ztyp7v4' } },
             " of using the mechanisms of the state against the 'other'. So "
-            + 'probably not, just a light bit of fun.'] },
+            + 'probably not, just a bit of fun.'] },
     ],
   },
   how: { title: 'How it works', body: PAGE_FILLER },
