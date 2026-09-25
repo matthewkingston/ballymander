@@ -2761,7 +2761,10 @@ const PAGES = {
       + 'Gerry, at the time the Governor of Massachusetts) and salamander. It '
       + 'stems from the unmistakably amphibian shape of one of the election '
       + 'districts drawn under his leadership.',
-      { img: 'img/gerry-mander-cartoon.png', alt: '1812 Gerry-mander cartoon',
+      // Empty alt on purpose, not by omission: the caption below it says what
+      // the picture is and is read out to everyone, so a description here
+      // would only repeat it.
+      { img: 'img/gerry-mander-cartoon.png', alt: '',
         width: '75%',
         caption: "1812 cartoon satirising the original 'Gerry-mander': "
           + 'definitely a dragon.' },
