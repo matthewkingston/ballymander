@@ -426,7 +426,9 @@ html, body {
 }
 #panel-page-body p { margin: 0 0 11px; }
 #panel-page-body p:last-child { margin-bottom: 2px; }
-#panel-page-body figure { margin: 14px 0; }
+/* Centred, so a figure narrower than the column sits in the middle of it
+   rather than leaving all its slack on one side. */
+#panel-page-body figure { margin: 14px auto; }
 #panel-page-body img {
   display: block;
   width: 100%;

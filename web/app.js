@@ -2755,30 +2755,33 @@ const PAGES = {
   gerrymandering: {
     title: "What's gerrymandering?",
     body: [
-      'Gerrymandering is the practice of drawing electoral borders to favour '
+      'Gerrymandering is the practice of drawing civic boundaries to favour '
       + 'one group over another, especially in the context of elections. The '
-      + 'word, first used 1812, is a portmanteau of Gerry (for Elbridge Gerry, '
-      + 'at the time the Governor of Massachusets) and salamander. It stems '
-      + 'from the unmistakably amphibian shape of one of the election '
+      + 'word, first used in 1812, is a portmanteau of Gerry (for Elbridge '
+      + 'Gerry, at the time the Governor of Massachusetts) and salamander. It '
+      + 'stems from the unmistakably amphibian shape of one of the election '
       + 'districts drawn under his leadership.',
+      { img: 'img/gerry-mander-cartoon.png', alt: '1812 Gerry-mander cartoon',
+        caption: "1812 cartoon satirising the original 'Gerry-mander': "
+          + 'definitely a dragon.' },
       'Here the example of a first-past-the-post (FPTP) election will be used, '
       + 'with just 2 parties: the blue and yellow; and 5 voters per region. '
       + 'The voters are 60% blue, so naively you could say the fair outcome is '
       + '3 blue and 2 yellow regions.',
-      { img: 'img/gerrymander-even.png', alt: 'Even' },
+      { img: 'img/gerrymander-even.png', alt: 'Even', width: '50%' },
       { p: ['However the blue party decides to go full on gerrymander all over '
             + 'the shop. They use ', { em: 'cracking' }, ': splitting up the '
             + "yellows so they don't get a majority in any of the 5 regions: a "
             + 'blue sweep.'] },
-      { img: 'img/gerrymander-crack.png', alt: 'Cracking' },
+      { img: 'img/gerrymander-crack.png', alt: 'Cracking', width: '50%' },
       { p: ['Miraculously, following a scandal the yellows manage to get '
             + "enough power back to draw their own boundaries. They can't "
-            + 'sweep back, but they can get 3 out of  5 seats through ',
+            + 'sweep back, but they can get 3 out of 5 seats through ',
             { em: 'packing' }, '. They cram all the blue voters together, '
             + 'until the remainder is small enough to crack.'] },
-      { img: 'img/gerrymander-pack.png', alt: 'Packing' },
-      'If voters and seats are infinitely divisible and fluid in an N party '
-      + 'FPTP election, though judicious packing and cracking a party can '
+      { img: 'img/gerrymander-pack.png', alt: 'Packing', width: '50%' },
+      'If voters and seats are infinitely divisible and fluid in an N-party '
+      + 'FPTP election, through judicious packing and cracking a party can '
       + 'multiply their seats by almost a factor of N in ideal conditions, '
       + 'compared to their vote share.',
       { p: ['So is this relevant to the real world? Fortunately this '
@@ -2786,7 +2789,7 @@ const PAGES = {
             { link: { text: 'history',
                       href: 'https://www.bbc.co.uk/bitesize/articles/ztyp7v4' } },
             " of using the mechanisms of the state against the 'other'. So "
-            + 'probably not, just a light but of fun.'] },
+            + 'probably not, just a light bit of fun.'] },
     ],
   },
   how: { title: 'How it works', body: PAGE_FILLER },
@@ -2814,9 +2817,14 @@ function pageBlock(block) {
   if (block.img) {
     const img = el('img', { src: block.img, alt: block.alt || '',
                             loading: 'lazy' });
-    return block.caption
+    const figure = block.caption
       ? el('figure', {}, img, el('figcaption', {}, block.caption))
       : el('figure', {}, img);
+    // Narrower than the column, when the picture does not want the whole of
+    // it: the diagrams are five squares on a grid and read at half the width,
+    // where the cartoon has engraving in it and wants every pixel.
+    if (block.width) figure.style.width = block.width;
+    return figure;
   }
   return el('p', {}, '');
 }
