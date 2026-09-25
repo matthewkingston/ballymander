@@ -2772,18 +2772,24 @@ const PAGES = {
       + 'with just 2 parties: the blue and yellow; and 5 voters per region. '
       + 'The voters are 60% blue, so naively you could say the fair outcome is '
       + '3 blue and 2 yellow regions.',
-      { img: 'img/gerrymander-even.png', alt: 'Even', width: '50%' },
+      { img: 'img/gerrymander-even.png', width: '50%',
+        alt: '25 voters, 15 blue and 10 yellow, in five regions of one row '
+          + 'each: three all blue, two all yellow.' },
       { p: ['However the blue party decides to go full on gerrymander all over '
             + 'the shop. They use ', { em: 'cracking' }, ': splitting up the '
             + "yellows so they don't get a majority in any of the 5 regions: a "
             + 'blue sweep.'] },
-      { img: 'img/gerrymander-crack.png', alt: 'Cracking', width: '50%' },
+      { img: 'img/gerrymander-crack.png', width: '50%',
+        alt: 'The same voters in five regions of one column each, 3 blue to '
+          + '2 yellow, so blue wins all five.' },
       { p: ['Miraculously, following a scandal the yellows manage to get '
             + "enough power back to draw their own boundaries. They can't "
             + 'sweep back, but they can get 3 out of 5 seats through ',
             { em: 'packing' }, '. They cram all the blue voters together, '
             + 'until the remainder is small enough to crack.'] },
-      { img: 'img/gerrymander-pack.png', alt: 'Packing', width: '50%' },
+      { img: 'img/gerrymander-pack.png', width: '50%',
+        alt: 'The same voters regrouped: two regions entirely blue, the '
+          + 'other three drawn to give yellow the majority.' },
       'If voters and seats are infinitely divisible and fluid in an N-party '
       + 'FPTP election, through judicious packing and cracking a party can '
       + 'multiply their seats by almost a factor of N in ideal conditions, '
