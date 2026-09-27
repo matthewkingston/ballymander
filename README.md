@@ -1170,3 +1170,9 @@ Outputs are in `data/model/`; the scripts need `pip install -r requirements.txt`
 
 Hierarchy is a clean tree: DZ → SDZ → DEA → LGD. Source `.geojson` files are
 gitignored (large); the census JSON is small enough to keep.
+
+## Licence
+
+Code: MIT. Artwork (`art/`, `web/img/`, the screenshots in `docs/`): all rights
+reserved. Data (`data/`): the publishers' Open Government Licence v3.0, credited
+in the app's Data sources page. The details are in [LICENSE](LICENSE).
