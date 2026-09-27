@@ -2805,6 +2805,36 @@ const PAGES = {
   simulation: { title: 'How the simulation works', body: PAGE_FILLER },
   voters: { title: 'How voters are modelled', body: PAGE_FILLER },
   accuracy: { title: 'Accuracy', body: PAGE_FILLER },
+  // The credits the licences ask for. Each statement is the one its publisher
+  // specifies, verbatim: NISRA's and OSNI's from their download pages and the
+  // LPS licence, EONI's the OGL default, since EONI names none of its own.
+  sources: {
+    title: 'Data sources',
+    body: [
+      { p: [{ em: 'Census 2021' }, ': Northern Ireland Statistics and Research '
+            + 'Agency (NISRA). Source: NISRA : Website: ',
+            { link: { text: 'www.nisra.gov.uk',
+                      href: 'https://www.nisra.gov.uk' } }, '.'] },
+      { p: [{ em: 'Data Zone 2021 boundaries' }, ': NISRA. Contains Ordnance '
+            + 'Survey of Northern Ireland information licensed under the Open '
+            + 'Government Licence v3.0.'] },
+      { p: [{ em: 'Parliamentary constituency and District Electoral Area '
+              + 'boundaries' }, ': OSNI Open Data, Land & Property Services. '
+            + 'Contains public sector information licensed under the terms of '
+            + 'the Open Government Licence v3.0.'] },
+      { p: [{ em: 'Election results and electorates' }, ': Electoral Office '
+            + 'for Northern Ireland (EONI), ',
+            { link: { text: 'www.eoni.org.uk',
+                      href: 'https://www.eoni.org.uk' } }, '. Contains public '
+            + 'sector information licensed under the Open Government Licence '
+            + 'v3.0.'] },
+      { p: ['Open Government Licence v3.0: ',
+            { link: { text: 'www.nationalarchives.gov.uk/doc/open-government-'
+                        + 'licence/version/3',
+                      href: 'https://www.nationalarchives.gov.uk/doc/'
+                        + 'open-government-licence/version/3/' } }, '.'] },
+    ],
+  },
 };
 let openPage = null;
 
