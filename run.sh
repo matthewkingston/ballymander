@@ -3,16 +3,19 @@
 #   ./run.sh              build if needed, then serve
 #   ./run.sh --rebuild    force a rebuild of the map data first
 #   ./run.sh --port 9000  serve on another port
+#   ./run.sh --build-only build if needed, then stop (used by scripts/deploy.sh)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
 REBUILD=0
+BUILD_ONLY=0
 SERVE_ARGS=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --rebuild) REBUILD=1; shift ;;
+    --build-only) BUILD_ONLY=1; shift ;;
     *) SERVE_ARGS+=("$1"); shift ;;
   esac
 done
@@ -60,6 +63,8 @@ if [ "$REBUILD" = 1 ] || [ ! -f web/data/dz_regions.json ]; then
   echo "==> real regions"
   python3 scripts/build_app_regions.py
 fi
+
+if [ "$BUILD_ONLY" = 1 ]; then exit 0; fi
 
 # 7. serve
 echo
