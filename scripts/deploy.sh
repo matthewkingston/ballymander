@@ -6,6 +6,9 @@
 # What goes up is the committed web/ (so stray files and unfinished edits stay
 # local) plus the generated web/data/ and web/vendor/, which git ignores. The
 # server's copy is made to match exactly: files gone from here go there too.
+# On the way, the CSS, scripts and pictures index.html loads get a hash of their
+# contents on their URLs (scripts/stamp_assets.py), so no cache can pair a new
+# page with an old script.
 #
 # Caddy on the server serves ~/server/sites/ballymander/ as-is, so an upload is
 # live immediately; nothing needs restarting. The server's own config lives in
@@ -36,5 +39,6 @@ stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
 git archive HEAD web | tar -x -C "$stage"
 cp -a web/data web/vendor "$stage/web/"
+python3 scripts/stamp_assets.py "$stage/web"
 
 rsync -avz --delete --mkpath "${RSYNC_ARGS[@]}" "$stage/web/" "$HOST:$DEST"
