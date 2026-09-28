@@ -15,7 +15,7 @@
 # the separate ~/server repo.
 set -euo pipefail
 
-HOST="${BALLYMANDER_HOST:-matt@2.29.25.238}"
+HOST="${BALLYMANDER_HOST:-matt@159.69.29.42}"
 DEST="server/sites/ballymander/"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
