@@ -3,7 +3,7 @@ cover:
 
   - Artwork: everything under art/ and web/img/, and the screenshots in docs/,
     including the Ballysanser typeface, the gable, the salamander and the
-    diagrams. Copyright (c) 2026 Matt Kingston. All rights reserved.
+    diagrams. Copyright (c) 2026 Matthew Kingston. All rights reserved.
 
   - Data: the files under data/ are, or are derived from, public sector
     information from NISRA, OSNI (Land & Property Services) and the Electoral
@@ -15,7 +15,7 @@ cover:
 
 MIT License
 
-Copyright (c) 2026 Matt Kingston
+Copyright (c) 2026 Matthew Kingston
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
